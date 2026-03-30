@@ -1,6 +1,7 @@
 import type { Character, AbilityScore } from '@/schemas/character.ts'
 import type { InventoryItem } from '@/schemas/inventory.ts'
 import { getSpell } from '@/data/spells.ts'
+import { getClass } from '@/data/classes.ts'
 import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
@@ -147,6 +148,32 @@ export function CharacterSheet({
           )}
         </div>
       )}
+
+      {/* Class Abilities */}
+      {(() => {
+        const cls = getClass(c.class)
+        if (!cls) return null
+        const features = cls.features.filter(f => f.level <= c.level)
+        if (features.length === 0) return null
+        return (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <h3 className="mb-3 font-semibold">{cls.name} Abilities</h3>
+            <div className="space-y-2 text-sm">
+              {features.map(f => (
+                <div key={f.name} className="rounded-lg border border-border p-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{f.name}</span>
+                    {f.level > 1 && (
+                      <span className="text-xs text-muted-foreground">Lv {f.level}</span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{f.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Conditions */}
       {c.conditions.length > 0 && (

@@ -20,6 +20,7 @@ import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues } from '@/lib/rules/character.ts'
+import { getClass } from '@/data/classes.ts'
 
 export const Route = createFileRoute('/gm/session/$sessionId')({
   component: GMSessionPage,
@@ -557,23 +558,29 @@ function GMSessionPage() {
   }
 
   const players = Object.values(session.players)
+  const allCharacters = Object.values(session.characters)
   // Only characters assigned to players are "the party"
   const assignedCharIds = new Set(Object.values(session.players).filter(p => p.characterId).map(p => p.characterId!))
-  const characters = Object.values(session.characters).filter(c => assignedCharIds.has(c.id))
+  const characters = allCharacters.filter(c => assignedCharIds.has(c.id))
   const activeMonsters = Object.values(session.activeMonsters)
+  // Map character ID → player name for assignment hints in dropdown
+  const charToPlayer = new Map<string, string>()
+  for (const pl of players) {
+    if (pl.characterId) charToPlayer.set(pl.characterId, pl.displayName)
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6">
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Connected Players + Character Assignment */}
-        <div className="rounded-xl border border-border bg-card p-4">
-          <h2 className="mb-3 font-semibold">Connected Players</h2>
+        <div className="rounded-xl border border-border bg-card p-4 max-h-[480px] flex flex-col">
+          <h2 className="mb-3 font-semibold shrink-0">Connected Players</h2>
           {players.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No players connected. Share the room code with your players.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto">
               {players.map(p => {
                 const isPlayerActiveTurn = p.characterId ? session.activeTurnId === p.characterId : false
                 return (
@@ -696,11 +703,40 @@ function GMSessionPage() {
                         className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs outline-none"
                       >
                         <option value="">— None —</option>
-                        {characters.map(c => (
-                          <option key={c.id} value={c.id}>{c.name} ({c.ancestry} {c.class} Lv{c.level})</option>
-                        ))}
+                        {allCharacters.map(c => {
+                          const owner = charToPlayer.get(c.id)
+                          const taken = owner && owner !== p.displayName
+                          return (
+                            <option key={c.id} value={c.id} disabled={!!taken}>
+                              {c.name} ({c.ancestry} {c.class} Lv{c.level}){taken ? ` — ${owner}` : ''}
+                            </option>
+                          )
+                        })}
                       </select>
                     </div>
+                    {/* Class Abilities */}
+                    {(() => {
+                      const char = p.characterId ? session.characters[p.characterId] : null
+                      if (!char) return null
+                      const cls = getClass(char.class)
+                      if (!cls) return null
+                      const features = cls.features.filter(f => f.level <= char.level)
+                      if (features.length === 0) return null
+                      return (
+                        <div className="mt-2 rounded-md border border-border/50 bg-background/50 px-2 py-1.5">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{cls.name} Abilities</p>
+                          <div className="space-y-1">
+                            {features.map(f => (
+                              <div key={f.name}>
+                                <span className="text-xs font-medium">{f.name}</span>
+                                {f.level > 1 && <span className="ml-1 text-[10px] text-muted-foreground">Lv {f.level}</span>}
+                                <p className="text-[11px] text-muted-foreground leading-tight">{f.description}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })()}
                   </div>
                 )
               })}
@@ -714,9 +750,9 @@ function GMSessionPage() {
         </div>
 
         {/* Chat Log */}
-        <div className="rounded-xl border border-border bg-card p-4 flex flex-col">
+        <div className="rounded-xl border border-border bg-card p-4 flex flex-col h-[480px]">
           <h2 className="mb-3 font-semibold">Chat</h2>
-          <AutoScrollContainer className="max-h-60 min-h-[100px] space-y-1 overflow-y-auto mb-3 flex-1" deps={[session.chatLog.length]}>
+          <AutoScrollContainer className="min-h-0 space-y-1 overflow-y-auto mb-3 flex-1" deps={[session.chatLog.length]}>
             {session.chatLog.length === 0 ? (
               <p className="text-sm text-muted-foreground">No messages yet.</p>
             ) : (
