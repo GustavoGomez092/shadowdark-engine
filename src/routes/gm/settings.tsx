@@ -1,0 +1,170 @@
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useSessionStore } from '@/stores/session-store.ts'
+import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
+
+export const Route = createFileRoute('/gm/settings')({
+  component: GMSettingsPage,
+})
+
+function GMSettingsPage() {
+  const navigate = useNavigate()
+  const session = useSessionStore(s => s.session)
+  const endSession = useSessionStore(s => s.endSession)
+
+  const [torchMin, setTorchMin] = useState(session?.settings?.torchDurationMinutes ?? 60)
+  const [lanternMin, setLanternMin] = useState(session?.settings?.lanternDurationMinutes ?? 60)
+  const [campfireMin, setCampfireMin] = useState(session?.settings?.campfireDurationMinutes ?? 480)
+  const [saved, setSaved] = useState(false)
+
+  function saveSettings() {
+    const store = useSessionStore.getState()
+    if (!store.session) return
+    store.session.settings = {
+      torchDurationMinutes: torchMin,
+      lanternDurationMinutes: lanternMin,
+      campfireDurationMinutes: campfireMin,
+    }
+    store.saveNow()
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+    setTimeout(() => gmPeer.broadcastStateSync(), 50)
+  }
+
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-8">
+      <h1 className="mb-6 text-3xl font-bold">Settings</h1>
+
+      {/* Session Info */}
+      {session && (
+        <div className="mb-6 rounded-xl border border-border bg-card p-4">
+          <h2 className="mb-3 font-semibold">Session Info</h2>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between"><span className="text-muted-foreground">Name:</span><span className="font-medium">{session.room.name}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Room ID:</span><span className="font-mono text-xs">{session.room.id}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Created:</span><span>{new Date(session.room.createdAt).toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Characters:</span><span>{Object.keys(session.characters).length}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Players:</span><span>{Object.keys(session.players).length}</span></div>
+          </div>
+        </div>
+      )}
+
+      {/* Light Duration Settings */}
+      <div className="mb-6 rounded-xl border border-border bg-card p-4">
+        <h2 className="mb-1 font-semibold">Light Source Durations</h2>
+        <p className="mb-4 text-xs text-muted-foreground">Customize how long light sources last. Default is 1 hour real time for torches and lanterns. Lower values for faster-paced games.</p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1.5 flex items-center justify-between text-sm">
+              <span>🔥 Torch Duration</span>
+              <span className="font-mono text-xs text-muted-foreground">{torchMin} min ({Math.round(torchMin / 60 * 10) / 10}h)</span>
+            </label>
+            <input
+              type="range"
+              min={1}
+              max={120}
+              value={torchMin}
+              onChange={e => setTorchMin(parseInt(e.target.value))}
+              className="w-full accent-primary"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+              <span>1 min</span>
+              <div className="flex gap-2">
+                {[5, 10, 15, 30, 60].map(v => (
+                  <button key={v} onClick={() => setTorchMin(v)}
+                    className={`rounded px-1.5 py-0.5 transition ${torchMin === v ? 'bg-primary/20 text-primary' : 'hover:bg-accent'}`}
+                  >{v}m</button>
+                ))}
+              </div>
+              <span>2h</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 flex items-center justify-between text-sm">
+              <span>🏮 Lantern Duration (per oil)</span>
+              <span className="font-mono text-xs text-muted-foreground">{lanternMin} min ({Math.round(lanternMin / 60 * 10) / 10}h)</span>
+            </label>
+            <input
+              type="range"
+              min={1}
+              max={120}
+              value={lanternMin}
+              onChange={e => setLanternMin(parseInt(e.target.value))}
+              className="w-full accent-primary"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+              <span>1 min</span>
+              <div className="flex gap-2">
+                {[5, 10, 15, 30, 60].map(v => (
+                  <button key={v} onClick={() => setLanternMin(v)}
+                    className={`rounded px-1.5 py-0.5 transition ${lanternMin === v ? 'bg-primary/20 text-primary' : 'hover:bg-accent'}`}
+                  >{v}m</button>
+                ))}
+              </div>
+              <span>2h</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 flex items-center justify-between text-sm">
+              <span>🔥 Campfire Duration</span>
+              <span className="font-mono text-xs text-muted-foreground">{campfireMin} min ({Math.round(campfireMin / 60 * 10) / 10}h)</span>
+            </label>
+            <input
+              type="range"
+              min={10}
+              max={480}
+              step={10}
+              value={campfireMin}
+              onChange={e => setCampfireMin(parseInt(e.target.value))}
+              className="w-full accent-primary"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
+              <span>10 min</span>
+              <div className="flex gap-2">
+                {[30, 60, 120, 240, 480].map(v => (
+                  <button key={v} onClick={() => setCampfireMin(v)}
+                    className={`rounded px-1.5 py-0.5 transition ${campfireMin === v ? 'bg-primary/20 text-primary' : 'hover:bg-accent'}`}
+                  >{v >= 60 ? `${v/60}h` : `${v}m`}</button>
+                ))}
+              </div>
+              <span>8h</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            onClick={saveSettings}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+          >
+            Save Settings
+          </button>
+          {saved && <span className="text-xs text-green-400">Saved!</span>}
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-semibold text-red-400">End Session</h2>
+            <p className="text-xs text-muted-foreground">Save and close this session. You can resume it later from the create screen.</p>
+          </div>
+          <button
+            onClick={() => {
+              gmPeer.destroy()
+              endSession()
+              navigate({ to: '/gm/create' })
+            }}
+            className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/20 transition"
+          >
+            End Session
+          </button>
+        </div>
+      </div>
+    </main>
+  )
+}
