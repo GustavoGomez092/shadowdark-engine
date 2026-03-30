@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
+import { DataPackManager } from '@/components/gm/data-pack-manager.tsx'
 
 export const Route = createFileRoute('/gm/settings')({
   component: GMSettingsPage,
@@ -144,6 +145,11 @@ function GMSettingsPage() {
           </button>
           {saved && <span className="text-xs text-green-400">Saved!</span>}
         </div>
+      </div>
+
+      {/* Data Packs */}
+      <div className="mb-6">
+        <DataPackManager />
       </div>
 
       {/* Danger Zone */}
