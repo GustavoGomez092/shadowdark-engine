@@ -173,10 +173,18 @@ export function rollDeathSave(): { isNat20: boolean; roll: number } {
   return { isNat20: roll.dice[0].isNat20, roll: roll.total }
 }
 
-export function attemptStabilize(intScore: number): boolean {
+export interface StabilizeResult {
+  success: boolean
+  roll: number
+  intMod: number
+  total: number
+}
+
+export function attemptStabilize(intScore: number): StabilizeResult {
   const intMod = getAbilityModifier(intScore)
   const roll = rollDice('1d20', { purpose: 'stabilize' })
-  return roll.total + intMod >= DC.HARD // DC 15
+  const total = roll.total + intMod
+  return { success: total >= DC.HARD, roll: roll.total, intMod, total } // DC 15
 }
 
 // ========== Turn Management ==========

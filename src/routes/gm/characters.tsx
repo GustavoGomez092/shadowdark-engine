@@ -109,11 +109,31 @@ function GMCharactersPage() {
                 character={selected}
                 isEditable
                 onHpChange={(delta) => {
-                  updateChar(selected.id, c => ({
-                    ...c,
-                    currentHp: Math.max(0, Math.min(c.maxHp, c.currentHp + delta)),
-                    isDying: c.currentHp + delta <= 0,
-                  }))
+                  const newHp = Math.max(0, Math.min(selected.maxHp, selected.currentHp + delta))
+                  const nowDying = newHp <= 0
+                  const wasDying = selected.isDying
+
+                  if (nowDying && !wasDying) {
+                    updateChar(selected.id, c => ({
+                      ...c,
+                      currentHp: newHp,
+                      isDying: true,
+                      deathTimer: undefined,
+                    }))
+                  } else if (!nowDying && wasDying) {
+                    updateChar(selected.id, c => ({
+                      ...c,
+                      currentHp: newHp,
+                      isDying: false,
+                      deathTimer: undefined,
+                    }))
+                  } else {
+                    updateChar(selected.id, c => ({
+                      ...c,
+                      currentHp: newHp,
+                      isDying: nowDying,
+                    }))
+                  }
                 }}
                 onToggleLuckToken={() => {
                   updateChar(selected.id, c => ({

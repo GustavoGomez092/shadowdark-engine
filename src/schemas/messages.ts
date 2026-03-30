@@ -32,6 +32,8 @@ export type PlayerToGMMessage =
   | PlayerShopAction
   | PlayerCharacterUpdate
   | PlayerCreateCharacter
+  | PlayerStabilizeAction
+  | PlayerDeathTimerRoll
   | PlayerPing;
 
 export interface JoinRoomRequest {
@@ -135,6 +137,23 @@ export interface PlayerCharacterUpdate {
 export interface PlayerCreateCharacter {
   type: 'player_create_character';
   character: import('@/schemas/character.ts').Character;
+}
+
+export interface PlayerStabilizeAction {
+  type: 'player_stabilize';
+  characterId: string; // the character attempting to stabilize
+  targetId: string;    // the dying character to stabilize
+  roll: number;        // the d20 result
+  intMod: number;      // INT modifier
+  total: number;       // roll + intMod
+  success: boolean;    // total >= 15
+}
+
+export interface PlayerDeathTimerRoll {
+  type: 'player_death_timer_roll';
+  characterId: string;
+  roll: number;        // the d4 result
+  totalRounds: number; // roll + CON mod (min 1)
 }
 
 export interface PlayerPing {

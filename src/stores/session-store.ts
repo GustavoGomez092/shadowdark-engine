@@ -424,6 +424,8 @@ export const useSessionStore = create<SessionStore>()(
           level: c.level,
           alignment: c.alignment,
           hpStatus: getHpStatus(c.currentHp, c.maxHp, c.isDying),
+          isDying: c.isDying,
+          hasDeathTimer: c.isDying && !!c.deathTimer,
           conditions: c.conditions,
           isInCombat: session.combat?.combatants.some(cb => cb.referenceId === c.id) ?? false,
         }))

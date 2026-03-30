@@ -8,10 +8,13 @@ import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import { EncounterView } from '@/components/combat/encounter-view.tsx'
 import { LightControls } from '@/components/player/light-controls.tsx'
 import { ShopWidget } from '@/components/player/shop-widget.tsx'
+import { StabilizeWidget } from '@/components/player/stabilize-widget.tsx'
 import { Spinner, LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
 import { ChatMessageRow } from '@/components/shared/chat-message.tsx'
 import { pushRollToast } from '@/components/shared/roll-toast.tsx'
+import { rollDice } from '@/lib/dice/roller.ts'
+import { getAbilityModifier } from '@/schemas/reference.ts'
 import type { Character } from '@/schemas/character.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import type { GMToPlayerMessage } from '@/schemas/messages.ts'
@@ -31,6 +34,22 @@ function PlayerSessionPage() {
   const reset = usePlayerStore(s => s.reset)
   const [isReconnecting, setIsReconnecting] = useState(false)
   const hasAttemptedReconnect = useRef(false)
+  const [deathDialogOpen, setDeathDialogOpen] = useState(false)
+  const [stabilizeResult, setStabilizeResult] = useState<{
+    targetName: string; roll: number; intScore: number; intMod: number; total: number; success: boolean
+  } | null>(null)
+
+  // Open death dialog when character enters dying state with no timer
+  const myCharIsDying = state?.myCharacter?.isDying ?? false
+  const myCharHasTimer = !!state?.myCharacter?.deathTimer
+  useEffect(() => {
+    if (myCharIsDying && !myCharHasTimer) {
+      setDeathDialogOpen(true)
+    }
+    if (!myCharIsDying) {
+      setDeathDialogOpen(false)
+    }
+  }, [myCharIsDying, myCharHasTimer])
 
   // Hydrate from localStorage on client only (avoids SSR mismatch)
   useEffect(() => { hydrate() }, [hydrate])
@@ -195,6 +214,22 @@ function PlayerSessionPage() {
         </div>
       )}
 
+      {/* Stabilize Result Dialog — stays open until manually dismissed */}
+      {stabilizeResult && (
+        <StabilizeResultDialog result={stabilizeResult} onClose={() => setStabilizeResult(null)} />
+      )}
+
+      {/* Death Timer Roll Dialog — pops up when dying, stays until dismissed */}
+      {deathDialogOpen && state?.myCharacter && (
+        <DeathTimerRoll
+          character={state.myCharacter}
+          onRoll={(roll, totalRounds) => {
+            send({ type: 'player_death_timer_roll', characterId: state.myCharacter!.id, roll, totalRounds })
+          }}
+          onClose={() => setDeathDialogOpen(false)}
+        />
+      )}
+
       {state ? (
         <>
         {/* Darkness Banner — hidden when light system is paused */}
@@ -221,6 +256,15 @@ function PlayerSessionPage() {
           {/* Main: Character Sheet — full inventory, equip/drop managed by GM via P2P */}
           <div>
             {state.myCharacter ? (<>
+              {/* Death Timer Display — shown when dying with active timer */}
+              {state.myCharacter.isDying && state.myCharacter.deathTimer && (
+                <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-center animate-pulse">
+                  <p className="text-lg font-bold text-red-400">You are dying</p>
+                  <p className="text-sm text-red-300 mt-1">
+                    {state.myCharacter.deathTimer.roundsRemaining} round{state.myCharacter.deathTimer.roundsRemaining !== 1 ? 's' : ''} remaining
+                  </p>
+                </div>
+              )}
               <CharacterSheet
                 character={state.myCharacter}
                 onEquipItem={(itemId) => {
@@ -287,6 +331,24 @@ function PlayerSessionPage() {
                 />
               </div>
             )}
+
+            {/* Stabilize Widget — shown when player is alive and there are dying allies */}
+            {state.myCharacter && !state.myCharacter.isDying && state.myCharacter.currentHp > 0 && (() => {
+              const dyingAllies = state.otherCharacters.filter(c => c.isDying && c.hasDeathTimer)
+              if (dyingAllies.length === 0) return null
+              const isMyTurn = state.activeTurnId === state.myCharacter!.id
+              return (
+                <StabilizeWidget
+                  myCharacter={state.myCharacter!}
+                  dyingAllies={dyingAllies}
+                  isMyTurn={isMyTurn}
+                  onStabilize={(targetId, roll, intMod, total, success, targetName, intScore) => {
+                    setStabilizeResult({ targetName, roll, intScore, intMod, total, success })
+                    send({ type: 'player_stabilize', characterId: state.myCharacter!.id, targetId, roll, intMod, total, success })
+                  }}
+                />
+              )
+            })()}
 
             {/* Light Controls + Status */}
             {state.myCharacter && (
@@ -485,6 +547,134 @@ function RestButton({ character, onRest }: { character: Character; onRest: () =>
     >
       Take a Rest (8 hours + ration){needsRest && <span className="ml-1 text-amber-400">•</span>}
     </button>
+  )
+}
+
+function StabilizeResultDialog({ result, onClose }: {
+  result: { targetName: string; roll: number; intScore: number; intMod: number; total: number; success: boolean }
+  onClose: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-2xl">
+        <h2 className="text-xl font-bold mb-1">Stabilize {result.targetName}</h2>
+        <p className="text-sm text-muted-foreground mb-4">DC 15 INT check</p>
+
+        <div className="rounded-xl bg-background border border-border p-4 space-y-2 mb-4">
+          <div className="flex items-center justify-center gap-3 text-sm">
+            <div className="rounded-lg bg-card border border-border px-3 py-1.5">
+              <span className="text-xs text-muted-foreground block">d20</span>
+              <span className="text-lg font-bold">{result.roll}</span>
+            </div>
+            <span className="text-muted-foreground text-lg">+</span>
+            <div className="rounded-lg bg-card border border-border px-3 py-1.5">
+              <span className="text-xs text-muted-foreground block">INT ({result.intScore})</span>
+              <span className="text-lg font-bold">{result.intMod >= 0 ? '+' : ''}{result.intMod}</span>
+            </div>
+            <span className="text-muted-foreground text-lg">=</span>
+            <div className={`rounded-lg border px-3 py-1.5 ${
+              result.success
+                ? 'bg-green-500/20 border-green-500/30'
+                : 'bg-red-500/20 border-red-500/30'
+            }`}>
+              <span className={`text-xs block ${result.success ? 'text-green-400' : 'text-red-400'}`}>
+                vs DC 15
+              </span>
+              <span className={`text-lg font-bold ${result.success ? 'text-green-400' : 'text-red-400'}`}>
+                {result.total}
+              </span>
+            </div>
+          </div>
+
+          <p className={`text-2xl font-bold mt-2 ${result.success ? 'text-green-400' : 'text-red-400'}`}>
+            {result.success ? `${result.targetName} stabilized!` : 'Failed to stabilize'}
+          </p>
+          {result.success ? (
+            <p className="text-xs text-muted-foreground">
+              {result.targetName} is back on their feet with 1 HP.
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {result.targetName} is still dying. Their death timer continues.
+            </p>
+          )}
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function DeathTimerRoll({ character, onRoll, onClose }: { character: Character; onRoll: (roll: number, totalRounds: number) => void; onClose: () => void }) {
+  const [result, setResult] = useState<{ roll: number; conMod: number; conScore: number; total: number } | null>(null)
+
+  function handleRoll() {
+    const conScore = character.computed.effectiveStats.CON
+    const conMod = getAbilityModifier(conScore)
+    const roll = rollDice('1d4')
+    const total = Math.max(1, roll.total + conMod)
+    setResult({ roll: roll.total, conMod, conScore, total })
+    onRoll(roll.total, total)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="mx-4 w-full max-w-sm rounded-2xl border border-red-500/40 bg-card p-6 text-center shadow-2xl">
+        <div className="mb-2 text-4xl">&#x1F480;</div>
+        <h2 className="text-xl font-bold text-red-400 mb-2">You are dying!</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Your HP has dropped to 0. Roll to determine how many rounds you have before death.
+        </p>
+
+        {!result ? (
+          <button
+            onClick={handleRoll}
+            className="w-full rounded-lg bg-red-600 py-3 text-lg font-bold text-white transition hover:bg-red-500 active:scale-95"
+          >
+            Roll Death Timer (1d4 + CON)
+          </button>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 space-y-2">
+              <div className="flex items-center justify-center gap-3 text-sm">
+                <div className="rounded-lg bg-background border border-border px-3 py-1.5">
+                  <span className="text-xs text-muted-foreground block">d4</span>
+                  <span className="text-lg font-bold">{result.roll}</span>
+                </div>
+                <span className="text-muted-foreground text-lg">+</span>
+                <div className="rounded-lg bg-background border border-border px-3 py-1.5">
+                  <span className="text-xs text-muted-foreground block">CON ({result.conScore})</span>
+                  <span className="text-lg font-bold">{result.conMod >= 0 ? '+' : ''}{result.conMod}</span>
+                </div>
+                <span className="text-muted-foreground text-lg">=</span>
+                <div className="rounded-lg bg-red-500/20 border border-red-500/30 px-3 py-1.5">
+                  <span className="text-xs text-red-400 block">Total</span>
+                  <span className="text-lg font-bold text-red-400">{result.total}</span>
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-red-400 mt-2">
+                {result.total} round{result.total !== 1 ? 's' : ''} until death
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              An ally can try to stabilize you (DC 15 INT). A natural 20 on your death save will revive you with 1 HP.
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition"
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 

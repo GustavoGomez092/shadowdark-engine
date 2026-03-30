@@ -97,6 +97,8 @@ export interface PublicCharacterInfo {
   hpStatus: HpStatus;
   currentHp?: number; // only if GM enables sharing exact HP
   maxHp?: number;
+  isDying: boolean;
+  hasDeathTimer: boolean; // true = actively dying with timer ticking
   conditions: ActiveCondition[];
   isInCombat: boolean;
 }

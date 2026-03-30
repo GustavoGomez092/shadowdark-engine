@@ -21,6 +21,7 @@ import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues } from '@/lib/rules/character.ts'
 import { getClass } from '@/data/classes.ts'
+import { rollDeathSave } from '@/lib/rules/combat.ts'
 
 export const Route = createFileRoute('/gm/session/$sessionId')({
   component: GMSessionPage,
@@ -438,6 +439,49 @@ function GMSessionPage() {
       setTimeout(() => broadcastStateSyncRef.current(), 50)
     }
 
+    // === PLAYER DEATH TIMER ROLL ===
+    if (message.type === 'player_death_timer_roll') {
+      const { characterId, roll, totalRounds } = message as { type: 'player_death_timer_roll'; characterId: string; roll: number; totalRounds: number }
+      const char = useSessionStore.getState().session?.characters[characterId]
+      if (!char || !char.isDying || char.deathTimer) return // already has timer or not dying
+
+      updateCharacter(characterId, (c) => {
+        c.deathTimer = { totalRounds, roundsRemaining: totalRounds, startedAt: Date.now() }
+      })
+      addChatMessage(createActionLog(`${char.name} rolled a ${roll} on their death timer — ${totalRounds} round${totalRounds !== 1 ? 's' : ''} until death`))
+      setTimeout(() => broadcastStateSyncRef.current(), 50)
+    }
+
+    // === PLAYER STABILIZE ===
+    if (message.type === 'player_stabilize') {
+      const { targetId, roll, intMod, total, success } = message as {
+        type: 'player_stabilize'; characterId: string; targetId: string
+        roll: number; intMod: number; total: number; success: boolean
+      }
+      const player = useSessionStore.getState().session?.players[peerId]
+      if (!player?.characterId) return
+      const stabilizer = useSessionStore.getState().session?.characters[player.characterId]
+      const target = useSessionStore.getState().session?.characters[targetId]
+      if (!stabilizer || !target) return
+      if (!target.isDying || !target.deathTimer) return
+
+      if (success) {
+        updateCharacter(targetId, (c) => {
+          c.currentHp = 1
+          c.isDying = false
+          c.deathTimer = undefined
+        })
+        addChatMessage(createActionLog(
+          `${stabilizer.name} stabilized ${target.name}! (INT check: ${roll}${intMod >= 0 ? '+' : ''}${intMod} = ${total} vs DC 15) — ${target.name} is back at 1 HP`
+        ))
+      } else {
+        addChatMessage(createActionLog(
+          `${stabilizer.name} failed to stabilize ${target.name}. (INT check: ${roll}${intMod >= 0 ? '+' : ''}${intMod} = ${total} vs DC 15)`
+        ))
+      }
+      setTimeout(() => broadcastStateSyncRef.current(), 50)
+    }
+
     // === PLAYER CHARACTER CREATION ===
     if (message.type === 'player_create_character') {
       const player = useSessionStore.getState().session?.players[peerId]
@@ -592,8 +636,37 @@ function GMSessionPage() {
                         <button
                           onClick={() => {
                             if (!p.characterId) return
-                            const newId = isPlayerActiveTurn ? null : p.characterId
-                            useSessionStore.getState().setActiveTurnId(newId)
+                            if (isPlayerActiveTurn) {
+                              useSessionStore.getState().setActiveTurnId(null)
+                            } else {
+                              // Process death save if character is dying with an active timer
+                              const char = session.characters[p.characterId]
+                              if (char?.isDying && char.deathTimer && char.deathTimer.roundsRemaining > 0) {
+                                const save = rollDeathSave()
+                                const remaining = char.deathTimer.roundsRemaining - 1
+
+                                if (save.isNat20) {
+                                  updateCharacter(p.characterId, (c) => {
+                                    c.currentHp = 1
+                                    c.isDying = false
+                                    c.deathTimer = undefined
+                                  })
+                                  addChatMessage(createActionLog(`${char.name} rolled a NAT 20 on their death save and rises with 1 HP!`))
+                                } else if (remaining <= 0) {
+                                  updateCharacter(p.characterId, (c) => {
+                                    c.isDying = false
+                                    c.deathTimer = undefined
+                                  })
+                                  addChatMessage(createActionLog(`${char.name} death save: ${save.roll} — ${char.name} has died.`))
+                                } else {
+                                  updateCharacter(p.characterId, (c) => {
+                                    if (c.deathTimer) c.deathTimer.roundsRemaining = remaining
+                                  })
+                                  addChatMessage(createActionLog(`${char.name} death save: ${save.roll} (${remaining} round${remaining !== 1 ? 's' : ''} remaining)`))
+                                }
+                              }
+                              useSessionStore.getState().setActiveTurnId(p.characterId)
+                            }
                             setTimeout(() => gmPeer.broadcastStateSync(), 50)
                           }}
                           disabled={!p.characterId}
@@ -614,12 +687,36 @@ function GMSessionPage() {
                         playerName={p.displayName}
                         onUpdateHp={(delta) => {
                           if (!p.characterId) return
-                          const charName = session.characters[p.characterId]?.name ?? p.displayName
-                          updateCharacter(p.characterId, (c) => {
-                            c.currentHp = Math.max(0, Math.min(c.maxHp, c.currentHp + delta))
-                            c.isDying = c.currentHp <= 0
-                          })
-                          addChatMessage(createActionLog(`GM ${delta > 0 ? 'healed' : 'damaged'} ${charName} for ${Math.abs(delta)} HP`))
+                          const char = session.characters[p.characterId]
+                          if (!char) return
+                          const charName = char.name
+                          const newHp = Math.max(0, Math.min(char.maxHp, char.currentHp + delta))
+                          const wasDying = char.isDying
+                          const nowDying = newHp <= 0
+
+                          if (nowDying && !wasDying) {
+                            // Entering dying state — player will roll their own death timer
+                            updateCharacter(p.characterId, (c) => {
+                              c.currentHp = newHp
+                              c.isDying = true
+                              c.deathTimer = undefined
+                            })
+                            addChatMessage(createActionLog(`GM damaged ${charName} for ${Math.abs(delta)} HP — ${charName} is dying!`))
+                          } else if (!nowDying && wasDying) {
+                            // Healed out of dying
+                            updateCharacter(p.characterId, (c) => {
+                              c.currentHp = newHp
+                              c.isDying = false
+                              c.deathTimer = undefined
+                            })
+                            addChatMessage(createActionLog(`GM healed ${charName} for ${Math.abs(delta)} HP — ${charName} is back on their feet!`))
+                          } else {
+                            updateCharacter(p.characterId, (c) => {
+                              c.currentHp = newHp
+                              c.isDying = nowDying
+                            })
+                            addChatMessage(createActionLog(`GM ${delta > 0 ? 'healed' : 'damaged'} ${charName} for ${Math.abs(delta)} HP`))
+                          }
                           setTimeout(() => gmPeer.broadcastStateSync(), 50)
                         }}
                         onUpdateXp={(delta) => {
@@ -850,11 +947,33 @@ function GMSessionPage() {
               setTimeout(() => gmPeer.broadcastStateSync(), 50)
             }}
             onUpdateCharacterHp={(id, delta) => {
-              updateCharacter(id, (c) => {
-                c.currentHp = Math.max(0, Math.min(c.maxHp, c.currentHp + delta))
-                c.isDying = c.currentHp <= 0
-                Object.assign(c, { computed: computeCharacterValues(c as any) })
-              })
+              const char = session.characters[id]
+              if (!char) return
+              const newHp = Math.max(0, Math.min(char.maxHp, char.currentHp + delta))
+              const wasDying = char.isDying
+              const nowDying = newHp <= 0
+
+              if (nowDying && !wasDying) {
+                // Player will roll their own death timer
+                updateCharacter(id, (c) => {
+                  c.currentHp = newHp
+                  c.isDying = true
+                  c.deathTimer = undefined
+                })
+                addChatMessage(createActionLog(`${char.name} is dying!`))
+              } else if (!nowDying && wasDying) {
+                updateCharacter(id, (c) => {
+                  c.currentHp = newHp
+                  c.isDying = false
+                  c.deathTimer = undefined
+                })
+                addChatMessage(createActionLog(`${char.name} is back on their feet!`))
+              } else {
+                updateCharacter(id, (c) => {
+                  c.currentHp = newHp
+                  c.isDying = nowDying
+                })
+              }
               setTimeout(() => gmPeer.broadcastStateSync(), 50)
             }}
             onResolveEncounter={(encounterType) => {
