@@ -15,6 +15,7 @@ interface Props {
   onUnequipItem?: (itemId: string) => void
   onDropItem?: (itemId: string) => void
   onUseItem?: (itemId: string) => void
+  onAdjustQuantity?: (itemId: string, delta: number) => void
   onNotesChange?: (notes: string) => void
   onRest?: () => void
 }
@@ -29,6 +30,7 @@ export function CharacterSheet({
   onUnequipItem,
   onDropItem,
   onUseItem,
+  onAdjustQuantity,
   onNotesChange,
   onRest,
 }: Props) {
@@ -195,6 +197,7 @@ export function CharacterSheet({
                 onUnequip={onUnequipItem}
                 onDrop={onDropItem}
                 onUse={onUseItem}
+                onAdjustQuantity={onAdjustQuantity}
               />
             ))}
           </div>
@@ -275,14 +278,16 @@ function InventoryRow({
   onUnequip,
   onDrop,
   onUse,
+  onAdjustQuantity,
 }: {
   item: InventoryItem
   onEquip?: (id: string) => void
   onUnequip?: (id: string) => void
   onDrop?: (id: string) => void
   onUse?: (id: string) => void
+  onAdjustQuantity?: (id: string, delta: number) => void
 }) {
-  const isEquippable = item.category === 'weapon' || item.category === 'armor' || item.category === 'shield'
+  const isEquippable = item.category === 'weapon' || item.category === 'armor' || item.category === 'shield' || item.category === 'magic_item'
   const isUsable = item.category === 'consumable' || item.category === 'light_source'
 
   return (
@@ -304,6 +309,12 @@ function InventoryRow({
           )}
           {isUsable && onUse && (
             <button onClick={() => onUse(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200">Use</button>
+          )}
+          {onAdjustQuantity && (item.category === 'ammo' || item.category === 'ration' || item.quantity > 1) && (
+            <>
+              <button onClick={() => onAdjustQuantity(item.id, -1)} className="rounded px-1.5 py-0.5 text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 font-bold">-1</button>
+              <button onClick={() => onAdjustQuantity(item.id, 1)} className="rounded px-1.5 py-0.5 text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20 font-bold">+1</button>
+            </>
           )}
           {onDrop && (
             <button onClick={() => onDrop(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200">Drop</button>

@@ -12,11 +12,12 @@ interface Props {
   onAddGold: (amount: number) => void
   onAddItem: (item: InventoryItem) => void
   onRemoveItem: (itemId: string) => void
+  onAdjustQuantity: (itemId: string, delta: number) => void
   onToggleLuckToken: () => void
   onKick: () => void
 }
 
-export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onUpdateXp, onAddGold, onAddItem, onRemoveItem, onToggleLuckToken, onKick }: Props) {
+export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onUpdateXp, onAddGold, onAddItem, onRemoveItem, onAdjustQuantity, onToggleLuckToken, onKick }: Props) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'actions' | 'addItem' | 'removeItem'>('actions')
   const [itemSearch, setItemSearch] = useState('')
@@ -177,12 +178,20 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
                   <div className="space-y-0.5">
                     {character.inventory.items.map(item => (
                       <div key={item.id} className="flex items-center justify-between rounded px-2 py-1 text-xs">
-                        <span>
+                        <span className="truncate flex-1 mr-1">
                           {item.name}
                           {item.equipped && <span className="ml-1 text-primary">(E)</span>}
                           {item.quantity > 1 && <span className="ml-1 text-muted-foreground">x{item.quantity}</span>}
                         </span>
-                        <button onClick={() => onRemoveItem(item.id)} className="text-red-400 hover:text-red-300">✕</button>
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          {(item.category === 'ammo' || item.category === 'ration' || item.quantity > 1) && (
+                            <>
+                              <button onClick={() => onAdjustQuantity(item.id, -1)} className="rounded bg-red-500/10 px-1 py-0.5 text-[9px] font-bold text-red-400 hover:bg-red-500/20" title="Remove 1">-1</button>
+                              <button onClick={() => onAdjustQuantity(item.id, 1)} className="rounded bg-green-500/10 px-1 py-0.5 text-[9px] font-bold text-green-400 hover:bg-green-500/20" title="Add 1">+1</button>
+                            </>
+                          )}
+                          <button onClick={() => onRemoveItem(item.id)} className="text-red-400 hover:text-red-300 ml-0.5" title="Remove all">✕</button>
+                        </div>
                       </div>
                     ))}
                   </div>

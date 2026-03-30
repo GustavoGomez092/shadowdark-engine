@@ -102,8 +102,10 @@ export function computeGearSlots(character: Character): number {
 }
 
 export function computeUsedGearSlots(character: Character): number {
+  // Each item takes its slot count regardless of quantity
+  // (20 arrows = 1 slot, 3 rations = 1 slot)
   const itemSlots = character.inventory.items.reduce((total, item) => {
-    return total + (item.slots * item.quantity);
+    return total + item.slots;
   }, 0);
   const coinSlots = calculateCoinSlots(character.inventory.coins);
   return itemSlots + coinSlots;

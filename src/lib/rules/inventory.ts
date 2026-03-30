@@ -5,16 +5,18 @@ import { generateId } from '@/lib/utils/id.ts';
 // ========== Slot Calculations ==========
 
 export function calculateUsedSlots(inventory: InventoryState): number {
+  // Each item takes its slot count regardless of quantity
+  // (20 arrows = 1 slot, 3 rations = 1 slot)
   const itemSlots = inventory.items.reduce((total, item) => {
-    return total + item.slots * item.quantity;
+    return total + item.slots;
   }, 0);
   const coinSlots = calculateCoinSlots(inventory.coins);
   return itemSlots + coinSlots;
 }
 
-export function canCarryItem(inventory: InventoryState, maxSlots: number, itemSlots: number, quantity: number = 1): boolean {
+export function canCarryItem(inventory: InventoryState, maxSlots: number, itemSlots: number, _quantity: number = 1): boolean {
   const currentSlots = calculateUsedSlots(inventory);
-  return currentSlots + (itemSlots * quantity) <= maxSlots;
+  return currentSlots + itemSlots <= maxSlots;
 }
 
 // ========== Add / Remove Items ==========
@@ -219,13 +221,21 @@ export function createInventoryItem(
   slots: number,
   overrides?: Partial<InventoryItem>
 ): InventoryItem {
+  // Auto-detect quantity for stackable items (ammo, rations)
+  // by checking the name for common patterns like "(20)", "(5)", "(3)"
+  let defaultQuantity = 1
+  const qtyMatch = name.match(/\((\d+)\)/)
+  if (qtyMatch && (category === 'ammo' || category === 'ration')) {
+    defaultQuantity = parseInt(qtyMatch[1], 10)
+  }
+
   return {
     id: generateId(),
     definitionId,
     name,
     category,
     slots,
-    quantity: 1,
+    quantity: defaultQuantity,
     equipped: false,
     isIdentified: true,
     ...overrides,

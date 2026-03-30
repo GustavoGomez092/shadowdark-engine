@@ -5,6 +5,7 @@ import { LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
 import { ChatMessageRow } from '@/components/shared/chat-message.tsx'
 import { createActionLog } from '@/lib/utils/action-log.ts'
+import { getGear } from '@/data/gear.ts'
 import { pushRollToast } from '@/components/shared/roll-toast.tsx'
 import { EncounterPanel } from '@/components/gm/encounter-panel.tsx'
 import { RewardsDialog } from '@/components/gm/rewards-dialog.tsx'
@@ -340,13 +341,17 @@ function GMSessionPage() {
         if (remaining > 0) { const gpSpend = Math.ceil(remaining / 100); gp -= gpSpend; const change = gpSpend * 100 - remaining; sp += Math.floor(change / 10); cp += change % 10 }
         c.inventory.coins = { gp, sp, cp }
 
+        // Check if item has quantityPerSlot (ammo, rations)
+        const gearDef = storeItem.itemDefinitionId ? getGear(storeItem.itemDefinitionId) : null
+        const qty = gearDef?.quantityPerSlot ?? 1
+
         c.inventory.items.push({
           id: generateId(),
           definitionId: storeItem.itemDefinitionId ?? storeItem.name.toLowerCase().replace(/\s/g, '-'),
           name: storeItem.name,
           category: storeItem.category,
           slots: storeItem.slots,
-          quantity: 1,
+          quantity: qty,
           equipped: false,
           isIdentified: true,
         })
@@ -481,12 +486,19 @@ function GMSessionPage() {
   // Start peer host when session is active — reuse existing peer ID on refresh
   useEffect(() => {
     if (session && !isReady) {
-      // Reset all players to disconnected on GM startup (they'll reconnect)
+      // Reset all players to disconnected and recompute all characters on GM startup
       const store = useSessionStore.getState()
       if (store.session) {
         for (const pid of Object.keys(store.session.players)) {
           store.updatePlayer(pid, { isConnected: false })
         }
+        // Force recompute all character values (fixes stale computed data in localStorage)
+        for (const char of Object.values(store.session.characters)) {
+          try {
+            char.computed = computeCharacterValues(char as any)
+          } catch { /* ignore */ }
+        }
+        store.saveNow()
       }
 
       const existingPeerId = session.room.gmPeerId || undefined
@@ -634,6 +646,27 @@ function GMSessionPage() {
                             c.inventory.items = c.inventory.items.filter(i => i.id !== itemId)
                           })
                           addChatMessage(createActionLog(`GM removed ${itemName} from ${charName}`))
+                          setTimeout(() => gmPeer.broadcastStateSync(), 50)
+                        }}
+                        onAdjustQuantity={(itemId, delta) => {
+                          if (!p.characterId) return
+                          const charName = session.characters[p.characterId]?.name ?? p.displayName
+                          const item = session.characters[p.characterId]?.inventory.items.find(i => i.id === itemId)
+                          if (!item) return
+
+                          updateCharacter(p.characterId, (c) => {
+                            const target = c.inventory.items.find(i => i.id === itemId)
+                            if (!target) return
+                            target.quantity = target.quantity + delta
+                            if (target.quantity <= 0) {
+                              c.inventory.items = c.inventory.items.filter(i => i.id !== itemId)
+                            }
+                          })
+
+                          // Re-read after update for accurate log
+                          const updatedItem = useSessionStore.getState().session?.characters[p.characterId!]?.inventory.items.find(i => i.id === itemId)
+                          const remaining = updatedItem?.quantity ?? 0
+                          addChatMessage(createActionLog(`GM ${delta > 0 ? 'added' : 'removed'} ${Math.abs(delta)} unit from ${item.name} for ${charName} (${remaining} left)`))
                           setTimeout(() => gmPeer.broadcastStateSync(), 50)
                         }}
                         onToggleLuckToken={() => {

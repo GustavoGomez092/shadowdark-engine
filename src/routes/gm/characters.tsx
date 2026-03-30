@@ -73,25 +73,33 @@ function GMCharactersPage() {
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           {/* Character list sidebar */}
           <div className="space-y-2">
-            {characters.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setSelectedId(c.id)}
-                className={`w-full rounded-lg border p-3 text-left transition ${
-                  selectedId === c.id
-                    ? 'border-primary bg-primary/5 ring-2 ring-primary'
-                    : 'border-border bg-card hover:border-primary/50'
-                }`}
-              >
-                <div className="font-semibold">{c.name}</div>
-                <div className="text-sm text-muted-foreground capitalize">
-                  {c.ancestry} {c.class} · Lv {c.level}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  HP: {c.currentHp}/{c.maxHp}
-                </div>
-              </button>
-            ))}
+            {characters.map(c => {
+              const assignedPlayer = session ? Object.values(session.players).find(p => p.characterId === c.id) : null
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedId(c.id)}
+                  className={`w-full rounded-lg border p-3 text-left transition ${
+                    selectedId === c.id
+                      ? 'border-primary bg-primary/5 ring-2 ring-primary'
+                      : 'border-border bg-card hover:border-primary/50'
+                  }`}
+                >
+                  <div className="font-semibold">{c.name}</div>
+                  <div className="text-sm text-muted-foreground capitalize">
+                    {c.ancestry} {c.class} · Lv {c.level}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    HP: {c.currentHp}/{c.maxHp}
+                  </div>
+                  {assignedPlayer ? (
+                    <span className="mt-1.5 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[9px] font-medium text-primary">🎮 {assignedPlayer.displayName}</span>
+                  ) : (
+                    <span className="mt-1.5 inline-block rounded-full bg-secondary px-2 py-0.5 text-[9px] text-muted-foreground">Available</span>
+                  )}
+                </button>
+              )
+            })}
           </div>
 
           {/* Character sheet */}
@@ -130,6 +138,17 @@ function GMCharactersPage() {
                     ...c,
                     inventory: removeItem(c.inventory, itemId),
                   }))
+                }}
+                onAdjustQuantity={(itemId, delta) => {
+                  updateChar(selected.id, c => {
+                    const item = c.inventory.items.find(i => i.id === itemId)
+                    if (!item) return c
+                    const newQty = item.quantity + delta
+                    if (newQty <= 0) {
+                      return { ...c, inventory: { ...c.inventory, items: c.inventory.items.filter(i => i.id !== itemId) } }
+                    }
+                    return { ...c, inventory: { ...c.inventory, items: c.inventory.items.map(i => i.id === itemId ? { ...i, quantity: newQty } : i) } }
+                  })
                 }}
                 onNotesChange={(notes) => {
                   updateChar(selected.id, c => ({ ...c, notes }))
