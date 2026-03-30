@@ -87,13 +87,13 @@ class DataRegistry {
   getClass(id: string) { return this.classIndex.get(id) }
 
   // Filtered lookups
-  getSpellsByClass(spellClass: 'wizard' | 'priest') {
+  getSpellsByClass(spellClass: 'wizard' | 'priest' | 'witch' | 'seer') {
     return this.spells.filter(s => s.class === spellClass)
   }
   getSpellsByTier(tier: number) {
     return this.spells.filter(s => s.tier === tier)
   }
-  getSpellsByClassAndTier(spellClass: 'wizard' | 'priest', tier: number) {
+  getSpellsByClassAndTier(spellClass: 'wizard' | 'priest' | 'witch' | 'seer', tier: number) {
     return this.spells.filter(s => s.class === spellClass && s.tier === tier)
   }
   getMonstersByTag(tag: string) {

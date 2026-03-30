@@ -64,6 +64,17 @@ export const ANCESTRIES: AncestryDefinition[] = [
     ],
     languages: ['Common'], // +1 additional common language (chosen at creation)
   },
+  {
+    id: 'kobold',
+    name: 'Kobold',
+    traitName: 'Knack',
+    traitDescription: 'Choose one: +1 to spellcasting checks OR begin each session with a luck token.',
+    mechanics: [
+      { type: 'bonus_spellcasting', value: 1, isChoice: true, choiceGroup: 'knack' },
+      { type: 'luck_token_session_start', isChoice: true, choiceGroup: 'knack' },
+    ],
+    languages: ['Common', 'Draconic'],
+  },
 ];
 
 export function getAncestry(id: string): AncestryDefinition | undefined {

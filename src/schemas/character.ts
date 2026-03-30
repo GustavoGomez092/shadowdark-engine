@@ -7,13 +7,21 @@ export type AbilityScore = 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
 export type AbilityScores = Record<AbilityScore, number>;
 export type AbilityModifiers = Record<AbilityScore, number>;
 
-export type Ancestry = 'dwarf' | 'elf' | 'goblin' | 'halfling' | 'half-orc' | 'human';
-export type CharacterClass = 'fighter' | 'priest' | 'thief' | 'wizard';
+export type Ancestry = 'dwarf' | 'elf' | 'goblin' | 'halfling' | 'half-orc' | 'human' | 'kobold';
+export type CharacterClass =
+  | 'fighter' | 'priest' | 'thief' | 'wizard'
+  | 'bard' | 'ranger' | 'warlock' | 'witch'
+  | 'knight-of-st-ydris' | 'seer' | 'basilisk-warrior'
+  | 'desert-rider' | 'pit-fighter' | 'sea-wolf' | 'ras-godai';
 
 export type ConditionType =
   | 'blinded' | 'charmed' | 'deafened' | 'paralyzed' | 'poisoned'
   | 'sleeping' | 'dazed' | 'grabbed' | 'frightened' | 'invisible'
-  | 'prone' | 'restrained' | 'stunned' | 'unconscious';
+  | 'prone' | 'restrained' | 'stunned' | 'unconscious'
+  | 'afraid' | 'banished' | 'beguiled' | 'compelled' | 'cursed'
+  | 'diseased' | 'drained' | 'enfeebled' | 'fragile' | 'gibbering'
+  | 'laughing' | 'life-drained' | 'mesmerized' | 'petrified'
+  | 'polymorphed' | 'possessed' | 'stuck' | 'stupified';
 
 export interface ActiveCondition {
   id: string;
@@ -48,7 +56,8 @@ export type AncestryMechanicType =
   | 'invisibility_1day'
   | 'bonus_melee_attack'
   | 'bonus_melee_damage'
-  | 'extra_talent_level1';
+  | 'extra_talent_level1'
+  | 'luck_token_session_start';
 
 export interface AncestryMechanic {
   type: AncestryMechanicType;
@@ -77,7 +86,34 @@ export type ClassFeatureMechanic =
   | { type: 'thievery'; skills: string[] }
   | { type: 'turn_undead' }
   | { type: 'spellcasting'; stat: AbilityScore }
-  | { type: 'scroll_learning' };
+  | { type: 'scroll_learning' }
+  | { type: 'bardic_arts'; skills: string[] }
+  | { type: 'presence'; description: string }
+  | { type: 'magical_dabbler'; stat: AbilityScore }
+  | { type: 'prolific' }
+  | { type: 'wayfinder'; skills: string[] }
+  | { type: 'herbalism'; stat: AbilityScore }
+  | { type: 'demonic_possession'; usesPerDay: number; damageBonus: number; rounds: number }
+  | { type: 'patron'; description: string }
+  | { type: 'patron_boon' }
+  | { type: 'familiar' }
+  | { type: 'omen'; usesPerDay: number; dc: number }
+  | { type: 'destined' }
+  | { type: 'stone_skin'; acBonus: number }
+  | { type: 'basilisk_blood' }
+  | { type: 'petrifying_gaze'; dc: number }
+  | { type: 'charge'; usesPerDay: number }
+  | { type: 'mount' }
+  | { type: 'flourish'; usesPerDay: number }
+  | { type: 'relentless'; usesPerDay: number; dc: number }
+  | { type: 'implacable' }
+  | { type: 'last_stand'; threshold: number }
+  | { type: 'seafarer' }
+  | { type: 'old_gods' }
+  | { type: 'shield_wall'; ac: number }
+  | { type: 'smoke_step'; usesPerDay: number }
+  | { type: 'black_lotus' }
+  | { type: 'trained_assassin' };
 
 export interface ClassFeature {
   name: string;
@@ -98,7 +134,22 @@ export type TalentMechanic =
   | { type: 'make_magic_item' }
   | { type: 'backstab_extra_dice'; amount: number }
   | { type: 'initiative_advantage' }
-  | { type: 'choose_talent_or_stats' };
+  | { type: 'choose_talent_or_stats' }
+  | { type: 'magical_dabbler_bonus'; amount: number }
+  | { type: 'improved_presence' }
+  | { type: 'find_random_wand' }
+  | { type: 'herbalism_advantage' }
+  | { type: 'increased_weapon_damage' }
+  | { type: 'melee_attack_bonus'; amount: number }
+  | { type: 'ranged_attack_damage_bonus'; amount: number }
+  | { type: 'damage_bonus'; amount: number }
+  | { type: 'ac_bonus'; amount: number }
+  | { type: 'patron_boon_roll' }
+  | { type: 'go_berserk' }
+  | { type: 'duality' }
+  | { type: 'additional_smoke_step' }
+  | { type: 'poisons_training' }
+  | { type: 'additional_black_lotus' };
 
 export interface TalentTableEntry {
   roll: number | [number, number]; // value or range on 2d6
@@ -120,7 +171,7 @@ export type ArmorProficiency = 'none' | 'leather' | 'chainmail' | 'plate' | 'shi
 
 export interface SpellcastingConfig {
   stat: AbilityScore;
-  spellList: 'wizard' | 'priest';
+  spellList: 'wizard' | 'priest' | 'witch' | 'seer';
 }
 
 export interface ClassDefinition {
