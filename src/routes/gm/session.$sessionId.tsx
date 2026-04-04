@@ -704,7 +704,7 @@ function GMSessionPage() {
                           <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-400 uppercase">Active</span>
                         )}
                         {p.characterId && session.characters[p.characterId] && canLevelUp(session.characters[p.characterId]) && (
-                          <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold text-primary uppercase animate-pulse">Level Up!</span>
+                          <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold text-primary uppercase animate-pulse">{t('character.levelUp')}</span>
                         )}
                       </div>
                       <PlayerMenu
