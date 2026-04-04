@@ -56,9 +56,13 @@ export function CharacterSheet({
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold">{c.name}</h2>
-            <p className="text-sm text-muted-foreground">{c.title}</p>
+            <p className="text-sm text-muted-foreground">{(() => {
+              const rangeStart = c.level <= 2 ? 1 : c.level <= 4 ? 3 : c.level <= 6 ? 5 : c.level <= 8 ? 7 : 9
+              const rangeEnd = rangeStart + 1
+              return tData('titles', `${c.class}-${c.alignment}-${rangeStart}-${rangeEnd}`, 'title', c.title)
+            })()}</p>
             <p className="text-sm capitalize">
-              {c.ancestry} {c.class} · Level {c.level} · {c.alignment}
+              {tData('ancestries', c.ancestry, 'name', c.ancestry)} {tData('classes', c.class, 'name', c.class)} · {t('character.level')} {c.level} · {t(`character.alignment.${c.alignment}`)}
             </p>
           </div>
           <div className="text-right">
