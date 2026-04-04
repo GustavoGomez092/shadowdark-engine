@@ -450,9 +450,12 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
             <div className="rounded-lg bg-secondary p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 {talentRollState.dice.map((d, i) => (
-                  <div key={i} className="rounded-lg border border-primary/30 bg-primary/10 w-10 h-10 flex items-center justify-center text-lg font-bold">
-                    {d}
-                  </div>
+                  <span key={i} className="contents">
+                    {i > 0 && <span className="text-muted-foreground font-bold">+</span>}
+                    <div className="rounded-lg border border-primary/30 bg-primary/10 w-10 h-10 flex items-center justify-center text-lg font-bold">
+                      {d}
+                    </div>
+                  </span>
                 ))}
                 <span className="mx-1 text-muted-foreground">=</span>
                 <div className="text-2xl font-bold text-primary">{talentRollState.rollTotal}</div>
