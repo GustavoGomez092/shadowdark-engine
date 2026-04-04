@@ -637,14 +637,14 @@ function GMSessionPage() {
     <main className="mx-auto max-w-7xl px-4 py-6">
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Connected Players + Character Assignment */}
-        <div className="rounded-xl border border-border bg-card p-4 max-h-[480px] flex flex-col">
+        <div className="rounded-xl border border-border bg-card p-4">
           <h2 className="mb-3 font-semibold shrink-0">Connected Players</h2>
           {players.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No players connected. Share the room code with your players.
             </p>
           ) : (
-            <div className="space-y-2 overflow-y-auto">
+            <div className="space-y-2">
               {players.map(p => {
                 const isPlayerActiveTurn = p.characterId ? session.activeTurnId === p.characterId : false
                 return (
