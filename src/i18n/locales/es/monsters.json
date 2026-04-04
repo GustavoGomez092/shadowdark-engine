@@ -317,1567 +317,1791 @@
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un bulbo translúcido de tentáculos flotantes que se desplaza por aguas oscuras, aguijoneando todo lo que toca."
   },
   "kobold": {
     "name": "Kóbold",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un pequeño y cobarde humanoide reptiliano que depende de trampas y la superioridad numérica."
   },
   "rat": {
     "name": "Rata",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una alimaña común de cloacas y mazmorras, envalentonada por la oscuridad y la inmundicia."
   },
   "scorpion": {
     "name": "Escorpión",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un arácnido del tamaño de una palma con pinzas y un aguijón venenoso en la cola."
   },
   "spider": {
     "name": "Araña",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una araña pequeña y venenosa que acecha en grietas y redes tendidas en corredores de mazmorras."
   },
   "apprentice": {
     "name": "Aprendiz",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un joven estudiante de las artes arcanas, apenas entrenado y ansioso por demostrar su valía."
   },
   "badger": {
     "name": "Tejón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un mamífero rechoncho y excavador con garras poderosas y un temperamento feroz cuando se le acorrala."
   },
   "basilisk-hatchling": {
     "name": "Cría de Basilisco",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un reptil juvenil de ocho patas cuya mirada petrificante aún no se ha desarrollado del todo."
   },
   "brachiosaurus": {
     "name": "Braquiosaurio",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un herbívoro colosal de cuello largo que hace temblar el suelo con cada paso."
   },
   "centipede-giant": {
     "name": "Ciempiés Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un horror segmentado del largo de un hombre que se arrastra por paredes y techos con docenas de patas."
   },
   "goblin": {
     "name": "Trasgo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una criatura escuálida de piel verde con dientes afilados y una astucia cruel."
   },
   "guard": {
     "name": "Guardia",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un centinela armado apostado para proteger una puerta, caravana o casa noble."
   },
   "mastiff": {
     "name": "Mastín",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un perro guardián grande y musculoso criado para la lealtad y la agresión."
   },
   "orc": {
     "name": "Orco",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero brutal con colmillos, impulsado por la rabia y el hambre de conquista."
   },
   "peasant": {
     "name": "Campesino",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un campesino común sin entrenamiento de combate, armado con lo que tenga a mano."
   },
   "pirate": {
     "name": "Pirata",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un rufián curtido por el mar que vive del saqueo y la espada."
   },
   "rat-giant": {
     "name": "Rata Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una rata del tamaño de un perro con pelaje apelmazado y colmillos amarillentos, lo bastante audaz para atacar a los vivos."
   },
   "snake-cobra": {
     "name": "Serpiente Cobra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una serpiente encapuchada que se yergue y ataca con colmillos venenosos a la velocidad del rayo."
   },
   "stingbat": {
     "name": "Murciélago Aguijón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un morador de cavernas de alas coriáceas con una cola con púas que gotea veneno."
   },
   "thug": {
     "name": "Matón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un matón callejero que resuelve disputas a puñetazos y garrotazos."
   },
   "vulture": {
     "name": "Buitre",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ave carroñera calva que sobrevuela campos de batalla, esperando a que los moribundos dejen de moverse."
   },
   "ape": {
     "name": "Simio",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un primate poderoso de brazos largos y un fiero temperamento territorial."
   },
   "berserker": {
     "name": "Berserker",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero de ojos desorbitados consumido por la furia de batalla, indiferente al dolor o la autopreservación."
   },
   "camel": {
     "name": "Camello",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia de carga del desierto, resistente y de mal genio, con una patada demoledora."
   },
   "deep-one": {
     "name": "Ser de las Profundidades",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un humanoide con cara de pez que habita en ciudades sumergidas y adora a dioses alienígenas del abismo."
   },
   "demon-dretch": {
     "name": "Demonio Dretch",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Lo más bajo de la estirpe demoníaca: un infernal hinchado y pestilente de carne pálida y gomosa."
   },
   "devil-imp": {
     "name": "Diablo Diablillo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un pequeño infernal alado con cola de púas, enviado para tentar mortales y espiar para sus amos infernales."
   },
   "drow": {
     "name": "Drow",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un elfo de piel pálida del subsuelo, criado en la crueldad y experto con la hoja y el veneno."
   },
   "duergar": {
     "name": "Duergar",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un enano de piel gris de las profundidades, amargado por siglos de oscuridad y trabajo."
   },
   "elf": {
     "name": "Elfo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un habitante del bosque grácil y longevo, con sentidos agudos y afinidad natural por la magia."
   },
   "frog-giant": {
     "name": "Rana Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un anfibio hinchado del tamaño de un poni, capaz de tragarse halflings enteros."
   },
   "ghoul": {
     "name": "Gul",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un no muerto encorvado y con garras que acecha cementerios y túneles, paralizando presas con su toque."
   },
   "gnoll": {
     "name": "Gnoll",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un humanoide con cabeza de hiena que deambula en bandas de guerra salvajes, dejando ruina a su paso."
   },
   "gray-ooze": {
     "name": "Cieno Gris",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cieno del color de la piedra que se adhiere a los suelos de mazmorras, disolviendo metal y carne por igual."
   },
   "hobgoblin": {
     "name": "Hobgoblin",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un soldado goblinoide disciplinado y acorazado que pelea en formaciones organizadas."
   },
   "horse": {
     "name": "Caballo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un animal de montura domesticado, fuerte y veloz pero que se asusta fácilmente ante monstruos."
   },
   "hydra": {
     "name": "Hidra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia reptiliana masiva de múltiples cabezas; corta una y dos más crecen en su lugar."
   },
   "leech-giant": {
     "name": "Sanguijuela Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una sanguijuela viscosa del grosor de un brazo que acecha en aguas estancadas y se prende de los incautos."
   },
   "lizardfolk": {
     "name": "Hombre Lagarto",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un humanoide de sangre fría y escamas que habita en pantanos y defiende su territorio con ferocidad primordial."
   },
   "merfolk": {
     "name": "Tritón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un humanoide acuático con la parte inferior de un pez, desconfiado de los habitantes de la superficie."
   },
   "rat-dire": {
     "name": "Rata Atroz",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un roedor del tamaño de un lobo con cuero cicatrizado y un apetito voraz por la carne tibia."
   },
   "rot-flower": {
     "name": "Flor Pútrida",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una planta maloliente con zarcillos retorcidos que se alimenta de cadáveres en descomposición."
   },
   "sahuagin": {
     "name": "Sahuagin",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un feroz diablo marino con garras palmeadas y dientes como navajas que asalta asentamientos costeros de noche."
   },
   "skeleton": {
     "name": "Esqueleto",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Los huesos reanimados de los muertos, unidos por magia oscura y obligados a obedecer."
   },
   "soldier": {
     "name": "Soldado",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un combatiente entrenado equipado con cota de malla y un arma sólida, leal a la corona o la moneda."
   },
   "spider-swarm": {
     "name": "Enjambre de Arañas",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una alfombra hirviente de miles de pequeñas arañas que envuelve y muerde todo a su paso."
   },
   "velociraptor": {
     "name": "Velocirráptor",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador veloz y emplumado con garras en forma de hoz e instintos de caza en manada."
   },
   "violet-fungus": {
     "name": "Hongo Violeta",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un hongo de sombrero púrpura con zarcillos azotadores que pudre la carne al contacto."
   },
   "wasp-giant": {
     "name": "Avispa Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un insecto del tamaño de un caballo con alas iridiscentes y un aguijón capaz de perforar armadura de placas."
   },
   "will-o-wisp": {
     "name": "Fuego Fatuo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una esfera titilante de luz pálida que atrae viajeros a los pantanos y se alimenta de sus últimos alientos."
   },
   "wolf": {
     "name": "Lobo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador gris y esbelto que caza en manada, rodeando a su presa con una coordinación inquietante."
   },
   "zombie": {
     "name": "Zombi",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cadáver tambaleante impulsado por hambre necromántica, lento pero implacable."
   },
   "angel-seraph": {
     "name": "Ángel Serafín",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero celestial radiante envuelto en fuego sagrado, enviado a ejecutar el juicio divino."
   },
   "ankheg": {
     "name": "Ankheg",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un insectoide excavador con mandíbulas como tijeras y un rocío de ácido corrosivo."
   },
   "azer": {
     "name": "Azer",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un herrero elemental rechoncho de piel broncínea cuyo cabello y barba arden con llama viva."
   },
   "bugbear": {
     "name": "Bugbear",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un goblinoide enorme y peludo que sobresale en las emboscadas, golpeando desde las sombras con fuerza brutal."
   },
   "centaur": {
     "name": "Centauro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una noble criatura con torso humano y cuerpo de caballo, orgullosa y veloz."
   },
   "cockatrice": {
     "name": "Cocatriz",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un reptil con cuerpo de gallo y alas de murciélago cuya mordida convierte la carne viva en piedra."
   },
   "devil-barbed": {
     "name": "Diablo Barbado",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un infernal alto cubierto de púas afiladas y ganchudas que desgarran todo lo que lo agarra."
   },
   "gladiator": {
     "name": "Gladiador",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un luchador de arena cubierto de cicatrices, experto en el espectáculo y la masacre, con armadura improvisada."
   },
   "gnome-deep": {
     "name": "Gnomo de las Profundidades",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gnomo pequeño y recluso del subsuelo con magia ilusoria innata y aguda visión en la oscuridad."
   },
   "harpy": {
     "name": "Arpía",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una infernal alada con rostro de mujer y cuerpo de buitre, cuyo canto atrae víctimas a su perdición."
   },
   "hippogriff": {
     "name": "Hipogrifo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un majestuoso híbrido de águila y caballo, feroz en la naturaleza pero domesticable como montura."
   },
   "knight": {
     "name": "Caballero",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero con armadura pesada de cuna noble, juramentado a un señor u orden sagrada."
   },
   "kobold-sorcerer": {
     "name": "Kóbold Hechicero",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un kóbold raro nacido con poder arcano innato, temido y venerado por su tribu."
   },
   "lion": {
     "name": "León",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gran felino poderoso con melena leonada, depredador supremo de sabanas y ruinas por igual."
   },
   "mushroomfolk": {
     "name": "Pueblo Hongo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un humanoide fúngico consciente que se comunica mediante nubes de esporas y cuida jardines subterráneos."
   },
   "panther": {
     "name": "Pantera",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un felino esbelto de pelaje negro que acecha a su presa en silencio antes de saltar desde la oscuridad."
   },
   "pegasus": {
     "name": "Pegaso",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un caballo alado de origen celestial, leal solo a los puros de corazón."
   },
   "piranha-swarm": {
     "name": "Enjambre de Pirañas",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cardumen frenético de peces con dientes de navaja que arranca la carne del hueso en segundos."
   },
   "scarab-swarm": {
     "name": "Enjambre de Escarabajos",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una marea de escarabajos quitinosos que brota de las tumbas y devora todo lo orgánico."
   },
   "scarecrow": {
     "name": "Espantapájaros",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un espantapájaros relleno de paja animado por hechicería oscura, su rostro de arpillera cosido en una sonrisa permanente."
   },
   "scorpion-giant": {
     "name": "Escorpión Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un arácnido del tamaño de una carreta con pinzas aplastantes y un aguijón que gotea veneno letal."
   },
   "shadow": {
     "name": "Sombra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un no muerto incorpóreo formado de oscuridad viviente que drena la fuerza de los vivos con su toque."
   },
   "shark": {
     "name": "Tiburón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador oceánico esbelto atraído por la sangre, todo músculo, dientes y hambre implacable."
   },
   "smilodon": {
     "name": "Smilodon",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gran felino prehistórico con colmillos del largo de una daga, diseñado para derribar presas enormes."
   },
   "spider-giant": {
     "name": "Araña Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un arácnido del tamaño de un caballo que teje redes en las bocas de las cavernas e inyecta veneno disolvente."
   },
   "strangler": {
     "name": "Estrangulador",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un acechador tentaculado que se deja caer desde los techos para enrollarse alrededor de la garganta de su víctima."
   },
   "thief": {
     "name": "Ladrón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un pícaro de dedos ágiles que vive del sigilo, forzando cerraduras y bolsillos con igual destreza."
   },
   "viperian": {
     "name": "Viperiano",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un humanoide con cuerpo de serpiente y fauces colmilludas, mezclando inteligencia astuta con malicia reptiliana."
   },
   "wererat": {
     "name": "Hombre Rata",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un licántropo escurridizo que alterna entre forma humana y de rata, acechando en cloacas y gremios de ladrones."
   },
   "wight": {
     "name": "Tumulario",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero no muerto acorazado sostenido por el odio, cuyo toque drena la vida de los vivos."
   },
   "worg": {
     "name": "Wargo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un lobo malévolo y sobredimensionado con inteligencia cruel, frecuentemente montado por trasgos."
   },
   "ape-snow": {
     "name": "Simio de las Nieves",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un simio de pelaje blanco de las montañas que lanza rocas y aplasta intrusos en su dominio helado."
   },
   "bat-swarm": {
     "name": "Enjambre de Murciélagos",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una nube chillante de cientos de murciélagos que envuelve a sus víctimas en un caos de mordiscos y arañazos."
   },
   "centipede-swarm": {
     "name": "Enjambre de Ciempiés",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una masa retorcida de ciempiés venenosos que brota de las grietas en la piedra como una alfombra viviente."
   },
   "doppelganger": {
     "name": "Doppelgänger",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cambiaformas sin rostro que asume la identidad de sus víctimas para infiltrarse y traicionar."
   },
   "gargoyle": {
     "name": "Gárgola",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador alado con piel de piedra que se posa inmóvil en cornisas hasta que una presa se acerca."
   },
   "ghast": {
     "name": "Ghast",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gul más poderoso que exuda un hedor nauseabundo, paralizando incluso a elfos con sus garras."
   },
   "gibbering-mouther": {
     "name": "Susurrador Demente",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un montículo de carne fundida cubierto de incontables bocas y ojos, balbuceando sinsentidos enloquecedores."
   },
   "goblin-boss": {
     "name": "Trasgo Jefe",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "El trasgo más grande y malvado de la tribu, que gobierna mediante la violencia y la intimidación."
   },
   "goblin-shaman": {
     "name": "Trasgo Chamán",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un trasgo encorvado cubierto de fetiches y huesos, canalizando magia tosca pero peligrosa."
   },
   "gorilla": {
     "name": "Gorila",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un primate masivo de lomo plateado con fuerza tremenda que carga cuando se siente amenazado."
   },
   "grick": {
     "name": "Grick",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador vermiforme con un pico duro y tentáculos retorcidos, camuflado contra la piedra de las mazmorras."
   },
   "griffon": {
     "name": "Grifo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un híbrido feroz con cabeza y alas de águila y el poderoso cuerpo de un león."
   },
   "hell-hound": {
     "name": "Sabueso Infernal",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un sabueso negro como el carbón con ojos humeantes que exhala bocanadas de fuego infernal."
   },
   "leprechaun": {
     "name": "Leprechaun",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un diminuto embaucador feérico que acumula oro y confunde a los mortales con ilusiones."
   },
   "moose": {
     "name": "Alce",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia colosal y astada de las tierras del norte, engañosamente agresiva cuando se le provoca."
   },
   "ochre-jelly": {
     "name": "Gelatina Ocre",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cieno espeso de color ámbar que disuelve la carne y se divide en dos cuando lo cortan con hojas."
   },
   "orc-chieftain": {
     "name": "Orco Caudillo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un señor de la guerra orco cubierto de cicatrices que gobierna mediante el miedo y una brutalidad sin igual."
   },
   "pterodactyl": {
     "name": "Pterodáctilo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un reptil alado de una era primordial que planea con alas coriáceas y arrebata presas desde abajo."
   },
   "rust-monster": {
     "name": "Monstruo del Óxido",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un carroñero insectoide con antenas plumosas que corroen el metal al contacto, la perdición de los aventureros acorazados."
   },
   "shambling-mound": {
     "name": "Montículo Andante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un montón de vegetación podrida animada por magia vil, engullendo víctimas en su masa musgosa."
   },
   "siren": {
     "name": "Sirena",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una criatura de belleza sobrecogedora cuyo canto encantador obliga a los marineros a dirigirse hacia las rocas."
   },
   "snake-swarm": {
     "name": "Enjambre de Serpientes",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un nudo agitado de docenas de serpientes venenosas que ataca desde todas las direcciones a la vez."
   },
   "unicorn": {
     "name": "Unicornio",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un caballo blanco radiante con un cuerno espiral, encarnación de la pureza y la antigua magia del bosque."
   },
   "werewolf": {
     "name": "Hombre Lobo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un licántropo maldito que se transforma en un híbrido salvaje de lobo y humano bajo la luna llena."
   },
   "wolf-dire": {
     "name": "Lobo Atroz",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un lobo prehistórico de tamaño inmenso, lo bastante inteligente para coordinar emboscadas en manada."
   },
   "basilisk": {
     "name": "Basilisco",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un reptil de ocho patas cuya mirada letal convierte a las criaturas vivas en piedra."
   },
   "chuul": {
     "name": "Chuul",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una aberración similar a una langosta con pinzas masivas y tentáculos paralíticos, acechando en pozas subterráneas."
   },
   "crab-giant": {
     "name": "Cangrejo Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un crustáceo del tamaño de una carreta cubierto de percebes, con pinzas capaces de aplastar huesos."
   },
   "demon-vrock": {
     "name": "Demonio Vrock",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un demonio con cabeza de buitre y enormes alas cuyo alarido tiene fuerza suficiente para aturdir a sus enemigos."
   },
   "hippopotamus": {
     "name": "Hipopótamo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia fluvial de complexión masiva con fauces abiertas capaces de aplastar una canoa de un mordisco."
   },
   "mimic": {
     "name": "Mímico",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un astuto cambiaformas que se disfraza de cofres del tesoro y muebles para atraer a los incautos."
   },
   "octopus-giant": {
     "name": "Pulpo Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un terror de las profundidades con tentáculos aplastantes y una inteligencia alienígena tras sus ojos oscuros."
   },
   "priest": {
     "name": "Sacerdote",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un devoto servidor de los dioses que canaliza la ira divina contra los infieles."
   },
   "rhinoceros": {
     "name": "Rinoceronte",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un bruto de piel gruesa que embiste con furia imparable, su cuerno apuntando como una lanza."
   },
   "salamander": {
     "name": "Salamandra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una criatura serpentina envuelta en llamas elementales, forjada en los fuegos bajo el mundo."
   },
   "snake-giant": {
     "name": "Serpiente Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una constrictora enorme que desciende en silencio desde el follaje para enroscarse alrededor de su presa."
   },
   "troll": {
     "name": "Trol",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un horror desgarbado y regenerativo de carne verde y gomosa que se recompone tras cada herida."
   },
   "vampire-spawn": {
     "name": "Engendro Vampírico",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un vasallo no muerto recién convertido, salvaje y hambriento, atado a la voluntad de su oscuro creador."
   },
   "void-spider": {
     "name": "Araña del Vacío",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un arácnido tejido de la nada misma, cuya mordida deshilvana los hilos de la realidad."
   },
   "wolf-winter": {
     "name": "Lobo Invernal",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador pálido nacido en páramos helados cuyo aliento porta el frío letal del norte profundo."
   },
   "black-pudding": {
     "name": "Pudín Negro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cieno masivo y corrosivo que disuelve carne y metal por igual mientras fluye por túneles sin luz."
   },
   "cloaker": {
     "name": "Embozado",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una sombra viviente con forma de gran capa que envuelve a sus víctimas y drena su voluntad de vivir."
   },
   "devil-cubi": {
     "name": "Diablo Cubi",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un infernal de seducción y pactos susurrados, vistiendo la belleza como máscara sobre su verdadera crueldad."
   },
   "drow-drider": {
     "name": "Drow Drider",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un drow maldito fusionado con un cuerpo monstruoso de araña, enloquecido por el castigo de su diosa."
   },
   "drow-priestess": {
     "name": "Drow Sacerdotisa",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una servidora fanática de la reina araña, esgrimiendo plegarias oscuras y autoridad ponzoñosa."
   },
   "elemental-air-lesser": {
     "name": "Elemental de Aire (Menor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un vórtice aullante de viento con propósito maligno, desgarrando todo a su paso."
   },
   "elemental-earth-lesser": {
     "name": "Elemental de Tierra (Menor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una masa chirriante de piedra y tierra que avanza con la paciencia de la roca madre."
   },
   "elemental-fire-lesser": {
     "name": "Elemental de Fuego (Menor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una columna rugiente de llamas vivas que ansía consumir todo lo que toca."
   },
   "elemental-water-lesser": {
     "name": "Elemental de Agua (Menor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un pilar turbulento de agua oscura que golpea a sus enemigos con la fuerza implacable de una inundación."
   },
   "hag-sea": {
     "name": "Bruja del Mar",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bruja hinchada e incrustada de percebes que atrae marineros a ahogarse con promesas susurradas entre la niebla."
   },
   "hag-weald": {
     "name": "Bruja del Bosque",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bruja encorvada del bosque cuyo conocimiento de hierbas oscuras y maldiciones vuelve hostil al bosque mismo."
   },
   "invisible-stalker": {
     "name": "Acechador Invisible",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cazador invisible de los planos elementales, atado por magia para perseguir a su presa sin descanso."
   },
   "mage": {
     "name": "Mago",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un erudito del poder arcano cuyos conjuros pueden reconfigurar el campo de batalla en un instante."
   },
   "manticore": {
     "name": "Mantícora",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia con cuerpo de león, rostro humano retorcido en malicia y una cola erizada de púas letales."
   },
   "naga-bone": {
     "name": "Naga de Hueso",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una serpiente esquelética animada por rencor necromántico, con cuencas vacías que arden con fuego pálido."
   },
   "nightmare": {
     "name": "Pesadilla",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un corcel negro como el carbón envuelto en fuego infernal, galopando entre mundos para transportar a los condenados."
   },
   "ogre": {
     "name": "Ogro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un bruto torpe y corpulento que golpea primero y nunca piensa en hacer preguntas."
   },
   "owlbear": {
     "name": "Oso Búho",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un híbrido feroz de búho y oso, todo pico, garras y rabia ciega."
   },
   "plesiosaurus": {
     "name": "Plesiosaurio",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador acuático de cuello largo que se desliza por aguas oscuras como una máquina de asedio viviente."
   },
   "primordial-slime": {
     "name": "Cieno Primordial",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un cieno ancestral que brota de los cimientos del mundo, más antiguo que la memoria e infinitamente hambriento."
   },
   "rat-swarm": {
     "name": "Enjambre de Ratas",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una marea de roedores sucios y mordedores que abruma a sus presas por la fuerza frenética del número."
   },
   "reaver": {
     "name": "Saqueador",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero curtido en batalla que vive para el saqueo y solo deja cenizas a su paso."
   },
   "roper": {
     "name": "Roper",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador con forma de estalagmita que atrapa víctimas con largos zarcillos pegajosos antes de devorarlas."
   },
   "viperian-ophid": {
     "name": "Viperiano Ófido",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero serpentino con fría astucia reptiliana y un brazo-hoja venenoso."
   },
   "bear-polar": {
     "name": "Oso Polar",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un colosal cazador blanco de los páramos helados, capaz de quebrar hielo de un solo zarpazo."
   },
   "devil-horned": {
     "name": "Diablo Cornudo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un infernal colosal blindado con escamas duras como el hierro, sus grandes cuernos envueltos en llamas infernales."
   },
   "druid": {
     "name": "Druida",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guardián de las viejas costumbres que invoca la ira de la naturaleza contra quienes profanan lo salvaje."
   },
   "elephant": {
     "name": "Elefante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia gris colosal cuya carga atronadora puede aplastar empalizadas y dispersar ejércitos."
   },
   "giant-hill": {
     "name": "Gigante de las Colinas",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gigante torpe y bruto que lanza peñascos y devora ganado entero."
   },
   "golem-flesh": {
     "name": "Gólem de Carne",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un grotesco mosaico de cadáveres robados, cosido y animado con terrible vida."
   },
   "gorgon": {
     "name": "Gorgona",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un toro con escamas de hierro que exhala gas petrificante, dejando un rastro de estatuas de piedra a su paso."
   },
   "minotaur": {
     "name": "Minotauro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un horror con cabeza de toro que acecha corredores laberínticos, deleitándose con el terror de los perdidos."
   },
   "oni": {
     "name": "Oni",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un demonio ogro cambiaformas envuelto en ilusión, alimentándose del miedo y la carne humana."
   },
   "otyugh": {
     "name": "Otyugh",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un carroñero inmundo con tentáculos que se revuelca en la basura y propaga enfermedades virulentas con cada golpe."
   },
   "triceratops": {
     "name": "Triceratops",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia titánica de tres cuernos cuya coraza frontal y furia arrolladora la hacen casi imparable."
   },
   "troll-frost": {
     "name": "Trol de Escarcha",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un trol de piel pálida adaptado a páramos glaciales, su carne regenerativa crepitando con escarcha."
   },
   "void-spawn": {
     "name": "Engendro del Vacío",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una aberración retorcida arrancada de los espacios entre las estrellas, irradiando una anomalía que deforma la mente."
   },
   "assassin": {
     "name": "Asesino",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un asesino de mirada fría entrenado en veneno y sombras, que ataca una vez desde la oscuridad y se desvanece."
   },
   "brain-eater": {
     "name": "Devorador de Cerebros",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una aberración con cara de tentáculos que se alimenta de mentes conscientes, saboreando la inteligencia como un manjar."
   },
   "bulette": {
     "name": "Bulette",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un depredador masivo y acorazado que excava a través de la tierra y erupciona bajo su presa con fuerza devastadora."
   },
   "cyclops": {
     "name": "Cíclope",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gigante de un solo ojo con fuerza terrible y temperamento atroz, que lanza peñascos con puntería sobrenatural."
   },
   "demon-glabrezu": {
     "name": "Demonio Glabrezu",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un demonio colosal con pinzas masivas y un don para corromper mortales mediante pactos oscuros."
   },
   "giant-goat": {
     "name": "Gigante Cabra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bestia montañosa con cuernos en espiral capaces de destrozar muros de piedra al impacto."
   },
   "giant-stone": {
     "name": "Gigante de Piedra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gigante sombrío y solitario que lanza peñascos tallados con precisión mortal desde riscos elevados."
   },
   "golem-clay": {
     "name": "Gólem de Arcilla",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una figura maciza de arcilla encantada, moldeada por mandato divino y casi imposible de destruir."
   },
   "golem-stone": {
     "name": "Gólem de Piedra",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guardián lento tallado en roca sólida, inquebrantable e incansable en su deber asignado."
   },
   "hag-night": {
     "name": "Bruja Nocturna",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una bruja tocada por lo infernal que acecha los sueños de los mortales, alimentándose del terror hasta marchitar el alma."
   },
   "manta-ray-giant": {
     "name": "Mantarraya Gigante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un inmenso planeador silencioso del océano profundo cuyas aletas barredoras bloquean la luz desde arriba."
   },
   "medusa": {
     "name": "Medusa",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una mujer maldita con serpientes vivas por cabello cuya mirada convierte a los vivos en piedra sin vida."
   },
   "rakshasa": {
     "name": "Rakshasa",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un embaucador infernal disfrazado de mortal, sus manos invertidas la única señal de su verdadera naturaleza."
   },
   "shark-megalodon": {
     "name": "Tiburón Megalodón",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un leviatán primigenio de las profundidades, lo bastante grande para tragarse botes enteros."
   },
   "treant": {
     "name": "Treant",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un árbol ancestral y despierto que defiende el bosque con ira pausada y ramas como arietes."
   },
   "viperian-wizard": {
     "name": "Viperiano Mago",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un hechicero serpentino que empuña magia venenosa y rituales oscuros transmitidos por generaciones de sangre fría."
   },
   "wraith": {
     "name": "Espectro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un espíritu odioso de pura malicia que drena la fuerza vital de los vivos con su toque gélido."
   },
   "wyvern": {
     "name": "Guiverno",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un primo del dragón bípedo con cola venenosa y con púas, y un alarido que resuena por los valles montañosos."
   },
   "angel-domini": {
     "name": "Ángel Dominación",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un guerrero celestial radiante cuya mirada ardiente juzga a los malvados y cuya espada hiende lo profano."
   },
   "couatl": {
     "name": "Couatl",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una serpiente emplumada de origen divino, brillando con luz prismática y benevolencia ancestral."
   },
   "demon-marilith": {
     "name": "Demonio Marilith",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un demonio serpiente de seis brazos, cada mano empuñando una hoja diferente en un torbellino de carnicería."
   },
   "devil-erinyes": {
     "name": "Diablo Erinias",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ángel caído al servicio infernal, hermosa y despiadada, cazando a los perjuros a través de los planos."
   },
   "efreeti": {
     "name": "Efrit",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un señor del fuego elemental, envuelto en humo y llamas, concediendo deseos que siempre queman al deseante."
   },
   "elemental-air-greater": {
     "name": "Elemental de Aire (Mayor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ciclón bramante de furia elemental, lo bastante poderoso para arrancar torres de sus cimientos."
   },
   "elemental-earth-greater": {
     "name": "Elemental de Tierra (Mayor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una montaña dotada de vida colérica, sacudiendo el suelo con cada paso ponderal y aplastante."
   },
   "elemental-fire-greater": {
     "name": "Elemental de Fuego (Mayor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un infierno encarnado que derrite la piedra bajo sus pisadas y convierte el aire en agonía reluciente."
   },
   "elemental-water-greater": {
     "name": "Elemental de Agua (Mayor)",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una ola colosal con voluntad propia, arrastrando todo ante ella hacia las profundidades aplastantes."
   },
   "giant-fire": {
     "name": "Gigante de Fuego",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un coloso de barba llameante que forja armas en calor volcánico y lanza peñascos fundidos a sus enemigos."
   },
   "giant-frost": {
     "name": "Gigante de Escarcha",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gigante colosal de piel azulada con armadura glacial, exhalando frío mortal sobre la tundra."
   },
   "grimlow": {
     "name": "Grimlow",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un horror anfibio hinchado que acecha en aguas pantanosas someras, tragando presas de un solo bocado horrendo."
   },
   "mammoth": {
     "name": "Mamut",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un titán peludo de la estepa helada, blandiendo colmillos como armas de asedio contra todo en su camino."
   },
   "naga": {
     "name": "Naga",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una serpiente inmortal de terrible inteligencia, custodiando secretos prohibidos con conjuros y colmillos."
   },
   "rime-walker": {
     "name": "Caminante de Escarcha",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una entidad cadavérica envuelta en escarcha que avanza a través de ventiscas, congelando a los vivos donde se yerguen."
   },
   "sphinx": {
     "name": "Esfinge",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una guardiana enigmática con cuerpo de león y mente de sabio, planteando acertijos que portan el peso de la perdición."
   },
   "tyrannosaurus": {
     "name": "Tiranosaurio",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "El depredador supremo de una era olvidada, todo mandíbulas aplastantes y pisadas atronadoras."
   },
   "archmage": {
     "name": "Archimago",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un maestro de lo arcano cuyo vasto conocimiento doblega las propias leyes de la realidad a su voluntad."
   },
   "chimera": {
     "name": "Quimera",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una abominación de tres cabezas de león, cabra y dragón, escupiendo fuego y sembrando el caos donde vaya."
   },
   "djinni": {
     "name": "Djinn",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un noble espíritu del viento y los deseos, antiguo y caprichoso, atado por leyes más viejas que la humanidad."
   },
   "giant-cloud": {
     "name": "Gigante de las Nubes",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un gigante regio que habita entre los picos más altos, lanzando rayos y dictando sentencia desde las alturas."
   },
   "golem-iron": {
     "name": "Gólem de Hierro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un titán indestructible de metal forjado, inmune a casi toda magia y absolutamente implacable."
   },
   "mummy": {
     "name": "Momia",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un tirano embalsamado resurgido de una tumba maldita, arrastrando vendajes antiguos y un aura putrefacta de pavor."
   },
   "remorhaz": {
     "name": "Remorhaz",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ciempiés ártico masivo que irradia calor abrasador, derritiendo túneles a través de glaciares mientras caza."
   },
   "angel-principi": {
     "name": "Ángel Principado",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un comandante celestial envuelto en resplandor cegador, liderando la hueste celestial contra las fuerzas de la oscuridad."
   },
   "vampire": {
     "name": "Vampiro",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un antiguo señor no muerto de la noche, que comanda sombras, bestias y siervos con astucia imperiosa."
   },
   "dragon-forest": {
     "name": "Dragón del Bosque",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un wyrm con escamas de musgo que dormita bajo doseles ancestrales, exhalando nubes de esporas asfixiantes."
   },
   "giant-storm": {
     "name": "Gigante de la Tormenta",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un titán envuelto en relámpagos que camina entre nubarrones de tormenta y lanza rayos que parten la tierra."
   },
   "purple-worm": {
     "name": "Gusano Púrpura",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un horror excavador gargantuesco que erupciona de la tierra para tragarse caballos y jinetes enteros."
   },
   "dragon-desert": {
     "name": "Dragón del Desierto",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un wyrm del color de la arena de terrible sabiduría que gobierna los páramos desde un trono de hueso blanqueado."
   },
   "lich": {
     "name": "Liche",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un hechicero no muerto que sacrificó su mortalidad por poder eterno, su filacteria ocultando un alma consumida por la ambición."
   },
   "phoenix": {
     "name": "Fénix",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ave inmortal de llama sagrada que se inmola al morir y renace de sus cenizas."
   },
   "dragon-frost": {
     "name": "Dragón de Escarcha",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un wyrm de escamas pálidas del norte helado cuyo aliento sepulta ejércitos enteros en hielo letal."
   },
   "roc": {
     "name": "Roc",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ave de tamaño imposible que anida en cumbres montañosas y transporta elefantes en sus garras."
   },
   "the-wandering-merchant": {
     "name": "El Mercader Errante",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Una figura misteriosa que aparece en encrucijadas y bajo antorchas moribundas, vendiendo maravillas que ningún mortal debería poseer."
   },
   "archangel": {
     "name": "Arcángel",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un ser celestial supremo de gloria cegadora cuya mera presencia abrasa a los malvados e inspira a los justos."
   },
   "archdevil": {
     "name": "Archidiablo",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un soberano de los Nueve Infiernos cuyas palabras melosas han derrocado imperios y condenado incontables almas."
   },
   "demon-balor": {
     "name": "Demonio Balor",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un infernal colosal de fuego y sombra, blandiendo un látigo de llamas y una espada que bebe almas."
   },
   "dragon-sea": {
     "name": "Dragón del Mar",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un leviatán de escamas zafiro que comanda las mareas y arrastra flotas enteras bajo las olas."
   },
   "obe-ixx-of-azarumme": {
     "name": "Obe-ixx de Azarumme",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un pavor innombrable dado forma en el abismo de Azarumme, cuyos mil susurros erosionan la cordura como olas contra la roca."
   },
   "dragon-fire": {
     "name": "Dragón de Fuego",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "El más poderoso de los wyrms, un cataclismo viviente de llamas cuya ira reduce reinos a ceniza y recuerdo."
   },
   "kraken": {
     "name": "Kraken",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un titán abisal de tentáculos y pico que arrastra barcos a las profundidades sin luz y devora a todos a bordo."
   },
   "the-ten-eyed-oracle": {
     "name": "El Oráculo de los Diez Ojos",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un vidente eldritch con diez ojos que no parpadean, atravesando todos los velos del tiempo, el destino y el engaño."
   },
   "mordanticus-the-flayed": {
     "name": "Mordanticus el Desollado",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un archidemonio sin piel cuyos tendones expuestos pulsan con poder prohibido, reescribiendo las leyes de la carne con cada gesto."
   },
   "rathgamnon": {
     "name": "Rathgamnon",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un antiguo juez celestial convertido en verdugo, cuya espada reluciente ha puesto fin a civilizaciones halladas indignas."
   },
   "the-tarrasque": {
     "name": "El Tarrasque",
     "attacks": {
       "Attack": "Ataque"
     },
-    "abilities": {}
+    "abilities": {},
+    "description": "Un motor apocalíptico de destrucción que devora todo a su paso, temido como el destructor de mundos en todas las eras."
   }
 }

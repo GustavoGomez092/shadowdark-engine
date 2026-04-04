@@ -474,6 +474,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'jellyfish',
     name: 'Jellyfish',
+    description: 'A translucent blob of trailing tentacles that drifts through dark waters, stinging whatever it touches.',
     level: 0,
     ac: 11,
     hp: 1,
@@ -490,6 +491,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'kobold',
     name: 'Kobold',
+    description: 'A small, craven reptilian humanoid that relies on traps and overwhelming numbers.',
     level: 0,
     ac: 13,
     hp: 1,
@@ -506,6 +508,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rat',
     name: 'Rat',
+    description: 'A common vermin found in sewers and dungeons, emboldened by darkness and filth.',
     level: 0,
     ac: 10,
     hp: 1,
@@ -522,6 +525,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'scorpion',
     name: 'Scorpion',
+    description: 'A palm-sized arachnid with pincers and a venomous tail barb.',
     level: 0,
     ac: 11,
     hp: 1,
@@ -538,6 +542,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'spider',
     name: 'Spider',
+    description: 'A small, venomous spider that lurks in crevices and webs strung across dungeon corridors.',
     level: 0,
     ac: 11,
     hp: 1,
@@ -554,6 +559,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'apprentice',
     name: 'Apprentice',
+    description: 'A young student of the arcane arts, barely trained and eager to prove themselves.',
     level: 1,
     ac: 11,
     hp: 3,
@@ -570,6 +576,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'badger',
     name: 'Badger',
+    description: 'A stocky, burrowing mammal with powerful claws and a vicious temperament when cornered.',
     level: 1,
     ac: 11,
     hp: 5,
@@ -586,6 +593,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'basilisk-hatchling',
     name: 'Basilisk Hatchling',
+    description: 'A juvenile eight-legged reptile whose petrifying gaze has not yet fully developed.',
     level: 1,
     ac: 13,
     hp: 6,
@@ -602,6 +610,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'brachiosaurus',
     name: 'Brachiosaurus',
+    description: 'A towering, long-necked herbivore that shakes the ground with every step.',
     level: 1,
     ac: 13,
     hp: 57,
@@ -618,6 +627,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'centipede-giant',
     name: 'Centipede, Giant',
+    description: 'A man-length segmented horror that skitters along walls and ceilings on dozens of legs.',
     level: 1,
     ac: 11,
     hp: 4,
@@ -634,6 +644,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'goblin',
     name: 'Goblin',
+    description: 'A scrawny, green-skinned creature with sharp teeth and a cruel cunning.',
     level: 1,
     ac: 11,
     hp: 5,
@@ -650,6 +661,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'guard',
     name: 'Guard',
+    description: 'An armored sentry posted to protect a gate, caravan, or noble household.',
     level: 1,
     ac: 15,
     hp: 4,
@@ -666,6 +678,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mastiff',
     name: 'Mastiff',
+    description: 'A large, muscular guard dog bred for loyalty and aggression.',
     level: 1,
     ac: 11,
     hp: 4,
@@ -682,6 +695,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'orc',
     name: 'Orc',
+    description: 'A brutish, tusked warrior driven by rage and a hunger for conquest.',
     level: 1,
     ac: 15,
     hp: 4,
@@ -698,6 +712,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'peasant',
     name: 'Peasant',
+    description: 'A common laborer with no combat training, armed with whatever is at hand.',
     level: 1,
     ac: 10,
     hp: 4,
@@ -714,6 +729,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'pirate',
     name: 'Pirate',
+    description: 'A sea-hardened cutthroat who lives by plunder and the blade.',
     level: 1,
     ac: 12,
     hp: 4,
@@ -730,6 +746,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rat-giant',
     name: 'Rat, Giant',
+    description: 'A dog-sized rat with matted fur and yellowed fangs, bold enough to attack the living.',
     level: 1,
     ac: 11,
     hp: 5,
@@ -746,6 +763,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'snake-cobra',
     name: 'Snake, Cobra',
+    description: 'A hooded serpent that rears up and strikes with lightning-fast, venomous fangs.',
     level: 1,
     ac: 12,
     hp: 4,
@@ -762,6 +780,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'stingbat',
     name: 'Stingbat',
+    description: 'A leathery-winged cave dweller with a barbed tail that drips venom.',
     level: 1,
     ac: 12,
     hp: 4,
@@ -778,6 +797,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'thug',
     name: 'Thug',
+    description: 'A streetwise brute who settles disputes with fists and clubs.',
     level: 1,
     ac: 13,
     hp: 4,
@@ -794,6 +814,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'vulture',
     name: 'Vulture',
+    description: 'A bald-headed carrion bird that circles battlefields, waiting for the dying to stop moving.',
     level: 1,
     ac: 10,
     hp: 5,
@@ -810,6 +831,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ape',
     name: 'Ape',
+    description: 'A powerful primate with long arms and a fierce territorial temper.',
     level: 2,
     ac: 12,
     hp: 10,
@@ -826,6 +848,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'berserker',
     name: 'Berserker',
+    description: 'A wild-eyed warrior consumed by battle-rage, heedless of pain or self-preservation.',
     level: 2,
     ac: 12,
     hp: 10,
@@ -842,6 +865,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'camel',
     name: 'Camel',
+    description: 'A hardy desert beast of burden with a foul temper and a punishing kick.',
     level: 2,
     ac: 10,
     hp: 12,
@@ -858,6 +882,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'deep-one',
     name: 'Deep One',
+    description: 'A fish-faced humanoid that dwells in sunken cities and worships alien gods of the abyss.',
     level: 2,
     ac: 13,
     hp: 10,
@@ -874,6 +899,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'demon-dretch',
     name: 'Demon, Dretch',
+    description: 'The lowest of demonkind -- a bloated, stinking fiend with rubbery pale flesh.',
     level: 2,
     ac: 12,
     hp: 11,
@@ -890,6 +916,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'devil-imp',
     name: 'Devil, Imp',
+    description: 'A tiny, winged fiend with a barbed tail, sent to tempt mortals and spy for its infernal masters.',
     level: 2,
     ac: 13,
     hp: 9,
@@ -906,6 +933,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'drow',
     name: 'Drow',
+    description: 'A pale-skinned elf of the underworld, raised in cruelty and skilled with blade and poison.',
     level: 2,
     ac: 16,
     hp: 9,
@@ -922,6 +950,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'duergar',
     name: 'Duergar',
+    description: 'A gray-skinned dwarf of the deep, embittered by centuries of darkness and toil.',
     level: 2,
     ac: 15,
     hp: 12,
@@ -938,6 +967,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elf',
     name: 'Elf',
+    description: 'A graceful, long-lived forest dweller with keen senses and natural affinity for magic.',
     level: 2,
     ac: 13,
     hp: 9,
@@ -954,6 +984,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'frog-giant',
     name: 'Frog, Giant',
+    description: 'A bloated amphibian the size of a pony, capable of swallowing halflings whole.',
     level: 2,
     ac: 12,
     hp: 10,
@@ -970,6 +1001,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ghoul',
     name: 'Ghoul',
+    description: 'A hunched, clawed undead that haunts graveyards and tunnels, paralyzing prey with its touch.',
     level: 2,
     ac: 11,
     hp: 11,
@@ -986,6 +1018,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gnoll',
     name: 'Gnoll',
+    description: 'A cackling hyena-headed humanoid that roams in savage war bands, leaving ruin in its wake.',
     level: 2,
     ac: 12,
     hp: 10,
@@ -1002,6 +1035,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gray-ooze',
     name: 'Gray Ooze',
+    description: 'A stone-colored slime that clings to dungeon floors, dissolving metal and flesh alike.',
     level: 2,
     ac: 11,
     hp: 9,
@@ -1018,6 +1052,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hobgoblin',
     name: 'Hobgoblin',
+    description: 'A disciplined, iron-clad goblinoid soldier that fights in organized formations.',
     level: 2,
     ac: 15,
     hp: 10,
@@ -1034,6 +1069,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'horse',
     name: 'Horse',
+    description: 'A domesticated riding animal, strong and swift but easily spooked by monsters.',
     level: 2,
     ac: 11,
     hp: 11,
@@ -1050,6 +1086,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hydra',
     name: 'Hydra',
+    description: 'A massive, multi-headed reptilian beast; sever one head and two more grow in its place.',
     level: 2,
     ac: 15,
     hp: 11,
@@ -1066,6 +1103,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'leech-giant',
     name: 'Leech, Giant',
+    description: 'A slimy, arm-thick blood-drinker that lurks in stagnant water and latches onto the unwary.',
     level: 2,
     ac: 9,
     hp: 10,
@@ -1082,6 +1120,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'lizardfolk',
     name: 'Lizardfolk',
+    description: 'A cold-blooded, scaled humanoid that dwells in swamps and guards its territory with primal ferocity.',
     level: 2,
     ac: 14,
     hp: 11,
@@ -1098,6 +1137,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'merfolk',
     name: 'Merfolk',
+    description: 'An aquatic humanoid with a fish-like lower body, wary of surface dwellers.',
     level: 2,
     ac: 11,
     hp: 9,
@@ -1114,6 +1154,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rat-dire',
     name: 'Rat, Dire',
+    description: 'A wolf-sized rodent with scarred hide and a ravenous appetite for warm flesh.',
     level: 2,
     ac: 12,
     hp: 10,
@@ -1130,6 +1171,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rot-flower',
     name: 'Rot Flower',
+    description: 'A foul-smelling plant with writhing tendrils that feeds on decomposing corpses.',
     level: 2,
     ac: 9,
     hp: 10,
@@ -1146,6 +1188,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'sahuagin',
     name: 'Sahuagin',
+    description: 'A vicious sea-devil with webbed claws and razor teeth, raiding coastal settlements by night.',
     level: 2,
     ac: 14,
     hp: 9,
@@ -1162,6 +1205,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'skeleton',
     name: 'Skeleton',
+    description: 'The reanimated bones of the dead, held together by dark magic and driven to obey.',
     level: 2,
     ac: 13,
     hp: 11,
@@ -1178,6 +1222,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'soldier',
     name: 'Soldier',
+    description: 'A trained fighting man equipped with mail and a sturdy weapon, loyal to crown or coin.',
     level: 2,
     ac: 15,
     hp: 10,
@@ -1194,6 +1239,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'spider-swarm',
     name: 'Spider, Swarm',
+    description: 'A seething carpet of thousands of tiny spiders that engulfs and bites everything in its path.',
     level: 2,
     ac: 13,
     hp: 9,
@@ -1210,6 +1256,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'velociraptor',
     name: 'Velociraptor',
+    description: 'A swift, feathered predator with sickle-shaped claws and pack-hunting instincts.',
     level: 2,
     ac: 13,
     hp: 10,
@@ -1226,6 +1273,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'violet-fungus',
     name: 'Violet Fungus',
+    description: 'A purple-capped fungus with lashing tendrils that rots flesh on contact.',
     level: 2,
     ac: 7,
     hp: 9,
@@ -1242,6 +1290,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wasp-giant',
     name: 'Wasp, Giant',
+    description: 'A horse-sized insect with iridescent wings and a stinger that can pierce plate armor.',
     level: 2,
     ac: 13,
     hp: 9,
@@ -1258,6 +1307,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'will-o-wisp',
     name: 'Will-o\'-Wisp',
+    description: 'A flickering ball of pale light that lures travelers into bogs and feeds on their dying breaths.',
     level: 2,
     ac: 13,
     hp: 10,
@@ -1274,6 +1324,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wolf',
     name: 'Wolf',
+    description: 'A lean gray predator that hunts in packs, circling prey with eerie coordination.',
     level: 2,
     ac: 12,
     hp: 10,
@@ -1290,6 +1341,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'zombie',
     name: 'Zombie',
+    description: 'A shambling corpse driven by necromantic hunger, slow but relentless.',
     level: 2,
     ac: 8,
     hp: 11,
@@ -1306,6 +1358,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'angel-seraph',
     name: 'Angel, Seraph',
+    description: 'A radiant celestial warrior wreathed in holy fire, sent to enact divine judgment.',
     level: 3,
     ac: 14,
     hp: 14,
@@ -1322,6 +1375,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ankheg',
     name: 'Ankheg',
+    description: 'A burrowing insectoid with mandibles like shears and a corrosive acid spray.',
     level: 3,
     ac: 14,
     hp: 14,
@@ -1338,6 +1392,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'azer',
     name: 'Azer',
+    description: 'A stout, bronze-skinned elemental smith whose hair and beard burn with living flame.',
     level: 3,
     ac: 15,
     hp: 15,
@@ -1354,6 +1409,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'bugbear',
     name: 'Bugbear',
+    description: 'A hulking, fur-covered goblinoid that excels at ambush, striking from the shadows with brutal force.',
     level: 3,
     ac: 13,
     hp: 14,
@@ -1370,6 +1426,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'centaur',
     name: 'Centaur',
+    description: 'A noble creature with the torso of a human and the body of a horse, proud and swift.',
     level: 3,
     ac: 12,
     hp: 14,
@@ -1386,6 +1443,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'cockatrice',
     name: 'Cockatrice',
+    description: 'A rooster-bodied reptile with bat wings whose bite turns living flesh to stone.',
     level: 3,
     ac: 11,
     hp: 14,
@@ -1402,6 +1460,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'devil-barbed',
     name: 'Devil, Barbed',
+    description: 'A tall fiend covered in sharp, hooked barbs that shred anything that grapples it.',
     level: 3,
     ac: 13,
     hp: 14,
@@ -1418,6 +1477,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gladiator',
     name: 'Gladiator',
+    description: 'A scarred arena fighter skilled in spectacle and slaughter, armored in piecemeal plate.',
     level: 3,
     ac: 16,
     hp: 15,
@@ -1434,6 +1494,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gnome-deep',
     name: 'Gnome, Deep',
+    description: 'A small, reclusive subterranean gnome with innate illusion magic and keen darkvision.',
     level: 3,
     ac: 14,
     hp: 14,
@@ -1450,6 +1511,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'harpy',
     name: 'Harpy',
+    description: 'A winged she-fiend with a woman\'s face and a vulture\'s body, whose song lures victims to their doom.',
     level: 3,
     ac: 13,
     hp: 14,
@@ -1466,6 +1528,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hippogriff',
     name: 'Hippogriff',
+    description: 'A majestic hybrid of eagle and horse, fierce in the wild but tameable as a mount.',
     level: 3,
     ac: 13,
     hp: 14,
@@ -1482,6 +1545,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'knight',
     name: 'Knight',
+    description: 'A heavily armored warrior of noble birth, sworn to a lord or holy order.',
     level: 3,
     ac: 17,
     hp: 14,
@@ -1498,6 +1562,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'kobold-sorcerer',
     name: 'Kobold, Sorcerer',
+    description: 'A rare kobold born with innate arcane power, feared and revered by its tribe.',
     level: 3,
     ac: 13,
     hp: 13,
@@ -1514,6 +1579,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'lion',
     name: 'Lion',
+    description: 'A powerful great cat with a tawny mane, apex predator of savanna and ruin alike.',
     level: 3,
     ac: 12,
     hp: 15,
@@ -1530,6 +1596,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mushroomfolk',
     name: 'Mushroomfolk',
+    description: 'A sentient fungal humanoid that communicates through spore clouds and tends subterranean gardens.',
     level: 3,
     ac: 13,
     hp: 15,
@@ -1546,6 +1613,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'panther',
     name: 'Panther',
+    description: 'A sleek, black-furred cat that stalks its prey in silence before pouncing from the dark.',
     level: 3,
     ac: 14,
     hp: 14,
@@ -1562,6 +1630,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'pegasus',
     name: 'Pegasus',
+    description: 'A winged horse of celestial origin, loyal only to the pure of heart.',
     level: 3,
     ac: 12,
     hp: 15,
@@ -1578,6 +1647,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'piranha-swarm',
     name: 'Piranha, Swarm',
+    description: 'A frenzied school of razor-toothed fish that strips flesh from bone in seconds.',
     level: 3,
     ac: 12,
     hp: 13,
@@ -1594,6 +1664,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'scarab-swarm',
     name: 'Scarab, Swarm',
+    description: 'A tide of chitinous beetles that boils out of tombs and devours anything organic.',
     level: 3,
     ac: 13,
     hp: 14,
@@ -1610,6 +1681,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'scarecrow',
     name: 'Scarecrow',
+    description: 'A straw-stuffed effigy animated by dark sorcery, its burlap face stitched into a permanent grin.',
     level: 3,
     ac: 12,
     hp: 15,
@@ -1626,6 +1698,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'scorpion-giant',
     name: 'Scorpion, Giant',
+    description: 'A wagon-sized arachnid with crushing pincers and a tail barb dripping lethal venom.',
     level: 3,
     ac: 14,
     hp: 13,
@@ -1642,6 +1715,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'shadow',
     name: 'Shadow',
+    description: 'A bodiless undead formed of living darkness that drains the strength of the living with its touch.',
     level: 3,
     ac: 12,
     hp: 15,
@@ -1658,6 +1732,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'shark',
     name: 'Shark',
+    description: 'A sleek oceanic predator drawn to blood, all muscle and teeth and relentless hunger.',
     level: 3,
     ac: 11,
     hp: 15,
@@ -1674,6 +1749,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'smilodon',
     name: 'Smilodon',
+    description: 'A prehistoric great cat with dagger-length fangs, built for bringing down massive prey.',
     level: 3,
     ac: 12,
     hp: 14,
@@ -1690,6 +1766,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'spider-giant',
     name: 'Spider, Giant',
+    description: 'A horse-sized arachnid that spins webs across cavern mouths and injects dissolving venom.',
     level: 3,
     ac: 13,
     hp: 13,
@@ -1706,6 +1783,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'strangler',
     name: 'Strangler',
+    description: 'A tentacled lurker that drops from ceilings to wrap around its victim\'s throat.',
     level: 3,
     ac: 12,
     hp: 14,
@@ -1722,6 +1800,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'thief',
     name: 'Thief',
+    description: 'A quick-fingered rogue who lives by stealth, picking locks and pockets with equal ease.',
     level: 3,
     ac: 13,
     hp: 13,
@@ -1738,6 +1817,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'viperian',
     name: 'Viperian',
+    description: 'A serpent-bodied humanoid with fanged jaws, blending cunning intelligence with reptilian malice.',
     level: 3,
     ac: 13,
     hp: 13,
@@ -1754,6 +1834,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wererat',
     name: 'Wererat',
+    description: 'A shifty lycanthrope that alternates between human and rat form, lurking in sewers and thieves\' guilds.',
     level: 3,
     ac: 13,
     hp: 14,
@@ -1770,6 +1851,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wight',
     name: 'Wight',
+    description: 'An armored undead warrior sustained by hatred, whose touch drains the life from the living.',
     level: 3,
     ac: 14,
     hp: 15,
@@ -1786,6 +1868,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'worg',
     name: 'Worg',
+    description: 'A malevolent, oversized wolf with a cruel intelligence, often ridden by goblins.',
     level: 3,
     ac: 11,
     hp: 14,
@@ -1802,6 +1885,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ape-snow',
     name: 'Ape, Snow',
+    description: 'A white-furred mountain ape that hurls rocks and crushes intruders in its frozen domain.',
     level: 4,
     ac: 13,
     hp: 19,
@@ -1818,6 +1902,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'bat-swarm',
     name: 'Bat, Swarm',
+    description: 'A shrieking cloud of hundreds of bats that engulfs victims in biting, scratching chaos.',
     level: 4,
     ac: 12,
     hp: 18,
@@ -1834,6 +1919,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'centipede-swarm',
     name: 'Centipede, Swarm',
+    description: 'A writhing mass of venomous centipedes that pours from cracks in the stone like a living carpet.',
     level: 4,
     ac: 11,
     hp: 18,
@@ -1850,6 +1936,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'doppelganger',
     name: 'Doppelganger',
+    description: 'A faceless shapeshifter that assumes the identity of its victims to infiltrate and betray.',
     level: 4,
     ac: 12,
     hp: 20,
@@ -1866,6 +1953,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gargoyle',
     name: 'Gargoyle',
+    description: 'A stone-skinned, winged predator that perches motionless on ledges until prey wanders near.',
     level: 4,
     ac: 16,
     hp: 20,
@@ -1882,6 +1970,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ghast',
     name: 'Ghast',
+    description: 'A more powerful ghoul that exudes a nauseating stench, paralyzing even elves with its claws.',
     level: 4,
     ac: 11,
     hp: 20,
@@ -1898,6 +1987,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gibbering-mouther',
     name: 'Gibbering Mouther',
+    description: 'A mound of melted flesh covered in countless mouths and eyes, babbling maddening nonsense.',
     level: 4,
     ac: 8,
     hp: 21,
@@ -1914,6 +2004,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'goblin-boss',
     name: 'Goblin, Boss',
+    description: 'The biggest and meanest goblin in the tribe, ruling through violence and intimidation.',
     level: 4,
     ac: 14,
     hp: 20,
@@ -1930,6 +2021,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'goblin-shaman',
     name: 'Goblin, Shaman',
+    description: 'A hunched goblin draped in fetishes and bones, channeling crude but dangerous magic.',
     level: 4,
     ac: 12,
     hp: 19,
@@ -1946,6 +2038,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gorilla',
     name: 'Gorilla',
+    description: 'A massive, silver-backed primate of tremendous strength that charges when threatened.',
     level: 4,
     ac: 12,
     hp: 20,
@@ -1962,6 +2055,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'grick',
     name: 'Grick',
+    description: 'A worm-like predator with a hard beak and writhing tentacles, camouflaged against dungeon stone.',
     level: 4,
     ac: 14,
     hp: 19,
@@ -1978,6 +2072,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'griffon',
     name: 'Griffon',
+    description: 'A ferocious hybrid with an eagle\'s head and wings and a lion\'s powerful body.',
     level: 4,
     ac: 12,
     hp: 19,
@@ -1994,6 +2089,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hell-hound',
     name: 'Hell Hound',
+    description: 'A coal-black hound with smoldering eyes that breathes gouts of hellfire.',
     level: 4,
     ac: 13,
     hp: 19,
@@ -2010,6 +2106,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'leprechaun',
     name: 'Leprechaun',
+    description: 'A tiny, mischievous fey trickster that hoards gold and bewilders mortals with illusions.',
     level: 4,
     ac: 13,
     hp: 19,
@@ -2026,6 +2123,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'moose',
     name: 'Moose',
+    description: 'A towering, antlered beast of the northern wilds, deceptively aggressive when provoked.',
     level: 4,
     ac: 11,
     hp: 19,
@@ -2042,6 +2140,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ochre-jelly',
     name: 'Ochre Jelly',
+    description: 'A thick, amber-colored ooze that dissolves flesh and splits in two when struck by blades.',
     level: 4,
     ac: 9,
     hp: 20,
@@ -2058,6 +2157,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'orc-chieftain',
     name: 'Orc, Chieftain',
+    description: 'A battle-scarred orc warlord who commands through fear and unmatched brutality.',
     level: 4,
     ac: 14,
     hp: 19,
@@ -2074,6 +2174,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'pterodactyl',
     name: 'Pterodactyl',
+    description: 'A winged reptile from a primordial age, soaring on leathery wings and snatching prey from below.',
     level: 4,
     ac: 14,
     hp: 20,
@@ -2090,6 +2191,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rust-monster',
     name: 'Rust Monster',
+    description: 'An insectoid scavenger with feathery antennae that corrode metal on contact, the bane of armored adventurers.',
     level: 4,
     ac: 13,
     hp: 19,
@@ -2106,6 +2208,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'shambling-mound',
     name: 'Shambling Mound',
+    description: 'A heap of rotting vegetation animated by foul magic, engulfing victims in its mossy bulk.',
     level: 4,
     ac: 14,
     hp: 20,
@@ -2122,6 +2225,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'siren',
     name: 'Siren',
+    description: 'A hauntingly beautiful creature whose enchanting song compels sailors to steer toward the rocks.',
     level: 4,
     ac: 12,
     hp: 18,
@@ -2138,6 +2242,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'snake-swarm',
     name: 'Snake, Swarm',
+    description: 'A roiling knot of dozens of venomous serpents that strikes from every direction at once.',
     level: 4,
     ac: 12,
     hp: 19,
@@ -2154,6 +2259,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'unicorn',
     name: 'Unicorn',
+    description: 'A radiant white horse bearing a spiraling horn, embodying purity and ancient woodland magic.',
     level: 4,
     ac: 12,
     hp: 20,
@@ -2170,6 +2276,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'werewolf',
     name: 'Werewolf',
+    description: 'A cursed lycanthrope that transforms into a savage wolf-human hybrid under the full moon.',
     level: 4,
     ac: 12,
     hp: 20,
@@ -2186,6 +2293,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wolf-dire',
     name: 'Wolf, Dire',
+    description: 'A prehistoric wolf of immense size, intelligent enough to coordinate pack ambushes.',
     level: 4,
     ac: 12,
     hp: 19,
@@ -2202,6 +2310,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'basilisk',
     name: 'Basilisk',
+    description: 'An eight-legged reptile whose deadly gaze turns living creatures to stone.',
     level: 5,
     ac: 14,
     hp: 25,
@@ -2218,6 +2327,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'chuul',
     name: 'Chuul',
+    description: 'A lobster-like aberration with massive pincers and paralytic tentacles, lurking in underground pools.',
     level: 5,
     ac: 15,
     hp: 25,
@@ -2234,6 +2344,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'crab-giant',
     name: 'Crab, Giant',
+    description: 'A barnacle-encrusted crustacean the size of a wagon, snapping its claws with bone-crushing force.',
     level: 5,
     ac: 15,
     hp: 24,
@@ -2250,6 +2361,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'demon-vrock',
     name: 'Demon, Vrock',
+    description: 'A vulture-headed demon with enormous wings that shrieks with enough force to stun its foes.',
     level: 5,
     ac: 14,
     hp: 24,
@@ -2266,6 +2378,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hippopotamus',
     name: 'Hippopotamus',
+    description: 'A massively built river beast with a gaping maw that can crush a canoe in one bite.',
     level: 5,
     ac: 12,
     hp: 24,
@@ -2282,6 +2395,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mimic',
     name: 'Mimic',
+    description: 'A cunning shapeshifter that disguises itself as treasure chests and furniture to lure the unwary.',
     level: 5,
     ac: 12,
     hp: 23,
@@ -2298,6 +2412,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'octopus-giant',
     name: 'Octopus, Giant',
+    description: 'A deep-dwelling terror with crushing tentacles and an alien intelligence behind its dark eyes.',
     level: 5,
     ac: 13,
     hp: 23,
@@ -2314,6 +2429,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'priest',
     name: 'Priest',
+    description: 'A devout servant of the gods who channels divine wrath against the faithless.',
     level: 5,
     ac: 15,
     hp: 23,
@@ -2330,6 +2446,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rhinoceros',
     name: 'Rhinoceros',
+    description: 'A thick-skinned brute that charges with unstoppable fury, its horn lowered like a lance.',
     level: 5,
     ac: 14,
     hp: 25,
@@ -2346,6 +2463,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'salamander',
     name: 'Salamander',
+    description: 'A serpentine creature wreathed in elemental flame, forged in the fires beneath the world.',
     level: 5,
     ac: 13,
     hp: 24,
@@ -2362,6 +2480,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'snake-giant',
     name: 'Snake, Giant',
+    description: 'An enormous constrictor that drops silently from the canopy to coil around its prey.',
     level: 5,
     ac: 12,
     hp: 23,
@@ -2378,6 +2497,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'troll',
     name: 'Troll',
+    description: 'A lanky, regenerating horror with rubbery green flesh that knits itself back together after every wound.',
     level: 5,
     ac: 12,
     hp: 24,
@@ -2394,6 +2514,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'vampire-spawn',
     name: 'Vampire Spawn',
+    description: 'A newly turned undead thrall, savage and hungry, bound to the will of its dark creator.',
     level: 5,
     ac: 13,
     hp: 25,
@@ -2410,6 +2531,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'void-spider',
     name: 'Void Spider',
+    description: 'An arachnid woven from the fabric of nothingness, its bite unravels the threads of reality.',
     level: 5,
     ac: 13,
     hp: 23,
@@ -2426,6 +2548,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wolf-winter',
     name: 'Wolf, Winter',
+    description: 'A pale predator born of frozen wastelands whose breath carries the killing cold of the deep north.',
     level: 5,
     ac: 12,
     hp: 23,
@@ -2442,6 +2565,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'black-pudding',
     name: 'Black Pudding',
+    description: 'A massive, corrosive ooze that dissolves flesh and metal alike as it flows through lightless tunnels.',
     level: 6,
     ac: 9,
     hp: 30,
@@ -2458,6 +2582,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'cloaker',
     name: 'Cloaker',
+    description: 'A living shadow shaped like a great cloak, it wraps around victims and drains their will to live.',
     level: 6,
     ac: 13,
     hp: 28,
@@ -2474,6 +2599,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'devil-cubi',
     name: 'Devil, Cubi',
+    description: 'A fiend of seduction and whispered bargains, wearing beauty like a mask over its true cruelty.',
     level: 6,
     ac: 14,
     hp: 29,
@@ -2490,6 +2616,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'drow-drider',
     name: 'Drow, Drider',
+    description: 'A cursed drow fused with a monstrous spider body, driven mad by its goddess\'s punishment.',
     level: 6,
     ac: 16,
     hp: 29,
@@ -2506,6 +2633,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'drow-priestess',
     name: 'Drow, Priestess',
+    description: 'A fanatical servant of the spider queen, wielding dark prayers and venomous authority.',
     level: 6,
     ac: 16,
     hp: 28,
@@ -2522,6 +2650,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-air-lesser',
     name: 'Elemental, Air (Lesser)',
+    description: 'A howling vortex of wind given malevolent purpose, tearing at all in its path.',
     level: 6,
     ac: 16,
     hp: 29,
@@ -2538,6 +2667,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-earth-lesser',
     name: 'Elemental, Earth (Lesser)',
+    description: 'A grinding mass of stone and soil that shambles forward with the patience of bedrock.',
     level: 6,
     ac: 17,
     hp: 31,
@@ -2554,6 +2684,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-fire-lesser',
     name: 'Elemental, Fire (Lesser)',
+    description: 'A roiling column of living flame that hungers to consume everything it touches.',
     level: 6,
     ac: 15,
     hp: 30,
@@ -2570,6 +2701,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-water-lesser',
     name: 'Elemental, Water (Lesser)',
+    description: 'A churning pillar of dark water that batters foes with the relentless force of a flood.',
     level: 6,
     ac: 15,
     hp: 29,
@@ -2586,6 +2718,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hag-sea',
     name: 'Hag, Sea',
+    description: 'A bloated, barnacle-crusted crone who lures sailors to drown with promises whispered through the fog.',
     level: 6,
     ac: 15,
     hp: 28,
@@ -2602,6 +2735,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hag-weald',
     name: 'Hag, Weald',
+    description: 'A hunched forest witch whose knowledge of dark herbs and curses makes the woodland itself hostile.',
     level: 6,
     ac: 14,
     hp: 28,
@@ -2618,6 +2752,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'invisible-stalker',
     name: 'Invisible Stalker',
+    description: 'An unseen hunter from the elemental planes, bound by magic to pursue its quarry without rest.',
     level: 6,
     ac: 13,
     hp: 29,
@@ -2634,6 +2769,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mage',
     name: 'Mage',
+    description: 'A scholarly wielder of arcane power whose spells can reshape the battlefield in an instant.',
     level: 6,
     ac: 11,
     hp: 27,
@@ -2650,6 +2786,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'manticore',
     name: 'Manticore',
+    description: 'A beast with a lion\'s body, a human face twisted in malice, and a tail bristling with deadly spikes.',
     level: 6,
     ac: 14,
     hp: 29,
@@ -2666,6 +2803,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'naga-bone',
     name: 'Naga, Bone',
+    description: 'A skeletal serpent animated by necromantic spite, its hollow eye sockets burning with pale fire.',
     level: 6,
     ac: 13,
     hp: 31,
@@ -2682,6 +2820,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'nightmare',
     name: 'Nightmare',
+    description: 'A coal-black steed wreathed in hellfire, galloping between worlds to carry the damned.',
     level: 6,
     ac: 13,
     hp: 29,
@@ -2698,6 +2837,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'ogre',
     name: 'Ogre',
+    description: 'A dim-witted, lumbering brute that bludgeons first and never thinks to ask questions.',
     level: 6,
     ac: 9,
     hp: 30,
@@ -2714,6 +2854,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'owlbear',
     name: 'Owlbear',
+    description: 'A ferocious hybrid of owl and bear, all beak, claws, and unreasoning rage.',
     level: 6,
     ac: 13,
     hp: 30,
@@ -2730,6 +2871,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'plesiosaurus',
     name: 'Plesiosaurus',
+    description: 'A long-necked aquatic predator that glides through dark waters like a living siege engine.',
     level: 6,
     ac: 13,
     hp: 30,
@@ -2746,6 +2888,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'primordial-slime',
     name: 'Primordial Slime',
+    description: 'An ancient ooze seeping up from the world\'s foundations, older than memory and endlessly hungry.',
     level: 6,
     ac: 9,
     hp: 30,
@@ -2762,6 +2905,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rat-swarm',
     name: 'Rat, Swarm',
+    description: 'A tide of filthy, biting rodents that overwhelms prey through sheer frenzied numbers.',
     level: 6,
     ac: 10,
     hp: 28,
@@ -2778,6 +2922,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'reaver',
     name: 'Reaver',
+    description: 'A battle-hardened warrior who lives for plunder and leaves only ashes in their wake.',
     level: 6,
     ac: 17,
     hp: 28,
@@ -2794,6 +2939,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'roper',
     name: 'Roper',
+    description: 'A stalagmite-shaped ambush predator that snares victims with long, sticky tendrils before devouring them.',
     level: 6,
     ac: 14,
     hp: 31,
@@ -2810,6 +2956,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'viperian-ophid',
     name: 'Viperian, Ophid',
+    description: 'A serpentfolk warrior with cold reptilian cunning and a venomous blade arm.',
     level: 6,
     ac: 14,
     hp: 28,
@@ -2826,6 +2973,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'bear-polar',
     name: 'Bear, Polar',
+    description: 'A towering white hunter of the frozen wastes, powerful enough to shatter ice with a single swipe.',
     level: 7,
     ac: 13,
     hp: 34,
@@ -2842,6 +2990,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'devil-horned',
     name: 'Devil, Horned',
+    description: 'A towering fiend armored in iron-hard scales, its great horns wreathed in infernal flame.',
     level: 7,
     ac: 16,
     hp: 35,
@@ -2858,6 +3007,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'druid',
     name: 'Druid',
+    description: 'A keeper of the old ways who commands the wrath of nature itself against those who defile the wild.',
     level: 7,
     ac: 11,
     hp: 31,
@@ -2874,6 +3024,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elephant',
     name: 'Elephant',
+    description: 'A colossal grey beast whose thundering charge can flatten palisades and scatter armies.',
     level: 7,
     ac: 14,
     hp: 34,
@@ -2890,6 +3041,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-hill',
     name: 'Giant, Hill',
+    description: 'A dim, brutish giant that hurls boulders and devours livestock whole.',
     level: 7,
     ac: 11,
     hp: 34,
@@ -2906,6 +3058,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'golem-flesh',
     name: 'Golem, Flesh',
+    description: 'A grotesque patchwork of stolen corpses, stitched together and jolted to terrible life.',
     level: 7,
     ac: 9,
     hp: 35,
@@ -2922,6 +3075,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'gorgon',
     name: 'Gorgon',
+    description: 'An iron-scaled bull that breathes petrifying gas, leaving a trail of stone statues in its wake.',
     level: 7,
     ac: 18,
     hp: 33,
@@ -2938,6 +3092,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'minotaur',
     name: 'Minotaur',
+    description: 'A bull-headed horror that stalks labyrinthine corridors, relishing the terror of the lost.',
     level: 7,
     ac: 14,
     hp: 34,
@@ -2954,6 +3109,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'oni',
     name: 'Oni',
+    description: 'A shape-shifting ogre demon cloaked in illusion, feeding on fear and human flesh.',
     level: 7,
     ac: 11,
     hp: 33,
@@ -2970,6 +3126,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'otyugh',
     name: 'Otyugh',
+    description: 'A foul, tentacled scavenger that wallows in refuse and spreads virulent disease with every lashing strike.',
     level: 7,
     ac: 13,
     hp: 35,
@@ -2986,6 +3143,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'triceratops',
     name: 'Triceratops',
+    description: 'A titanic, three-horned beast whose armored frill and charging fury make it nearly unstoppable.',
     level: 7,
     ac: 17,
     hp: 35,
@@ -3002,6 +3160,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'troll-frost',
     name: 'Troll, Frost',
+    description: 'A pale-skinned troll adapted to glacial wastes, its regenerating flesh crackling with rime.',
     level: 7,
     ac: 13,
     hp: 34,
@@ -3018,6 +3177,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'void-spawn',
     name: 'Void Spawn',
+    description: 'A writhing aberration pulled from the spaces between stars, radiating wrongness that warps the mind.',
     level: 7,
     ac: 13,
     hp: 34,
@@ -3034,6 +3194,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'assassin',
     name: 'Assassin',
+    description: 'A cold-eyed killer trained in poison and shadow, striking once from the dark and vanishing.',
     level: 8,
     ac: 15,
     hp: 38,
@@ -3050,6 +3211,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'brain-eater',
     name: 'Brain Eater',
+    description: 'A tentacle-faced aberration that feeds on sentient minds, savoring intelligence as a delicacy.',
     level: 8,
     ac: 14,
     hp: 36,
@@ -3066,6 +3228,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'bulette',
     name: 'Bulette',
+    description: 'A massive, armored predator that burrows through earth and erupts beneath its prey with devastating force.',
     level: 8,
     ac: 17,
     hp: 40,
@@ -3082,6 +3245,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'cyclops',
     name: 'Cyclops',
+    description: 'A one-eyed giant of terrible strength and foul temper, hurling boulders with uncanny aim.',
     level: 8,
     ac: 11,
     hp: 38,
@@ -3098,6 +3262,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'demon-glabrezu',
     name: 'Demon, Glabrezu',
+    description: 'A towering fiend with massive pincers and a gift for corrupting mortals through dark bargains.',
     level: 8,
     ac: 15,
     hp: 40,
@@ -3114,6 +3279,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-goat',
     name: 'Giant, Goat',
+    description: 'A mountainous beast with spiraling horns that can shatter stone walls on impact.',
     level: 8,
     ac: 12,
     hp: 39,
@@ -3130,6 +3296,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-stone',
     name: 'Giant, Stone',
+    description: 'A brooding, reclusive giant who hurls carved boulders with deadly precision from high crags.',
     level: 8,
     ac: 17,
     hp: 40,
@@ -3146,6 +3313,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'golem-clay',
     name: 'Golem, Clay',
+    description: 'A hulking figure of enchanted clay, shaped by divine command and nearly impossible to destroy.',
     level: 8,
     ac: 14,
     hp: 40,
@@ -3162,6 +3330,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'golem-stone',
     name: 'Golem, Stone',
+    description: 'A ponderous guardian carved from solid rock, unyielding and utterly tireless in its appointed duty.',
     level: 8,
     ac: 18,
     hp: 40,
@@ -3178,6 +3347,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'hag-night',
     name: 'Hag, Night',
+    description: 'A fiend-touched crone who haunts the dreams of mortals, feeding on terror until the soul withers.',
     level: 8,
     ac: 14,
     hp: 37,
@@ -3194,6 +3364,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'manta-ray-giant',
     name: 'Manta Ray, Giant',
+    description: 'A vast, silent glider of the deep ocean whose sweeping fins blot out the light above.',
     level: 8,
     ac: 13,
     hp: 37,
@@ -3210,6 +3381,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'medusa',
     name: 'Medusa',
+    description: 'A cursed woman with living serpents for hair whose gaze turns the living to lifeless stone.',
     level: 8,
     ac: 14,
     hp: 38,
@@ -3226,6 +3398,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rakshasa',
     name: 'Rakshasa',
+    description: 'A fiendish trickster cloaked in mortal guise, its backwards hands the only tell of its true nature.',
     level: 8,
     ac: 16,
     hp: 39,
@@ -3242,6 +3415,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'shark-megalodon',
     name: 'Shark, Megalodon',
+    description: 'A primeval leviathan of the deep, large enough to swallow longboats whole.',
     level: 8,
     ac: 13,
     hp: 38,
@@ -3258,6 +3432,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'treant',
     name: 'Treant',
+    description: 'An ancient, awakened tree that defends the forest with slow wrath and limbs like battering rams.',
     level: 8,
     ac: 14,
     hp: 38,
@@ -3274,6 +3449,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'viperian-wizard',
     name: 'Viperian, Wizard',
+    description: 'A serpentfolk sorcerer who wields venomous magic and dark rituals passed down through cold-blooded generations.',
     level: 8,
     ac: 13,
     hp: 37,
@@ -3290,6 +3466,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wraith',
     name: 'Wraith',
+    description: 'A hateful spirit of pure malice, draining the life force of the living with its freezing touch.',
     level: 8,
     ac: 14,
     hp: 36,
@@ -3306,6 +3483,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'wyvern',
     name: 'Wyvern',
+    description: 'A two-legged dragon cousin with a venomous barbed tail and a shriek that echoes across mountain valleys.',
     level: 8,
     ac: 15,
     hp: 37,
@@ -3322,6 +3500,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'angel-domini',
     name: 'Angel, Domini',
+    description: 'A radiant celestial warrior whose burning gaze judges the wicked and whose blade cleaves the unholy.',
     level: 9,
     ac: 17,
     hp: 42,
@@ -3338,6 +3517,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'couatl',
     name: 'Couatl',
+    description: 'A feathered serpent of divine origin, shimmering with prismatic light and ancient benevolence.',
     level: 9,
     ac: 16,
     hp: 42,
@@ -3354,6 +3534,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'demon-marilith',
     name: 'Demon, Marilith',
+    description: 'A six-armed serpent demon, each hand wielding a different blade in a whirlwind of carnage.',
     level: 9,
     ac: 17,
     hp: 43,
@@ -3370,6 +3551,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'devil-erinyes',
     name: 'Devil, Erinyes',
+    description: 'A fallen angel in infernal service, beautiful and merciless, hunting oathbreakers across the planes.',
     level: 9,
     ac: 17,
     hp: 43,
@@ -3386,6 +3568,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'efreeti',
     name: 'Efreeti',
+    description: 'A lord of elemental fire, wreathed in smoke and flame, granting wishes that always burn the wisher.',
     level: 9,
     ac: 15,
     hp: 43,
@@ -3402,6 +3585,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-air-greater',
     name: 'Elemental, Air (Greater)',
+    description: 'A screaming cyclone of elemental fury, powerful enough to rip towers from their foundations.',
     level: 9,
     ac: 16,
     hp: 42,
@@ -3418,6 +3602,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-earth-greater',
     name: 'Elemental, Earth (Greater)',
+    description: 'A mountain given wrathful life, shaking the ground with every ponderous, crushing step.',
     level: 9,
     ac: 17,
     hp: 44,
@@ -3434,6 +3619,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-fire-greater',
     name: 'Elemental, Fire (Greater)',
+    description: 'An inferno incarnate that melts stone beneath its stride and turns the air to shimmering agony.',
     level: 9,
     ac: 15,
     hp: 43,
@@ -3450,6 +3636,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'elemental-water-greater',
     name: 'Elemental, Water (Greater)',
+    description: 'A towering tidal wave with a will of its own, dragging all before it into the crushing depths.',
     level: 9,
     ac: 15,
     hp: 42,
@@ -3466,6 +3653,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-fire',
     name: 'Giant, Fire',
+    description: 'A flame-bearded colossus that forges weapons in volcanic heat and hurls molten boulders at its foes.',
     level: 9,
     ac: 15,
     hp: 44,
@@ -3482,6 +3670,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-frost',
     name: 'Giant, Frost',
+    description: 'A towering blue-skinned giant clad in glacial armor, breathing killing cold across the tundra.',
     level: 9,
     ac: 14,
     hp: 44,
@@ -3498,6 +3687,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'grimlow',
     name: 'Grimlow',
+    description: 'A bloated amphibious horror that lurks in swamp shallows, swallowing prey in one hideous gulp.',
     level: 9,
     ac: 12,
     hp: 43,
@@ -3514,6 +3704,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mammoth',
     name: 'Mammoth',
+    description: 'A shaggy titan of the frozen steppe, wielding tusks like siege weapons against anything in its path.',
     level: 9,
     ac: 15,
     hp: 44,
@@ -3530,6 +3721,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'naga',
     name: 'Naga',
+    description: 'An immortal serpent of terrible intelligence, guarding forbidden secrets with spell and fang.',
     level: 9,
     ac: 16,
     hp: 43,
@@ -3546,6 +3738,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rime-walker',
     name: 'Rime Walker',
+    description: 'A gaunt, frost-wreathed entity that strides through blizzards, freezing the living where they stand.',
     level: 9,
     ac: 16,
     hp: 43,
@@ -3562,6 +3755,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'sphinx',
     name: 'Sphinx',
+    description: 'An enigmatic guardian with the body of a lion and the mind of a sage, posing riddles that carry the weight of doom.',
     level: 9,
     ac: 16,
     hp: 42,
@@ -3578,6 +3772,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'tyrannosaurus',
     name: 'Tyrannosaurus',
+    description: 'The apex predator of a forgotten age, all crushing jaws and thunderous footsteps.',
     level: 9,
     ac: 13,
     hp: 44,
@@ -3594,6 +3789,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'archmage',
     name: 'Archmage',
+    description: 'A master of the arcane whose vast knowledge bends the very laws of reality to their will.',
     level: 10,
     ac: 12,
     hp: 44,
@@ -3610,6 +3806,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'chimera',
     name: 'Chimera',
+    description: 'A three-headed abomination of lion, goat, and dragon, belching fire and sowing chaos wherever it roams.',
     level: 10,
     ac: 16,
     hp: 49,
@@ -3626,6 +3823,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'djinni',
     name: 'Djinni',
+    description: 'A noble spirit of wind and wish, ancient and capricious, bound by laws older than mortal reckoning.',
     level: 10,
     ac: 14,
     hp: 48,
@@ -3642,6 +3840,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-cloud',
     name: 'Giant, Cloud',
+    description: 'A regal giant dwelling among the highest peaks, hurling thunderbolts and passing judgment from above.',
     level: 10,
     ac: 15,
     hp: 48,
@@ -3658,6 +3857,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'golem-iron',
     name: 'Golem, Iron',
+    description: 'An indestructible juggernaut of forged metal, immune to nearly all magic and utterly relentless.',
     level: 10,
     ac: 19,
     hp: 49,
@@ -3674,6 +3874,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mummy',
     name: 'Mummy',
+    description: 'An embalmed tyrant risen from a cursed tomb, trailing ancient wrappings and a rotting aura of dread.',
     level: 10,
     ac: 13,
     hp: 47,
@@ -3690,6 +3891,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'remorhaz',
     name: 'Remorhaz',
+    description: 'A massive arctic centipede radiating searing heat, melting tunnels through glaciers as it hunts.',
     level: 10,
     ac: 16,
     hp: 47,
@@ -3706,6 +3908,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'angel-principi',
     name: 'Angel, Principi',
+    description: 'A celestial commander clad in blinding radiance, leading the heavenly host against the forces of darkness.',
     level: 11,
     ac: 16,
     hp: 53,
@@ -3722,6 +3925,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'vampire',
     name: 'Vampire',
+    description: 'An ancient undead lord of the night, commanding shadows, beasts, and thralls with imperious cunning.',
     level: 11,
     ac: 15,
     hp: 52,
@@ -3738,6 +3942,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'dragon-forest',
     name: 'Dragon, Forest',
+    description: 'A moss-scaled wyrm that slumbers beneath ancient canopies, exhaling clouds of choking spores.',
     level: 12,
     ac: 16,
     hp: 58,
@@ -3754,6 +3959,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'giant-storm',
     name: 'Giant, Storm',
+    description: 'A titan wreathed in lightning, striding through thunderheads and hurling bolts that split the earth.',
     level: 12,
     ac: 15,
     hp: 58,
@@ -3770,6 +3976,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'purple-worm',
     name: 'Purple Worm',
+    description: 'A gargantuan burrowing horror that erupts from the earth to swallow horses and riders whole.',
     level: 12,
     ac: 18,
     hp: 57,
@@ -3786,6 +3993,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'dragon-desert',
     name: 'Dragon, Desert',
+    description: 'A sand-colored wyrm of terrible wisdom that rules the wastelands from a throne of bleached bone.',
     level: 13,
     ac: 17,
     hp: 61,
@@ -3802,6 +4010,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'lich',
     name: 'Lich',
+    description: 'An undead sorcerer who sacrificed its mortality for eternal power, its phylactery hiding a soul consumed by ambition.',
     level: 13,
     ac: 16,
     hp: 62,
@@ -3818,6 +4027,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'phoenix',
     name: 'Phoenix',
+    description: 'An immortal bird of sacred flame that immolates itself in death and rises renewed from the ashes.',
     level: 13,
     ac: 16,
     hp: 60,
@@ -3834,6 +4044,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'dragon-frost',
     name: 'Dragon, Frost',
+    description: 'A pale-scaled wyrm of the frozen north whose breath entombs entire armies in killing ice.',
     level: 14,
     ac: 17,
     hp: 68,
@@ -3850,6 +4061,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'roc',
     name: 'Roc',
+    description: 'A bird of impossible size that nests on mountaintops and carries elephants in its talons.',
     level: 15,
     ac: 15,
     hp: 69,
@@ -3866,6 +4078,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'the-wandering-merchant',
     name: 'The Wandering Merchant',
+    description: 'A mysterious figure who appears at crossroads and in dying torchlight, selling wonders no mortal should possess.',
     level: 15,
     ac: 16,
     hp: 71,
@@ -3882,6 +4095,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'archangel',
     name: 'Archangel',
+    description: 'A supreme celestial being of blinding glory whose mere presence sears the wicked and inspires the righteous.',
     level: 16,
     ac: 18,
     hp: 76,
@@ -3898,6 +4112,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'archdevil',
     name: 'Archdevil',
+    description: 'A sovereign of the Nine Hells whose honeyed words have toppled empires and damned countless souls.',
     level: 16,
     ac: 19,
     hp: 76,
@@ -3914,6 +4129,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'demon-balor',
     name: 'Demon, Balor',
+    description: 'A colossal fiend of fire and shadow, wielding a whip of flame and a sword that drinks souls.',
     level: 16,
     ac: 19,
     hp: 77,
@@ -3930,6 +4146,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'dragon-sea',
     name: 'Dragon, Sea',
+    description: 'A sapphire-scaled leviathan that commands the tides and drags entire fleets beneath the waves.',
     level: 16,
     ac: 17,
     hp: 76,
@@ -3946,6 +4163,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'obe-ixx-of-azarumme',
     name: 'Obe-ixx of Azarumme',
+    description: 'A nameless dread given form in the abyss of Azarumme, its thousand whispers eroding sanity like waves upon stone.',
     level: 16,
     ac: 18,
     hp: 76,
@@ -3962,6 +4180,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'dragon-fire',
     name: 'Dragon, Fire',
+    description: 'The mightiest of wyrms, a living cataclysm of flame whose wrath reduces kingdoms to cinder and memory.',
     level: 17,
     ac: 18,
     hp: 80,
@@ -3978,6 +4197,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'kraken',
     name: 'Kraken',
+    description: 'An abyssal titan of tentacle and beak that drags ships into the lightless deep and devours all aboard.',
     level: 17,
     ac: 18,
     hp: 80,
@@ -3994,6 +4214,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'the-ten-eyed-oracle',
     name: 'The Ten-eyed Oracle',
+    description: 'An eldritch seer with ten unblinking eyes that pierce all veils of time, fate, and deception.',
     level: 18,
     ac: 17,
     hp: 85,
@@ -4010,6 +4231,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'mordanticus-the-flayed',
     name: 'Mordanticus the Flayed',
+    description: 'A skinless archfiend whose exposed sinews pulse with forbidden power, rewriting the laws of flesh with every gesture.',
     level: 19,
     ac: 17,
     hp: 89,
@@ -4026,6 +4248,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'rathgamnon',
     name: 'Rathgamnon',
+    description: 'An ancient celestial judge turned executioner, whose gleaming blade has ended civilizations found wanting.',
     level: 19,
     ac: 17,
     hp: 89,
@@ -4042,6 +4265,7 @@ export const MONSTERS: MonsterDefinition[] = [
   {
     id: 'the-tarrasque',
     name: 'The Tarrasque',
+    description: 'An apocalyptic engine of destruction that devours all in its path, feared as the world-ender in every age.',
     level: 30,
     ac: 22,
     hp: 140,
