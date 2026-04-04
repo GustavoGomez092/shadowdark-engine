@@ -53,7 +53,7 @@ interface AIPanelProps {
 }
 
 export function AIPanel({ isOpen, onClose }: AIPanelProps) {
-  const { t, ti } = useLocale()
+  const { t, ti, tData } = useLocale()
   const navigate = useNavigate()
   const {
     generate,
@@ -128,8 +128,10 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
         session &&
         Object.values(session.activeMonsters).some((m) => !m.isDefeated)
 
-      // Build the prompt
-      const monsterNames = session ? Object.values(session.activeMonsters).filter(m => !m.isDefeated).map(m => m.name) : []
+      // Build the prompt — use translated monster names
+      const monsterNames = session ? Object.values(session.activeMonsters).filter(m => !m.isDefeated).map(m =>
+        tData('monsters', m.definitionId, 'name', m.name)
+      ) : []
       const prompt =
         purpose === 'encounter_description' && hasMonsters
           ? `Describe this encounter. There are exactly ${monsterNames.length} enemies: ${monsterNames.join(', ')}. Describe each one and how they appear.${contextSuffix}`

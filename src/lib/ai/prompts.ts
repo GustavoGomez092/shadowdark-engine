@@ -1,7 +1,7 @@
 import type { AIPurpose, AIGameContext, AIMonsterContext, AIPartyMemberContext } from '@/schemas/ai.ts'
 import type { SessionState } from '@/schemas/session.ts'
 import { getMonster } from '@/data/index.ts'
-import { getLocale, LOCALE_LABELS } from '@/i18n/index.ts'
+import { getLocale, LOCALE_LABELS, tData, tDataNested } from '@/i18n/index.ts'
 
 // ========== Purpose Labels & Icons ==========
 
@@ -125,12 +125,12 @@ export function buildGameContext(session: SessionState): AIGameContext {
 
   const partyMembers: AIPartyMemberContext[] = characters.map((c) => ({
     name: c.name,
-    ancestry: c.ancestry,
-    class: c.class,
+    ancestry: tData('ancestries', c.ancestry, 'name', c.ancestry),
+    class: tData('classes', c.class, 'name', c.class),
     level: c.level,
   }))
-  const partyAncestries = [...new Set(characters.map((c) => c.ancestry))]
-  const partyClasses = [...new Set(characters.map((c) => c.class))]
+  const partyAncestries = [...new Set(characters.map((c) => tData('ancestries', c.ancestry, 'name', c.ancestry)))]
+  const partyClasses = [...new Set(characters.map((c) => tData('classes', c.class, 'name', c.class)))]
 
   const combatPhase = session.combat?.phase
   const inCombat = combatPhase === 'active' || combatPhase === 'initiative'
@@ -139,16 +139,24 @@ export function buildGameContext(session: SessionState): AIGameContext {
   const activeMonsterInstances = Object.values(session.activeMonsters).filter((m) => !m.isDefeated)
   const activeMonsters: AIMonsterContext[] = activeMonsterInstances.map((inst) => {
     const def = getMonster(inst.definitionId)
+    const defId = inst.definitionId
     return {
-      name: inst.name,
-      description: def?.description,
+      name: tData('monsters', defId, 'name', inst.name),
+      description: def?.description ? tData('monsters', defId, 'description', def.description) : undefined,
       level: def?.level ?? 0,
       ac: def?.ac ?? 0,
       currentHp: inst.currentHp,
       maxHp: inst.maxHp,
-      attacks: def?.attacks.map((a) => `${a.name} +${a.bonus} (${a.damage})${a.specialEffect ? ` — ${a.specialEffect}` : ''}`) ?? [],
-      abilities: def?.abilities.map((a) => `${a.name}: ${a.description}`) ?? [],
-      tags: def?.tags ?? [],
+      attacks: def?.attacks.map((a) => {
+        const translatedName = tDataNested('monsters', defId, ['attacks', a.name], a.name)
+        return `${translatedName} +${a.bonus} (${a.damage})${a.specialEffect ? ` — ${a.specialEffect}` : ''}`
+      }) ?? [],
+      abilities: def?.abilities.map((a) => {
+        const translatedAbName = tDataNested('monsters', defId, ['abilities', a.name, 'name'], a.name)
+        const translatedAbDesc = tDataNested('monsters', defId, ['abilities', a.name, 'description'], a.description)
+        return `${translatedAbName}: ${translatedAbDesc}`
+      }) ?? [],
+      tags: def?.tags.map(tag => tData('monsters', '__tags', tag, tag)) ?? [],
     }
   })
 
