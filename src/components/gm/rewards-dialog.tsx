@@ -1,17 +1,12 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { Character } from '@/schemas/character.ts'
 import type { TreasureQuality } from '@/schemas/reference.ts'
 import { TREASURE_XP, XP_THRESHOLDS } from '@/schemas/reference.ts'
 import { generateGoldReward } from '@/lib/rules/xp.ts'
-import { WEAPONS, ARMOR, GEAR } from '@/data/index.ts'
+import { WEAPONS, ARMOR, GEAR, getItemPackId } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { dataRegistry } from '@/lib/data/registry.ts'
 import { calculateUsedSlots } from '@/lib/rules/inventory.ts'
-
-const ALL_REWARD_ITEMS = [
-  ...WEAPONS.map(w => ({ id: w.id, name: w.name, slots: w.slots, category: 'weapon' as const })),
-  ...ARMOR.map(a => ({ id: a.id, name: a.name, slots: a.slots, category: 'armor' as const })),
-  ...GEAR.filter(g => g.category === 'magic_item' || g.category === 'consumable' || g.category === 'treasure')
-    .map(g => ({ id: g.id, name: g.name, slots: g.slots, category: g.category })),
-]
 
 interface ItemAward {
   itemId: string
@@ -39,10 +34,19 @@ const QUALITY_OPTIONS: { key: TreasureQuality; label: string; xp: number; color:
 ]
 
 export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounterType, onDistribute, onSkip }: Props) {
+  useDataRegistry()
+  const ALL_REWARD_ITEMS = useMemo(() => [
+    ...WEAPONS.map(w => ({ id: w.id, name: w.name, slots: w.slots, category: 'weapon' as const })),
+    ...ARMOR.map(a => ({ id: a.id, name: a.name, slots: a.slots, category: 'armor' as const })),
+    ...GEAR.filter(g => g.category === 'magic_item' || g.category === 'consumable' || g.category === 'treasure')
+      .map(g => ({ id: g.id, name: g.name, slots: g.slots, category: g.category })),
+  ], [WEAPONS, ARMOR, GEAR])
   const [quality, setQuality] = useState<TreasureQuality>('normal')
   const [gold, setGold] = useState(() => generateGoldReward(avgPartyLevel))
   const [bonusXP, setBonusXP] = useState(0)
   const [itemAwards, setItemAwards] = useState<ItemAward[]>([])
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
+  const itemPacks = dataRegistry.getPacks().filter(p => p.enabled && (p.counts.weapons + p.counts.armor + p.counts.gear) > 0)
   const [itemSearch, setItemSearch] = useState('')
   const [selectedItemId, setSelectedItemId] = useState('')
   const [selectedCharId, setSelectedCharId] = useState('')
@@ -102,9 +106,13 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
     )
   }
 
+  let sourceFilteredItems = ALL_REWARD_ITEMS
+  if (sourceFilter === 'core') sourceFilteredItems = sourceFilteredItems.filter(i => !getItemPackId(i.id))
+  else if (sourceFilter !== 'all') sourceFilteredItems = sourceFilteredItems.filter(i => getItemPackId(i.id) === sourceFilter)
+
   const filteredItems = itemSearch
-    ? ALL_REWARD_ITEMS.filter(i => i.name.toLowerCase().includes(itemSearch.toLowerCase()))
-    : ALL_REWARD_ITEMS
+    ? sourceFilteredItems.filter(i => i.name.toLowerCase().includes(itemSearch.toLowerCase()))
+    : sourceFilteredItems
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto py-8">
@@ -159,7 +167,22 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
 
         {/* Item Awards */}
         <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Award Items</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Award Items</label>
+            {itemPacks.length > 0 && (
+              <select
+                value={sourceFilter}
+                onChange={e => setSourceFilter(e.target.value)}
+                className="rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none"
+              >
+                <option value="all">All Sources</option>
+                <option value="core">Core Only</option>
+                {itemPacks.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
           <div className="flex gap-2 mb-2">
             <div className="flex-1">
               <input

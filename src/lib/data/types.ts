@@ -10,6 +10,8 @@ export interface DataPack {
   author: string
   version: string
   description: string
+  color?: string
+  enabled?: boolean
   data: DataPackContent
 }
 
@@ -32,6 +34,8 @@ export interface DataPackMeta {
   author: string
   version: string
   description: string
+  enabled: boolean
+  color?: string
   counts: {
     monsters: number
     spells: number
@@ -45,4 +49,10 @@ export interface DataPackMeta {
     classes: number
   }
   addedAt: number
+}
+
+export interface AddPackResult {
+  success: boolean
+  error?: string
+  warnings?: string[]
 }

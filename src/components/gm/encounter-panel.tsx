@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { getMonster } from "@/data/monsters.ts"
+import { getMonster, getClass, getItemPackId, getPackColor } from "@/data/index.ts"
 import { DiceRoller } from "@/components/dice/dice-roller.tsx"
 import { pushRollToast } from "@/components/shared/roll-toast.tsx"
 import { generateId } from "@/lib/utils/id.ts"
@@ -114,11 +114,13 @@ export function EncounterPanel({
               const hpPercent = m.maxHp > 0 ? (m.currentHp / m.maxHp) * 100 : 0
               const isSelected = selection?.type === 'monster' && selection.id === m.id
               const isActiveTurn = activeTurnId === m.id
+              const packColor = getPackColor(getItemPackId(m.definitionId) ?? '')
               return (
                 <div
                   key={m.id}
                   onClick={() => setSelection({ type: 'monster', id: m.id })}
                   onDoubleClick={() => onSetActiveTurn(isActiveTurn ? null : m.id)}
+                  style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}
                   className={`relative w-full cursor-pointer rounded-lg border p-2 text-left transition ${
                     isActiveTurn ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500/30" :
                     isSelected ? "border-red-500 bg-red-500/5" : "border-border/50 hover:border-border"
@@ -345,6 +347,19 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
           </div>
         </div>
       )}
+      {definition.description && (
+        <div>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Description</p>
+          <p className="text-xs text-muted-foreground italic leading-relaxed">{definition.description}</p>
+        </div>
+      )}
+      {definition.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {definition.tags.map(tag => (
+            <span key={tag} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] capitalize">{tag}</span>
+          ))}
+        </div>
+      )}
       {instance.currentHp <= 0 && !instance.isDefeated && (
         <button onClick={onDefeat} className="w-full rounded-lg bg-red-500/20 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/30 transition">
           Mark as Defeated
@@ -418,6 +433,52 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
           </div>
         </div>
       )}
+      {/* Background & Deity */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+        {c.background && (
+          <span><span className="text-muted-foreground">Background:</span> <span className="capitalize">{c.background}</span></span>
+        )}
+        {c.deity && (
+          <span><span className="text-muted-foreground">Deity:</span> <span className="capitalize">{c.deity}</span></span>
+        )}
+      </div>
+      {/* Class Abilities */}
+      <CharacterAbilities character={c} />
+      {/* Talents */}
+      {c.talents.length > 0 && (
+        <div>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Talents</p>
+          <div className="space-y-1 text-xs">
+            {c.talents.map((t) => (
+              <p key={t.id}><span className="font-semibold">{t.description}</span></p>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* Player Notes */}
+      {c.notes && (
+        <div>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Player Notes</p>
+          <p className="text-xs text-muted-foreground italic leading-relaxed whitespace-pre-wrap">{c.notes}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CharacterAbilities({ character: c }: { character: Character }) {
+  const classDef = getClass(c.class)
+  if (!classDef) return null
+  const activeFeatures = classDef.features.filter(f => f.level <= c.level)
+  if (activeFeatures.length === 0) return null
+  return (
+    <div>
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Class Abilities</p>
+      <div className="space-y-1 text-xs">
+        {activeFeatures.map((f, i) => (
+          <p key={i}><span className="font-semibold">{f.name}:</span> <span className="text-muted-foreground">{f.description}</span></p>
+        ))}
+      </div>
     </div>
   )
 }

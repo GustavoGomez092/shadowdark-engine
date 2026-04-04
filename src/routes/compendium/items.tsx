@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { WEAPONS, ARMOR, GEAR } from '@/data/index.ts'
+import { WEAPONS, ARMOR, GEAR, getItemPackId, getPackColor } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { sortPackFirst } from '@/lib/data/sort.ts'
+import { useSessionStore } from '@/stores/session-store.ts'
 
 export const Route = createFileRoute('/compendium/items')({
   component: ItemsPage,
@@ -9,14 +12,21 @@ export const Route = createFileRoute('/compendium/items')({
 type Tab = 'weapons' | 'armor' | 'gear'
 
 function ItemsPage() {
+  useDataRegistry()
   const [tab, setTab] = useState<Tab>('weapons')
   const [search, setSearch] = useState('')
+  const settings = useSessionStore(s => s.session?.settings)
 
   const q = search.toLowerCase()
 
-  const filteredWeapons = WEAPONS.filter(w => !q || w.name.toLowerCase().includes(q) || w.properties.some(p => p.includes(q)))
-  const filteredArmor = ARMOR.filter(a => !q || a.name.toLowerCase().includes(q))
-  const filteredGear = GEAR.filter(g => !q || g.name.toLowerCase().includes(q) || g.description.toLowerCase().includes(q))
+  let filteredWeapons = WEAPONS.filter(w => !q || w.name.toLowerCase().includes(q) || w.properties.some(p => p.includes(q)))
+  let filteredArmor = ARMOR.filter(a => !q || a.name.toLowerCase().includes(q))
+  let filteredGear = GEAR.filter(g => !q || g.name.toLowerCase().includes(q) || g.description.toLowerCase().includes(q))
+  if (settings?.showPackItemsFirst) {
+    filteredWeapons = sortPackFirst(filteredWeapons)
+    filteredArmor = sortPackFirst(filteredArmor)
+    filteredGear = sortPackFirst(filteredGear)
+  }
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -48,8 +58,10 @@ function ItemsPage() {
 
       {tab === 'weapons' && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {filteredWeapons.map(w => (
-            <div key={w.id} className="rounded-lg border border-border bg-card p-3">
+          {filteredWeapons.map(w => {
+            const packColor = getPackColor(getItemPackId(w.id) ?? '')
+            return (
+            <div key={w.id} className="rounded-lg border border-border bg-card p-3" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
               <div className="flex items-baseline justify-between">
                 <span className="font-medium">{w.name}</span>
                 <span className="text-sm text-muted-foreground">{formatCost(w.cost)} · {w.slots} slot{w.slots !== 1 ? 's' : ''}</span>
@@ -67,15 +79,18 @@ function ItemsPage() {
                 </div>
               )}
             </div>
-          ))}
+            )
+          })}
           {filteredWeapons.length === 0 && <p className="col-span-2 py-8 text-center text-muted-foreground">No weapons match your search.</p>}
         </div>
       )}
 
       {tab === 'armor' && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {filteredArmor.map(a => (
-            <div key={a.id} className="rounded-lg border border-border bg-card p-3">
+          {filteredArmor.map(a => {
+            const packColor = getPackColor(getItemPackId(a.id) ?? '')
+            return (
+            <div key={a.id} className="rounded-lg border border-border bg-card p-3" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
               <div className="flex items-baseline justify-between">
                 <span className="font-medium">{a.name}</span>
                 <span className="text-sm text-muted-foreground">{formatCost(a.cost)} · {a.slots} slot{a.slots !== 1 ? 's' : ''}</span>
@@ -92,22 +107,26 @@ function ItemsPage() {
                 </div>
               )}
             </div>
-          ))}
+            )
+          })}
           {filteredArmor.length === 0 && <p className="col-span-2 py-8 text-center text-muted-foreground">No armor matches your search.</p>}
         </div>
       )}
 
       {tab === 'gear' && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {filteredGear.map(g => (
-            <div key={g.id} className="rounded-lg border border-border bg-card p-3">
+          {filteredGear.map(g => {
+            const packColor = getPackColor(getItemPackId(g.id) ?? '')
+            return (
+            <div key={g.id} className="rounded-lg border border-border bg-card p-3" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
               <div className="flex items-baseline justify-between">
                 <span className="font-medium">{g.name}</span>
                 <span className="text-sm text-muted-foreground">{formatCost(g.cost)} · {g.slots} slot{g.slots !== 1 ? 's' : ''}</span>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{g.description}</p>
             </div>
-          ))}
+            )
+          })}
           {filteredGear.length === 0 && <p className="col-span-2 py-8 text-center text-muted-foreground">No gear matches your search.</p>}
         </div>
       )}

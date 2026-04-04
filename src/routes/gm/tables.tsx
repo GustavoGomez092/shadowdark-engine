@@ -1,18 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import { ANCESTRIES } from "@/data/ancestries.ts"
-import { ARMOR } from "@/data/armor.ts"
-import { BACKGROUNDS } from "@/data/backgrounds.ts"
-import { CLASSES } from "@/data/classes.ts"
-import { DEITIES } from "@/data/deities.ts"
-import { GEAR } from "@/data/gear.ts"
-import { MONSTERS } from "@/data/monsters.ts"
-import { SPELLS } from "@/data/spells.ts"
+import { ANCESTRIES, ARMOR, BACKGROUNDS, CLASSES, DEITIES, GEAR, MONSTERS, SPELLS, WEAPONS } from "@/data/index.ts"
+import { useDataRegistry } from "@/hooks/use-data-registry.ts"
 import { generateAdventureName } from "@/data/tables/adventure-names.ts"
 import { getRandomHazard } from "@/data/tables/hazards.ts"
 import { getRandomName } from "@/data/tables/npc-names.ts"
 import { getRandomTrap } from "@/data/tables/traps.ts"
-import { WEAPONS } from "@/data/weapons.ts"
 import { rollDice } from "@/lib/dice/roller.ts"
 import { getAbilityModifier } from "@/schemas/reference.ts"
 
@@ -23,6 +16,7 @@ export const Route = createFileRoute("/gm/tables")({
 type Tab = "rules" | "spells" | "items" | "monsters" | "world" | "generators"
 
 function ReferencePage() {
+  useDataRegistry()
   const [tab, setTab] = useState<Tab>("rules")
   const [search, setSearch] = useState("")
 

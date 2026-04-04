@@ -1,0 +1,211 @@
+{
+  "id": "thieves-guild",
+  "name": "Thieves' Guild Intrigue",
+  "author": "Claude",
+  "version": "1.0",
+  "description": "Urban rogues, poisoned blades, and underworld contacts for city-based campaigns.",
+  "color": "#a855f7",
+  "data": {
+    "monsters": [
+      {
+        "id": "thieves-guild-guild-enforcer",
+        "name": "Guild Enforcer",
+        "description": "A scarred veteran of the underground, sent to collect debts or silence problems. Fights dirty and without mercy.",
+        "level": 3,
+        "ac": 14,
+        "acSource": "leather + shield",
+        "hp": 15,
+        "hpDice": "3d8+3",
+        "attacks": [
+          { "name": "Short Sword", "bonus": 4, "damage": "1d6+2", "range": "close" },
+          { "name": "Hand Crossbow", "bonus": 3, "damage": "1d6", "range": "far", "specialEffect": "First shot is poisoned: DC 12 CON or 1d6 extra poison damage" }
+        ],
+        "movement": { "normal": "near" },
+        "stats": { "STR": 14, "DEX": 14, "CON": 12, "INT": 10, "WIS": 11, "CHA": 12 },
+        "alignment": "chaotic",
+        "abilities": [
+          { "name": "Dirty Fighter", "description": "Once per encounter, can throw sand/dirt: DC 12 DEX or blinded for 1 round." },
+          { "name": "Underworld Connections", "description": "If allowed to flee, will return with 1d4 reinforcements within 1 hour." }
+        ],
+        "checksMorale": true,
+        "tags": ["humanoid", "rogue"]
+      },
+      {
+        "id": "thieves-guild-shadow-dancer",
+        "name": "Shadow Dancer",
+        "description": "An elite assassin trained in an ancient art that lets them step between shadows. They strike without warning and vanish without trace.",
+        "level": 7,
+        "ac": 15,
+        "hp": 28,
+        "hpDice": "5d8+5",
+        "attacks": [
+          { "name": "Shadow Blade", "bonus": 7, "damage": "1d6+4", "range": "close", "multiattack": 2 },
+          { "name": "Throwing Knives", "bonus": 6, "damage": "1d4+3", "range": "near" }
+        ],
+        "movement": { "normal": "near" },
+        "stats": { "STR": 10, "DEX": 18, "CON": 12, "INT": 14, "WIS": 14, "CHA": 12 },
+        "alignment": "chaotic",
+        "abilities": [
+          { "name": "Shadow Step", "description": "Can teleport between any two areas of dim light or darkness within near range as a free action." },
+          { "name": "Assassinate", "description": "Deals an extra 2d6 damage against surprised targets or targets that haven't acted yet." },
+          { "name": "Evasion", "description": "Takes no damage on successful DEX saves, half on failure." }
+        ],
+        "checksMorale": true,
+        "tags": ["humanoid", "rogue", "assassin"]
+      },
+      {
+        "id": "thieves-guild-rat-king",
+        "name": "Rat King",
+        "description": "A massive, intelligent rat the size of a dog, ruling a swarm of lesser rats in the sewers. Covered in matted fur and old scars.",
+        "level": 2,
+        "ac": 12,
+        "hp": 10,
+        "hpDice": "2d6+2",
+        "attacks": [
+          { "name": "Diseased Bite", "bonus": 3, "damage": "1d4+1", "range": "close", "specialEffect": "DC 11 CON or diseased: disadvantage on CON checks for 24 hours" }
+        ],
+        "movement": { "normal": "near", "swim": "close" },
+        "stats": { "STR": 8, "DEX": 14, "CON": 12, "INT": 8, "WIS": 12, "CHA": 6 },
+        "alignment": "chaotic",
+        "abilities": [
+          { "name": "Rat Swarm", "description": "Surrounded by a swarm of rats. Melee attackers take 1d4 damage from biting rats." },
+          { "name": "Flee Through Cracks", "description": "Can squeeze through any gap a normal rat could fit through." }
+        ],
+        "checksMorale": true,
+        "tags": ["beast", "swarm"]
+      },
+      {
+        "id": "thieves-guild-corrupt-guard",
+        "name": "Corrupt City Guard",
+        "description": "A guard on the guild's payroll. Will look the other way for coin, or frame adventurers if paid enough.",
+        "level": 2,
+        "ac": 15,
+        "acSource": "chainmail",
+        "hp": 11,
+        "hpDice": "2d8+2",
+        "attacks": [
+          { "name": "Longsword", "bonus": 3, "damage": "1d8+1", "range": "close" },
+          { "name": "Crossbow", "bonus": 2, "damage": "1d8", "range": "far" }
+        ],
+        "movement": { "normal": "near" },
+        "stats": { "STR": 13, "DEX": 10, "CON": 12, "INT": 10, "WIS": 10, "CHA": 11 },
+        "alignment": "neutral",
+        "abilities": [
+          { "name": "Call for Backup", "description": "Can blow a whistle to summon 1d4 additional guards in 1d4 rounds." },
+          { "name": "Bribable", "description": "Will accept 10+ gold to ignore crimes or share information." }
+        ],
+        "checksMorale": true,
+        "tags": ["humanoid", "guard"]
+      }
+    ],
+    "spells": [
+      {
+        "id": "thieves-guild-shadow-veil",
+        "name": "Shadow Veil",
+        "tier": 1,
+        "class": "wizard",
+        "range": "self",
+        "duration": "rounds",
+        "durationValue": 10,
+        "isFocus": false,
+        "description": "You blend into shadows, becoming nearly invisible in dim light. Advantage on stealth checks. Attacking or casting another spell ends the effect.",
+        "effects": [{ "type": "utility", "description": "Advantage on stealth in dim light" }]
+      },
+      {
+        "id": "thieves-guild-whisper-wind",
+        "name": "Whisper Wind",
+        "tier": 1,
+        "class": "wizard",
+        "range": "far",
+        "duration": "instant",
+        "isFocus": false,
+        "description": "Send a whispered message of up to 25 words to a creature you can see within far range. Only the target can hear it. They can whisper a reply.",
+        "effects": [{ "type": "utility", "description": "Send and receive a whispered message" }]
+      }
+    ],
+    "weapons": [
+      {
+        "id": "thieves-guild-garrote",
+        "name": "Garrote Wire",
+        "type": "melee",
+        "damage": "1d6",
+        "range": "close",
+        "properties": ["finesse", "two_handed"],
+        "cost": 3,
+        "slots": 1,
+        "description": "Thin wire with wooden handles. Can only be used on surprised or grappled targets. Silences the target while applied."
+      },
+      {
+        "id": "thieves-guild-cane-sword",
+        "name": "Cane Sword",
+        "type": "melee",
+        "damage": "1d6",
+        "range": "close",
+        "properties": ["finesse"],
+        "cost": 20,
+        "slots": 1,
+        "description": "A slender blade concealed inside a gentleman's walking cane. DC 15 WIS to notice it's a weapon before it's drawn."
+      }
+    ],
+    "gear": [
+      {
+        "id": "thieves-guild-lockpick-set",
+        "name": "Master Lockpick Set",
+        "category": "gear",
+        "cost": 25,
+        "slots": 1,
+        "description": "A fine set of picks, rakes, and tension wrenches. +1 bonus to lockpicking attempts. Breaks on a natural 1."
+      },
+      {
+        "id": "thieves-guild-smoke-bomb",
+        "name": "Smoke Bomb",
+        "category": "consumable",
+        "cost": 10,
+        "slots": 1,
+        "description": "Fills close range with thick smoke for 3 rounds. All creatures in the smoke are effectively blinded. 3 per slot.",
+        "quantityPerSlot": 3
+      },
+      {
+        "id": "thieves-guild-poison-vial",
+        "name": "Serpent Venom Vial",
+        "category": "consumable",
+        "cost": 40,
+        "slots": 1,
+        "description": "Apply to a weapon as an action. Next hit deals an extra 2d4 poison damage. DC 13 CON or poisoned for 1 hour."
+      },
+      {
+        "id": "thieves-guild-disguise-kit",
+        "name": "Disguise Kit",
+        "category": "gear",
+        "cost": 15,
+        "slots": 1,
+        "description": "Wigs, makeup, and prosthetics. Spend 10 minutes to create a disguise. Observers must pass DC 14 WIS to see through it."
+      },
+      {
+        "id": "thieves-guild-grappling-hook",
+        "name": "Silk Rope & Hook",
+        "category": "gear",
+        "cost": 12,
+        "slots": 1,
+        "description": "30 feet of lightweight silk rope with a folding grappling hook. Half the weight of normal rope. Nearly silent when thrown."
+      }
+    ],
+    "backgrounds": [
+      {
+        "id": "thieves-guild-pickpocket",
+        "name": "Street Pickpocket",
+        "description": "You grew up lifting purses in crowded markets. Your fingers are quick and your instincts for trouble are sharper."
+      },
+      {
+        "id": "thieves-guild-fence",
+        "name": "Black Market Fence",
+        "description": "You dealt in stolen goods, knowing the value of everything and the provenance of nothing. You have contacts in every market district."
+      },
+      {
+        "id": "thieves-guild-informant",
+        "name": "Guild Informant",
+        "description": "You sold secrets to whoever paid most. Everyone trusts you just enough to talk, and no one trusts you enough to turn their back."
+      }
+    ]
+  }
+}

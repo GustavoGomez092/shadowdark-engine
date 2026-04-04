@@ -1,20 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { SPELLS } from '@/data/index.ts'
+import { SPELLS, getItemPackId, getPackColor } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { sortPackFirst } from '@/lib/data/sort.ts'
+import { useSessionStore } from '@/stores/session-store.ts'
 
 export const Route = createFileRoute('/compendium/spells')({
   component: SpellsPage,
 })
 
 function SpellsPage() {
+  useDataRegistry()
   const [classFilter, setClassFilter] = useState<'all' | 'wizard' | 'priest'>('all')
   const [tierFilter, setTierFilter] = useState<number>(0) // 0 = all
+  const settings = useSessionStore(s => s.session?.settings)
 
-  const filtered = SPELLS.filter(s => {
+  let filtered = SPELLS.filter(s => {
     if (classFilter !== 'all' && s.class !== classFilter) return false
     if (tierFilter > 0 && s.tier !== tierFilter) return false
     return true
   })
+  if (settings?.showPackItemsFirst) filtered = sortPackFirst(filtered)
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -55,8 +61,10 @@ function SpellsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {filtered.map(spell => (
-          <div key={spell.id} className="rounded-xl border border-border bg-card p-4">
+        {filtered.map(spell => {
+          const packColor = getPackColor(getItemPackId(spell.id) ?? '')
+          return (
+          <div key={spell.id} className="rounded-xl border border-border bg-card p-4" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
             <div className="mb-2 flex items-start justify-between gap-2">
               <h2 className="text-lg font-semibold">{spell.name}</h2>
               <div className="flex gap-1.5">
@@ -81,7 +89,8 @@ function SpellsPage() {
             </div>
             <p className="text-sm leading-relaxed">{spell.description}</p>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {filtered.length === 0 && (

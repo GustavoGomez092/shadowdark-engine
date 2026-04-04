@@ -1,32 +1,29 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { GameStore, StoreItem, StoreType } from '@/schemas/stores.ts'
 import type { ItemCategory } from '@/schemas/inventory.ts'
-import { WEAPONS, ARMOR, GEAR } from '@/data/index.ts'
+import { WEAPONS, ARMOR, GEAR, getItemPackId, getPackColor } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { dataRegistry } from '@/lib/data/registry.ts'
 import { generateId } from '@/lib/utils/id.ts'
 
-// Build full catalog with categories
-const ALL_ITEMS = [
-  ...WEAPONS.map(w => ({ id: w.id, name: w.name, price: w.cost, category: 'weapon' as ItemCategory, slots: w.slots })),
-  ...ARMOR.map(a => ({ id: a.id, name: a.name, price: a.cost, category: 'armor' as ItemCategory, slots: a.slots })),
-  ...GEAR.map(g => ({ id: g.id, name: g.name, price: g.cost, category: g.category, slots: g.slots })),
-]
+type CatalogItem = { id: string; name: string; price: number; category: ItemCategory; slots: number }
 
 // Filter items by store type
-function getItemsForStoreType(storeType: StoreType) {
+function getItemsForStoreType(storeType: StoreType, allItems: CatalogItem[]) {
   switch (storeType) {
-    case 'weapons': return ALL_ITEMS.filter(i => i.category === 'weapon')
-    case 'armor': return ALL_ITEMS.filter(i => i.category === 'armor' || i.category === 'shield')
-    case 'magic': return ALL_ITEMS.filter(i => i.category === 'magic_item')
-    case 'potions': return ALL_ITEMS.filter(i => i.category === 'consumable')
-    case 'tavern': return ALL_ITEMS.filter(i => i.category === 'ration' || i.category === 'consumable' || i.category === 'gear')
-    case 'temple': return ALL_ITEMS.filter(i => i.category === 'consumable' || i.category === 'magic_item' || i.name.toLowerCase().includes('holy'))
-    case 'general': return ALL_ITEMS
-    case 'custom': return ALL_ITEMS
-    default: return ALL_ITEMS
+    case 'weapons': return allItems.filter(i => i.category === 'weapon')
+    case 'armor': return allItems.filter(i => i.category === 'armor' || i.category === 'shield')
+    case 'magic': return allItems.filter(i => i.category === 'magic_item')
+    case 'potions': return allItems.filter(i => i.category === 'consumable')
+    case 'tavern': return allItems.filter(i => i.category === 'ration' || i.category === 'consumable' || i.category === 'gear')
+    case 'temple': return allItems.filter(i => i.category === 'consumable' || i.category === 'magic_item' || i.name.toLowerCase().includes('holy'))
+    case 'general': return allItems
+    case 'custom': return allItems
+    default: return allItems
   }
 }
 
-function makeStoreItems(items: typeof ALL_ITEMS): StoreItem[] {
+function makeStoreItems(items: CatalogItem[]): StoreItem[] {
   return items.map(item => ({
     id: generateId(),
     itemDefinitionId: item.id,
@@ -54,15 +51,23 @@ interface Props {
 }
 
 export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }: Props) {
+  useDataRegistry()
+  const allItems = useMemo<CatalogItem[]>(() => [
+    ...WEAPONS.map(w => ({ id: w.id, name: w.name, price: w.cost, category: 'weapon' as ItemCategory, slots: w.slots })),
+    ...ARMOR.map(a => ({ id: a.id, name: a.name, price: a.cost, category: 'armor' as ItemCategory, slots: a.slots })),
+    ...GEAR.map(g => ({ id: g.id, name: g.name, price: g.cost, category: g.category, slots: g.slots })),
+  ], [WEAPONS, ARMOR, GEAR])
   const [showCreate, setShowCreate] = useState(false)
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null)
   const [catalogSearch, setCatalogSearch] = useState('')
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
+  const itemPacks = dataRegistry.getPacks().filter(p => p.enabled && (p.counts.weapons + p.counts.armor + p.counts.gear) > 0)
 
   const selectedStore = stores.find(s => s.id === selectedStoreId)
 
   function handleCreateStore(name: string, storeType: StoreType) {
     // Auto-populate with items matching store type
-    const defaultItems = getItemsForStoreType(storeType)
+    const defaultItems = getItemsForStoreType(storeType, allItems)
     const store: GameStore = {
       id: generateId(),
       name,
@@ -94,12 +99,15 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
     })
   }
 
-  // Items already in the store (by definitionId) to avoid duplicates in catalog
+  // Items already in the store (by definitionId)
   const storeItemIds = new Set(selectedStore?.items.map(i => i.itemDefinitionId) ?? [])
 
-  // Catalog filtered by search and excluding already-added items
-  const catalogItems = ALL_ITEMS
-    .filter(i => !storeItemIds.has(i.id))
+  // Catalog filtered by source and search (shows all items, in-store items are togglable)
+  let sourceFilteredItems = allItems
+  if (sourceFilter === 'core') sourceFilteredItems = sourceFilteredItems.filter(i => !getItemPackId(i.id))
+  else if (sourceFilter !== 'all') sourceFilteredItems = sourceFilteredItems.filter(i => getItemPackId(i.id) === sourceFilter)
+
+  const catalogItems = sourceFilteredItems
     .filter(i => !catalogSearch || i.name.toLowerCase().includes(catalogSearch.toLowerCase()))
 
   return (
@@ -114,7 +122,7 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
         </button>
       </div>
 
-      {showCreate && <CreateStoreForm onCreate={handleCreateStore} onCancel={() => setShowCreate(false)} />}
+      {showCreate && <CreateStoreForm allItems={allItems} onCreate={handleCreateStore} onCancel={() => setShowCreate(false)} />}
 
       {stores.length === 0 && !showCreate ? (
         <div className="rounded-xl border border-dashed border-border py-12 text-center">
@@ -142,10 +150,11 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
 
           {selectedStore && (
             <div className="rounded-xl border border-border bg-card p-4">
-              <div className="mb-4 flex items-center justify-between">
+              {/* Header */}
+              <div className="mb-3 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold">{selectedStore.name}</h3>
-                  <span className="text-xs text-muted-foreground capitalize">{selectedStore.storeType} store · {selectedStore.items.length} items</span>
+                  <span className="text-xs text-muted-foreground capitalize">{selectedStore.storeType} store · {selectedStore.items.length} items in stock</span>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -167,66 +176,86 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
                 </div>
               </div>
 
-              {/* Store items */}
-              <div className="mb-4 max-h-64 space-y-1 overflow-y-auto">
-                {selectedStore.items.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No items. Add from the catalog below.</p>
-                ) : (
-                  selectedStore.items.map(item => (
-                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-border/50 px-3 py-1.5 text-sm group">
-                      <div>
-                        <span className="font-medium">{item.name}</span>
-                        <span className="ml-2 text-muted-foreground">{formatCost(item.price)}</span>
-                      </div>
-                      <button
-                        onClick={() => removeItemFromStore(selectedStore.id, item.id)}
-                        className="text-xs text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Add from catalog */}
-              <div className="border-t border-border pt-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Add from catalog</p>
-                  <span className="text-[10px] text-muted-foreground">{catalogItems.length} available</span>
-                </div>
+              {/* Search & Filters */}
+              <div className="flex gap-2 mb-3">
                 <input
                   type="text"
                   value={catalogSearch}
                   onChange={e => setCatalogSearch(e.target.value)}
                   placeholder="Search items..."
-                  className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs mb-2 outline-none focus:ring-1 focus:ring-ring"
+                  className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
                 />
-                <div className="max-h-48 space-y-0.5 overflow-y-auto">
-                  {catalogItems.slice(0, 30).map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => addItemToStore(selectedStore.id, {
-                        itemDefinitionId: item.id,
-                        name: item.name,
-                        description: '',
-                        price: item.price,
-                        quantity: -1,
-                        category: item.category,
-                        slots: item.slots,
-                        isCustom: false,
-                      })}
-                      className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-xs hover:bg-accent transition"
-                    >
-                      <span>{item.name}</span>
-                      <span className="text-muted-foreground">{formatCost(item.price)}</span>
-                    </button>
-                  ))}
-                  {catalogItems.length > 30 && (
-                    <p className="text-[10px] text-muted-foreground text-center py-1">Search to find more...</p>
-                  )}
-                </div>
+                {itemPacks.length > 0 && (
+                  <select
+                    value={sourceFilter}
+                    onChange={e => setSourceFilter(e.target.value)}
+                    className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm outline-none"
+                  >
+                    <option value="all">All Sources</option>
+                    <option value="core">Core Only</option>
+                    {itemPacks.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
+
+              {/* Full Item List */}
+              <div className="max-h-[480px] space-y-0.5 overflow-y-auto rounded-lg border border-border/50 p-1">
+                {catalogItems.length === 0 && storeItemIds.size === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">No items match the current filters.</p>
+                ) : (
+                  <>
+                    {catalogItems.map(item => {
+                      const inStore = storeItemIds.has(item.id)
+                      const packId = getItemPackId(item.id)
+                      const packColor = packId ? getPackColor(packId) : undefined
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            if (inStore) {
+                              const storeItem = selectedStore.items.find(si => si.itemDefinitionId === item.id)
+                              if (storeItem) removeItemFromStore(selectedStore.id, storeItem.id)
+                            } else {
+                              addItemToStore(selectedStore.id, {
+                                itemDefinitionId: item.id,
+                                name: item.name,
+                                description: '',
+                                price: item.price,
+                                quantity: -1,
+                                category: item.category,
+                                slots: item.slots,
+                                isCustom: false,
+                              })
+                            }
+                          }}
+                          className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition ${
+                            inStore
+                              ? 'bg-primary/10 text-foreground'
+                              : 'hover:bg-accent'
+                          }`}
+                          style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`w-4 text-center text-xs ${inStore ? 'text-primary' : 'text-muted-foreground/30'}`}>
+                              {inStore ? '\u2713' : '+'}
+                            </span>
+                            <span className={inStore ? 'font-medium' : ''}>{item.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground capitalize">{item.category.replace('_', ' ')}</span>
+                            <span className="text-xs text-muted-foreground w-14 text-right">{formatCost(item.price)}</span>
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </>
+                )}
+              </div>
+              <p className="mt-1.5 text-[10px] text-muted-foreground">
+                Click to add/remove items. {catalogItems.filter(i => storeItemIds.has(i.id)).length} of {catalogItems.length} items in stock.
+              </p>
             </div>
           )}
         </div>
@@ -235,11 +264,11 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
   )
 }
 
-function CreateStoreForm({ onCreate, onCancel }: { onCreate: (name: string, type: StoreType) => void; onCancel: () => void }) {
+function CreateStoreForm({ allItems, onCreate, onCancel }: { allItems: CatalogItem[]; onCreate: (name: string, type: StoreType) => void; onCancel: () => void }) {
   const [name, setName] = useState('')
   const [storeType, setStoreType] = useState<StoreType>('general')
 
-  const previewCount = getItemsForStoreType(storeType).length
+  const previewCount = getItemsForStoreType(storeType, allItems).length
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 space-y-3">

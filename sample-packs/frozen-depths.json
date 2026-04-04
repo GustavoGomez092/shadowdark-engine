@@ -1,0 +1,188 @@
+{
+  "id": "frozen-depths",
+  "name": "Frozen Depths",
+  "author": "Claude",
+  "version": "1.0",
+  "description": "Ice-bound horrors and arctic gear for campaigns in the frozen north.",
+  "color": "#38bdf8",
+  "data": {
+    "monsters": [
+      {
+        "id": "frozen-depths-frost-revenant",
+        "name": "Frost Revenant",
+        "description": "A warrior who froze to death on a failed expedition, now risen as an ice-encased undead driven by bitter rage.",
+        "level": 5,
+        "ac": 16,
+        "acSource": "ice armor",
+        "hp": 26,
+        "hpDice": "4d10+4",
+        "attacks": [
+          { "name": "Frozen Axe", "bonus": 5, "damage": "1d8+3", "range": "close", "specialEffect": "DC 13 CON or speed halved for 1 round" }
+        ],
+        "movement": { "normal": "near" },
+        "stats": { "STR": 16, "DEX": 8, "CON": 14, "INT": 6, "WIS": 10, "CHA": 5 },
+        "alignment": "chaotic",
+        "abilities": [
+          { "name": "Ice Armor", "description": "Takes half damage from cold. Fire damage bypasses AC bonus from ice armor for 1 round." },
+          { "name": "Frozen Grip", "description": "On a critical hit, the target's weapon freezes to their hand (cannot switch weapons until warmed)." }
+        ],
+        "checksMorale": false,
+        "tags": ["undead", "cold"]
+      },
+      {
+        "id": "frozen-depths-glacial-wurm",
+        "name": "Glacial Wurm",
+        "description": "A massive burrowing predator that tunnels through permafrost. Its crystalline scales refract light into blinding rainbows.",
+        "level": 9,
+        "ac": 17,
+        "acSource": "natural",
+        "hp": 52,
+        "hpDice": "8d10+8",
+        "attacks": [
+          { "name": "Bite", "bonus": 7, "damage": "2d10+4", "range": "close", "specialEffect": "DC 15 STR or swallowed (1d8 cold damage per round)" },
+          { "name": "Tail Sweep", "bonus": 6, "damage": "2d6+3", "range": "near" }
+        ],
+        "movement": { "normal": "near", "burrow": "near" },
+        "stats": { "STR": 20, "DEX": 8, "CON": 18, "INT": 3, "WIS": 12, "CHA": 6 },
+        "alignment": "neutral",
+        "abilities": [
+          { "name": "Ice Breath", "description": "Recharge 5-6. Breathes a cone of frost (near range). DC 15 DEX or 3d6 cold damage, half on save." },
+          { "name": "Tremorsense", "description": "Detects creatures touching the ground within far range." },
+          { "name": "Cold Immunity", "description": "Immune to cold damage. Vulnerable to fire." }
+        ],
+        "checksMorale": true,
+        "tags": ["beast", "cold", "burrower"]
+      },
+      {
+        "id": "frozen-depths-ice-sprite",
+        "name": "Ice Sprite",
+        "description": "A tiny fey creature made of living ice. Mischievous but not inherently hostile unless its territory is threatened.",
+        "level": 1,
+        "ac": 13,
+        "hp": 4,
+        "hpDice": "1d4+1",
+        "attacks": [
+          { "name": "Frost Shard", "bonus": 3, "damage": "1d4", "range": "near" }
+        ],
+        "movement": { "normal": "close", "fly": "near" },
+        "stats": { "STR": 3, "DEX": 16, "CON": 8, "INT": 12, "WIS": 14, "CHA": 16 },
+        "alignment": "neutral",
+        "abilities": [
+          { "name": "Invisibility", "description": "Can turn invisible in snowy conditions. Attacking breaks invisibility." },
+          { "name": "Freeze Water", "description": "Can freeze a bucket-sized amount of water solid at will." }
+        ],
+        "checksMorale": true,
+        "tags": ["fey", "cold", "tiny"]
+      }
+    ],
+    "spells": [
+      {
+        "id": "frozen-depths-glacial-barrier",
+        "name": "Glacial Barrier",
+        "tier": 2,
+        "class": "wizard",
+        "range": "near",
+        "duration": "rounds",
+        "durationValue": 5,
+        "isFocus": false,
+        "description": "A wall of thick ice erupts from the ground (near range, 10 ft wide, 10 ft tall). The wall has 20 HP and AC 12. Creatures adjacent to it take 1d4 cold damage per round.",
+        "effects": [{ "type": "utility", "description": "Creates ice wall with 20 HP" }]
+      },
+      {
+        "id": "frozen-depths-frostbite",
+        "name": "Frostbite",
+        "tier": 1,
+        "class": "wizard",
+        "range": "near",
+        "duration": "instant",
+        "isFocus": false,
+        "description": "A beam of freezing energy strikes a target. Deal 1d8 cold damage. On a critical success, the target's speed is halved for 3 rounds.",
+        "effects": [{ "type": "damage", "dice": "1d8", "damageType": "cold" }]
+      }
+    ],
+    "weapons": [
+      {
+        "id": "frozen-depths-ice-pick",
+        "name": "Ice Pick",
+        "type": "melee",
+        "damage": "1d6",
+        "range": "close",
+        "properties": ["finesse"],
+        "cost": 8,
+        "slots": 1,
+        "description": "A sturdy climbing pick that doubles as a weapon. Advantage on checks to climb icy surfaces."
+      },
+      {
+        "id": "frozen-depths-harpoon",
+        "name": "Bone Harpoon",
+        "type": "ranged",
+        "damage": "1d8",
+        "range": "far",
+        "properties": ["thrown"],
+        "cost": 12,
+        "slots": 1,
+        "description": "A barbed harpoon carved from whale bone. On hit, target must DC 12 STR or be pulled to near range."
+      }
+    ],
+    "armor": [
+      {
+        "id": "frozen-depths-frostward-leather",
+        "name": "Frostward Leather",
+        "type": "leather",
+        "acBase": 12,
+        "addDex": true,
+        "stealthPenalty": false,
+        "swimPenalty": "none",
+        "cost": 30,
+        "slots": 1,
+        "isMithral": false
+      }
+    ],
+    "gear": [
+      {
+        "id": "frozen-depths-firebrew",
+        "name": "Firebrew Flask",
+        "category": "consumable",
+        "cost": 15,
+        "slots": 1,
+        "description": "A potent alchemical drink. Grants immunity to cold weather effects for 4 hours. Tastes like burning cinnamon."
+      },
+      {
+        "id": "frozen-depths-snowshoes",
+        "name": "Snowshoes",
+        "category": "gear",
+        "cost": 5,
+        "slots": 1,
+        "description": "Woven sinew frames worn over boots. Move at normal speed over deep snow instead of half speed."
+      },
+      {
+        "id": "frozen-depths-everburn-coal",
+        "name": "Everburn Coal",
+        "category": "magic_item",
+        "cost": 75,
+        "slots": 1,
+        "description": "A fist-sized coal that radiates warmth indefinitely. Prevents cold weather exhaustion for the bearer and anyone within close range. Cannot start fires."
+      }
+    ],
+    "backgrounds": [
+      {
+        "id": "frozen-depths-ice-fisher",
+        "name": "Ice Fisher",
+        "description": "You spent years on the frozen lakes, cutting holes and hauling nets in brutal cold. You know how to read ice and survive the long dark."
+      },
+      {
+        "id": "frozen-depths-expedition-survivor",
+        "name": "Expedition Survivor",
+        "description": "You were part of a doomed expedition into the frozen wastes. You alone returned. You don't talk about what happened to the others."
+      }
+    ],
+    "languages": [
+      {
+        "id": "frozen-depths-glacial",
+        "name": "Glacial",
+        "rarity": "rare",
+        "typicalSpeakers": "Ice sprites, frost giants, glacial wurms"
+      }
+    ]
+  }
+}

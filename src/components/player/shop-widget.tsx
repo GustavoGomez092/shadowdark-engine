@@ -2,9 +2,7 @@ import { useState } from 'react'
 import type { Character } from '@/schemas/character.ts'
 import type { PublicStoreInfo } from '@/schemas/session.ts'
 import type { StoreItem } from '@/schemas/stores.ts'
-import { getWeapon } from '@/data/weapons.ts'
-import { getArmor } from '@/data/armor.ts'
-import { getGear } from '@/data/gear.ts'
+import { getWeapon, getArmor, getGear } from '@/data/index.ts'
 
 function formatCost(gp: number): string {
   if (gp >= 1) return `${gp} gp`

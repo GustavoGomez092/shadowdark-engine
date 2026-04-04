@@ -1,15 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { CLASSES } from '@/data/index.ts'
+import { CLASSES, getItemPackId, getPackColor } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { sortPackFirst } from '@/lib/data/sort.ts'
 import type { ClassDefinition } from '@/schemas/character.ts'
+import { useSessionStore } from '@/stores/session-store.ts'
 
 export const Route = createFileRoute('/compendium/classes')({
   component: ClassesPage,
 })
 
 function ClassesPage() {
+  useDataRegistry()
+  const settings = useSessionStore(s => s.session?.settings)
   const [selected, setSelected] = useState<string>('fighter')
-  const cls = CLASSES.find(c => c.id === selected)!
+  let classes = [...CLASSES]
+  if (settings?.showPackMonstersFirst) classes = sortPackFirst(classes)
+  const cls = classes.find(c => c.id === selected)!
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -17,7 +24,7 @@ function ClassesPage() {
       <p className="mb-6 text-muted-foreground">The four adventuring classes</p>
 
       <div className="mb-6 flex gap-1 rounded-lg border border-border p-1 w-fit">
-        {CLASSES.map(c => (
+        {classes.map(c => (
           <button
             key={c.id}
             onClick={() => setSelected(c.id)}
@@ -36,9 +43,10 @@ function ClassesPage() {
 }
 
 function ClassDetail({ cls }: { cls: ClassDefinition }) {
+  const packColor = getPackColor(getItemPackId(cls.id) ?? '')
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-border bg-card p-5">
+      <div className="rounded-xl border border-border bg-card p-5" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
         <h2 className="mb-2 text-2xl font-bold">{cls.name}</h2>
         <p className="mb-4 text-muted-foreground">{cls.description}</p>
 

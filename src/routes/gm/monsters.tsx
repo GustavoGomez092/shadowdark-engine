@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { MONSTERS } from '@/data/index.ts'
+import { MONSTERS, getItemPackId, getPackColor } from '@/data/index.ts'
+import { dataRegistry } from '@/lib/data/registry.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { sortPackFirst } from '@/lib/data/sort.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
 import type { MonsterDefinition } from '@/schemas/monsters.ts'
 import { getAbilityModifier } from '@/schemas/reference.ts'
@@ -13,18 +16,29 @@ export const Route = createFileRoute('/gm/monsters')({
 })
 
 function GMMonstersPage() {
+  useDataRegistry()
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState<number>(0)
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
   const [showRandomEncounter, setShowRandomEncounter] = useState(false)
   const addMonster = useSessionStore(s => s.addMonster)
   const addChatMessage = useSessionStore(s => s.addChatMessage)
+  const settings = useSessionStore(s => s.session?.settings)
+
+  const monsterPacks = dataRegistry.getPacks().filter(p => p.enabled && p.counts.monsters > 0)
 
   const maxLevel = Math.max(...MONSTERS.map(m => m.level))
-  const filtered = MONSTERS.filter(m => {
+  let filtered = MONSTERS.filter(m => {
     if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false
     if (levelFilter > 0 && m.level !== levelFilter) return false
+    if (sourceFilter === 'core') {
+      if (getItemPackId(m.id)) return false
+    } else if (sourceFilter !== 'all') {
+      if (getItemPackId(m.id) !== sourceFilter) return false
+    }
     return true
   })
+  if (settings?.showPackMonstersFirst) filtered = sortPackFirst(filtered)
 
   const [spawned, setSpawned] = useState<string | null>(null)
   const session = useSessionStore(s => s.session)
@@ -87,6 +101,17 @@ function GMMonstersPage() {
             </button>
           ))}
         </div>
+        <select
+          value={sourceFilter}
+          onChange={e => setSourceFilter(e.target.value)}
+          className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="all">All Sources</option>
+          <option value="core">Core Only</option>
+          {monsterPacks.map(p => (
+            <option key={p.id} value={p.id}>{p.name} ({p.counts.monsters})</option>
+          ))}
+        </select>
         <span className="text-xs text-muted-foreground">{filtered.length} monsters</span>
       </div>
 
@@ -112,8 +137,10 @@ function GMMonstersPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {filtered.map(m => (
-          <div key={m.id} className="rounded-xl border border-border bg-card p-4">
+        {filtered.map(m => {
+          const packColor = getPackColor(getItemPackId(m.id) ?? '')
+          return (
+          <div key={m.id} className="rounded-xl border border-border bg-card p-4" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
             <div className="mb-2 flex items-baseline justify-between">
               <h2 className="text-lg font-bold">{m.name}</h2>
               <span className="text-sm text-muted-foreground">LV {m.level}</span>
@@ -142,7 +169,8 @@ function GMMonstersPage() {
               Spawn
             </button>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Random Encounter Dialog */}
@@ -175,12 +203,37 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
   const [maxLevel, setMaxLevel] = useState(3)
   const [minFoes, setMinFoes] = useState(1)
   const [maxFoes, setMaxFoes] = useState(4)
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(() => new Set(['core']))
   const [preview, setPreview] = useState<{ def: MonsterDefinition; instance: import('@/schemas/monsters.ts').MonsterInstance }[] | null>(null)
 
   const maxMonsterLevel = Math.max(...MONSTERS.map(m => m.level))
+  const monsterPacks = dataRegistry.getPacks().filter(p => p.enabled && p.counts.monsters > 0)
+
+  function toggleSource(id: string) {
+    setSelectedSources(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function selectAll() {
+    setSelectedSources(new Set(['core', ...monsterPacks.map(p => p.id)]))
+  }
+
+  const allSelected = selectedSources.has('core') && monsterPacks.every(p => selectedSources.has(p.id))
 
   function generate() {
-    const eligible = MONSTERS.filter(m => m.level >= minLevel && m.level <= maxLevel)
+    let eligible = MONSTERS.filter(m => m.level >= minLevel && m.level <= maxLevel)
+    // Filter by selected sources
+    if (!allSelected) {
+      eligible = eligible.filter(m => {
+        const packId = getItemPackId(m.id)
+        if (!packId) return selectedSources.has('core')
+        return selectedSources.has(packId)
+      })
+    }
     if (eligible.length === 0) { setPreview([]); return }
 
     const count = minFoes + Math.floor(Math.random() * (maxFoes - minFoes + 1))
@@ -242,6 +295,46 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
           </div>
         </div>
 
+        {monsterPacks.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-muted-foreground">Monster Sources</label>
+              <button
+                onClick={allSelected ? () => setSelectedSources(new Set()) : selectAll}
+                className="text-[10px] text-primary hover:underline"
+              >{allSelected ? 'Deselect all' : 'Select all'}</button>
+            </div>
+            <div className="rounded-lg border border-input bg-background p-2 space-y-1">
+              <label className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent cursor-pointer transition">
+                <input
+                  type="checkbox"
+                  checked={selectedSources.has('core')}
+                  onChange={() => toggleSource('core')}
+                  className="rounded accent-primary"
+                />
+                <span>Core Monsters</span>
+                <span className="ml-auto text-xs text-muted-foreground">{MONSTERS.filter(m => !getItemPackId(m.id)).length}</span>
+              </label>
+              {monsterPacks.map(p => (
+                <label key={p.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent cursor-pointer transition">
+                  <input
+                    type="checkbox"
+                    checked={selectedSources.has(p.id)}
+                    onChange={() => toggleSource(p.id)}
+                    className="rounded accent-primary"
+                  />
+                  {p.color && <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />}
+                  <span>{p.name}</span>
+                  <span className="ml-auto text-xs text-muted-foreground">{p.counts.monsters}</span>
+                </label>
+              ))}
+            </div>
+            {selectedSources.size === 0 && (
+              <p className="mt-1 text-[10px] text-red-400">Select at least one source to generate encounters.</p>
+            )}
+          </div>
+        )}
+
         <button
           onClick={generate}
           className="w-full rounded-lg border border-primary/30 bg-primary/10 py-2 text-sm font-semibold text-primary hover:bg-primary/20 transition mb-4"
@@ -261,8 +354,10 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
                   <button onClick={generate} className="text-[10px] text-primary hover:underline">Re-roll</button>
                 </div>
                 <div className="space-y-1.5 max-h-52 overflow-y-auto">
-                  {preview.map(({ def, instance }) => (
-                    <div key={instance.id} className="rounded-lg border border-border/50 px-3 py-2 text-sm">
+                  {preview.map(({ def, instance }) => {
+                    const packColor = getPackColor(getItemPackId(def.id) ?? '')
+                    return (
+                    <div key={instance.id} className="rounded-lg border border-border/50 px-3 py-2 text-sm" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
                       <div className="flex items-baseline justify-between">
                         <span className="font-semibold">{instance.name}</span>
                         <span className="text-xs text-muted-foreground">LV {def.level}</span>
@@ -273,7 +368,8 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
                         <span>{def.attacks.map(a => `${a.name} (${a.damage})`).join(', ')}</span>
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             )}

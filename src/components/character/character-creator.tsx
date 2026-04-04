@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ANCESTRIES, CLASSES, BACKGROUNDS, DEITIES } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
 import type { AbilityScores, AbilityScore, Ancestry, CharacterClass } from '@/schemas/character.ts'
 import type { Alignment } from '@/schemas/reference.ts'
 import { getAbilityModifier } from '@/schemas/reference.ts'
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }: Props) {
+  useDataRegistry()
   const [step, setStep] = useState(0)
   const [stats, setStats] = useState<AbilityScores | null>(null)
   const [rerollsUsed, setRerollsUsed] = useState(0)

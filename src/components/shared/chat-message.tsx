@@ -1,5 +1,21 @@
 import type { ChatMessage } from '@/schemas/session.ts'
 
+function renderMarkdown(text: string) {
+  const parts: (string | React.ReactElement)[] = []
+  const regex = /(\*\*(.+?)\*\*|\*(.+?)\*)/g
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+  let key = 0
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index))
+    if (match[2]) parts.push(<strong key={key++} className="font-semibold">{match[2]}</strong>)
+    else if (match[3]) parts.push(<em key={key++}>{match[3]}</em>)
+    lastIndex = match.index + match[0].length
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex))
+  return parts
+}
+
 export function ChatMessageRow({ msg }: { msg: ChatMessage }) {
   switch (msg.type) {
     case 'system':
@@ -23,6 +39,16 @@ export function ChatMessageRow({ msg }: { msg: ChatMessage }) {
             <span className="font-semibold text-primary">{msg.senderName}</span>
             <span className="text-muted-foreground">: {msg.content}</span>
           </span>
+        </div>
+      )
+    case 'ai_response':
+      return (
+        <div className="my-2 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
+          <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-purple-400">
+            <span>✨</span>
+            <span>AI Narrator</span>
+          </div>
+          <div className="text-xs text-foreground/90 italic whitespace-pre-wrap leading-relaxed">{renderMarkdown(msg.content)}</div>
         </div>
       )
     case 'chat':

@@ -56,6 +56,8 @@ export interface GameSettings {
   torchDurationMinutes: number;    // default 60 (1 hour real time)
   lanternDurationMinutes: number;  // default 60
   campfireDurationMinutes: number; // default 480 (8 hours)
+  showPackMonstersFirst?: boolean;
+  showPackItemsFirst?: boolean;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {

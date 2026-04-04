@@ -42,3 +42,8 @@ export const getDeitiesByAlignment = (a: string) => dataRegistry.getDeitiesByAli
 export const getLanguage = (id: string) => dataRegistry.getLanguage(id)
 export const getBackground = (id: string) => dataRegistry.getBackground(id)
 export const getTitle = (cls: string, align: string, level: number) => dataRegistry.getTitle(cls, align, level)
+
+// ========== Pack tracking ==========
+
+export const getItemPackId = (id: string) => dataRegistry.getItemPackId(id)
+export const getPackColor = (packId: string) => dataRegistry.getPackColor(packId)

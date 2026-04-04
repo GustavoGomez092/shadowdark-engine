@@ -5,7 +5,7 @@ import { LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
 import { ChatMessageRow } from '@/components/shared/chat-message.tsx'
 import { createActionLog } from '@/lib/utils/action-log.ts'
-import { getGear } from '@/data/gear.ts'
+import { getGear, getClass } from '@/data/index.ts'
 import { pushRollToast } from '@/components/shared/roll-toast.tsx'
 import { EncounterPanel } from '@/components/gm/encounter-panel.tsx'
 import { RewardsDialog } from '@/components/gm/rewards-dialog.tsx'
@@ -20,7 +20,6 @@ import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues } from '@/lib/rules/character.ts'
-import { getClass } from '@/data/classes.ts'
 import { rollDeathSave } from '@/lib/rules/combat.ts'
 
 export const Route = createFileRoute('/gm/session/$sessionId')({
@@ -580,6 +579,7 @@ function GMSessionPage() {
   }, [isReady, broadcastStateSync])
 
   const [rewardsState, setRewardsState] = useState<{ show: boolean; hasTreasure: boolean; encounterType: 'random' | 'story' }>({ show: false, hasTreasure: false, encounterType: 'random' })
+
 
   // Loading while PeerJS starts
   if (session && !isReady) {

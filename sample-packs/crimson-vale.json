@@ -1,0 +1,148 @@
+{
+  "id": "crimson-vale",
+  "name": "Crimson Vale Expansion",
+  "author": "Claude",
+  "version": "1.0",
+  "description": "Dark creatures and forbidden magic from the Crimson Vale.",
+  "color": "#dc2626",
+  "data": {
+    "monsters": [
+      {
+        "id": "crimson-vale-blood-wraith",
+        "name": "Blood Wraith",
+        "description": "A spectral horror formed from the spilled blood of fallen warriors. It drifts through the vale seeking living hosts to drain.",
+        "level": 6,
+        "ac": 14,
+        "hp": 30,
+        "hpDice": "5d8+5",
+        "attacks": [
+          { "name": "Life Drain", "bonus": 5, "damage": "1d8+3", "range": "close", "specialEffect": "DC 14 CON or lose 1d4 max HP until long rest" },
+          { "name": "Wail", "bonus": 4, "damage": "2d6", "range": "near", "specialEffect": "DC 12 WIS or frightened for 1 round" }
+        ],
+        "movement": { "normal": "near", "fly": "near" },
+        "stats": { "STR": 6, "DEX": 16, "CON": 12, "INT": 10, "WIS": 14, "CHA": 15 },
+        "alignment": "chaotic",
+        "abilities": [
+          { "name": "Incorporeal", "description": "Can move through solid objects. Takes half damage from non-magical weapons." },
+          { "name": "Blood Sense", "description": "Can detect wounded creatures within far range." },
+          { "name": "Sunlight Weakness", "description": "Disadvantage on attacks and checks in direct sunlight." }
+        ],
+        "checksMorale": false,
+        "tags": ["undead", "incorporeal"]
+      },
+      {
+        "id": "crimson-vale-thornbeast",
+        "name": "Thornbeast",
+        "description": "A hulking mass of twisted vines and thorns, animated by dark magic. It guards the deep groves of the vale.",
+        "level": 4,
+        "ac": 15,
+        "acSource": "natural",
+        "hp": 22,
+        "hpDice": "4d8+4",
+        "attacks": [
+          { "name": "Thorn Slam", "bonus": 5, "damage": "1d10+3", "range": "close" },
+          { "name": "Vine Lash", "bonus": 4, "damage": "1d6+2", "range": "near", "specialEffect": "DC 13 STR or grabbed" }
+        ],
+        "movement": { "normal": "close" },
+        "stats": { "STR": 16, "DEX": 6, "CON": 14, "INT": 3, "WIS": 10, "CHA": 4 },
+        "alignment": "neutral",
+        "abilities": [
+          { "name": "Thorn Aura", "description": "Creatures that hit the thornbeast with melee attacks take 1d4 piercing damage." },
+          { "name": "Regeneration", "description": "Regains 3 HP at the start of its turn unless it took fire damage last round." }
+        ],
+        "checksMorale": false,
+        "tags": ["plant", "construct"]
+      },
+      {
+        "id": "crimson-vale-ashen-knight",
+        "name": "Ashen Knight",
+        "description": "The reanimated remains of a fallen paladin, still clad in scorched plate armor. Its hollow eyes burn with cold purpose.",
+        "level": 8,
+        "ac": 18,
+        "acSource": "plate",
+        "hp": 42,
+        "hpDice": "6d10+6",
+        "attacks": [
+          { "name": "Cursed Greatsword", "bonus": 7, "damage": "2d6+4", "range": "close", "specialEffect": "DC 15 CON or cursed: -1 to all rolls for 1 hour" },
+          { "name": "Shield Bash", "bonus": 6, "damage": "1d6+3", "range": "close", "specialEffect": "Target pushed to near range" }
+        ],
+        "movement": { "normal": "near" },
+        "stats": { "STR": 18, "DEX": 10, "CON": 14, "INT": 8, "WIS": 12, "CHA": 16 },
+        "alignment": "chaotic",
+        "abilities": [
+          { "name": "Undead Fortitude", "description": "When reduced to 0 HP, DC 12 CON save to drop to 1 HP instead. Does not work against radiant damage." },
+          { "name": "Command Undead", "description": "Once per encounter, can summon 1d4 skeletons that act on its turn." },
+          { "name": "Aura of Dread", "description": "Creatures within close range have disadvantage on morale checks." }
+        ],
+        "checksMorale": false,
+        "tags": ["undead", "humanoid", "leader"]
+      }
+    ],
+    "spells": [
+      {
+        "id": "crimson-vale-blood-pact",
+        "name": "Blood Pact",
+        "tier": 2,
+        "class": "priest",
+        "range": "close",
+        "duration": "focus",
+        "isFocus": true,
+        "description": "Sacrifice 1d6 of your own HP. An ally within close range regains twice the HP sacrificed. While focusing, both caster and target gain +1 to attack rolls.",
+        "effects": [{ "type": "healing", "dice": "2d6" }]
+      },
+      {
+        "id": "crimson-vale-thorn-cage",
+        "name": "Thorn Cage",
+        "tier": 3,
+        "class": "wizard",
+        "range": "far",
+        "duration": "rounds",
+        "durationValue": 5,
+        "isFocus": false,
+        "description": "Thorny vines erupt from the ground, trapping a target in a cage. DC 15 STR to break free. While trapped, the target takes 1d4 piercing damage at the start of each round.",
+        "effects": [
+          { "type": "condition", "condition": "restrained", "duration": 5, "saveDC": 15 },
+          { "type": "damage", "dice": "1d4", "damageType": "piercing" }
+        ]
+      }
+    ],
+    "weapons": [
+      {
+        "id": "crimson-vale-blood-dagger",
+        "name": "Blood Dagger",
+        "type": "melee",
+        "damage": "1d4",
+        "range": "close",
+        "properties": ["finesse", "thrown"],
+        "cost": 25,
+        "slots": 1,
+        "description": "A crimson-bladed dagger that whispers when near the wounded."
+      }
+    ],
+    "gear": [
+      {
+        "id": "crimson-vale-crimson-elixir",
+        "name": "Crimson Elixir",
+        "category": "consumable",
+        "cost": 50,
+        "slots": 1,
+        "description": "A thick, dark-red potion brewed from vale herbs. Heals 2d6+2 HP but causes vivid nightmares on next rest (no HP recovery from that rest)."
+      },
+      {
+        "id": "crimson-vale-thornwood-talisman",
+        "name": "Thornwood Talisman",
+        "category": "magic_item",
+        "cost": 100,
+        "slots": 1,
+        "description": "A carved talisman of thornwood. Once per day, the bearer can reflect 1d6 damage back to a melee attacker."
+      }
+    ],
+    "backgrounds": [
+      {
+        "id": "crimson-vale-vale-exile",
+        "name": "Vale Exile",
+        "description": "You were cast out of the Crimson Vale for a crime you may or may not have committed. You know its hidden paths and dark secrets."
+      }
+    ]
+  }
+}

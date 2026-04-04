@@ -3,7 +3,7 @@ import type { SpellDefinition } from '@/schemas/spells.ts'
 import type { WeaponDefinition, ArmorDefinition, GearDefinition } from '@/schemas/inventory.ts'
 import type { BackgroundDefinition, DeityDefinition, LanguageDefinition, TitleDefinition } from '@/schemas/reference.ts'
 import type { AncestryDefinition, ClassDefinition } from '@/schemas/character.ts'
-import type { DataPack, DataPackMeta } from './types.ts'
+import type { DataPack, DataPackMeta, AddPackResult } from './types.ts'
 import { validateDataPack } from './validator.ts'
 
 // Core data imports
@@ -26,6 +26,11 @@ function mergeById<T extends { id: string }>(core: T[], custom: T[]): T[] {
   for (const item of core) map.set(item.id, item)
   for (const item of custom) map.set(item.id, item) // custom overrides
   return Array.from(map.values())
+}
+
+function replaceInPlace<T>(target: T[], source: T[]): void {
+  target.length = 0
+  target.push(...source)
 }
 
 function buildIndex<T extends { id: string }>(items: T[]): Map<string, T> {
@@ -60,6 +65,9 @@ class DataRegistry {
   private languageIndex = new Map<string, LanguageDefinition>()
   private ancestryIndex = new Map<string, AncestryDefinition>()
   private classIndex = new Map<string, ClassDefinition>()
+
+  // Item-to-pack tracking
+  private itemPackMap = new Map<string, string>()
 
   // Pack management
   private packs: DataPack[] = []
@@ -114,13 +122,38 @@ class DataRegistry {
   get commonLanguages() { return this.languages.filter(l => l.rarity === 'common') }
   get rareLanguages() { return this.languages.filter(l => l.rarity === 'rare') }
 
+  // ========== Pack Tracking ==========
+
+  getItemPackId(itemId: string): string | undefined {
+    return this.itemPackMap.get(itemId)
+  }
+
+  getPackColor(packId: string): string | undefined {
+    return this.packMetas.find(p => p.id === packId)?.color
+  }
+
+  setPackColor(packId: string, color: string | undefined) {
+    const pack = this.packs.find(p => p.id === packId)
+    if (!pack) return
+    pack.color = color || undefined
+    this.saveCustomPacks()
+    this.rebuild()
+    this.notify()
+  }
+
   // ========== Pack Management ==========
 
-  addPack(pack: DataPack): { success: boolean; error?: string } {
+  addPack(pack: DataPack): AddPackResult {
     const validation = validateDataPack(pack)
     if (!validation.valid) {
       return { success: false, error: validation.errors.join('; ') }
     }
+
+    // Detect ID conflicts
+    const warnings = this.detectConflicts(pack)
+
+    // Default enabled to true if not set
+    if (pack.enabled === undefined) pack.enabled = true
 
     // Remove existing pack with same ID
     this.packs = this.packs.filter(p => p.id !== pack.id)
@@ -128,7 +161,7 @@ class DataRegistry {
     this.saveCustomPacks()
     this.rebuild()
     this.notify()
-    return { success: true }
+    return { success: true, warnings: warnings.length > 0 ? warnings : undefined }
   }
 
   removePack(packId: string) {
@@ -148,7 +181,19 @@ class DataRegistry {
 
   exportPack(packId: string): string | null {
     const pack = this.packs.find(p => p.id === packId)
-    return pack ? JSON.stringify(pack, null, 2) : null
+    if (!pack) return null
+    // Strip 'enabled' from export so it defaults to true on reimport
+    const { enabled: _, ...exportable } = pack
+    return JSON.stringify(exportable, null, 2)
+  }
+
+  togglePack(packId: string) {
+    const pack = this.packs.find(p => p.id === packId)
+    if (!pack) return
+    pack.enabled = pack.enabled === false ? true : false
+    this.saveCustomPacks()
+    this.rebuild()
+    this.notify()
   }
 
   // ========== Change Notification ==========
@@ -164,8 +209,48 @@ class DataRegistry {
 
   // ========== Internal ==========
 
+  private detectConflicts(pack: DataPack): string[] {
+    const warnings: string[] = []
+    const coreData: Record<string, { id: string; name: string }[]> = {
+      monsters: CORE_MONSTERS, spells: CORE_SPELLS, weapons: CORE_WEAPONS,
+      armor: CORE_ARMOR, gear: CORE_GEAR, backgrounds: CORE_BACKGROUNDS,
+      deities: CORE_DEITIES, languages: CORE_LANGUAGES,
+      ancestries: CORE_ANCESTRIES, classes: CORE_CLASSES,
+    }
+
+    for (const [key, items] of Object.entries(pack.data)) {
+      if (!Array.isArray(items)) continue
+      const core = coreData[key]
+      if (!core) continue
+      const coreIds = new Set(core.map(c => c.id))
+
+      for (const item of items) {
+        if (coreIds.has(item.id)) {
+          const coreName = core.find(c => c.id === item.id)?.name
+          warnings.push(`${key}: "${item.name}" overrides core "${coreName ?? item.id}"`)
+        }
+      }
+
+      // Check other packs
+      for (const otherPack of this.packs) {
+        if (otherPack.id === pack.id) continue
+        const otherItems = otherPack.data[key as keyof typeof otherPack.data]
+        if (!Array.isArray(otherItems)) continue
+        const otherIds = new Set(otherItems.map((i: { id: string }) => i.id))
+        for (const item of items) {
+          if (otherIds.has(item.id)) {
+            warnings.push(`${key}: "${item.name}" overrides same ID from pack "${otherPack.name}"`)
+          }
+        }
+      }
+    }
+
+    return warnings
+  }
+
   private rebuild() {
-    // Collect all custom data
+    // Collect custom data from enabled packs only
+    const enabledPacks = this.packs.filter(p => p.enabled !== false)
     const customMonsters: MonsterDefinition[] = []
     const customSpells: SpellDefinition[] = []
     const customWeapons: WeaponDefinition[] = []
@@ -177,7 +262,7 @@ class DataRegistry {
     const customAncestries: AncestryDefinition[] = []
     const customClasses: ClassDefinition[] = []
 
-    for (const pack of this.packs) {
+    for (const pack of enabledPacks) {
       if (pack.data.monsters) customMonsters.push(...pack.data.monsters)
       if (pack.data.spells) customSpells.push(...pack.data.spells)
       if (pack.data.weapons) customWeapons.push(...pack.data.weapons)
@@ -190,17 +275,31 @@ class DataRegistry {
       if (pack.data.classes) customClasses.push(...pack.data.classes)
     }
 
-    // Merge core + custom
-    this.monsters = mergeById(CORE_MONSTERS, customMonsters)
-    this.spells = mergeById(CORE_SPELLS, customSpells)
-    this.weapons = mergeById(CORE_WEAPONS, customWeapons)
-    this.armor = mergeById(CORE_ARMOR, customArmor)
-    this.gear = mergeById(CORE_GEAR, customGear)
-    this.backgrounds = mergeById(CORE_BACKGROUNDS, customBackgrounds)
-    this.deities = mergeById(CORE_DEITIES, customDeities)
-    this.languages = mergeById(CORE_LANGUAGES, customLanguages)
-    this.ancestries = mergeById(CORE_ANCESTRIES, customAncestries)
-    this.classes = mergeById(CORE_CLASSES, customClasses)
+    // Merge core + custom (mutate in-place to keep exported references stable)
+    replaceInPlace(this.monsters, mergeById(CORE_MONSTERS, customMonsters))
+    replaceInPlace(this.spells, mergeById(CORE_SPELLS, customSpells))
+    replaceInPlace(this.weapons, mergeById(CORE_WEAPONS, customWeapons))
+    replaceInPlace(this.armor, mergeById(CORE_ARMOR, customArmor))
+    replaceInPlace(this.gear, mergeById(CORE_GEAR, customGear))
+    replaceInPlace(this.backgrounds, mergeById(CORE_BACKGROUNDS, customBackgrounds))
+    replaceInPlace(this.deities, mergeById(CORE_DEITIES, customDeities))
+    replaceInPlace(this.languages, mergeById(CORE_LANGUAGES, customLanguages))
+    replaceInPlace(this.ancestries, mergeById(CORE_ANCESTRIES, customAncestries))
+    replaceInPlace(this.classes, mergeById(CORE_CLASSES, customClasses))
+
+    // Build item-to-pack map
+    this.itemPackMap.clear()
+    for (const pack of enabledPacks) {
+      const categories = ['monsters', 'spells', 'weapons', 'armor', 'gear', 'backgrounds', 'deities', 'languages', 'ancestries', 'classes'] as const
+      for (const key of categories) {
+        const items = pack.data[key]
+        if (items) {
+          for (const item of items) {
+            this.itemPackMap.set(item.id, pack.id)
+          }
+        }
+      }
+    }
 
     // Build indexes
     this.monsterIndex = buildIndex(this.monsters)
@@ -221,6 +320,8 @@ class DataRegistry {
       author: p.author,
       version: p.version,
       description: p.description,
+      enabled: p.enabled !== false,
+      color: p.color,
       counts: {
         monsters: p.data.monsters?.length ?? 0,
         spells: p.data.spells?.length ?? 0,

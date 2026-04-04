@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import type { Character } from '@/schemas/character.ts'
-import { WEAPONS, ARMOR, GEAR } from '@/data/index.ts'
+import { WEAPONS, ARMOR, GEAR, getItemPackId } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { dataRegistry } from '@/lib/data/registry.ts'
 import { createInventoryItem } from '@/lib/rules/inventory.ts'
 import type { InventoryItem } from '@/schemas/inventory.ts'
 
@@ -18,9 +20,12 @@ interface Props {
 }
 
 export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onUpdateXp, onAddGold, onAddItem, onRemoveItem, onAdjustQuantity, onToggleLuckToken, onKick }: Props) {
+  useDataRegistry()
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'actions' | 'addItem' | 'removeItem'>('actions')
   const [itemSearch, setItemSearch] = useState('')
+  const [sourceFilter, setSourceFilter] = useState<string>('all')
+  const itemPacks = dataRegistry.getPacks().filter(p => p.enabled && (p.counts.weapons + p.counts.armor + p.counts.gear) > 0)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close on click outside
@@ -53,9 +58,13 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
     ...ARMOR.map(a => ({ id: a.id, name: a.name, category: 'armor' as const, slots: a.slots })),
     ...GEAR.map(g => ({ id: g.id, name: g.name, category: g.category, slots: g.slots })),
   ]
+  let sourceFilteredItems = allItems
+  if (sourceFilter === 'core') sourceFilteredItems = sourceFilteredItems.filter(i => !getItemPackId(i.id))
+  else if (sourceFilter !== 'all') sourceFilteredItems = sourceFilteredItems.filter(i => getItemPackId(i.id) === sourceFilter)
+
   const filteredItems = itemSearch
-    ? allItems.filter(i => i.name.toLowerCase().includes(itemSearch.toLowerCase()))
-    : allItems
+    ? sourceFilteredItems.filter(i => i.name.toLowerCase().includes(itemSearch.toLowerCase()))
+    : sourceFilteredItems
 
   return (
     <div className="relative" ref={menuRef}>
@@ -145,6 +154,19 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
 
             {tab === 'addItem' && (
               <div>
+                {itemPacks.length > 0 && (
+                  <select
+                    value={sourceFilter}
+                    onChange={e => setSourceFilter(e.target.value)}
+                    className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none mb-2"
+                  >
+                    <option value="all">All Sources</option>
+                    <option value="core">Core Only</option>
+                    {itemPacks.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                )}
                 <input
                   type="text"
                   value={itemSearch}

@@ -1,22 +1,28 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { MONSTERS } from '@/data/index.ts'
+import { MONSTERS, getItemPackId, getPackColor } from '@/data/index.ts'
+import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { sortPackFirst } from '@/lib/data/sort.ts'
 import { getAbilityModifier } from '@/schemas/reference.ts'
 import type { MonsterDefinition } from '@/schemas/monsters.ts'
+import { useSessionStore } from '@/stores/session-store.ts'
 
 export const Route = createFileRoute('/compendium/monsters')({
   component: MonstersReferencePage,
 })
 
 function MonstersReferencePage() {
+  useDataRegistry()
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState<number>(0) // 0 = all
+  const settings = useSessionStore(s => s.session?.settings)
 
-  const filtered = MONSTERS.filter(m => {
+  let filtered = MONSTERS.filter(m => {
     if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false
     if (levelFilter > 0 && m.level !== levelFilter) return false
     return true
   })
+  if (settings?.showPackMonstersFirst) filtered = sortPackFirst(filtered)
 
   const maxLevel = Math.max(...MONSTERS.map(m => m.level))
 
@@ -60,9 +66,10 @@ function MonstersReferencePage() {
 
 function MonsterCard({ monster: m }: { monster: MonsterDefinition }) {
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
+  const packColor = getPackColor(getItemPackId(m.id) ?? '')
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
       <div className="mb-2 flex items-baseline justify-between">
         <h2 className="text-lg font-bold">{m.name}</h2>
         <span className="text-sm text-muted-foreground">LV {m.level}</span>

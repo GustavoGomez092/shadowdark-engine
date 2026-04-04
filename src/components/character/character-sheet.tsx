@@ -1,7 +1,6 @@
 import type { Character, AbilityScore } from '@/schemas/character.ts'
 import type { InventoryItem } from '@/schemas/inventory.ts'
-import { getSpell } from '@/data/spells.ts'
-import { getClass } from '@/data/classes.ts'
+import { getSpell, getClass } from '@/data/index.ts'
 import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']

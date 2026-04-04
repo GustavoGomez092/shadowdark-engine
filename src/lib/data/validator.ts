@@ -1,4 +1,5 @@
 import type { DataPack } from './types.ts'
+import { DATA_PACK_SCHEMAS } from './schemas.ts'
 
 export interface ValidationResult {
   valid: boolean
@@ -28,7 +29,7 @@ export function validateDataPack(raw: unknown): ValidationResult {
   }
 
   const data = obj.data as Record<string, unknown>
-  const validKeys = ['monsters', 'spells', 'weapons', 'armor', 'gear', 'backgrounds', 'deities', 'languages', 'ancestries', 'classes']
+  const validKeys = Object.keys(DATA_PACK_SCHEMAS)
 
   for (const key of Object.keys(data)) {
     if (!validKeys.includes(key)) {
@@ -42,18 +43,15 @@ export function validateDataPack(raw: unknown): ValidationResult {
       continue
     }
 
-    // Validate each entry has at minimum an id and name
-    for (let i = 0; i < arr.length; i++) {
-      const item = arr[i]
-      if (!item || typeof item !== 'object') {
-        errors.push(`data.${key}[${i}]: must be an object`)
-        continue
-      }
-      if (!item.id || typeof item.id !== 'string') {
-        errors.push(`data.${key}[${i}]: missing "id" field`)
-      }
-      if (!item.name || typeof item.name !== 'string') {
-        errors.push(`data.${key}[${i}]: missing "name" field`)
+    // Validate with Zod schema
+    const schema = DATA_PACK_SCHEMAS[key]
+    if (schema) {
+      const result = schema.safeParse(arr)
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          const path = issue.path.length > 0 ? `[${issue.path.join('.')}]` : ''
+          errors.push(`data.${key}${path}: ${issue.message}`)
+        }
       }
     }
   }

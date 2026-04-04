@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { DataPackManager } from '@/components/gm/data-pack-manager.tsx'
+import { AISettingsPanel } from '@/components/ai/ai-settings.tsx'
 
 export const Route = createFileRoute('/gm/settings')({
   component: GMSettingsPage,
@@ -16,6 +17,8 @@ function GMSettingsPage() {
   const [torchMin, setTorchMin] = useState(session?.settings?.torchDurationMinutes ?? 60)
   const [lanternMin, setLanternMin] = useState(session?.settings?.lanternDurationMinutes ?? 60)
   const [campfireMin, setCampfireMin] = useState(session?.settings?.campfireDurationMinutes ?? 480)
+  const [showPackMonstersFirst, setShowPackMonstersFirst] = useState(session?.settings?.showPackMonstersFirst ?? false)
+  const [showPackItemsFirst, setShowPackItemsFirst] = useState(session?.settings?.showPackItemsFirst ?? false)
   const [saved, setSaved] = useState(false)
 
   function saveSettings() {
@@ -25,6 +28,8 @@ function GMSettingsPage() {
       torchDurationMinutes: torchMin,
       lanternDurationMinutes: lanternMin,
       campfireDurationMinutes: campfireMin,
+      showPackMonstersFirst,
+      showPackItemsFirst,
     }
     store.saveNow()
     setSaved(true)
@@ -150,6 +155,49 @@ function GMSettingsPage() {
       {/* Data Packs */}
       <div className="mb-6">
         <DataPackManager />
+      </div>
+
+      {/* Data Pack Display */}
+      <div className="mb-6 rounded-xl border border-border bg-card p-4">
+        <h2 className="mb-1 font-semibold">Data Pack Display</h2>
+        <p className="mb-4 text-xs text-muted-foreground">Control how data pack content appears in lists throughout the app.</p>
+
+        <div className="space-y-3">
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={showPackMonstersFirst}
+              onChange={e => setShowPackMonstersFirst(e.target.checked)}
+              className="h-4 w-4 rounded border-border accent-primary"
+            />
+            <span>Show pack monsters first in lists</span>
+          </label>
+
+          <label className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              checked={showPackItemsFirst}
+              onChange={e => setShowPackItemsFirst(e.target.checked)}
+              className="h-4 w-4 rounded border-border accent-primary"
+            />
+            <span>Show pack items first in lists</span>
+          </label>
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            onClick={saveSettings}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+          >
+            Save Settings
+          </button>
+          {saved && <span className="text-xs text-green-400">Saved!</span>}
+        </div>
+      </div>
+
+      {/* AI Settings */}
+      <div className="mb-6">
+        <AISettingsPanel />
       </div>
 
       {/* Danger Zone */}

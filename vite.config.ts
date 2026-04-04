@@ -26,6 +26,11 @@ const config = defineConfig({
     }),
     viteReact(),
   ],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: [],
+  },
 })
 
 export default config

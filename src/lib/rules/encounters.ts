@@ -4,7 +4,7 @@ import type { DangerLevel } from '@/schemas/reference.ts'
 import { getStartingDistance, getEncounterActivity, getEncounterReaction, ENCOUNTER_CHECK_INTERVALS, TREASURE_XP } from '@/schemas/reference.ts'
 import { rollDice } from '@/lib/dice/roller.ts'
 import { generateId } from '@/lib/utils/id.ts'
-import { MONSTERS } from '@/data/monsters.ts'
+import { MONSTERS } from '@/data/index.ts'
 
 export function checkForEncounter(): { roll: number; isEncounter: boolean } {
   const result = rollDice('1d6')
