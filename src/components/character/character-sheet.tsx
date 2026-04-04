@@ -39,7 +39,7 @@ export function CharacterSheet({
   onRest,
   onLevelUp,
 }: Props) {
-  const { t, ti, tData } = useLocale()
+  const { t, ti, tData, tDataNested } = useLocale()
   const [showLevelUp, setShowLevelUp] = useState(false)
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
   const xpNeeded = getXpToNextLevel(c)
@@ -175,17 +175,20 @@ export function CharacterSheet({
           <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="mb-3 font-semibold">{ti('character.abilities', { className: tData('classes', cls.id, 'name', cls.name) })}</h3>
             <div className="space-y-2 text-sm">
-              {features.map(f => (
+              {features.map(f => {
+                const featureKey = f.mechanic.type.replace(/_/g, '-')
+                return (
                 <div key={f.name} className="rounded-lg border border-border p-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{f.name}</span>
+                    <span className="font-medium">{tDataNested('classes', cls.id, ['features', featureKey, 'name'], f.name)}</span>
                     {f.level > 1 && (
                       <span className="text-xs text-muted-foreground">Lv {f.level}</span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{f.description}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{tDataNested('classes', cls.id, ['features', featureKey, 'description'], f.description)}</p>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )

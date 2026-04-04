@@ -136,3 +136,21 @@ export function tData(category: string, id: string, field: string, fallback: str
   if (!itemData) return fallback
   return itemData[field] ?? fallback
 }
+
+/**
+ * Translate nested game data (e.g., class features, nested within a class).
+ * Usage: tDataNested('classes', 'fighter', ['features', 'hauler', 'name'], 'Hauler')
+ */
+export function tDataNested(category: string, id: string, path: string[], fallback: string): string {
+  if (currentLocale === 'en') return fallback
+  const overlay = DATA_OVERLAYS[currentLocale]
+  if (!overlay) return fallback
+  const categoryData = overlay[category]
+  if (!categoryData) return fallback
+  let current: unknown = categoryData[id]
+  for (const key of path) {
+    if (!current || typeof current !== 'object') return fallback
+    current = (current as Record<string, unknown>)[key]
+  }
+  return typeof current === 'string' ? current : fallback
+}

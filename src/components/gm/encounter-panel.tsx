@@ -471,7 +471,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
 }
 
 function CharacterAbilities({ character: c }: { character: Character }) {
-  const { t } = useLocale()
+  const { t, tDataNested } = useLocale()
   const classDef = getClass(c.class)
   if (!classDef) return null
   const activeFeatures = classDef.features.filter(f => f.level <= c.level)
@@ -480,9 +480,12 @@ function CharacterAbilities({ character: c }: { character: Character }) {
     <div>
       <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.classAbilities')}</p>
       <div className="space-y-1 text-xs">
-        {activeFeatures.map((f, i) => (
-          <p key={i}><span className="font-semibold">{f.name}:</span> <span className="text-muted-foreground">{f.description}</span></p>
-        ))}
+        {activeFeatures.map((f, i) => {
+          const fk = f.mechanic.type.replace(/_/g, '-')
+          return (
+            <p key={i}><span className="font-semibold">{tDataNested('classes', classDef.id, ['features', fk, 'name'], f.name)}:</span> <span className="text-muted-foreground">{tDataNested('classes', classDef.id, ['features', fk, 'description'], f.description)}</span></p>
+          )
+        })}
       </div>
     </div>
   )
