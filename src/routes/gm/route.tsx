@@ -14,7 +14,7 @@ function GMLayout() {
 
   return (
     <div className="min-h-screen">
-      {isActive && <GMHeader />}
+      <GMHeader />
       <Outlet />
 
       {/* AI — available on all GM pages when session is active */}

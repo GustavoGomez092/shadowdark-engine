@@ -33,7 +33,23 @@ export function GMHeader() {
   const matches = useMatches()
   const currentPath = matches[matches.length - 1]?.fullPath ?? ''
 
-  if (!session) return null
+  if (!session) {
+    return (
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-30">
+        <div className="mx-auto max-w-7xl px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold">ShadowDark Engine</h1>
+              <p className="text-xs text-muted-foreground">No active session</p>
+            </div>
+            <Link to="/gm/create" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90">
+              Sessions
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const sessionId = session.room.id
 
