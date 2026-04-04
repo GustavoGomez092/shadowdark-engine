@@ -501,6 +501,7 @@ function ChatInput({ onSend, disabled }: { onSend: (content: string) => void; di
 }
 
 function RestButton({ character, onRest }: { character: Character; onRest: () => void }) {
+  const { t } = useLocale()
   const [showConfirm, setShowConfirm] = useState(false)
   const c = character
   const hpMissing = c.maxHp - c.currentHp
@@ -512,7 +513,7 @@ function RestButton({ character, onRest }: { character: Character; onRest: () =>
   if (showConfirm) {
     return (
       <div className="mt-4 rounded-xl border border-amber-500/30 bg-card p-4">
-        <h3 className="text-sm font-bold text-amber-400 mb-2">Take a Rest (8 hours)</h3>
+        <h3 className="text-sm font-bold text-amber-400 mb-2">{t('character.takeRest')}</h3>
         <div className="text-xs space-y-1.5 mb-4">
           <p className="text-muted-foreground">Requires 8 hours of sleep and <span className="text-foreground font-medium">1 ration</span> (consumed).</p>
 
@@ -543,13 +544,13 @@ function RestButton({ character, onRest }: { character: Character; onRest: () =>
             disabled={!hasRation}
             className="flex-1 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-40"
           >
-            {hasRation ? 'Rest Now' : 'No Rations Available'}
+            {hasRation ? t('character.restNow') : t('character.noRations')}
           </button>
           <button
             onClick={() => setShowConfirm(false)}
             className="rounded-lg border border-border px-4 py-2 text-xs hover:bg-accent transition"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       </div>
@@ -561,7 +562,7 @@ function RestButton({ character, onRest }: { character: Character; onRest: () =>
       onClick={() => setShowConfirm(true)}
       className="mt-4 w-full rounded-lg border border-border py-2.5 text-sm font-medium hover:bg-accent transition"
     >
-      Take a Rest (8 hours + ration){needsRest && <span className="ml-1 text-amber-400">•</span>}
+      {t('character.takeRest')}{needsRest && <span className="ml-1 text-amber-400">•</span>}
     </button>
   )
 }

@@ -212,6 +212,8 @@
   "character.notes": "Notes",
   "character.notesPlaceholder": "Character notes...",
   "character.takeRest": "Take a Rest (8 hours + ration)",
+  "character.restNow": "Rest Now",
+  "character.noRations": "No Rations Available",
   "character.equipped": "(E)",
   "character.background": "Background:",
   "character.deity": "Deity:",

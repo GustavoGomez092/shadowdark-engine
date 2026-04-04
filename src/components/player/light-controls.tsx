@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Character } from '@/schemas/character.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   character: Character
@@ -18,6 +19,7 @@ type ConfirmAction =
   | null
 
 export function LightControls({ character, isInDarkness, hasActiveLight, isPaused, onLightTorch, onLightLantern, onLightCampfire }: Props) {
+  const { t } = useLocale()
   const [confirm, setConfirm] = useState<ConfirmAction>(null)
 
   const torches = character.inventory.items.filter(i =>
@@ -74,12 +76,12 @@ export function LightControls({ character, isInDarkness, hasActiveLight, isPause
       {/* Status */}
       {isInDarkness ? (
         <div className="rounded-lg bg-red-500/15 border border-red-500/30 p-2 text-center animate-pulse">
-          <span className="text-xs font-bold text-red-400">🌑 DARKNESS</span>
-          <p className="text-[9px] text-red-400/70 mt-0.5">Disadvantage on most tasks</p>
+          <span className="text-xs font-bold text-red-400">🌑 {t('light.darknessWarning')}</span>
+          <p className="text-[9px] text-red-400/70 mt-0.5">{t('light.darknessDescription')}</p>
         </div>
       ) : hasActiveLight ? (
         <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-1.5 text-center">
-          <span className="text-[10px] font-semibold text-amber-400">🔥 Light Active</span>
+          <span className="text-[10px] font-semibold text-amber-400">🔥 {t('light.lightActive')}</span>
         </div>
       ) : null}
 

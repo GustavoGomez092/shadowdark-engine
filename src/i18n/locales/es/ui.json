@@ -212,6 +212,8 @@
   "character.notes": "Notas",
   "character.notesPlaceholder": "Notas del personaje...",
   "character.takeRest": "Descansar (8 horas + raci\u00f3n)",
+  "character.restNow": "Descansar ahora",
+  "character.noRations": "Sin raciones disponibles",
   "character.equipped": "(E)",
   "character.background": "Trasfondo:",
   "character.deity": "Deidad:",
