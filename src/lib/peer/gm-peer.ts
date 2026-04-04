@@ -208,6 +208,46 @@ export class GMPeerHost {
     }
   }
 
+  /**
+   * Rotate the room code: broadcast the new code to all players,
+   * then create a new peer with the new code. Players auto-reconnect.
+   */
+  async rotateRoomCode(): Promise<string> {
+    const newCode = `sd-${generateRoomCode()}`
+    console.log(`[GM Peer] Rotating room code: ${this._roomCode} → ${newCode}`)
+
+    // 1. Broadcast the new code to all connected players BEFORE destroying
+    this.broadcast({ type: 'room_code_changed', newRoomCode: newCode })
+
+    // 2. Wait briefly so messages can be delivered
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // 3. Close all current connections and destroy old peer
+    for (const peer of this.connections.values()) {
+      peer.connection.close()
+    }
+    this.connections.clear()
+    this._isReady = false
+    this.peer?.destroy()
+    this.peer = null
+
+    // 4. Create new peer with new code
+    return new Promise((resolve, reject) => {
+      this.peer = new Peer(newCode)
+      this.peer.on('open', (id) => {
+        this._roomCode = id
+        this._isReady = true
+        this.setupListeners()
+        console.log(`[GM Peer] Room code rotated successfully to ${id}`)
+        resolve(id)
+      })
+      this.peer.on('error', (err: { type?: string }) => {
+        console.error('[GM Peer] Rotation error:', err)
+        reject(err)
+      })
+    })
+  }
+
   destroy() {
     for (const peer of this.connections.values()) {
       peer.connection.close()

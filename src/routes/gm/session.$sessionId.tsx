@@ -597,7 +597,25 @@ function GMSessionPage() {
     const syncInterval = setInterval(() => {
       broadcastStateSync()
     }, 60000)
-    return () => { clearInterval(tickInterval); clearInterval(syncInterval) }
+
+    // Rotate room code every 25 minutes to prevent PeerJS timeout disconnections
+    const ROTATION_INTERVAL = 25 * 60 * 1000
+    const rotationInterval = setInterval(async () => {
+      try {
+        const newCode = await gmPeer.rotateRoomCode()
+        // Update session state with new room code
+        const store = useSessionStore.getState()
+        if (store.session) {
+          store.session.room.gmPeerId = newCode
+          store.saveNow()
+        }
+        console.log(`[Session] Room code rotated to ${newCode}`)
+      } catch (err) {
+        console.error('[Session] Room code rotation failed:', err)
+      }
+    }, ROTATION_INTERVAL)
+
+    return () => { clearInterval(tickInterval); clearInterval(syncInterval); clearInterval(rotationInterval) }
   }, [isReady, broadcastStateSync])
 
   const [rewardsState, setRewardsState] = useState<{ show: boolean; hasTreasure: boolean; encounterType: 'random' | 'story' }>({ show: false, hasTreasure: false, encounterType: 'random' })

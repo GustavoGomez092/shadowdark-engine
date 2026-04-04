@@ -125,6 +125,17 @@ export class PlayerPeerClient {
         this.callbacks.onError(`Disconnected: ${message.reason}`)
         this.destroy()
         break
+      case 'room_code_changed':
+        console.log(`[Player Peer] Room code rotating to: ${message.newRoomCode}`)
+        this.roomCode = message.newRoomCode
+        // Close current connection and reconnect to new code
+        this.connection?.close()
+        this._isConnected = false
+        // Brief delay then reconnect to the new room code
+        setTimeout(() => {
+          this.connectToRoom(message.newRoomCode)
+        }, 1000)
+        break
       default:
         this.callbacks.onMessage(message)
         break

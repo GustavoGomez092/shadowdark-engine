@@ -184,6 +184,7 @@ export type GMToPlayerMessage =
   | StoreOpenMessage
   | StoreCloseMessage
   | ForceDisconnectMessage
+  | RoomCodeChangedMessage
   | PongMessage
   | ErrorMessage;
 
@@ -259,6 +260,11 @@ export interface StoreCloseMessage {
 export interface ForceDisconnectMessage {
   type: 'force_disconnect';
   reason: string;
+}
+
+export interface RoomCodeChangedMessage {
+  type: 'room_code_changed';
+  newRoomCode: string;
 }
 
 export interface PongMessage {
