@@ -157,7 +157,7 @@ In **Settings**, customize torch, lantern, and campfire durations for faster-pac
 - [x] **AI Integration** -- LLM-powered GM assistant (Ollama + OpenAI-compatible) with encounter narration, NPC generation, room descriptions, store creation, ruling help, and contextual scene awareness
 - [x] **Session export/import** -- save full sessions as JSON files for backup and sharing, with drag-and-drop import
 - [x] **Level-up wizard** -- guided level-up flow with HP rolling, talent selection, new spells
-- [x] **Multi-language support** -- i18n with 449 translated strings, English + Spanish, language picker on all screens
+- [x] **Multi-language support** -- full i18n with 560+ UI strings, 811 game data entries, and AI context translation. English + Spanish with data overlay system for community-contributed languages
 
 ## License
 
