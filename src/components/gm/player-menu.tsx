@@ -5,6 +5,7 @@ import { useDataRegistry } from '@/hooks/use-data-registry.ts'
 import { dataRegistry } from '@/lib/data/registry.ts'
 import { createInventoryItem } from '@/lib/rules/inventory.ts'
 import type { InventoryItem } from '@/schemas/inventory.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   character: Character | null
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onUpdateXp, onAddGold, onAddItem, onRemoveItem, onAdjustQuantity, onToggleLuckToken, onKick }: Props) {
+  const { t, ti } = useLocale()
   useDataRegistry()
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'actions' | 'addItem' | 'removeItem'>('actions')
@@ -45,7 +47,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
         {open && (
           <div className="absolute right-0 top-8 z-50 w-48 rounded-lg border border-border bg-card p-2 shadow-lg">
             <button onClick={() => { onKick(); setOpen(false) }} className="w-full rounded px-3 py-1.5 text-left text-xs text-red-400 hover:bg-red-500/10">
-              Kick Player
+              {t('gm.kickPlayer')}
             </button>
           </div>
         )}
@@ -80,13 +82,13 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
 
           {/* Tab Buttons */}
           <div className="flex border-b border-border">
-            {(['actions', 'addItem', 'removeItem'] as const).map(t => (
+            {(['actions', 'addItem', 'removeItem'] as const).map(tb => (
               <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`flex-1 py-1.5 text-[10px] font-semibold uppercase transition ${tab === t ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                key={tb}
+                onClick={() => setTab(tb)}
+                className={`flex-1 py-1.5 text-[10px] font-semibold uppercase transition ${tab === tb ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                {t === 'actions' ? 'Actions' : t === 'addItem' ? 'Add Item' : 'Items'}
+                {tb === 'actions' ? t('player.menu.actions') : tb === 'addItem' ? t('player.menu.addItem') : t('player.menu.items')}
               </button>
             ))}
           </div>
@@ -96,7 +98,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
               <div className="space-y-2">
                 {/* HP */}
                 <div>
-                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">HP ({character.currentHp}/{character.maxHp})</p>
+                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">{ti('player.menu.hp', { current: character.currentHp, max: character.maxHp })}</p>
                   <div className="flex gap-1">
                     {[-5, -1, 1, 5].map(d => (
                       <button key={d} onClick={() => onUpdateHp(d)} className={`flex-1 rounded py-1 text-xs font-bold transition ${d < 0 ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'}`}>
@@ -108,7 +110,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
 
                 {/* XP */}
                 <div>
-                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">XP ({character.xp}/{character.level * 10})</p>
+                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">{ti('player.menu.xp', { current: character.xp, max: character.level * 10 })}</p>
                   <div className="flex gap-1">
                     {[1, 3, 5].map(d => (
                       <button key={d} onClick={() => onUpdateXp(d)} className="flex-1 rounded bg-primary/10 py-1 text-xs font-bold text-primary hover:bg-primary/20 transition">
@@ -120,7 +122,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
 
                 {/* Gold */}
                 <div>
-                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">Gold ({character.inventory.coins.gp} gp)</p>
+                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">{ti('player.menu.gold', { amount: character.inventory.coins.gp })}</p>
                   <div className="flex gap-1">
                     {[5, 10, 25, 50].map(d => (
                       <button key={d} onClick={() => onAddGold(d)} className="flex-1 rounded bg-amber-500/10 py-1 text-xs font-bold text-amber-400 hover:bg-amber-500/20 transition">
@@ -132,7 +134,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
 
                 {/* Luck Token */}
                 <div>
-                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">Luck Token</p>
+                  <p className="text-[9px] uppercase text-muted-foreground font-semibold mb-1">{t('player.menu.luckToken')}</p>
                   <button
                     onClick={onToggleLuckToken}
                     className={`w-full rounded py-1.5 text-xs font-bold transition ${
@@ -141,13 +143,13 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
                         : 'bg-secondary text-muted-foreground hover:text-amber-400 hover:bg-amber-500/10'
                     }`}
                   >
-                    {character.hasLuckToken ? '★ Has Luck Token — Click to Remove' : '☆ Grant Luck Token'}
+                    {character.hasLuckToken ? `★ ${t('player.menu.hasLuckToken')}` : `☆ ${t('player.menu.grantLuckToken')}`}
                   </button>
                 </div>
 
                 {/* Kick */}
                 <button onClick={() => { onKick(); setOpen(false) }} className="w-full rounded py-1.5 text-xs text-red-400 border border-red-500/20 hover:bg-red-500/10 transition mt-1">
-                  Kick Player
+                  {t('gm.kickPlayer')}
                 </button>
               </div>
             )}
@@ -160,8 +162,8 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
                     onChange={e => setSourceFilter(e.target.value)}
                     className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none mb-2"
                   >
-                    <option value="all">All Sources</option>
-                    <option value="core">Core Only</option>
+                    <option value="all">{t('common.allSources')}</option>
+                    <option value="core">{t('common.coreOnly')}</option>
                     {itemPacks.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
@@ -171,7 +173,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
                   type="text"
                   value={itemSearch}
                   onChange={e => setItemSearch(e.target.value)}
-                  placeholder="Search items..."
+                  placeholder={t('player.menu.searchItems')}
                   className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs mb-2 outline-none focus:ring-1 focus:ring-ring"
                 />
                 <div className="space-y-0.5">
@@ -195,7 +197,7 @@ export function PlayerMenu({ character, playerName: _playerName, onUpdateHp, onU
             {tab === 'removeItem' && (
               <div>
                 {character.inventory.items.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-2 text-center">No items</p>
+                  <p className="text-xs text-muted-foreground py-2 text-center">{t('common.noItems')}</p>
                 ) : (
                   <div className="space-y-0.5">
                     {character.inventory.items.map(item => (

@@ -6,6 +6,7 @@ import { generateId } from "@/lib/utils/id.ts"
 import type { Character } from "@/schemas/character.ts"
 import type { MonsterDefinition, MonsterInstance } from "@/schemas/monsters.ts"
 import { getAbilityModifier } from "@/schemas/reference.ts"
+import { useLocale } from '@/hooks/use-locale.ts'
 
 type Selection = { type: 'monster'; id: string } | { type: 'character'; id: string } | null
 
@@ -34,6 +35,7 @@ export function EncounterPanel({
   onUpdateCharacterHp,
   onResolveEncounter,
 }: Props) {
+  const { t, ti } = useLocale()
   const [encounterType, setEncounterType] = useState<'random' | 'story'>('random')
   const [selection, setSelection] = useState<Selection>(
     monsters[0] ? { type: 'monster', id: monsters[0].id } : null
@@ -60,7 +62,7 @@ export function EncounterPanel({
         }`}>
           <div className="flex items-center gap-2">
             <span className={`text-[10px] font-bold uppercase ${activeTurnIsMonster ? 'text-red-400' : 'text-primary'}`}>
-              Active Turn
+              {t('combat.activeTurn')}
             </span>
             <span className="font-semibold">{activeTurnName}</span>
           </div>
@@ -68,37 +70,37 @@ export function EncounterPanel({
             onClick={() => onSetActiveTurn(null)}
             className="rounded px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent"
           >
-            Clear
+            {t('common.clear')}
           </button>
         </div>
       )}
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <h2 className="font-semibold">Encounter</h2>
+          <h2 className="font-semibold">{t('combat.encounter')}</h2>
           <div className="flex gap-0.5 rounded-lg border border-border p-0.5">
-            {(['random', 'story'] as const).map(t => (
+            {(['random', 'story'] as const).map(et => (
               <button
-                key={t}
-                onClick={() => setEncounterType(t)}
+                key={et}
+                onClick={() => setEncounterType(et)}
                 className={`rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
-                  encounterType === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  encounterType === et ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {t}
+                {t(`combat.${et}`)}
               </button>
             ))}
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400">
-            {activeMonsters.length} ACTIVE
+            {ti('combat.activeCount', { count: activeMonsters.length })}
           </span>
           <button
             onClick={() => onResolveEncounter(encounterType)}
             className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition"
           >
-            Resolve Encounter
+            {t('combat.resolveEncounter')}
           </button>
         </div>
       </div>
@@ -107,7 +109,7 @@ export function EncounterPanel({
         {/* Left: Spawned Threats */}
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Spawned Threats
+            {t('combat.spawnedThreats')}
           </p>
           <div className="space-y-1.5">
             {activeMonsters.map((m) => {
@@ -140,7 +142,7 @@ export function EncounterPanel({
                           setSelection({ type: 'monster', id: m.id })
                         }}
                         className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'}`}
-                        title="Set active turn"
+                        title={t('combat.setActiveTurn')}
                       >{isActiveTurn ? '■' : '▷'}</button>
                       <span className="text-sm font-semibold">{m.name}</span>
                     </div>
@@ -170,7 +172,7 @@ export function EncounterPanel({
             })}
             {defeatedMonsters.length > 0 && (
               <div className="mt-2 border-t border-border/30 pt-2">
-                <p className="mb-1 text-[9px] uppercase text-muted-foreground">Defeated</p>
+                <p className="mb-1 text-[9px] uppercase text-muted-foreground">{t('combat.defeated')}</p>
                 {defeatedMonsters.map((m) => (
                   <div key={m.id} className="flex items-center justify-between py-0.5 text-xs text-muted-foreground line-through">
                     <span>{m.name}</span>
@@ -216,7 +218,7 @@ export function EncounterPanel({
             />
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Select a threat or party member
+              {t('combat.selectThreatOrPartyMember')}
             </div>
           )}
         </div>
@@ -224,7 +226,7 @@ export function EncounterPanel({
         {/* Right: The Party */}
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            The Party
+            {t('combat.theParty')}
           </p>
           <div className="space-y-1.5">
             {characters.map((c) => {
@@ -250,7 +252,7 @@ export function EncounterPanel({
                           setSelection({ type: 'character', id: c.id })
                         }}
                         className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'}`}
-                        title="Set active turn"
+                        title={t('combat.setActiveTurn')}
                       >{isActiveTurn ? '■' : '▷'}</button>
                       <span className="text-sm font-semibold">{c.name}</span>
                       <span className="text-[10px] text-muted-foreground capitalize">
@@ -285,6 +287,7 @@ export function EncounterPanel({
 function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
   instance: MonsterInstance; definition: MonsterDefinition; onHpChange: (delta: number) => void; onDefeat: () => void
 }) {
+  const { t } = useLocale()
   const hpPercent = instance.maxHp > 0 ? (instance.currentHp / instance.maxHp) * 100 : 0
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 
@@ -313,9 +316,9 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
         <div className={`h-2 rounded-full transition-all ${hpPercent > 50 ? "bg-green-500" : hpPercent > 25 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${hpPercent}%` }} />
       </div>
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">AC</div><div className="text-xl font-bold">{definition.ac}</div></div>
-        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">Attack</div><div className="text-xl font-bold">{fmt(definition.attacks[0]?.bonus ?? 0)}</div></div>
-        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">Speed</div><div className="text-xl font-bold capitalize">{definition.movement.double ? "Dbl " : ""}{definition.movement.normal}</div></div>
+        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.ac')}</div><div className="text-xl font-bold">{definition.ac}</div></div>
+        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('combat.attack')}</div><div className="text-xl font-bold">{fmt(definition.attacks[0]?.bonus ?? 0)}</div></div>
+        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('combat.speed')}</div><div className="text-xl font-bold capitalize">{definition.movement.double ? "Dbl " : ""}{definition.movement.normal}</div></div>
       </div>
       <div className="grid grid-cols-6 gap-1 text-center text-xs">
         {(["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const).map((stat) => (
@@ -327,7 +330,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
         ))}
       </div>
       <div>
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Attacks</p>
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.attacks')}</p>
         <div className="space-y-1">
           {definition.attacks.map((a, i) => (
             <div key={i} className="rounded-lg border border-border/50 px-3 py-2 text-sm">
@@ -339,7 +342,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
       </div>
       {definition.abilities.length > 0 && (
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Abilities</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.monsterAbilities')}</p>
           <div className="space-y-1 text-xs">
             {definition.abilities.map((a, i) => (
               <p key={i}><span className="font-semibold">{a.name}:</span> <span className="text-muted-foreground">{a.description}</span></p>
@@ -349,7 +352,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
       )}
       {definition.description && (
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Description</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.monsterDescription')}</p>
           <p className="text-xs text-muted-foreground italic leading-relaxed">{definition.description}</p>
         </div>
       )}
@@ -362,7 +365,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
       )}
       {instance.currentHp <= 0 && !instance.isDefeated && (
         <button onClick={onDefeat} className="w-full rounded-lg bg-red-500/20 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/30 transition">
-          Mark as Defeated
+          {t('combat.markAsDefeated')}
         </button>
       )}
     </div>
@@ -370,6 +373,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
 }
 
 function CharacterDetail({ character: c, onHpChange }: { character: Character; onHpChange: (delta: number) => void }) {
+  const { t } = useLocale()
   const hpPercent = c.maxHp > 0 ? (c.currentHp / c.maxHp) * 100 : 0
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 
@@ -398,9 +402,9 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
         <div className={`h-2 rounded-full transition-all ${hpPercent > 50 ? "bg-green-500" : hpPercent > 25 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${hpPercent}%` }} />
       </div>
       <div className="grid grid-cols-4 gap-2 text-center">
-        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">AC</div><div className="text-xl font-bold">{c.computed.ac}</div></div>
-        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">Melee</div><div className="text-xl font-bold">{fmt(c.computed.meleeAttackBonus)}</div></div>
-        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">Ranged</div><div className="text-xl font-bold">{fmt(c.computed.rangedAttackBonus)}</div></div>
+        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.ac')}</div><div className="text-xl font-bold">{c.computed.ac}</div></div>
+        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.melee')}</div><div className="text-xl font-bold">{fmt(c.computed.meleeAttackBonus)}</div></div>
+        <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.ranged')}</div><div className="text-xl font-bold">{fmt(c.computed.rangedAttackBonus)}</div></div>
         {c.computed.spellCheckBonus != null && (
           <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">Spell</div><div className="text-xl font-bold">{fmt(c.computed.spellCheckBonus)}</div></div>
         )}
@@ -423,7 +427,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
       )}
       {c.inventory.items.filter(i => i.equipped && i.weapon).length > 0 && (
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Equipped Weapons</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.equippedWeapons')}</p>
           <div className="space-y-1">
             {c.inventory.items.filter(i => i.equipped && i.weapon).map(w => (
               <div key={w.id} className="rounded-lg border border-border/50 px-3 py-2 text-sm font-medium">
@@ -447,7 +451,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
       {/* Talents */}
       {c.talents.length > 0 && (
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Talents</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('character.talents')}</p>
           <div className="space-y-1 text-xs">
             {c.talents.map((t) => (
               <p key={t.id}><span className="font-semibold">{t.description}</span></p>
@@ -458,7 +462,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
       {/* Player Notes */}
       {c.notes && (
         <div>
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Player Notes</p>
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.playerNotes')}</p>
           <p className="text-xs text-muted-foreground italic leading-relaxed whitespace-pre-wrap">{c.notes}</p>
         </div>
       )}
@@ -467,13 +471,14 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
 }
 
 function CharacterAbilities({ character: c }: { character: Character }) {
+  const { t } = useLocale()
   const classDef = getClass(c.class)
   if (!classDef) return null
   const activeFeatures = classDef.features.filter(f => f.level <= c.level)
   if (activeFeatures.length === 0) return null
   return (
     <div>
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Class Abilities</p>
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.classAbilities')}</p>
       <div className="space-y-1 text-xs">
         {activeFeatures.map((f, i) => (
           <p key={i}><span className="font-semibold">{f.name}:</span> <span className="text-muted-foreground">{f.description}</span></p>

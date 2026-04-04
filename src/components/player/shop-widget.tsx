@@ -3,6 +3,7 @@ import type { Character } from '@/schemas/character.ts'
 import type { PublicStoreInfo } from '@/schemas/session.ts'
 import type { StoreItem } from '@/schemas/stores.ts'
 import { getWeapon, getArmor, getGear } from '@/data/index.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 function formatCost(gp: number): string {
   if (gp >= 1) return `${gp} gp`
@@ -46,6 +47,7 @@ interface Props {
 }
 
 export function ShopWidget({ store, character, onBuy, onSell }: Props) {
+  const { t } = useLocale()
   const [tab, setTab] = useState<'buy' | 'sell'>('buy')
   const [search, setSearch] = useState('')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -73,13 +75,13 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
           className={`flex-1 rounded-md py-1 text-xs font-semibold transition ${
             tab === 'buy' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
           }`}
-        >Buy</button>
+        >{t('common.buy')}</button>
         <button
           onClick={() => setTab('sell')}
           className={`flex-1 rounded-md py-1 text-xs font-semibold transition ${
             tab === 'sell' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
           }`}
-        >Sell</button>
+        >{t('common.sell')}</button>
       </div>
 
       {tab === 'buy' && (
@@ -88,7 +90,7 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search items..."
+            placeholder={t('store.searchItems')}
             className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs mb-2 outline-none focus:ring-1 focus:ring-ring"
           />
           <div className="max-h-64 space-y-0.5 overflow-y-auto">
@@ -116,7 +118,7 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
                         disabled={!canAfford}
                         className="rounded bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary hover:bg-primary/25 disabled:opacity-30 disabled:cursor-not-allowed transition"
                       >
-                        Buy
+                        {t('common.buy')}
                       </button>
                     </div>
                   </div>
@@ -133,7 +135,7 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
       {tab === 'sell' && (
         <div className="max-h-64 space-y-0.5 overflow-y-auto">
           {sellableItems.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-4 text-center">No items to sell (equipped items can't be sold)</p>
+            <p className="text-xs text-muted-foreground py-4 text-center">{t('player.noItemsToSell')}</p>
           ) : (
             sellableItems.map(item => {
               const sellPrice = Math.max(1, Math.floor(item.slots * 2))
@@ -149,7 +151,7 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
                       onClick={() => onSell(store.id, item.id, item.name, sellPrice)}
                       className="rounded bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400 hover:bg-amber-500/25 transition"
                     >
-                      Sell
+                      {t('common.sell')}
                     </button>
                   </div>
                 </div>

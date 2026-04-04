@@ -7,9 +7,16 @@ import { getAbilityModifier } from '@/schemas/reference.ts'
 import { rollDice } from '@/lib/dice/roller.ts'
 import { createCharacter, rollStartingHP, rollStartingGold, getStartingLanguages } from '@/lib/rules/character.ts'
 import type { Character } from '@/schemas/character.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
-const STEPS = ['Roll Stats', 'Ancestry', 'Class', 'Details', 'Review']
+const STEP_KEYS = [
+  'character.creator.rollStats',
+  'character.creator.ancestry',
+  'character.creator.class',
+  'character.creator.details',
+  'character.creator.review',
+] as const
 
 interface Props {
   playerId: string
@@ -20,6 +27,7 @@ interface Props {
 
 export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }: Props) {
   useDataRegistry()
+  const { t, ti } = useLocale()
   const [step, setStep] = useState(0)
   const [stats, setStats] = useState<AbilityScores | null>(null)
   const [rerollsUsed, setRerollsUsed] = useState(0)
@@ -100,8 +108,8 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
     <div className="mx-auto max-w-2xl px-4 py-8">
       {/* Step indicators */}
       <div className="mb-8 flex items-center justify-center gap-2">
-        {STEPS.map((s, i) => (
-          <div key={s} className="flex items-center gap-2">
+        {STEP_KEYS.map((key, i) => (
+          <div key={key} className="flex items-center gap-2">
             <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
               i === step ? 'bg-primary text-primary-foreground' :
               i < step ? 'bg-primary/20 text-primary' : 'bg-secondary text-muted-foreground'
@@ -109,9 +117,9 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
               {i + 1}
             </div>
             <span className={`hidden text-sm sm:inline ${i === step ? 'font-semibold' : 'text-muted-foreground'}`}>
-              {s}
+              {t(key)}
             </span>
-            {i < STEPS.length - 1 && <div className="mx-1 h-px w-6 bg-border" />}
+            {i < STEP_KEYS.length - 1 && <div className="mx-1 h-px w-6 bg-border" />}
           </div>
         ))}
       </div>
@@ -119,12 +127,12 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
       {/* Step 0: Roll Stats */}
       {step === 0 && (
         <div>
-          <h2 className="mb-4 text-2xl font-bold">Roll Ability Scores</h2>
-          <p className="mb-6 text-muted-foreground">Roll 3d6 in order for each ability score.</p>
+          <h2 className="mb-4 text-2xl font-bold">{t('character.creator.rollAbilityScores')}</h2>
+          <p className="mb-6 text-muted-foreground">{t('character.creator.rollDescription')}</p>
 
           {!stats ? (
             <button onClick={() => rollStats(true)} className="rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90 transition">
-              Roll 3d6 for Each Stat
+              {t('character.creator.rollForEachStat')}
             </button>
           ) : (
             <div>
@@ -139,13 +147,13 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
               </div>
               {!hasHighStat && (
                 <p className="mb-4 text-sm text-amber-400">
-                  No stat is 14 or higher — free reroll (not counted).
+                  {t('character.creator.noStatHighEnough')}
                 </p>
               )}
               {rerollsRemaining !== undefined && (
                 <p className="mb-2 text-xs text-muted-foreground">
-                  Rerolls: {rerollsRemaining} of {maxRerolls} remaining
-                  {!hasHighStat && ' (this reroll is free)'}
+                  {ti('character.creator.rerollsRemaining', { remaining: rerollsRemaining, max: maxRerolls })}
+                  {!hasHighStat && ` ${t('character.creator.thisRerollIsFree')}`}
                 </p>
               )}
               <button
@@ -153,8 +161,8 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                 disabled={!canReroll}
                 className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-accent transition disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                {!hasHighStat ? 'Free Reroll (no stat ≥ 14)' :
-                 rerollsRemaining !== undefined ? `Reroll (${rerollsRemaining} left)` : 'Reroll All'}
+                {!hasHighStat ? t('character.creator.freeReroll') :
+                 rerollsRemaining !== undefined ? ti('character.creator.rerollWithCount', { count: rerollsRemaining }) : t('character.creator.rerollAll')}
               </button>
             </div>
           )}
@@ -164,7 +172,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
       {/* Step 1: Ancestry */}
       {step === 1 && (
         <div>
-          <h2 className="mb-4 text-2xl font-bold">Choose Ancestry</h2>
+          <h2 className="mb-4 text-2xl font-bold">{t('character.creator.chooseAncestry')}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {ANCESTRIES.map(a => (
               <button
@@ -188,7 +196,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
 
           {ancestry === 'elf' && (
             <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
-              <h3 className="mb-2 font-semibold">Farsight Choice</h3>
+              <h3 className="mb-2 font-semibold">{t('character.creator.farsightChoice')}</h3>
               <div className="flex gap-3">
                 {(['ranged', 'spellcasting'] as const).map(choice => (
                   <button
@@ -198,7 +206,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                       elfChoice === choice ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:bg-accent'
                     }`}
                   >
-                    {choice === 'ranged' ? '+1 Ranged Attacks' : '+1 Spellcasting'}
+                    {choice === 'ranged' ? t('character.creator.rangedAttacks') : t('character.creator.spellcasting')}
                   </button>
                 ))}
               </div>
@@ -210,7 +218,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
       {/* Step 2: Class */}
       {step === 2 && (
         <div>
-          <h2 className="mb-4 text-2xl font-bold">Choose Class</h2>
+          <h2 className="mb-4 text-2xl font-bold">{t('character.creator.chooseClass')}</h2>
           <div className="grid gap-3 sm:grid-cols-2 items-start">
             {CLASSES.map(c => {
               const isSelected = characterClass === c.id
@@ -248,10 +256,10 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                       ))}
                       <div className="pt-1">
                         <p className="text-[10px] text-muted-foreground">
-                          Weapons: {c.weaponProficiencies.join(', ')}
+                          {ti('character.creator.weapons', { list: c.weaponProficiencies.join(', ') })}
                         </p>
                         <p className="text-[10px] text-muted-foreground capitalize">
-                          Armor: {c.armorProficiencies.join(', ').replace(/_/g, ' ')}
+                          {ti('character.creator.armor', { list: c.armorProficiencies.join(', ').replace(/_/g, ' ') })}
                         </p>
                       </div>
                     </div>
@@ -266,21 +274,21 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
       {/* Step 3: Details */}
       {step === 3 && (
         <div>
-          <h2 className="mb-4 text-2xl font-bold">Character Details</h2>
+          <h2 className="mb-4 text-2xl font-bold">{t('character.creator.characterDetails')}</h2>
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-semibold">Name</label>
+              <label className="mb-1 block text-sm font-semibold">{t('character.creator.name')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Enter character name..."
+                placeholder={t('character.creator.namePlaceholder')}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-semibold">Background</label>
+              <label className="mb-1 block text-sm font-semibold">{t('character.creator.backgroundLabel')}</label>
               <select
                 value={background}
                 onChange={e => setBackground(e.target.value)}
@@ -293,7 +301,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold">Alignment</label>
+              <label className="mb-2 block text-sm font-semibold">{t('character.creator.alignment')}</label>
               <div className="flex gap-2">
                 {(['lawful', 'neutral', 'chaotic'] as const).map(a => (
                   <button
@@ -311,13 +319,13 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
 
             {characterClass === 'priest' && (
               <div>
-                <label className="mb-1 block text-sm font-semibold">Deity (required for Priests)</label>
+                <label className="mb-1 block text-sm font-semibold">{t('character.creator.deityLabel')}</label>
                 <select
                   value={deity ?? ''}
                   onChange={e => setDeity(e.target.value || undefined)}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 >
-                  <option value="">Select a deity...</option>
+                  <option value="">{t('character.creator.selectDeity')}</option>
                   {DEITIES.filter(d => d.alignment === alignment || d.alignment === 'neutral').map(d => (
                     <option key={d.id} value={d.id}>{d.name} ({d.alignment}) — {d.domain}</option>
                   ))}
@@ -331,10 +339,10 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
       {/* Step 4: Review */}
       {step === 4 && stats && ancestry && characterClass && (
         <div>
-          <h2 className="mb-4 text-2xl font-bold">Review Character</h2>
+          <h2 className="mb-4 text-2xl font-bold">{t('character.creator.reviewCharacter')}</h2>
           <div className="rounded-xl border border-border bg-card p-5 space-y-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-xl font-bold">{name || 'Unnamed'}</h3>
+              <h3 className="text-xl font-bold">{name || t('character.creator.unnamed')}</h3>
               <span className="text-sm text-muted-foreground capitalize">{alignment}</span>
             </div>
             <p className="text-muted-foreground capitalize">
@@ -352,16 +360,16 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><span className="font-semibold">Background:</span> {BACKGROUNDS.find(b => b.id === background)?.name}</div>
-              {deity && <div><span className="font-semibold">Deity:</span> {DEITIES.find(d => d.id === deity)?.name}</div>}
-              <div><span className="font-semibold">Hit Die:</span> {CLASSES.find(c => c.id === characterClass)?.hitDie}</div>
+              <div><span className="font-semibold">{t('character.background')}</span> {BACKGROUNDS.find(b => b.id === background)?.name}</div>
+              {deity && <div><span className="font-semibold">{t('character.deity')}</span> {DEITIES.find(d => d.id === deity)?.name}</div>}
+              <div><span className="font-semibold">{t('character.creator.hitDie')}</span> {CLASSES.find(c => c.id === characterClass)?.hitDie}</div>
             </div>
 
             <button
               onClick={handleCreate}
               className="w-full rounded-lg bg-primary py-3 font-semibold text-primary-foreground hover:opacity-90 transition"
             >
-              Create Character
+              {t('character.creator.createCharacter')}
             </button>
           </div>
         </div>
@@ -373,15 +381,15 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
           onClick={() => step === 0 ? onCancel() : setStep(step - 1)}
           className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-accent transition"
         >
-          {step === 0 ? 'Cancel' : 'Back'}
+          {step === 0 ? t('common.cancel') : t('common.back')}
         </button>
-        {step < STEPS.length - 1 && (
+        {step < STEP_KEYS.length - 1 && (
           <button
             onClick={() => setStep(step + 1)}
             disabled={!canProceed()}
             className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50"
           >
-            Next
+            {t('common.next')}
           </button>
         )}
       </div>

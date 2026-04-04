@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { dataRegistry } from '@/lib/data/registry.ts'
 import { validateDataPack } from '@/lib/data/validator.ts'
-import type { DataPackMeta } from '@/lib/data/types.ts'
 import { useDataRegistry } from '@/hooks/use-data-registry.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 export function DataPackManager() {
+  const { t, ti } = useLocale()
   useDataRegistry()
   const packs = dataRegistry.getPacks()
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +28,7 @@ export function DataPackManager() {
         const validation = validateDataPack(raw)
 
         if (!validation.valid) {
-          setError(`Invalid data pack: ${validation.errors.slice(0, 5).join('; ')}${validation.errors.length > 5 ? ` (+${validation.errors.length - 5} more)` : ''}`)
+          setError(ti('dataPack.invalidDataPack', { errors: `${validation.errors.slice(0, 5).join('; ')}${validation.errors.length > 5 ? ` (+${validation.errors.length - 5} more)` : ''}` }))
           return
         }
 
@@ -35,14 +36,14 @@ export function DataPackManager() {
         if (result.success) {
           const pack = validation.pack!
           const totalItems = Object.values(pack.data).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0)
-          setSuccess(`Added "${pack.name}" by ${pack.author} (${totalItems} items)`)
+          setSuccess(ti('dataPack.addedPack', { name: pack.name, author: pack.author, count: totalItems }))
           if (result.warnings) setWarnings(result.warnings)
           setTimeout(() => { setSuccess(null); setWarnings([]) }, 8000)
         } else {
-          setError(result.error ?? 'Failed to add pack')
+          setError(result.error ?? t('dataPack.failedToAddPack'))
         }
       } catch {
-        setError('Failed to parse JSON file')
+        setError(t('dataPack.failedToParseJson'))
       }
 
       if (fileRef.current) fileRef.current.value = ''
@@ -84,13 +85,13 @@ export function DataPackManager() {
     if (file && file.name.endsWith('.json')) {
       processFile(file)
     } else if (file) {
-      setError('Only .json files are supported')
+      setError(t('common.onlyJsonSupported'))
     }
   }, [])
 
   function handleRemove(packId: string) {
     dataRegistry.removePack(packId)
-    setSuccess('Pack removed. Core data restored.')
+    setSuccess(t('dataPack.packRemoved'))
     setWarnings([])
     setTimeout(() => setSuccess(null), 3000)
   }
@@ -136,19 +137,19 @@ export function DataPackManager() {
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
-      <h2 className="mb-1 font-semibold">Data Packs</h2>
+      <h2 className="mb-1 font-semibold">{t('dataPack.title')}</h2>
       <p className="mb-4 text-xs text-muted-foreground">
-        Extend the game with custom monsters, spells, items, and more. Upload JSON data packs to add homebrew content.
+        {t('dataPack.description')}
       </p>
 
       {/* Current data summary */}
       <div className="mb-4 flex flex-wrap gap-2">
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{totalMonsters} monsters</span>
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{totalSpells} spells</span>
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{totalGear} items</span>
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{totalBackgrounds} backgrounds</span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{ti('dataPack.monstersCount', { count: totalMonsters })}</span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{ti('dataPack.spellsCount', { count: totalSpells })}</span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{ti('dataPack.itemsCount', { count: totalGear })}</span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-medium">{ti('dataPack.backgroundsCount', { count: totalBackgrounds })}</span>
         {packs.length > 0 && (
-          <span className="rounded-full bg-primary/20 px-2.5 py-1 text-[10px] font-medium text-primary">{packs.length} custom pack{packs.length !== 1 ? 's' : ''}</span>
+          <span className="rounded-full bg-primary/20 px-2.5 py-1 text-[10px] font-medium text-primary">{ti('dataPack.customPacksCount', { count: packs.length })}</span>
         )}
       </div>
 
@@ -167,8 +168,8 @@ export function DataPackManager() {
         }`}>
           <div className="text-center pointer-events-none">
             <div className="text-2xl mb-1">{isDragging ? '\u2193' : '+'}</div>
-            <p className="text-sm font-medium">{isDragging ? 'Drop to import' : 'Upload Data Pack'}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Drag & drop or click to browse (.json)</p>
+            <p className="text-sm font-medium">{isDragging ? t('common.dropToImport') : t('dataPack.uploadDataPack')}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{t('common.dragDropOrBrowse')}</p>
           </div>
           <input
             ref={fileRef}
@@ -193,7 +194,7 @@ export function DataPackManager() {
       )}
       {warnings.length > 0 && (
         <div className="mb-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-2.5 text-xs text-yellow-400">
-          <p className="font-medium mb-1">Overrides detected:</p>
+          <p className="font-medium mb-1">{t('dataPack.overridesDetected')}</p>
           <ul className="list-disc list-inside space-y-0.5">
             {warnings.slice(0, 5).map((w, i) => <li key={i}>{w}</li>)}
             {warnings.length > 5 && <li>+{warnings.length - 5} more</li>}
@@ -204,7 +205,7 @@ export function DataPackManager() {
       {/* Installed packs */}
       {packs.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Installed Packs</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('dataPack.installedPacks')}</p>
           <div className="space-y-2">
             {packs.map(pack => {
               const totalItems = Object.values(pack.counts).reduce((sum, n) => sum + n, 0)
@@ -219,7 +220,7 @@ export function DataPackManager() {
                       <button
                         onClick={() => handleToggle(pack.id)}
                         className={`relative w-8 h-4 rounded-full transition-colors ${pack.enabled ? 'bg-primary' : 'bg-muted'}`}
-                        title={pack.enabled ? 'Disable pack' : 'Enable pack'}
+                        title={pack.enabled ? t('dataPack.disablePack') : t('dataPack.enablePack')}
                       >
                         <span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${pack.enabled ? 'translate-x-4' : ''}`} />
                       </button>
@@ -237,7 +238,7 @@ export function DataPackManager() {
                           <label
                             className={`relative inline-flex items-center justify-center w-5 h-5 rounded cursor-pointer border transition-colors ${pack.color ? 'border-border' : 'border-dashed border-muted-foreground/40'}`}
                             style={pack.color ? { backgroundColor: pack.color + '33' } : undefined}
-                            title="Set pack color"
+                            title={t('dataPack.setPackColor')}
                           >
                             <input
                               type="color"
@@ -254,7 +255,7 @@ export function DataPackManager() {
                             <button
                               onClick={() => dataRegistry.setPackColor(pack.id, undefined)}
                               className="w-4 h-4 rounded flex items-center justify-center text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
-                              title="Clear pack color"
+                              title={t('dataPack.clearPackColor')}
                             >
                               &times;
                             </button>
@@ -266,16 +267,16 @@ export function DataPackManager() {
                       <button
                         onClick={() => setExpandedPack(isExpanded ? null : pack.id)}
                         className="rounded px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
-                      >{isExpanded ? 'Hide' : 'Preview'}</button>
+                      >{isExpanded ? t('common.hide') : t('common.preview')}</button>
                       <button
                         onClick={() => handleExport(pack.id)}
                         className="rounded px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent"
-                        title="Export"
-                      >Export</button>
+                        title={t('common.export')}
+                      >{t('common.export')}</button>
                       <button
                         onClick={() => handleRemove(pack.id)}
                         className="rounded px-2 py-0.5 text-[10px] text-red-400 hover:bg-red-500/10"
-                      >Remove</button>
+                      >{t('common.remove')}</button>
                     </div>
                   </div>
                   {pack.description && (
@@ -287,7 +288,7 @@ export function DataPackManager() {
                         {count} {key}
                       </span>
                     ))}
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[9px] text-muted-foreground">{totalItems} total</span>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[9px] text-muted-foreground">{ti('dataPack.totalCount', { count: totalItems })}</span>
                   </div>
 
                   {/* Content preview */}
@@ -316,7 +317,7 @@ export function DataPackManager() {
 
       {/* Example format */}
       <details className="mt-4">
-        <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">Data Pack JSON format</summary>
+        <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">{t('dataPack.dataPackJsonFormat')}</summary>
         <pre className="mt-2 rounded-lg bg-secondary p-3 text-[10px] text-muted-foreground overflow-x-auto">{`{
   "id": "my-homebrew",
   "name": "My Homebrew Pack",

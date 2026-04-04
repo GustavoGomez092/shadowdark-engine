@@ -4,6 +4,7 @@ import type { InventoryItem } from '@/schemas/inventory.ts'
 import { getSpell, getClass } from '@/data/index.ts'
 import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
 import { LevelUpWizard } from './level-up-wizard.tsx'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
 
@@ -38,6 +39,7 @@ export function CharacterSheet({
   onRest,
   onLevelUp,
 }: Props) {
+  const { t, ti } = useLocale()
   const [showLevelUp, setShowLevelUp] = useState(false)
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
   const xpNeeded = getXpToNextLevel(c)
@@ -65,12 +67,12 @@ export function CharacterSheet({
                 onClick={onToggleLuckToken}
                 disabled={!isEditable}
                 className="rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                title="Luck Token — click to use"
+                title={t('character.luckTokenClickToUse')}
               >
-                LUCK
+                {t('character.luckToken')}
               </button>
             ) : (
-              <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">No Luck</span>
+              <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">{t('character.noLuck')}</span>
             )}
           </div>
         </div>
@@ -78,21 +80,21 @@ export function CharacterSheet({
         {/* XP Bar */}
         <div className="mt-3">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>XP: {c.xp} / {xpThreshold}</span>
+            <span>{ti('character.xpLabel', { current: c.xp, max: xpThreshold })}</span>
             {canLevelUp(c) ? (
               <div className="flex items-center gap-2">
-                <span className="font-bold text-primary">Ready to Level Up!</span>
+                <span className="font-bold text-primary">{t('character.readyToLevelUp')}</span>
                 {onLevelUp && (
                   <button
                     onClick={() => setShowLevelUp(true)}
                     className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black hover:bg-amber-400 transition animate-pulse"
                   >
-                    Level Up!
+                    {t('character.levelUp')}
                   </button>
                 )}
               </div>
             ) : (
-              <span>{xpNeeded} XP to next level</span>
+              <span>{ti('character.xpToNextLevel', { xp: xpNeeded })}</span>
             )}
           </div>
           <div className="h-2 w-full rounded-full bg-secondary">
@@ -119,11 +121,11 @@ export function CharacterSheet({
       {/* Combat Stats */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="rounded-xl border border-border bg-card p-3 text-center">
-          <div className="text-xs font-semibold text-muted-foreground">AC</div>
+          <div className="text-xs font-semibold text-muted-foreground">{t('character.ac')}</div>
           <div className="text-2xl font-bold">{c.computed.ac}</div>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center">
-          <div className="text-xs font-semibold text-muted-foreground">HP</div>
+          <div className="text-xs font-semibold text-muted-foreground">{t('character.hp')}</div>
           <div className="flex items-center justify-center gap-1">
             {isEditable && (
               <button onClick={() => onHpChange?.(-1)} className="rounded bg-red-100 px-1.5 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200">−</button>
@@ -141,11 +143,11 @@ export function CharacterSheet({
           </div>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center">
-          <div className="text-xs font-semibold text-muted-foreground">Melee</div>
+          <div className="text-xs font-semibold text-muted-foreground">{t('character.melee')}</div>
           <div className="text-2xl font-bold">{fmt(c.computed.meleeAttackBonus)}</div>
         </div>
         <div className="rounded-xl border border-border bg-card p-3 text-center">
-          <div className="text-xs font-semibold text-muted-foreground">Ranged</div>
+          <div className="text-xs font-semibold text-muted-foreground">{t('character.ranged')}</div>
           <div className="text-2xl font-bold">{fmt(c.computed.rangedAttackBonus)}</div>
         </div>
       </div>
@@ -153,11 +155,11 @@ export function CharacterSheet({
       {/* Spell Check (casters only) */}
       {c.computed.spellCheckBonus != null && (
         <div className="rounded-xl border border-border bg-card p-3 text-center">
-          <div className="text-xs font-semibold text-muted-foreground">Spell Check</div>
+          <div className="text-xs font-semibold text-muted-foreground">{t('character.spellCheck')}</div>
           <div className="text-2xl font-bold">{fmt(c.computed.spellCheckBonus)}</div>
           {c.spells.activeFocusSpell && (
             <p className="text-xs text-amber-600 dark:text-amber-400">
-              Focusing: {getSpell(c.spells.activeFocusSpell.spellId)?.name ?? 'Unknown'}
+              {ti('character.focusing', { spell: getSpell(c.spells.activeFocusSpell.spellId)?.name ?? 'Unknown' })}
             </p>
           )}
         </div>
@@ -171,7 +173,7 @@ export function CharacterSheet({
         if (features.length === 0) return null
         return (
           <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="mb-3 font-semibold">{cls.name} Abilities</h3>
+            <h3 className="mb-3 font-semibold">{ti('character.abilities', { className: cls.name })}</h3>
             <div className="space-y-2 text-sm">
               {features.map(f => (
                 <div key={f.name} className="rounded-lg border border-border p-2">
@@ -204,9 +206,9 @@ export function CharacterSheet({
       {/* Inventory */}
       {!hideInventory && <div className="rounded-xl border border-border bg-card p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-semibold">Inventory</h3>
+          <h3 className="font-semibold">{t('character.inventory')}</h3>
           <span className={`text-sm font-mono ${c.computed.usedGearSlots > c.computed.gearSlots ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
-            {c.computed.usedGearSlots}/{c.computed.gearSlots} slots
+            {ti('character.slots', { used: c.computed.usedGearSlots, max: c.computed.gearSlots })}
           </span>
         </div>
 
@@ -227,7 +229,7 @@ export function CharacterSheet({
 
         {/* Items */}
         {c.inventory.items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No items</p>
+          <p className="text-sm text-muted-foreground">{t('common.noItems')}</p>
         ) : (
           <div className="space-y-1">
             {c.inventory.items.map(item => (
@@ -248,7 +250,7 @@ export function CharacterSheet({
       {/* Spells */}
       {c.spells.knownSpells.length > 0 && (
         <div className="rounded-xl border border-border bg-card p-4">
-          <h3 className="mb-3 font-semibold">Spells</h3>
+          <h3 className="mb-3 font-semibold">{t('character.spells')}</h3>
           <div className="space-y-2">
             {c.spells.knownSpells.map(ks => {
               const spell = getSpell(ks.spellId)
@@ -259,12 +261,12 @@ export function CharacterSheet({
                 }`}>
                   <div>
                     <span className="font-medium">{spell.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">Tier {spell.tier}</span>
-                    {spell.isFocus && <span className="ml-1 text-xs text-amber-600">Focus</span>}
-                    {ks.hasAdvantage && <span className="ml-1 text-xs text-green-600">Adv</span>}
+                    <span className="ml-2 text-xs text-muted-foreground">{ti('character.tier', { tier: spell.tier })}</span>
+                    {spell.isFocus && <span className="ml-1 text-xs text-amber-600">{t('character.focus')}</span>}
+                    {ks.hasAdvantage && <span className="ml-1 text-xs text-green-600">{t('character.advantage')}</span>}
                   </div>
                   <span className={`text-xs ${ks.isAvailable ? 'text-green-600' : 'text-red-500'}`}>
-                    {ks.isAvailable ? 'Ready' : 'Lost'}
+                    {ks.isAvailable ? t('character.ready') : t('character.lost')}
                   </span>
                 </div>
               )
@@ -276,12 +278,12 @@ export function CharacterSheet({
       {/* Talents */}
       {c.talents.length > 0 && (
         <div className="rounded-xl border border-border bg-card p-4">
-          <h3 className="mb-3 font-semibold">Talents</h3>
+          <h3 className="mb-3 font-semibold">{t('character.talents')}</h3>
           <div className="space-y-2 text-sm">
-            {c.talents.map(t => (
-              <div key={t.id} className="rounded-lg border border-border p-2">
-                <span className="font-medium">{t.description}</span>
-                <span className="ml-2 text-xs text-muted-foreground">Level {t.levelGained}</span>
+            {c.talents.map(tal => (
+              <div key={tal.id} className="rounded-lg border border-border p-2">
+                <span className="font-medium">{tal.description}</span>
+                <span className="ml-2 text-xs text-muted-foreground">{ti('character.levelLabel', { level: tal.levelGained })}</span>
               </div>
             ))}
           </div>
@@ -290,12 +292,12 @@ export function CharacterSheet({
 
       {/* Notes */}
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-2 font-semibold">Notes</h3>
+        <h3 className="mb-2 font-semibold">{t('character.notes')}</h3>
         <textarea
           value={c.notes}
           onChange={e => onNotesChange?.(e.target.value)}
           disabled={!isEditable}
-          placeholder="Character notes..."
+          placeholder={t('character.notesPlaceholder')}
           className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y disabled:opacity-50"
         />
       </div>
@@ -306,7 +308,7 @@ export function CharacterSheet({
           onClick={onRest}
           className="w-full rounded-lg border border-border py-2 text-sm font-medium hover:bg-accent transition"
         >
-          Take a Rest (8 hours + ration)
+          {t('character.takeRest')}
         </button>
       )}
 
@@ -340,6 +342,7 @@ function InventoryRow({
   onUse?: (id: string) => void
   onAdjustQuantity?: (id: string, delta: number) => void
 }) {
+  const { t } = useLocale()
   const isEquippable = item.category === 'weapon' || item.category === 'armor' || item.category === 'shield' || item.category === 'magic_item'
   const isUsable = item.category === 'consumable' || item.category === 'light_source'
 
@@ -347,7 +350,7 @@ function InventoryRow({
     <div className="flex items-center gap-2 rounded-lg border border-border/50 px-2 py-1.5 text-sm">
       <div className="flex-1 min-w-0">
         <span className="font-medium">{item.name}</span>
-        {item.equipped && <span className="ml-1 text-xs text-primary font-semibold">(E)</span>}
+        {item.equipped && <span className="ml-1 text-xs text-primary font-semibold">{t('character.equipped')}</span>}
         {item.magicBonus && <span className="ml-1 text-xs text-purple-600">+{item.magicBonus}</span>}
         {item.quantity > 1 && <span className="ml-1 text-xs text-muted-foreground">x{item.quantity}</span>}
       </div>
@@ -355,13 +358,13 @@ function InventoryRow({
       {(onEquip || onUnequip || onDrop || onUse) && (
         <div className="flex gap-1">
           {isEquippable && !item.equipped && onEquip && (
-            <button onClick={() => onEquip(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-secondary hover:bg-accent">Equip</button>
+            <button onClick={() => onEquip(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-secondary hover:bg-accent">{t('common.equip')}</button>
           )}
           {isEquippable && item.equipped && onUnequip && (
-            <button onClick={() => onUnequip(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-secondary hover:bg-accent">Remove</button>
+            <button onClick={() => onUnequip(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-secondary hover:bg-accent">{t('common.remove')}</button>
           )}
           {isUsable && onUse && (
-            <button onClick={() => onUse(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200">Use</button>
+            <button onClick={() => onUse(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200">{t('common.use')}</button>
           )}
           {onAdjustQuantity && (item.category === 'ammo' || item.category === 'ration' || item.quantity > 1) && (
             <>
@@ -370,7 +373,7 @@ function InventoryRow({
             </>
           )}
           {onDrop && (
-            <button onClick={() => onDrop(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200">Drop</button>
+            <button onClick={() => onDrop(item.id)} className="rounded px-1.5 py-0.5 text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200">{t('common.drop')}</button>
           )}
         </div>
       )}

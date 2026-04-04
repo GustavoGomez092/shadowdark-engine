@@ -7,12 +7,14 @@ import { useSessionStore } from '@/stores/session-store.ts'
 import { computeCharacterValues, restCharacter } from '@/lib/rules/character.ts'
 import { equipItem, unequipItem, removeItem } from '@/lib/rules/inventory.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 export const Route = createFileRoute('/gm/characters')({
   component: GMCharactersPage,
 })
 
 function GMCharactersPage() {
+  const { t } = useLocale()
   const session = useSessionStore(s => s.session)
   const addCharacter = useSessionStore(s => s.addCharacter)
   const updateCharacter = useSessionStore(s => s.updateCharacter)
@@ -50,23 +52,23 @@ function GMCharactersPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Characters</h1>
+        <h1 className="text-3xl font-bold">{t('gm.characters')}</h1>
         <button
           onClick={() => setShowCreator(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
         >
-          + New Character
+          {t('gm.newCharacter')}
         </button>
       </div>
 
       {characters.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
-          <p className="mb-4 text-lg text-muted-foreground">No characters yet</p>
+          <p className="mb-4 text-lg text-muted-foreground">{t('gm.noCharactersYet')}</p>
           <button
             onClick={() => setShowCreator(true)}
             className="rounded-lg bg-primary px-6 py-2 font-semibold text-primary-foreground hover:opacity-90 transition"
           >
-            Create First Character
+            {t('gm.createFirstCharacter')}
           </button>
         </div>
       ) : (
@@ -95,7 +97,7 @@ function GMCharactersPage() {
                   {assignedPlayer ? (
                     <span className="mt-1.5 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[9px] font-medium text-primary">🎮 {assignedPlayer.displayName}</span>
                   ) : (
-                    <span className="mt-1.5 inline-block rounded-full bg-secondary px-2 py-0.5 text-[9px] text-muted-foreground">Available</span>
+                    <span className="mt-1.5 inline-block rounded-full bg-secondary px-2 py-0.5 text-[9px] text-muted-foreground">{t('gm.available')}</span>
                   )}
                 </button>
               )
@@ -179,7 +181,7 @@ function GMCharactersPage() {
               />
             ) : (
               <div className="flex items-center justify-center rounded-xl border border-dashed border-border py-16">
-                <p className="text-muted-foreground">Select a character to view their sheet</p>
+                <p className="text-muted-foreground">{t('gm.selectCharacterToView')}</p>
               </div>
             )}
           </div>

@@ -3,6 +3,7 @@ import type { LightState } from '@/schemas/light.ts'
 import type { LightSourceType } from '@/schemas/light.ts'
 import { getRemainingMs } from '@/lib/rules/light.ts'
 import { formatDuration } from '@/lib/utils/time.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   lightState: LightState
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, onRemoveTimer, isGM }: Props) {
+  const { t } = useLocale()
   const [, setTick] = useState(0)
 
   // Tick every second for countdown display
@@ -29,10 +31,10 @@ export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, 
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="font-semibold">Light Sources</h2>
+          <h2 className="font-semibold">{t('light.title')}</h2>
           {lightState.isInDarkness && (
             <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400 uppercase animate-pulse">
-              Darkness
+              {t('light.darkness')}
             </span>
           )}
         </div>
@@ -40,11 +42,11 @@ export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, 
           <div className="flex gap-2">
             {lightState.isPaused ? (
               <button onClick={onResumeAll} className="rounded-lg bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                Resume
+                {t('common.resume')}
               </button>
             ) : (
               <button onClick={onPauseAll} className="rounded-lg border border-border px-3 py-1 text-xs hover:bg-accent">
-                Pause
+                {t('common.pause')}
               </button>
             )}
           </div>
@@ -53,7 +55,7 @@ export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, 
 
       {activeTimers.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          {lightState.isInDarkness ? 'Total darkness! Disadvantage on most tasks.' : 'No active light sources.'}
+          {lightState.isInDarkness ? t('light.totalDarkness') : t('light.noActiveSources')}
         </p>
       ) : (
         <div className="space-y-2">
@@ -67,7 +69,7 @@ export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, 
                 <span className="text-base">{timer.type === 'torch' ? '🔥' : timer.type === 'lantern' ? '🏮' : timer.type === 'campfire' ? '🔥' : '✨'}</span>
                 <div className="flex-1">
                   <div className="flex items-baseline justify-between text-sm">
-                    <span className="capitalize">{timer.type}</span>
+                    <span className="capitalize">{timer.type === 'torch' ? t('light.torch') : timer.type === 'lantern' ? t('light.lantern') : timer.type === 'campfire' ? t('light.campfire') : timer.type}</span>
                     <span className={`font-mono text-xs ${isLow ? 'text-red-400 animate-pulse' : 'text-muted-foreground'}`}>
                       {formatDuration(remaining)}
                     </span>
@@ -92,7 +94,7 @@ export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, 
 
       {isGM && false && (
         <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
-          {([['torch', '🔥 Torch'], ['lantern', '🏮 Lantern'], ['campfire', '🔥 Campfire']] as const).map(([type, label]) => (
+          {([['torch', `🔥 ${t('light.torch')}`], ['lantern', `🏮 ${t('light.lantern')}`], ['campfire', `🔥 ${t('light.campfire')}`]] as const).map(([type, label]) => (
             <button
               key={type}
               onClick={() => onAddLight(type, 'party')}

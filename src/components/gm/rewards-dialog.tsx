@@ -7,6 +7,7 @@ import { WEAPONS, ARMOR, GEAR, getItemPackId } from '@/data/index.ts'
 import { useDataRegistry } from '@/hooks/use-data-registry.ts'
 import { dataRegistry } from '@/lib/data/registry.ts'
 import { calculateUsedSlots } from '@/lib/rules/inventory.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface ItemAward {
   itemId: string
@@ -26,14 +27,15 @@ interface Props {
   onSkip: () => void
 }
 
-const QUALITY_OPTIONS: { key: TreasureQuality; label: string; xp: number; color: string }[] = [
-  { key: 'poor', label: 'Poor', xp: 0, color: 'text-muted-foreground border-border' },
-  { key: 'normal', label: 'Normal', xp: 1, color: 'text-blue-400 border-blue-500/30' },
-  { key: 'fabulous', label: 'Fabulous', xp: 3, color: 'text-purple-400 border-purple-500/30' },
-  { key: 'legendary', label: 'Legendary', xp: 10, color: 'text-amber-400 border-amber-500/30' },
+const QUALITY_OPTIONS: { key: TreasureQuality; labelKey: string; xp: number; color: string }[] = [
+  { key: 'poor', labelKey: 'rewards.poor', xp: 0, color: 'text-muted-foreground border-border' },
+  { key: 'normal', labelKey: 'rewards.normal', xp: 1, color: 'text-blue-400 border-blue-500/30' },
+  { key: 'fabulous', labelKey: 'rewards.fabulous', xp: 3, color: 'text-purple-400 border-purple-500/30' },
+  { key: 'legendary', labelKey: 'rewards.legendary', xp: 10, color: 'text-amber-400 border-amber-500/30' },
 ]
 
 export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounterType, onDistribute, onSkip }: Props) {
+  const { t, ti } = useLocale()
   useDataRegistry()
   const ALL_REWARD_ITEMS = useMemo(() => [
     ...WEAPONS.map(w => ({ id: w.id, name: w.name, slots: w.slots, category: 'weapon' as const })),
@@ -92,14 +94,14 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div className="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6 text-center">
           <div className="text-4xl mb-3">💨</div>
-          <h2 className="text-xl font-bold mb-2">No Treasure Found</h2>
+          <h2 className="text-xl font-bold mb-2">{t('rewards.noTreasureFound')}</h2>
           <p className="text-sm text-muted-foreground mb-4">
             {encounterType === 'random'
-              ? 'The random encounter yielded no treasure (50% chance).'
-              : 'No treasure was found after this encounter.'}
+              ? t('rewards.randomNoTreasure')
+              : t('rewards.storyNoTreasure')}
           </p>
           <button onClick={onSkip} className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition">
-            Continue
+            {t('common.continue')}
           </button>
         </div>
       </div>
@@ -119,20 +121,20 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
       <div className="mx-4 w-full max-w-lg rounded-xl border border-border bg-card p-6">
         <div className="text-center mb-4">
           <div className="text-4xl mb-2">⚔️</div>
-          <h2 className="text-xl font-bold">Encounter Resolved!</h2>
-          <p className="text-xs text-muted-foreground capitalize">{encounterType} encounter</p>
+          <h2 className="text-xl font-bold">{t('rewards.encounterResolved')}</h2>
+          <p className="text-xs text-muted-foreground capitalize">{ti('rewards.encounterType', { type: encounterType })}</p>
         </div>
 
         {/* Treasure Quality */}
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Treasure Quality</label>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('rewards.treasureQuality')}</label>
           <div className="flex gap-2">
             {QUALITY_OPTIONS.map(q => (
               <button key={q.key} onClick={() => setQuality(q.key)}
                 className={`flex-1 rounded-lg border py-2 text-center text-sm font-semibold transition ${
                   quality === q.key ? `${q.color} bg-current/10 ring-1 ring-current` : 'border-border text-muted-foreground hover:text-foreground'
                 }`}>
-                <div>{q.label}</div>
+                <div>{t(q.labelKey)}</div>
                 <div className="text-[10px] opacity-70">{q.xp} XP</div>
               </button>
             ))}
@@ -141,7 +143,7 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
 
         {/* Gold */}
         <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Gold per Character</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('rewards.goldPerCharacter')}</label>
           <div className="flex items-center gap-2">
             <button onClick={() => setGold(g => Math.max(0, g - 5))} className="rounded-lg border border-border px-3 py-1.5 text-sm font-bold hover:bg-accent">-5</button>
             <button onClick={() => setGold(g => Math.max(0, g - 1))} className="rounded-lg border border-border px-3 py-1.5 text-sm font-bold hover:bg-accent">-1</button>
@@ -157,7 +159,7 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
 
         {/* Bonus XP */}
         <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bonus XP</label>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('rewards.bonusXp')}</label>
           <div className="flex items-center gap-2">
             <button onClick={() => setBonusXP(b => Math.max(0, b - 1))} className="rounded-lg border border-border px-3 py-1.5 text-sm font-bold hover:bg-accent">−</button>
             <span className="w-12 text-center text-lg font-bold">{bonusXP}</span>
@@ -168,15 +170,15 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
         {/* Item Awards */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Award Items</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('rewards.awardItems')}</label>
             {itemPacks.length > 0 && (
               <select
                 value={sourceFilter}
                 onChange={e => setSourceFilter(e.target.value)}
                 className="rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none"
               >
-                <option value="all">All Sources</option>
-                <option value="core">Core Only</option>
+                <option value="all">{t('common.allSources')}</option>
+                <option value="core">{t('common.coreOnly')}</option>
                 {itemPacks.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
@@ -189,7 +191,7 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
                 type="text"
                 value={itemSearch}
                 onChange={e => { setItemSearch(e.target.value); setSelectedItemId('') }}
-                placeholder="Search item..."
+                placeholder={t('rewards.searchItem')}
                 className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
               />
               {itemSearch && !selectedItemId && (
@@ -203,7 +205,7 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
             </div>
             <select value={selectedCharId} onChange={e => setSelectedCharId(e.target.value)}
               className="rounded-md border border-input bg-background px-2 py-1 text-xs outline-none">
-              <option value="">Hero...</option>
+              <option value="">{t('rewards.hero')}</option>
               {characters.map(c => {
                 const available = getAvailableSlots(c.id)
                 const canFit = selectedItem ? available >= selectedItem.slots : true
@@ -215,7 +217,7 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
               })}
             </select>
             <button onClick={addItemAward} disabled={!selectedItemId || !selectedCharId}
-              className="rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-30">Add</button>
+              className="rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-30">{t('common.add')}</button>
           </div>
           {itemAwards.length > 0 && (
             <div className="space-y-1">
@@ -232,27 +234,27 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
         {/* Summary */}
         <div className="mb-4 rounded-lg bg-secondary p-3">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-muted-foreground">XP from treasure:</span>
+            <span className="text-muted-foreground">{t('rewards.xpFromTreasure')}</span>
             <span className="font-bold">{xpFromTreasure}</span>
           </div>
           {bonusXP > 0 && (
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-muted-foreground">Bonus XP:</span>
+              <span className="text-muted-foreground">{t('rewards.bonusXpLabel')}</span>
               <span className="font-bold">+{bonusXP}</span>
             </div>
           )}
           <div className="flex justify-between text-sm font-bold border-t border-border/50 pt-1 mt-1">
-            <span>Total per character:</span>
-            <span className="text-primary">{totalXP} XP + {gold} gp</span>
+            <span>{t('rewards.totalPerCharacter')}</span>
+            <span className="text-primary">{ti('rewards.totalXpAndGold', { xp: totalXP, gold })}</span>
           </div>
           {itemAwards.length > 0 && (
-            <div className="text-xs text-muted-foreground mt-1">{itemAwards.length} item{itemAwards.length > 1 ? 's' : ''} awarded</div>
+            <div className="text-xs text-muted-foreground mt-1">{ti('rewards.itemsAwarded', { count: itemAwards.length })}</div>
           )}
         </div>
 
         {/* Party Preview */}
         <div className="mb-4">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Party Rewards Preview</label>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('rewards.partyRewardsPreview')}</label>
           <div className="space-y-1.5">
             {characters.map(c => {
               const threshold = XP_THRESHOLDS[c.level] ?? 0
@@ -264,7 +266,7 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
                 <div key={c.id} className={`rounded-lg border p-2 text-sm ${willLevelUp ? 'border-amber-500/30 bg-amber-500/5' : 'border-border/50'}`}>
                   <div className="flex items-baseline justify-between">
                     <span className="font-medium capitalize">{c.name} <span className="text-xs text-muted-foreground">Lv{c.level} {c.class}</span></span>
-                    {willLevelUp && <span className="text-[10px] font-bold text-amber-400 uppercase">Level Up!</span>}
+                    {willLevelUp && <span className="text-[10px] font-bold text-amber-400 uppercase">{t('rewards.levelUpExclaim')}</span>}
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     XP: {c.xp}/{threshold} → <span className={willLevelUp ? 'text-amber-400 font-bold' : 'text-primary'}>{newXP}/{threshold}</span>
@@ -283,9 +285,9 @@ export function RewardsDialog({ characters, avgPartyLevel, hasTreasure, encounte
         <div className="flex gap-3">
           <button onClick={() => onDistribute(quality, gold, bonusXP, itemAwards)}
             className="flex-1 rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition">
-            Distribute Rewards
+            {t('rewards.distributeRewards')}
           </button>
-          <button onClick={onSkip} className="rounded-lg border border-border px-4 py-2.5 text-sm hover:bg-accent transition">Skip</button>
+          <button onClick={onSkip} className="rounded-lg border border-border px-4 py-2.5 text-sm hover:bg-accent transition">{t('common.skip')}</button>
         </div>
       </div>
     </div>

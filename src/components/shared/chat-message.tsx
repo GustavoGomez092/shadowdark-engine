@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@/schemas/session.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 function renderMarkdown(text: string) {
   const parts: (string | React.ReactElement)[] = []
@@ -17,6 +18,7 @@ function renderMarkdown(text: string) {
 }
 
 export function ChatMessageRow({ msg }: { msg: ChatMessage }) {
+  const { t } = useLocale()
   switch (msg.type) {
     case 'system':
       return (
@@ -46,7 +48,7 @@ export function ChatMessageRow({ msg }: { msg: ChatMessage }) {
         <div className="my-2 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
           <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-purple-400">
             <span>✨</span>
-            <span>AI Narrator</span>
+            <span>{t('chat.aiNarrator')}</span>
           </div>
           <div className="text-xs text-foreground/90 italic whitespace-pre-wrap leading-relaxed">{renderMarkdown(msg.content)}</div>
         </div>

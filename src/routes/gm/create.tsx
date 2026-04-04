@@ -3,12 +3,14 @@ import { useState, useRef, useCallback } from 'react'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { Spinner } from '@/components/shared/spinner.tsx'
 import { exportSession, getExportFilename, downloadJson, parseSessionImport } from '@/lib/storage/session-export.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 export const Route = createFileRoute('/gm/create')({
   component: CreateGamePage,
 })
 
 function CreateGamePage() {
+  const { t, ti } = useLocale()
   const navigate = useNavigate()
   const createSession = useSessionStore(s => s.createSession)
   const loadSession = useSessionStore(s => s.loadSession)
@@ -65,13 +67,13 @@ function CreateGamePage() {
     reader.onload = () => {
       const result = parseSessionImport(reader.result as string)
       if (!result.valid || !result.session) {
-        setImportError(result.error ?? 'Failed to import session')
+        setImportError(result.error ?? t('gm.failedToImport'))
         return
       }
       const newId = importSession(result.session)
       setSavedSessions(getSavedSessions())
       const packMsg = result.packsInstalled ? ` (${result.packsInstalled} data pack${result.packsInstalled !== 1 ? 's' : ''} installed)` : ''
-      setImportSuccess(`Imported "${result.session.room.name}"${packMsg} — ready to resume`)
+      setImportSuccess(ti('gm.importedSession', { name: result.session.room.name, packMsg }))
       setTimeout(() => setImportSuccess(null), 5000)
       if (fileRef.current) fileRef.current.value = ''
       void newId // used for index registration
@@ -106,21 +108,21 @@ function CreateGamePage() {
     dragCounter.current = 0
     const file = e.dataTransfer.files?.[0]
     if (file && file.name.endsWith('.json')) processImportFile(file)
-    else if (file) setImportError('Only .json files are supported')
+    else if (file) setImportError(t('common.onlyJsonSupported'))
   }, [])
 
   return (
     <main className="mx-auto max-w-lg px-4 py-12">
-      <h1 className="mb-8 text-3xl font-bold">Create New Game</h1>
+      <h1 className="mb-8 text-3xl font-bold">{t('gm.createNewGame')}</h1>
 
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-semibold">Session Name</label>
+          <label className="mb-1.5 block text-sm font-semibold">{t('gm.sessionName')}</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder="e.g., The Lost Citadel"
+            placeholder={t('gm.sessionNamePlaceholder')}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
           />
         </div>
@@ -133,17 +135,17 @@ function CreateGamePage() {
             onChange={e => setUsePassword(e.target.checked)}
             className="rounded border-input"
           />
-          <label htmlFor="use-password" className="text-sm">Password protect this room</label>
+          <label htmlFor="use-password" className="text-sm">{t('gm.passwordProtect')}</label>
         </div>
 
         {usePassword && (
           <div>
-            <label className="mb-1.5 block text-sm font-semibold">Room Password</label>
+            <label className="mb-1.5 block text-sm font-semibold">{t('gm.roomPassword')}</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Enter password..."
+              placeholder={t('gm.roomPasswordPlaceholder')}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
             />
           </div>
@@ -155,14 +157,14 @@ function CreateGamePage() {
           className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50"
         >
           {isCreating && <Spinner size="sm" className="border-primary-foreground/30 border-t-primary-foreground" />}
-          {isCreating ? 'Creating...' : 'Create Game'}
+          {isCreating ? t('gm.creating') : t('gm.createGame')}
         </button>
       </div>
 
       {/* Saved Sessions */}
       {savedSessions.length > 0 && (
         <div className="mt-8">
-          <h2 className="mb-4 text-xl font-bold">Resume Previous Session</h2>
+          <h2 className="mb-4 text-xl font-bold">{t('gm.resumePreviousSession')}</h2>
           <div className="space-y-2">
             {savedSessions
               .sort((a, b) => b.lastPlayed - a.lastPlayed)
@@ -171,28 +173,28 @@ function CreateGamePage() {
                   <div>
                     <div className="font-medium">{s.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      Last played: {new Date(s.lastPlayed).toLocaleDateString()}
+                      {ti('gm.lastPlayed', { date: new Date(s.lastPlayed).toLocaleDateString() })}
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleExport(s.id, s.name)}
                       className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent"
-                      title="Export session"
+                      title={t('gm.exportSession')}
                     >
-                      Export
+                      {t('common.export')}
                     </button>
                     <button
                       onClick={() => handleLoad(s.id)}
                       className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
                     >
-                      Resume
+                      {t('common.resume')}
                     </button>
                     <button
                       onClick={() => handleDelete(s.id)}
                       className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10"
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   </div>
                 </div>
@@ -203,7 +205,7 @@ function CreateGamePage() {
 
       {/* Import Session */}
       <div className="mt-8">
-        <h2 className="mb-4 text-xl font-bold">Import Session</h2>
+        <h2 className="mb-4 text-xl font-bold">{t('gm.importSession')}</h2>
 
         {importError && (
           <div className="mb-3 rounded-lg bg-red-500/10 border border-red-500/20 p-2.5 text-xs text-red-400">
@@ -229,8 +231,8 @@ function CreateGamePage() {
           }`}>
             <div className="text-center pointer-events-none">
               <div className="text-2xl mb-1">{isDragging ? '\u2193' : '\u2191'}</div>
-              <p className="text-sm font-medium">{isDragging ? 'Drop to import' : 'Import Session File'}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Drag & drop or click to browse (.json)</p>
+              <p className="text-sm font-medium">{isDragging ? t('common.dropToImport') : t('gm.importSessionFile')}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{t('common.dragDropOrBrowse')}</p>
             </div>
             <input
               ref={fileRef}

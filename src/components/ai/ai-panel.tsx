@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAI } from '@/hooks/use-ai.ts'
 import { useAISettings } from '@/hooks/use-ai-settings.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 import { PURPOSE_LABELS, PURPOSE_ICONS } from '@/lib/ai/prompts.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
 import type { AIPurpose } from '@/schemas/ai.ts'
@@ -52,6 +53,7 @@ interface AIPanelProps {
 }
 
 export function AIPanel({ isOpen, onClose }: AIPanelProps) {
+  const { t, ti } = useLocale()
   const navigate = useNavigate()
   const {
     generate,
@@ -161,7 +163,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
-            <h2 className="font-semibold">AI Assistant</h2>
+            <h2 className="font-semibold">{t('ai.title')}</h2>
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                 isFreeProvider
@@ -169,8 +171,8 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                   : 'bg-amber-500/20 text-amber-400'
               }`}
             >
-              {isFreeProvider ? 'Free' : 'Paid'} &middot;{' '}
-              {settings.tokenUsage.session.toLocaleString()} tokens
+              {isFreeProvider ? t('ai.free') : t('ai.paid')} &middot;{' '}
+              {ti('ai.tokensUsed', { count: settings.tokenUsage.session.toLocaleString() })}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -178,9 +180,9 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
               <button
                 onClick={() => startNewConversation(null)}
                 className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                title="Back to quick actions"
+                title={t('ai.backToQuickActions')}
               >
-                New
+                {t('common.new')}
               </button>
             )}
             <button
@@ -196,13 +198,13 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
         {!activeProvider ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Set up an AI provider in Settings to get started.
+              {t('ai.setupProvider')}
             </p>
             <button
               onClick={() => navigate({ to: '/gm/settings' })}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
             >
-              Open Settings
+              {t('ai.openSettings')}
             </button>
           </div>
         ) : (
@@ -211,7 +213,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
             {!conversation && (
               <div className="border-b border-border px-4 py-3">
                 <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  Quick Actions
+                  {t('ai.quickActions')}
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
                   {(Object.keys(PURPOSE_LABELS) as AIPurpose[]).filter(
@@ -234,12 +236,12 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                 </div>
                 <div className="mt-3">
                   <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
-                    Scene Context <span className="font-normal">(optional — sets the stage for the AI)</span>
+                    {t('ai.sceneContext')} <span className="font-normal">{t('ai.sceneContextHint')}</span>
                   </label>
                   <textarea
                     value={sceneContext}
                     onChange={(e) => setSceneContext(e.target.value)}
-                    placeholder="e.g. The party is exploring an abandoned mine beneath Crestfall. They just heard a rockslide block the entrance behind them..."
+                    placeholder={t('ai.sceneContextPlaceholder')}
                     rows={3}
                     className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs outline-none placeholder:text-muted-foreground/50 focus:ring-1 focus:ring-ring resize-y"
                   />
@@ -257,7 +259,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                   {PURPOSE_LABELS[conversation.purpose]}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  &middot; {conversation.messages.length} messages
+                  &middot; {ti('ai.messagesCount', { count: conversation.messages.length })}
                 </span>
               </div>
             )}
@@ -331,7 +333,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                   onClick={() => postToChat(lastResponse)}
                   className="mb-2 w-full rounded-md border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-medium text-purple-400 transition hover:bg-purple-500/20"
                 >
-                  Post last response to game chat
+                  {t('ai.postToChat')}
                 </button>
               )}
 
@@ -343,8 +345,8 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                   onKeyDown={handleKeyDown}
                   placeholder={
                     conversation
-                      ? 'Ask a follow-up...'
-                      : 'Start a conversation...'
+                      ? t('ai.followUpPlaceholder')
+                      : t('ai.startConversationPlaceholder')
                   }
                   rows={1}
                   className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-ring"
@@ -354,7 +356,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                     onClick={abort}
                     className="shrink-0 rounded-lg bg-red-500/80 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-500"
                   >
-                    Stop
+                    {t('common.stop')}
                   </button>
                 ) : (
                   <button
@@ -362,7 +364,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                     disabled={!inputValue.trim()}
                     className="shrink-0 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
                   >
-                    Send
+                    {t('common.send')}
                   </button>
                 )}
               </div>

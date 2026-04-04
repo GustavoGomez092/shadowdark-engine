@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useRef } from 'react'
+import { useLocale } from '@/hooks/use-locale.ts'
+import { LOCALE_LABELS } from '@/i18n/index.ts'
 import { usePlayerStore } from '@/stores/player-store.ts'
 import { usePlayerPeer } from '@/hooks/use-peer-connection.ts'
 import { CharacterSheet } from '@/components/character/character-sheet.tsx'
@@ -24,6 +26,7 @@ export const Route = createFileRoute('/player/session')({
 })
 
 function PlayerSessionPage() {
+  const { t, locale, setLocale, availableLocales } = useLocale()
   const navigate = useNavigate()
   const hydrate = usePlayerStore(s => s.hydrate)
   const hydrated = usePlayerStore(s => s.hydrated)
@@ -198,6 +201,15 @@ function PlayerSessionPage() {
               </>
             )}
           </div>
+          <select
+            value={locale}
+            onChange={e => setLocale(e.target.value as typeof locale)}
+            className="rounded-lg border border-border bg-card px-2 py-1 text-xs outline-none"
+          >
+            {availableLocales.map(l => (
+              <option key={l} value={l}>{LOCALE_LABELS[l]}</option>
+            ))}
+          </select>
           <button
             onClick={handleLeave}
             className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-accent transition"
@@ -235,8 +247,8 @@ function PlayerSessionPage() {
         {/* Darkness Banner — hidden when light system is paused */}
         {state.light.isInDarkness && !state.light.isPaused && (
           <div className="mb-4 rounded-lg bg-red-500/15 border border-red-500/30 p-3 text-center animate-pulse">
-            <span className="text-sm font-bold text-red-400">🌑 TOTAL DARKNESS</span>
-            <p className="text-xs text-red-400/70 mt-0.5">Disadvantage on most tasks. Light a torch to see!</p>
+            <span className="text-sm font-bold text-red-400">🌑 {t('light.darknessWarning')}</span>
+            <p className="text-xs text-red-400/70 mt-0.5">{t('light.darknessDescription')}</p>
           </div>
         )}
 
@@ -306,7 +318,7 @@ function PlayerSessionPage() {
             {state.activeTurnId && state.myCharacter && state.activeTurnId === state.myCharacter.id && (
               <div>
                 <div className="mb-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-center">
-                  <span className="text-xs font-bold text-amber-400 uppercase">It's your turn!</span>
+                  <span className="text-xs font-bold text-amber-400 uppercase">{t('combat.activeTurn')}</span>
                 </div>
                 <DiceRoller
                   characterName={state.myCharacter.name}
@@ -426,7 +438,7 @@ function PlayerSessionPage() {
 
             {state.visibleMonsters.length > 0 && (
               <div className="rounded-xl border border-border bg-card p-4">
-                <h2 className="mb-3 text-sm font-semibold">Monsters</h2>
+                <h2 className="mb-3 text-sm font-semibold">{t('nav.monsters')}</h2>
                 <div className="space-y-1">
                   {state.visibleMonsters.map(m => (
                     <div key={m.id} className="flex items-center justify-between text-sm">
@@ -457,6 +469,7 @@ function PlayerSessionPage() {
 }
 
 function ChatInput({ onSend, disabled }: { onSend: (content: string) => void; disabled?: boolean }) {
+  const { t } = useLocale()
   const [value, setValue] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
@@ -481,7 +494,7 @@ function ChatInput({ onSend, disabled }: { onSend: (content: string) => void; di
         disabled={disabled}
         className="rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground disabled:opacity-50"
       >
-        Send
+        {t('common.send')}
       </button>
     </form>
   )

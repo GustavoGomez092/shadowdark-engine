@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useAISettings } from '@/hooks/use-ai-settings.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 import type { AIProviderType } from '@/schemas/ai.ts'
 
 export function AISettingsPanel() {
+  const { t, ti } = useLocale()
   const {
     settings,
     updateSettings,
@@ -85,25 +87,24 @@ export function AISettingsPanel() {
     <div className="space-y-6">
       {/* Provider Setup */}
       <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="mb-3 font-semibold">AI Provider Setup</h2>
+        <h2 className="mb-3 font-semibold">{t('ai.settings.providerSetup')}</h2>
 
         {/* Ollama Detection Banner */}
         {isOllamaAvailable ? (
           <div className="mb-4 rounded-lg border border-green-500/30 bg-green-500/10 p-3">
             <div className="flex items-center gap-2 text-sm font-medium text-green-400">
               <span className="inline-block h-2 w-2 rounded-full bg-green-400" />
-              Ollama detected!
+              {t('ai.settings.ollamaDetected')}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {ollamaModels.length} model{ollamaModels.length !== 1 ? 's' : ''} available:{' '}
-              {ollamaModels.map((m) => m.name).join(', ')}
+              {ti('ai.settings.ollamaModelsAvailable', { count: ollamaModels.length, models: ollamaModels.map((m) => m.name).join(', ') })}
             </p>
             {!hasOllamaProvider && (
               <button
                 onClick={detectOllama}
                 className="mt-2 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition"
               >
-                Use Ollama
+                {t('ai.settings.useOllama')}
               </button>
             )}
           </div>
@@ -113,18 +114,18 @@ export function AISettingsPanel() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Checking for Ollama...
+            {t('ai.settings.checkingForOllama')}
           </div>
         ) : (
           <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
             <p className="text-xs text-muted-foreground">
-              Ollama not detected. Install Ollama for free local AI.
+              {t('ai.settings.ollamaNotDetected')}
             </p>
             <button
               onClick={detectOllama}
               className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition"
             >
-              Re-detect
+              {t('ai.settings.reDetect')}
             </button>
           </div>
         )}
@@ -168,14 +169,14 @@ export function AISettingsPanel() {
                       onClick={() => setActiveProvider(provider.id)}
                       className="rounded border border-border px-2 py-1 text-xs hover:bg-accent transition"
                     >
-                      Activate
+                      {t('common.activate')}
                     </button>
                   )}
                   <button
                     onClick={() => removeProvider(provider.id)}
                     className="rounded border border-red-500/30 px-2 py-1 text-xs text-red-400 hover:bg-red-500/10 transition"
                   >
-                    Remove
+                    {t('common.remove')}
                   </button>
                 </div>
               </div>
@@ -191,7 +192,7 @@ export function AISettingsPanel() {
           }}
           className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-accent transition"
         >
-          {showAddForm ? 'Cancel' : 'Add Provider'}
+          {showAddForm ? t('common.cancel') : t('ai.settings.addProvider')}
         </button>
 
         {/* Add Provider Form */}
@@ -199,7 +200,7 @@ export function AISettingsPanel() {
           <div className="mt-4 space-y-3 rounded-lg border border-border bg-muted/20 p-4">
             {/* Type Selector */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Type</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('ai.settings.type')}</label>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleTypeChange('ollama')}
@@ -209,7 +210,7 @@ export function AISettingsPanel() {
                       : 'border border-border hover:bg-accent'
                   }`}
                 >
-                  Ollama
+                  {t('ai.settings.ollama')}
                 </button>
                 <button
                   onClick={() => handleTypeChange('openai-compatible')}
@@ -219,26 +220,26 @@ export function AISettingsPanel() {
                       : 'border border-border hover:bg-accent'
                   }`}
                 >
-                  OpenAI-compatible
+                  {t('ai.settings.openaiCompatible')}
                 </button>
               </div>
             </div>
 
             {/* Name */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Name</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('ai.settings.providerName')}</label>
               <input
                 type="text"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder={formType === 'ollama' ? 'My Ollama' : 'OpenAI'}
+                placeholder={formType === 'ollama' ? t('ai.settings.ollamaNamePlaceholder') : t('ai.settings.openaiNamePlaceholder')}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               />
             </div>
 
             {/* Endpoint */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Endpoint URL</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('ai.settings.endpointUrl')}</label>
               <input
                 type="text"
                 value={formEndpoint}
@@ -250,12 +251,12 @@ export function AISettingsPanel() {
             {/* API Key (OpenAI only) */}
             {formType === 'openai-compatible' && (
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">API Key</label>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('ai.settings.apiKey')}</label>
                 <input
                   type="password"
                   value={formApiKey}
                   onChange={(e) => setFormApiKey(e.target.value)}
-                  placeholder="sk-..."
+                  placeholder={t('ai.settings.apiKeyPlaceholder')}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono outline-none focus:border-primary"
                 />
               </div>
@@ -263,14 +264,14 @@ export function AISettingsPanel() {
 
             {/* Model */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Model</label>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">{t('ai.settings.model')}</label>
               {formType === 'ollama' && ollamaModels.length > 0 ? (
                 <select
                   value={formModel}
                   onChange={(e) => setFormModel(e.target.value)}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
                 >
-                  <option value="">Select a model...</option>
+                  <option value="">{t('ai.settings.selectModel')}</option>
                   {ollamaModels.map((m) => (
                     <option key={m.name} value={m.name}>
                       {m.name}
@@ -282,7 +283,7 @@ export function AISettingsPanel() {
                   type="text"
                   value={formModel}
                   onChange={(e) => setFormModel(e.target.value)}
-                  placeholder={formType === 'ollama' ? 'llama3.2' : 'gpt-4o-mini'}
+                  placeholder={formType === 'ollama' ? t('ai.settings.ollamaModelPlaceholder') : t('ai.settings.openaiModelPlaceholder')}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
                 />
               )}
@@ -296,13 +297,13 @@ export function AISettingsPanel() {
                 onChange={(e) => setFormIsFree(e.target.checked)}
                 className="h-4 w-4 rounded border-border accent-primary"
               />
-              <span>Free provider (no per-token charges)</span>
+              <span>{t('ai.settings.freeProvider')}</span>
             </label>
 
             {/* Paid Provider Warning */}
             {!formIsFree && (
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-400">
-                This provider charges per token. API calls will cost money.
+                {t('ai.settings.paidProviderWarning')}
               </div>
             )}
 
@@ -312,7 +313,7 @@ export function AISettingsPanel() {
               disabled={!formName.trim() || !formModel.trim()}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add Provider
+              {t('ai.settings.addProvider')}
             </button>
           </div>
         )}
@@ -320,16 +321,16 @@ export function AISettingsPanel() {
 
       {/* Generation Settings + Custom Prompt + Save */}
       <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="mb-1 font-semibold">Generation Settings</h2>
+        <h2 className="mb-1 font-semibold">{t('ai.settings.generationSettings')}</h2>
         <p className="mb-4 text-xs text-muted-foreground">
-          Control how AI responses are generated.
+          {t('ai.settings.generationDescription')}
         </p>
 
         <div className="space-y-4">
           {/* Temperature */}
           <div>
             <label className="mb-1.5 flex items-center justify-between text-sm">
-              <span>Temperature</span>
+              <span>{t('ai.settings.temperature')}</span>
               <span className="font-mono text-xs text-muted-foreground">{temperature.toFixed(1)}</span>
             </label>
             <input
@@ -342,15 +343,15 @@ export function AISettingsPanel() {
               className="w-full accent-primary"
             />
             <div className="flex justify-between text-[10px] text-muted-foreground mt-0.5">
-              <span>Precise (0.0)</span>
-              <span>Creative (2.0)</span>
+              <span>{t('ai.settings.temperaturePrecise')}</span>
+              <span>{t('ai.settings.temperatureCreative')}</span>
             </div>
           </div>
 
           {/* Max Tokens */}
           <div>
             <label className="mb-1.5 flex items-center justify-between text-sm">
-              <span>Max Tokens</span>
+              <span>{t('ai.settings.maxTokens')}</span>
               <span className="font-mono text-xs text-muted-foreground">{maxTokens}</span>
             </label>
             <input
@@ -381,20 +382,20 @@ export function AISettingsPanel() {
               onChange={(e) => setEnableStreaming(e.target.checked)}
               className="h-4 w-4 rounded border-border accent-primary"
             />
-            <span>Enable streaming responses</span>
+            <span>{t('ai.settings.enableStreaming')}</span>
           </label>
         </div>
 
         {/* Custom System Prompt */}
         <div className="mt-6 border-t border-border pt-4">
-          <h3 className="mb-1 font-semibold text-sm">Custom System Prompt</h3>
+          <h3 className="mb-1 font-semibold text-sm">{t('ai.settings.customSystemPrompt')}</h3>
           <p className="mb-3 text-xs text-muted-foreground">
-            Appended to all AI prompts. Use for campaign-specific context, world lore, or tone preferences.
+            {t('ai.settings.customSystemPromptDescription')}
           </p>
           <textarea
             value={customSystemPrompt}
             onChange={(e) => setCustomSystemPrompt(e.target.value)}
-            placeholder="e.g. The campaign is set in a grim, low-magic world called Duskhollow..."
+            placeholder={t('ai.settings.customSystemPromptPlaceholder')}
             rows={4}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary resize-y"
           />
@@ -406,22 +407,22 @@ export function AISettingsPanel() {
             onClick={saveGenerationSettings}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
           >
-            Save Settings
+            {t('settings.saveSettings')}
           </button>
-          {saved && <span className="text-xs text-green-400">Saved!</span>}
+          {saved && <span className="text-xs text-green-400">{t('common.saved')}</span>}
         </div>
       </div>
 
       {/* Token Usage */}
       <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="mb-3 font-semibold">Token Usage</h2>
+        <h2 className="mb-3 font-semibold">{t('ai.settings.tokenUsage')}</h2>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Session tokens used:</span>
+            <span className="text-muted-foreground">{t('ai.settings.sessionTokens')}</span>
             <span className="font-mono">{settings.tokenUsage.session.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Lifetime tokens used:</span>
+            <span className="text-muted-foreground">{t('ai.settings.lifetimeTokens')}</span>
             <span className="font-mono">{settings.tokenUsage.lifetime.toLocaleString()}</span>
           </div>
         </div>
@@ -433,7 +434,7 @@ export function AISettingsPanel() {
           }
           className="mt-3 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition"
         >
-          Reset session counter
+          {t('ai.settings.resetSessionCounter')}
         </button>
       </div>
     </div>

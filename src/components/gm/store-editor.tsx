@@ -5,6 +5,7 @@ import { WEAPONS, ARMOR, GEAR, getItemPackId, getPackColor } from '@/data/index.
 import { useDataRegistry } from '@/hooks/use-data-registry.ts'
 import { dataRegistry } from '@/lib/data/registry.ts'
 import { generateId } from '@/lib/utils/id.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 type CatalogItem = { id: string; name: string; price: number; category: ItemCategory; slots: number }
 
@@ -51,6 +52,7 @@ interface Props {
 }
 
 export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }: Props) {
+  const { t, ti } = useLocale()
   useDataRegistry()
   const allItems = useMemo<CatalogItem[]>(() => [
     ...WEAPONS.map(w => ({ id: w.id, name: w.name, price: w.cost, category: 'weapon' as ItemCategory, slots: w.slots })),
@@ -113,12 +115,12 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Stores</h2>
+        <h2 className="text-2xl font-bold">{t('store.stores')}</h2>
         <button
           onClick={() => setShowCreate(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
         >
-          + New Store
+          {t('store.newStore')}
         </button>
       </div>
 
@@ -126,7 +128,7 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
 
       {stores.length === 0 && !showCreate ? (
         <div className="rounded-xl border border-dashed border-border py-12 text-center">
-          <p className="text-muted-foreground">No stores created yet.</p>
+          <p className="text-muted-foreground">{t('store.noStoresCreated')}</p>
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-[250px_1fr]">
@@ -163,14 +165,14 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
                       selectedStore.isActive ? 'bg-green-500/20 text-green-400' : 'border border-border hover:bg-accent'
                     }`}
                   >
-                    {selectedStore.isActive ? 'Active' : 'Inactive'}
+                    {selectedStore.isActive ? t('store.active') : t('store.inactive')}
                   </button>
                   {!selectedStore.isActive && (
                     <button
                       onClick={() => { onRemoveStore(selectedStore.id); setSelectedStoreId(null) }}
                       className="rounded-lg border border-red-500/30 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10"
                     >
-                      Delete
+                      {t('common.delete')}
                     </button>
                   )}
                 </div>
@@ -182,7 +184,7 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
                   type="text"
                   value={catalogSearch}
                   onChange={e => setCatalogSearch(e.target.value)}
-                  placeholder="Search items..."
+                  placeholder={t('store.searchItems')}
                   className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
                 />
                 {itemPacks.length > 0 && (
@@ -191,8 +193,8 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
                     onChange={e => setSourceFilter(e.target.value)}
                     className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm outline-none"
                   >
-                    <option value="all">All Sources</option>
-                    <option value="core">Core Only</option>
+                    <option value="all">{t('common.allSources')}</option>
+                    <option value="core">{t('common.coreOnly')}</option>
                     {itemPacks.map(p => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
@@ -203,7 +205,7 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
               {/* Full Item List */}
               <div className="max-h-[480px] space-y-0.5 overflow-y-auto rounded-lg border border-border/50 p-1">
                 {catalogItems.length === 0 && storeItemIds.size === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">No items match the current filters.</p>
+                  <p className="py-8 text-center text-sm text-muted-foreground">{t('store.noItemsMatchFilters')}</p>
                 ) : (
                   <>
                     {catalogItems.map(item => {
@@ -254,7 +256,7 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
                 )}
               </div>
               <p className="mt-1.5 text-[10px] text-muted-foreground">
-                Click to add/remove items. {catalogItems.filter(i => storeItemIds.has(i.id)).length} of {catalogItems.length} items in stock.
+                {ti('store.clickToAddRemove', { inStock: catalogItems.filter(i => storeItemIds.has(i.id)).length, total: catalogItems.length })}
               </p>
             </div>
           )}
@@ -265,6 +267,7 @@ export function StoreEditor({ stores, onAddStore, onUpdateStore, onRemoveStore }
 }
 
 function CreateStoreForm({ allItems, onCreate, onCancel }: { allItems: CatalogItem[]; onCreate: (name: string, type: StoreType) => void; onCancel: () => void }) {
+  const { t, ti } = useLocale()
   const [name, setName] = useState('')
   const [storeType, setStoreType] = useState<StoreType>('general')
 
@@ -276,33 +279,33 @@ function CreateStoreForm({ allItems, onCreate, onCancel }: { allItems: CatalogIt
         type="text"
         value={name}
         onChange={e => setName(e.target.value)}
-        placeholder="Store name..."
+        placeholder={t('store.storeNamePlaceholder')}
         className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
       />
       <div>
-        <p className="mb-1.5 text-xs text-muted-foreground">Store type — auto-populates matching items</p>
+        <p className="mb-1.5 text-xs text-muted-foreground">{t('store.storeTypeDescription')}</p>
         <div className="flex flex-wrap gap-2">
-          {(['general', 'weapons', 'armor', 'magic', 'potions', 'tavern', 'temple', 'custom'] as StoreType[]).map(t => (
+          {(['general', 'weapons', 'armor', 'magic', 'potions', 'tavern', 'temple', 'custom'] as StoreType[]).map(st => (
             <button
-              key={t}
-              onClick={() => setStoreType(t)}
+              key={st}
+              onClick={() => setStoreType(st)}
               className={`rounded-lg px-3 py-1 text-xs capitalize transition ${
-                storeType === t ? 'bg-primary text-primary-foreground' : 'border border-border hover:bg-accent'
+                storeType === st ? 'bg-primary text-primary-foreground' : 'border border-border hover:bg-accent'
               }`}
             >
-              {t}
+              {t(`store.storeType.${st}`)}
             </button>
           ))}
         </div>
         <p className="mt-1.5 text-[10px] text-muted-foreground">
-          {storeType === 'custom' ? 'Empty store — add items manually' : `Will start with ${previewCount} items`}
+          {storeType === 'custom' ? t('store.emptyStoreDescription') : ti('store.willStartWith', { count: previewCount })}
         </p>
       </div>
       <div className="flex gap-2">
         <button onClick={() => name.trim() && onCreate(name.trim(), storeType)} disabled={!name.trim()} className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50">
-          Create
+          {t('common.create')}
         </button>
-        <button onClick={onCancel} className="rounded-lg border border-border px-4 py-1.5 text-sm hover:bg-accent">Cancel</button>
+        <button onClick={onCancel} className="rounded-lg border border-border px-4 py-1.5 text-sm hover:bg-accent">{t('common.cancel')}</button>
       </div>
     </div>
   )

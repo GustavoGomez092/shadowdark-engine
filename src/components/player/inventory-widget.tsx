@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Character } from '@/schemas/character.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   character: Character
@@ -19,6 +20,7 @@ type ConfirmAction =
   | null
 
 export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLightTorch, onLightLantern, onLightCampfire, onDropItem }: Props) {
+  const { t, ti } = useLocale()
   const c = character
   const usedSlots = c.computed.usedGearSlots
   const maxSlots = c.computed.gearSlots
@@ -60,9 +62,9 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
     return (
       <div className="rounded-xl border border-amber-500/30 bg-card p-3">
         <p className="text-xs font-bold text-amber-400 mb-2">
-          {confirm.type === 'drop' ? 'Drop Item?' :
-           confirm.type === 'torch' ? 'Light Torch?' :
-           confirm.type === 'lantern' ? 'Light Lantern?' : 'Make Campfire?'}
+          {confirm.type === 'drop' ? t('light.dropItem') :
+           confirm.type === 'torch' ? t('light.lightTorchConfirm') :
+           confirm.type === 'lantern' ? t('light.lightLanternConfirm') : t('light.makeCampfireConfirm')}
         </p>
         <div className="text-[11px] text-muted-foreground space-y-1 mb-3">
           {confirm.type === 'drop' && <p>Drop <span className="text-foreground font-medium">{confirm.itemName}</span> — it will be lost.</p>}
@@ -73,10 +75,10 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
         </div>
         <div className="flex gap-2">
           <button onClick={executeConfirm} className="flex-1 rounded-lg bg-primary py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition">
-            Confirm
+            {t('common.confirm')}
           </button>
           <button onClick={() => setConfirm(null)} className="flex-1 rounded-lg border border-border py-1.5 text-xs hover:bg-accent transition">
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       </div>
@@ -87,17 +89,17 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
     <div className="rounded-xl border border-border bg-card p-3">
       {isInDarkness ? (
         <div className="mb-2 rounded-lg bg-red-500/15 border border-red-500/30 p-2 text-center animate-pulse">
-          <span className="text-xs font-bold text-red-400">🌑 DARKNESS</span>
-          <p className="text-[9px] text-red-400/70 mt-0.5">Disadvantage on most tasks</p>
+          <span className="text-xs font-bold text-red-400">🌑 {t('light.darknessWarning')}</span>
+          <p className="text-[9px] text-red-400/70 mt-0.5">{t('light.darknessDescription')}</p>
         </div>
       ) : hasActiveLight ? (
         <div className="mb-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-1.5 text-center">
-          <span className="text-[10px] font-semibold text-amber-400">🔥 Light Active</span>
+          <span className="text-[10px] font-semibold text-amber-400">🔥 {t('light.lightActive')}</span>
         </div>
       ) : null}
 
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold">Inventory</h3>
+        <h3 className="text-sm font-semibold">{t('character.inventory')}</h3>
         <span className={`text-xs font-mono ${isOver ? 'text-red-400 font-bold' : 'text-muted-foreground'}`}>
           {usedSlots}/{maxSlots}
         </span>
@@ -123,7 +125,7 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
             onClick={() => setConfirm({ type: 'torch', itemId: torches[0].id })}
             className="w-full rounded-lg border border-amber-500/30 bg-amber-500/10 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 transition flex items-center justify-center gap-1.5"
           >
-            🔥 Light Torch ({torches.length})
+            🔥 {ti('light.lightTorch', { count: torches.length })}
           </button>
         )}
         {canLightLantern && (
@@ -131,7 +133,7 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
             onClick={() => setConfirm({ type: 'lantern', lanternId: lanterns[0].id, oilId: oilFlasks[0].id })}
             className="w-full rounded-lg border border-amber-500/30 bg-amber-500/10 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/20 transition flex items-center justify-center gap-1.5"
           >
-            🏮 Light Lantern ({oilFlasks.length} oil)
+            🏮 {ti('light.lightLantern', { count: oilFlasks.length })}
           </button>
         )}
         {canMakeCampfire && (
@@ -139,7 +141,7 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
             onClick={() => setConfirm({ type: 'campfire', torchIds: torches.slice(0, 3).map(t => t.id) })}
             className="w-full rounded-lg border border-orange-500/30 bg-orange-500/10 py-1.5 text-xs font-semibold text-orange-400 hover:bg-orange-500/20 transition flex items-center justify-center gap-1.5"
           >
-            🔥 Make Campfire (uses 3 torches)
+            🔥 {t('light.makeCampfire')}
           </button>
         )}
       </div>
@@ -147,13 +149,13 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
       {/* Item list */}
       <div className="space-y-0.5 max-h-40 overflow-y-auto">
         {c.inventory.items.length === 0 ? (
-          <p className="text-[10px] text-muted-foreground">No items</p>
+          <p className="text-[10px] text-muted-foreground">{t('common.noItems')}</p>
         ) : (
           c.inventory.items.map(item => (
             <div key={item.id} className="flex items-center justify-between text-[11px] py-0.5 group">
               <span className="truncate">
                 {item.name}
-                {item.equipped && <span className="ml-0.5 text-primary font-bold">(E)</span>}
+                {item.equipped && <span className="ml-0.5 text-primary font-bold">{t('character.equipped')}</span>}
                 {item.magicBonus ? <span className="ml-0.5 text-purple-400">+{item.magicBonus}</span> : null}
               </span>
               <div className="flex items-center gap-1 ml-1 shrink-0">
@@ -163,7 +165,7 @@ export function InventoryWidget({ character, isInDarkness, hasActiveLight, onLig
                 <button
                   onClick={() => setConfirm({ type: 'drop', itemId: item.id, itemName: item.name, slots: item.slots })}
                   className="opacity-0 group-hover:opacity-100 rounded text-[9px] text-red-400 hover:text-red-300 px-0.5 transition-opacity"
-                  title="Drop item"
+                  title={t('common.drop')}
                 >✕</button>
               </div>
             </div>

@@ -10,12 +10,14 @@ import { getAbilityModifier } from '@/schemas/reference.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { createActionLog } from '@/lib/utils/action-log.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 export const Route = createFileRoute('/gm/monsters')({
   component: GMMonstersPage,
 })
 
 function GMMonstersPage() {
+  const { t, ti } = useLocale()
   useDataRegistry()
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState<number>(0)
@@ -65,21 +67,21 @@ function GMMonstersPage() {
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Monsters</h1>
-          <p className="text-muted-foreground">Browse and spawn monsters into the session</p>
+          <h1 className="text-3xl font-bold">{t('gm.monsters')}</h1>
+          <p className="text-muted-foreground">{t('gm.monstersDescription')}</p>
         </div>
         <button
           onClick={() => setShowRandomEncounter(true)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
         >
-          🎲 Random Encounter
+          {t('gm.randomEncounter')}
         </button>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <input
           type="text"
-          placeholder="Search monsters..."
+          placeholder={t('gm.searchMonsters')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -106,26 +108,26 @@ function GMMonstersPage() {
           onChange={e => setSourceFilter(e.target.value)}
           className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         >
-          <option value="all">All Sources</option>
-          <option value="core">Core Only</option>
+          <option value="all">{t('common.allSources')}</option>
+          <option value="core">{t('common.coreOnly')}</option>
           {monsterPacks.map(p => (
             <option key={p.id} value={p.id}>{p.name} ({p.counts.monsters})</option>
           ))}
         </select>
-        <span className="text-xs text-muted-foreground">{filtered.length} monsters</span>
+        <span className="text-xs text-muted-foreground">{ti('gm.monsterCount', { count: filtered.length })}</span>
       </div>
 
       {/* Spawn toast */}
       {spawned && (
         <div className="mb-4 rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
-          Spawned {spawned} into the session!
+          {ti('gm.spawnedIntoSession', { name: spawned! })}
         </div>
       )}
 
       {/* Active monsters in session */}
       {activeMonsters.length > 0 && (
         <div className="mb-6 rounded-xl border border-border bg-card p-4">
-          <h2 className="mb-2 font-semibold">Active in Session ({activeMonsters.length})</h2>
+          <h2 className="mb-2 font-semibold">{ti('gm.activeInSession', { count: activeMonsters.length })}</h2>
           <div className="flex flex-wrap gap-2">
             {activeMonsters.map(m => (
               <span key={m.id} className="rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-medium">
@@ -166,7 +168,7 @@ function GMMonstersPage() {
               onClick={() => spawnMonster(m)}
               className="mt-2 w-full rounded-lg bg-primary py-1.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
             >
-              Spawn
+              {t('gm.spawn')}
             </button>
           </div>
           )
@@ -199,6 +201,7 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
   onSpawn: (monsters: import('@/schemas/monsters.ts').MonsterInstance[], startEncounter: boolean) => void
   onCancel: () => void
 }) {
+  const { t, ti } = useLocale()
   const [minLevel, setMinLevel] = useState(1)
   const [maxLevel, setMaxLevel] = useState(3)
   const [minFoes, setMinFoes] = useState(1)
@@ -262,32 +265,32 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6">
-        <h2 className="text-xl font-bold mb-4">🎲 Random Encounter</h2>
+        <h2 className="text-xl font-bold mb-4">{t('gm.randomEncounter')}</h2>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Min Level</label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t('gm.minLevel')}</label>
             <input type="number" value={minLevel} min={0} max={maxMonsterLevel}
               onChange={e => setMinLevel(Math.max(0, parseInt(e.target.value) || 0))}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Max Level</label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t('gm.maxLevel')}</label>
             <input type="number" value={maxLevel} min={minLevel} max={maxMonsterLevel}
               onChange={e => setMaxLevel(Math.max(minLevel, parseInt(e.target.value) || minLevel))}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Min Foes</label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t('gm.minFoes')}</label>
             <input type="number" value={minFoes} min={1} max={20}
               onChange={e => setMinFoes(Math.max(1, parseInt(e.target.value) || 1))}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Max Foes</label>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t('gm.maxFoes')}</label>
             <input type="number" value={maxFoes} min={minFoes} max={20}
               onChange={e => setMaxFoes(Math.max(minFoes, parseInt(e.target.value) || minFoes))}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
@@ -298,11 +301,11 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
         {monsterPacks.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-muted-foreground">Monster Sources</label>
+              <label className="block text-xs font-semibold text-muted-foreground">{t('gm.monsterSources')}</label>
               <button
                 onClick={allSelected ? () => setSelectedSources(new Set()) : selectAll}
                 className="text-[10px] text-primary hover:underline"
-              >{allSelected ? 'Deselect all' : 'Select all'}</button>
+              >{allSelected ? t('gm.deselectAll') : t('gm.selectAll')}</button>
             </div>
             <div className="rounded-lg border border-input bg-background p-2 space-y-1">
               <label className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-accent cursor-pointer transition">
@@ -312,7 +315,7 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
                   onChange={() => toggleSource('core')}
                   className="rounded accent-primary"
                 />
-                <span>Core Monsters</span>
+                <span>{t('gm.coreMonsters')}</span>
                 <span className="ml-auto text-xs text-muted-foreground">{MONSTERS.filter(m => !getItemPackId(m.id)).length}</span>
               </label>
               {monsterPacks.map(p => (
@@ -330,7 +333,7 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
               ))}
             </div>
             {selectedSources.size === 0 && (
-              <p className="mt-1 text-[10px] text-red-400">Select at least one source to generate encounters.</p>
+              <p className="mt-1 text-[10px] text-red-400">{t('gm.selectAtLeastOneSource')}</p>
             )}
           </div>
         )}
@@ -339,19 +342,19 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
           onClick={generate}
           className="w-full rounded-lg border border-primary/30 bg-primary/10 py-2 text-sm font-semibold text-primary hover:bg-primary/20 transition mb-4"
         >
-          🎲 Generate
+          {t('gm.generate')}
         </button>
 
         {/* Preview */}
         {preview !== null && (
           <div className="mb-4">
             {preview.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No monsters match the level range.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t('gm.noMonstersMatchLevel')}</p>
             ) : (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-muted-foreground">{preview.length} foes generated</p>
-                  <button onClick={generate} className="text-[10px] text-primary hover:underline">Re-roll</button>
+                  <p className="text-xs font-semibold text-muted-foreground">{ti('gm.foesGenerated', { count: preview.length })}</p>
+                  <button onClick={generate} className="text-[10px] text-primary hover:underline">{t('gm.reRoll')}</button>
                 </div>
                 <div className="space-y-1.5 max-h-52 overflow-y-auto">
                   {preview.map(({ def, instance }) => {
@@ -383,7 +386,7 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
                 onClick={() => onSpawn(preview.map(p => p.instance), true)}
                 className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition"
               >
-                ⚔️ Spawn & Start Encounter ({preview.length})
+                {ti('gm.spawnAndStartEncounter', { count: preview.length })}
               </button>
             </>
           )}
@@ -391,7 +394,7 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
             onClick={onCancel}
             className="w-full rounded-lg border border-border py-2 text-sm text-muted-foreground hover:bg-accent transition"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       </div>

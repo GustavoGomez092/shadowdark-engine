@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
+import { LOCALE_LABELS } from '@/i18n/index.ts'
 
 const NAV_ITEMS = [
   { key: 'nav.overview', href: '/gm/session/$sessionId', icon: '\u{1F3E0}', matchEnd: true },
@@ -15,7 +16,7 @@ const NAV_ITEMS = [
 ]
 
 export function GMHeader() {
-  const { t } = useLocale()
+  const { t, locale, setLocale, availableLocales } = useLocale()
   const session = useSessionStore(s => s.session)
   const [roomCode, setRoomCode] = useState(gmPeer.roomCode)
   const [isReady, setIsReady] = useState(gmPeer.isReady)
@@ -81,6 +82,15 @@ export function GMHeader() {
               <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{t('nav.players')}</div>
               <div className="text-sm font-bold">{connectedCount}</div>
             </div>
+            <select
+              value={locale}
+              onChange={e => setLocale(e.target.value as typeof locale)}
+              className="rounded-lg border border-border bg-card px-2 py-1 text-xs outline-none"
+            >
+              {availableLocales.map(l => (
+                <option key={l} value={l}>{LOCALE_LABELS[l]}</option>
+              ))}
+            </select>
             <div className={`h-2.5 w-2.5 rounded-full ${isReady ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
           </div>
         </div>

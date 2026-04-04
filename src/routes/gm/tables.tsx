@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
+import { useLocale } from "@/hooks/use-locale.ts"
 import { ANCESTRIES, ARMOR, BACKGROUNDS, CLASSES, DEITIES, GEAR, MONSTERS, SPELLS, WEAPONS } from "@/data/index.ts"
 import { useDataRegistry } from "@/hooks/use-data-registry.ts"
 import { generateAdventureName } from "@/data/tables/adventure-names.ts"
@@ -17,25 +18,26 @@ type Tab = "rules" | "spells" | "items" | "monsters" | "world" | "generators"
 
 function ReferencePage() {
   useDataRegistry()
+  const { t } = useLocale()
   const [tab, setTab] = useState<Tab>("rules")
   const [search, setSearch] = useState("")
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold">📖 Reference</h1>
+      <h1 className="mb-2 text-3xl font-bold">📖 {t('reference.title')}</h1>
       <p className="mb-6 text-muted-foreground">
-        ShadowDark RPG rules, items, spells, and generators
+        {t('reference.description')}
       </p>
 
       <div className="mb-6 flex flex-wrap gap-1 rounded-lg border border-border p-1 w-fit">
         {(
           [
-            ["rules", "Rules"],
-            ["spells", "Spells"],
-            ["items", "Items"],
-            ["monsters", "Monsters"],
-            ["world", "World"],
-            ["generators", "Generators"],
+            ["rules", t('reference.tabs.rules')],
+            ["spells", t('reference.tabs.spells')],
+            ["items", t('reference.tabs.items')],
+            ["monsters", t('reference.tabs.monsters')],
+            ["world", t('reference.tabs.world')],
+            ["generators", t('reference.tabs.generators')],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -60,7 +62,7 @@ function ReferencePage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search..."
+          placeholder={t('reference.searchPlaceholder')}
           className="mb-4 w-full max-w-sm rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
       )}

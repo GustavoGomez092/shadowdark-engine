@@ -15,6 +15,7 @@ import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import { gainsTalentAtLevel, computeEffectiveStats } from '@/lib/rules/character.ts'
 import { getClass, getTitle, getSpellsByClassAndTier, getSpell } from '@/data/index.ts'
 import { generateId } from '@/lib/utils/id.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 // ========== Types ==========
 
@@ -83,6 +84,7 @@ function getNewSpellSlots(classDef: ClassDefinition, currentLevel: number, newLe
 // ========== Component ==========
 
 export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizardProps) {
+  const { t, ti } = useLocale()
   const newLevel = character.level + 1
   const classDef = getClass(character.class)
   const effectiveStats = computeEffectiveStats(character)
@@ -298,11 +300,11 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
       <div className="text-center space-y-4">
         <div className="text-5xl mb-2">*</div>
         <h2 className="text-2xl font-bold text-foreground">
-          {character.name} reaches Level {newLevel}!
+          {ti('character.levelUp.reachesLevel', { name: character.name, level: newLevel })}
         </h2>
         <div className="space-y-1 text-sm text-muted-foreground">
           <p>{ancestryName} {className}</p>
-          <p>Hit Die: {hitDie}</p>
+          <p>{ti('character.levelUp.hitDie', { die: hitDie })}</p>
         </div>
         {oldTitle !== newTitle && (
           <div className="rounded-lg bg-secondary p-3 text-sm">
@@ -315,7 +317,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           onClick={goNext}
           className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition"
         >
-          Continue
+          {t('common.continue')}
         </button>
       </div>
     )
@@ -325,12 +327,12 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
     return (
       <div className="space-y-4">
         <div className="text-center">
-          <h3 className="text-lg font-bold mb-1">Roll {hitDie} for HP</h3>
+          <h3 className="text-lg font-bold mb-1">{ti('character.levelUp.rollHp', { die: hitDie })}</h3>
           <p className="text-sm text-muted-foreground">
-            CON modifier: <span className="font-semibold text-foreground">{formatMod(conMod)}</span>
+            {ti('character.levelUp.conModifier', { mod: formatMod(conMod) })}
           </p>
           {isDwarf && (
-            <p className="text-xs text-amber-400 mt-1">Dwarf Stout: Roll with advantage (take higher)</p>
+            <p className="text-xs text-amber-400 mt-1">{t('character.levelUp.dwarfStout')}</p>
           )}
         </div>
 
@@ -361,30 +363,30 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                   <div className={`rounded-lg border px-4 py-2 text-center ${
                     hpRollState.roll1 >= hpRollState.roll2 ? 'border-primary bg-primary/10' : 'border-border opacity-50'
                   }`}>
-                    <div className="text-xs text-muted-foreground">Roll 1</div>
+                    <div className="text-xs text-muted-foreground">{t('character.levelUp.roll1')}</div>
                     <div className="text-2xl font-bold">{hpRollState.roll1}</div>
                   </div>
                   <div className={`rounded-lg border px-4 py-2 text-center ${
                     hpRollState.roll2 > hpRollState.roll1 ? 'border-primary bg-primary/10' : 'border-border opacity-50'
                   }`}>
-                    <div className="text-xs text-muted-foreground">Roll 2</div>
+                    <div className="text-xs text-muted-foreground">{t('character.levelUp.roll2')}</div>
                     <div className="text-2xl font-bold">{hpRollState.roll2}</div>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Best: {hpRollState.chosenRoll} {formatMod(conMod)} CON = <span className="font-bold text-primary">{hpRollState.hpGain} HP gained</span>
+                  {ti('character.levelUp.bestRoll', { roll: hpRollState.chosenRoll, mod: formatMod(conMod), gain: hpRollState.hpGain })}
                 </p>
               </div>
             ) : (
               <div className="text-center">
                 <div className="text-3xl font-bold mb-2">{hpRollState.roll1}</div>
                 <p className="text-sm text-muted-foreground">
-                  Rolled {hpRollState.roll1} {formatMod(conMod)} CON = <span className="font-bold text-primary">{hpRollState.hpGain} HP gained</span>
+                  {ti('character.levelUp.rolledResult', { roll: hpRollState.roll1, mod: formatMod(conMod), gain: hpRollState.hpGain })}
                 </p>
               </div>
             )}
             <div className="border-t border-border/50 pt-2 text-center text-sm">
-              Max HP: <span className="text-muted-foreground">{character.maxHp}</span>
+              {t('character.levelUp.maxHp')} <span className="text-muted-foreground">{character.maxHp}</span>
               <span className="mx-2 text-primary font-bold">&rarr;</span>
               <span className="font-bold text-foreground">{character.maxHp + hpRollState.hpGain}</span>
             </div>
@@ -396,7 +398,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           disabled={!hpRollState}
           className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Continue
+          {t('common.continue')}
         </button>
       </div>
     )
@@ -409,8 +411,8 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
     return (
       <div className="space-y-4">
         <div className="text-center">
-          <h3 className="text-lg font-bold mb-1">Roll 2d6 on {className} Talent Table</h3>
-          <p className="text-xs text-muted-foreground">Talents are gained at levels 1, 3, 5, 7, and 9</p>
+          <h3 className="text-lg font-bold mb-1">{ti('character.levelUp.rollTalentTable', { className })}</h3>
+          <p className="text-xs text-muted-foreground">{t('character.levelUp.talentLevels')}</p>
         </div>
 
         {!talentRollState ? (
@@ -420,8 +422,8 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-secondary">
-                    <th className="px-2 py-1.5 text-left font-semibold text-muted-foreground">Roll</th>
-                    <th className="px-2 py-1.5 text-left font-semibold text-muted-foreground">Talent</th>
+                    <th className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{t('character.levelUp.rollColumn')}</th>
+                    <th className="px-2 py-1.5 text-left font-semibold text-muted-foreground">{t('character.levelUp.talentColumn')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -467,7 +469,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
             {needsStatChoice(talentRollState.matchedEntry.mechanic) && talentRollState.matchedEntry.mechanic.type === 'stat_bonus' && (
               <div className="space-y-2">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Choose stat to increase by {talentRollState.matchedEntry.mechanic.amount}
+                  {ti('character.levelUp.chooseStatToIncrease', { amount: talentRollState.matchedEntry.mechanic.amount })}
                 </label>
                 <div className="flex gap-2">
                   {talentRollState.matchedEntry.mechanic.stats.map(stat => (
@@ -492,7 +494,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
             {isChooseTalentOrStats(talentRollState.matchedEntry.mechanic) && (
               <div className="space-y-3">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Choose: Pick a talent OR distribute +2 to stats
+                  {t('character.levelUp.chooseTalentOrStats')}
                 </label>
 
                 <div className="flex gap-2">
@@ -504,7 +506,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                         : 'border-border text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    Pick a Talent
+                    {t('character.levelUp.pickATalent')}
                   </button>
                   <button
                     onClick={() => { setChooseTalentMode('stats'); setChosenTalentIndex(null); setStatDistribution({}) }}
@@ -514,7 +516,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                         : 'border-border text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    +2 to Stats
+                    {t('character.levelUp.plusTwoToStats')}
                   </button>
                 </div>
 
@@ -541,8 +543,8 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                 {chooseTalentMode === 'stats' && (
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground">
-                      Distribute 2 points among your stats.
-                      Remaining: <span className="font-bold text-foreground">{2 - Object.values(statDistribution).reduce((s, v) => s + v, 0)}</span>
+                      {t('character.levelUp.distributePoints')}{' '}
+                      {ti('character.levelUp.remaining', { count: 2 - Object.values(statDistribution).reduce((s, v) => s + v, 0) })}
                     </p>
                     <div className="grid grid-cols-3 gap-2">
                       {(['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as AbilityScore[]).map(stat => {
@@ -584,7 +586,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           disabled={!talentRollState || !isTalentChoiceComplete()}
           className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Continue
+          {t('common.continue')}
         </button>
       </div>
     )
@@ -597,9 +599,9 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
     return (
       <div className="space-y-4">
         <div className="text-center">
-          <h3 className="text-lg font-bold mb-1">Learn New Spells</h3>
+          <h3 className="text-lg font-bold mb-1">{t('character.levelUp.learnNewSpells')}</h3>
           <p className="text-xs text-muted-foreground">
-            New spell slots have opened at Level {newLevel}
+            {ti('character.levelUp.newSpellSlotsOpened', { level: newLevel })}
           </p>
         </div>
 
@@ -621,14 +623,14 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
             return (
               <div key={key} className="rounded-lg border border-border/50 p-3">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  New Tier {tier} Spell
+                  {ti('character.levelUp.newTierSpell', { tier })}
                 </label>
                 <select
                   value={currentSelection}
                   onChange={e => setSelectedSpells(prev => ({ ...prev, [key]: e.target.value }))}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="">Select a spell...</option>
+                  <option value="">{t('character.levelUp.selectSpell')}</option>
                   {filteredSpells.map((spell: SpellDefinition) => (
                     <option key={spell.id} value={spell.id}>
                       {spell.name} {spell.isFocus ? '(Focus)' : ''}
@@ -645,7 +647,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           disabled={!areAllSpellsFilled()}
           className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          Continue
+          {t('common.continue')}
         </button>
       </div>
     )
@@ -659,13 +661,13 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
       <div className="space-y-4">
         <div className="text-center">
           <div className="text-4xl mb-2">*</div>
-          <h2 className="text-xl font-bold">Level Up Complete!</h2>
+          <h2 className="text-xl font-bold">{t('character.levelUp.complete')}</h2>
         </div>
 
         <div className="rounded-lg bg-secondary p-4 space-y-2 text-sm">
           {/* Level */}
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Level</span>
+            <span className="text-muted-foreground">{t('character.levelUp.level')}</span>
             <span>
               <span className="text-muted-foreground">{character.level}</span>
               <span className="mx-2 text-primary font-bold">&rarr;</span>
@@ -676,7 +678,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           {/* Title */}
           {oldTitle !== newTitle && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Title</span>
+              <span className="text-muted-foreground">{t('character.levelUp.title')}</span>
               <span>
                 <span className="text-muted-foreground">{oldTitle}</span>
                 <span className="mx-2 text-primary font-bold">&rarr;</span>
@@ -688,7 +690,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           {/* HP */}
           {hpRollState && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Max HP</span>
+              <span className="text-muted-foreground">{t('character.levelUp.maxHp')}</span>
               <span>
                 <span className="text-muted-foreground">{character.maxHp}</span>
                 <span className="mx-2 text-primary font-bold">&rarr;</span>
@@ -701,19 +703,19 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           {/* Talent */}
           {talent && (
             <div className="border-t border-border/50 pt-2 mt-2">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Talent Gained</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{t('character.levelUp.talentGained')}</div>
               <p className="text-foreground">{talent.description}</p>
               {talent.choices?.stat && (
-                <p className="text-xs text-primary mt-0.5">Chosen stat: {talent.choices.stat}</p>
+                <p className="text-xs text-primary mt-0.5">{ti('character.levelUp.chosenStat', { stat: talent.choices.stat })}</p>
               )}
               {talent.choices?.chosen === 'talent' && talent.choices?.talentIndex != null && classDef && (
                 <p className="text-xs text-primary mt-0.5">
-                  Chosen talent: {classDef.talentTable[Number(talent.choices.talentIndex)]?.description}
+                  {ti('character.levelUp.chosenTalent', { talent: classDef.talentTable[Number(talent.choices.talentIndex)]?.description })}
                 </p>
               )}
               {talent.choices?.chosen === 'stats' && talent.choices?.distribution && (
                 <p className="text-xs text-primary mt-0.5">
-                  Stats: {talent.choices.distribution}
+                  {ti('character.levelUp.stats', { distribution: talent.choices.distribution })}
                 </p>
               )}
             </div>
@@ -722,7 +724,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           {/* Spells */}
           {spellIds.length > 0 && (
             <div className="border-t border-border/50 pt-2 mt-2">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Spells Learned</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">{t('character.levelUp.spellsLearned')}</div>
               <ul className="space-y-0.5">
                 {spellIds.map(id => {
                   const spell = getSpell(id)
@@ -742,7 +744,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           onClick={handleComplete}
           className="w-full rounded-lg bg-primary py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition"
         >
-          Complete Level Up
+          {t('character.levelUp.completeLevelUp')}
         </button>
       </div>
     )
@@ -767,7 +769,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
             onClick={onCancel}
             className="mt-3 w-full rounded-lg border border-border py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         )}
       </div>

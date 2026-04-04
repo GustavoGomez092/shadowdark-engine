@@ -1,5 +1,6 @@
 import type { PublicMonsterInfo } from '@/schemas/session.ts'
 import type { Character } from '@/schemas/character.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   monsters: PublicMonsterInfo[]
@@ -9,13 +10,14 @@ interface Props {
 }
 
 export function EncounterView({ monsters, myCharacter, otherCharacters, activeTurnId }: Props) {
+  const { t, ti } = useLocale()
   if (monsters.length === 0) return null
 
   // Resolve who has active turn
   const activeTurnMonster = activeTurnId ? monsters.find(m => m.id === activeTurnId) : null
   const activeTurnIsMe = activeTurnId && myCharacter ? activeTurnId === myCharacter.id : false
   const activeTurnOther = activeTurnId ? otherCharacters.find(c => c.id === activeTurnId) : null
-  const activeTurnName = activeTurnMonster?.name ?? (activeTurnIsMe ? `${myCharacter!.name} (You!)` : activeTurnOther?.name) ?? null
+  const activeTurnName = activeTurnMonster?.name ?? (activeTurnIsMe ? `${myCharacter!.name} ${t('combat.youExcited')}` : activeTurnOther?.name) ?? null
   const isMonsterTurn = !!activeTurnMonster
 
   return (
@@ -30,7 +32,7 @@ export function EncounterView({ monsters, myCharacter, otherCharacters, activeTu
           <span className={`text-[10px] font-bold uppercase ${
             activeTurnIsMe ? 'text-amber-400' : isMonsterTurn ? 'text-red-400' : 'text-primary'
           }`}>
-            Active Turn
+            {t('combat.activeTurn')}
           </span>
           <span className="ml-2 font-semibold">{activeTurnName}</span>
         </div>
@@ -38,15 +40,15 @@ export function EncounterView({ monsters, myCharacter, otherCharacters, activeTu
 
       <div className="mb-3 flex items-center gap-2">
         <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400 uppercase animate-pulse">
-          Encounter
+          {t('combat.encounterBadge')}
         </span>
-        <span className="text-sm text-muted-foreground">{monsters.length} threat{monsters.length !== 1 ? 's' : ''}</span>
+        <span className="text-sm text-muted-foreground">{ti('combat.threatCount', { count: monsters.length })}</span>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Threats */}
         <div>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Threats</p>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.threats')}</p>
           <div className="space-y-1.5">
             {monsters.map(m => (
               <div key={m.id} className="rounded-lg border border-red-500/20 bg-red-500/5 p-2">
@@ -75,12 +77,12 @@ export function EncounterView({ monsters, myCharacter, otherCharacters, activeTu
 
         {/* Party status */}
         <div>
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Your Party</p>
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.yourParty')}</p>
           <div className="space-y-1.5">
             {myCharacter && (
               <div className="rounded-lg border border-primary/30 bg-primary/5 p-2">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-sm font-semibold text-primary">{myCharacter.name} (You)</span>
+                  <span className="text-sm font-semibold text-primary">{myCharacter.name} {t('combat.you')}</span>
                   <span className="text-xs text-muted-foreground">AC {myCharacter.computed.ac}</span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">

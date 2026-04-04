@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { rollDice } from '@/lib/dice/roller.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 import type { DiceRollResult, DieType } from '@/schemas/dice.ts'
 
 interface Props {
@@ -23,6 +24,7 @@ type RollMode = 'advantage' | 'normal' | 'disadvantage'
 type Phase = 'idle' | 'rolling' | 'result'
 
 export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }: Props) {
+  const { t, ti } = useLocale()
   const [selectedDie, setSelectedDie] = useState<DieType>(lockedDie ?? 'd20')
   const [modifier, setModifier] = useState(0)
   const [rollMode, setRollMode] = useState<RollMode>('normal')
@@ -150,7 +152,7 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
         }`} />
 
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-1 relative">
-          {phase === 'rolling' ? 'Rolling...' : phase === 'result' ? 'Last Roll' : 'Ready'}
+          {phase === 'rolling' ? t('dice.rolling') : phase === 'result' ? t('dice.lastRoll') : t('dice.ready')}
         </p>
 
         <div className={`relative ${resultClass}`}>
@@ -172,21 +174,21 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
           <DieIcon type={selectedDie} size={14} className="text-primary" />
           <span className="text-xs text-muted-foreground">{selectedDie}</span>
           {modifier !== 0 && <span className="text-xs text-muted-foreground">{modifier > 0 ? '+' : ''}{modifier}</span>}
-          {rollMode !== 'normal' && <span className="text-[10px] uppercase text-amber-400">{rollMode === 'advantage' ? 'ADV' : 'DIS'}</span>}
+          {rollMode !== 'normal' && <span className="text-[10px] uppercase text-amber-400">{rollMode === 'advantage' ? t('dice.advantage') : t('dice.disadvantage')}</span>}
         </div>
 
         {/* Nat 20/1 flash text */}
         {phase === 'result' && isNat20 && (
-          <p className="mt-1 text-xs font-black uppercase tracking-wider text-green-400 dice-glow-green">Natural 20!</p>
+          <p className="mt-1 text-xs font-black uppercase tracking-wider text-green-400 dice-glow-green">{t('dice.natural20')}</p>
         )}
         {phase === 'result' && isNat1 && (
-          <p className="mt-1 text-xs font-black uppercase tracking-wider text-red-400 dice-glow-red">Natural 1!</p>
+          <p className="mt-1 text-xs font-black uppercase tracking-wider text-red-400 dice-glow-red">{t('dice.natural1')}</p>
         )}
 
         {/* Alternate roll display for advantage/disadvantage */}
         {phase === 'result' && lastRoll?.alternateTotal != null && (
           <p className="mt-0.5 text-[10px] text-muted-foreground">
-            Other roll: {lastRoll.alternateTotal}
+            {ti('dice.otherRoll', { value: lastRoll.alternateTotal })}
           </p>
         )}
       </div>
@@ -218,7 +220,7 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
         <div className="px-3 pb-3 flex items-center justify-between gap-3">
           {/* Roll Mode */}
           <div className="flex gap-0.5 rounded-lg border border-border p-0.5">
-            {([['advantage', 'ADV'], ['normal', 'NORM'], ['disadvantage', 'DIS']] as const).map(([mode, label]) => (
+            {([['advantage', t('dice.advantage')], ['normal', t('dice.normal')], ['disadvantage', t('dice.disadvantage')]] as const).map(([mode, label]) => (
               <button
                 key={mode}
                 onClick={() => setRollMode(mode)}
@@ -264,7 +266,7 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="opacity-80">
             <path d="M6.5 2L2 14h3.5l1-2.5h3l1 2.5H14L9.5 2H6.5zM7.5 9L8 6.5 8.5 9H7.5z" fill="currentColor"/>
           </svg>
-          {phase === 'rolling' ? 'Rolling...' : 'Roll'}
+          {phase === 'rolling' ? t('dice.rollingButton') : t('dice.rollButton')}
         </button>
       </div>
     </div>
