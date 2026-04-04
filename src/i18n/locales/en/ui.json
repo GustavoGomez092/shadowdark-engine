@@ -378,6 +378,21 @@
   "ai.settings.resetSessionCounter": "Reset session counter",
 
   "chat.aiNarrator": "AI Narrator",
+  "chat.title": "Chat",
+  "chat.typeMessage": "Type a message...",
+  "chat.reconnecting": "Reconnecting...",
+
+  "player.connected": "Connected",
+  "player.reconnecting": "Reconnecting...",
+  "player.leave": "Leave",
+  "player.leaveAndRejoin": "Leave & Rejoin",
+  "player.cancelAndLeave": "Cancel & Leave",
+  "player.playingAs": "Playing as {{name}}",
+  "player.waitingForSession": "Waiting for session data...",
+
+  "gm.connectedPlayers": "Connected Players",
+  "gm.noPlayersConnected": "No players connected. Share the room code with your players.",
+  "gm.typeMessageAsGM": "Type a message as GM...",
 
   "rewards.noTreasureFound": "No Treasure Found",
   "rewards.randomNoTreasure": "The random encounter yielded no treasure (50% chance).",

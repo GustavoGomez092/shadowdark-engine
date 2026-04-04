@@ -378,6 +378,21 @@
   "ai.settings.resetSessionCounter": "Reiniciar contador de sesi\u00f3n",
 
   "chat.aiNarrator": "Narrador de IA",
+  "chat.title": "Chat",
+  "chat.typeMessage": "Escribe un mensaje...",
+  "chat.reconnecting": "Reconectando...",
+
+  "player.connected": "Conectado",
+  "player.reconnecting": "Reconectando...",
+  "player.leave": "Salir",
+  "player.leaveAndRejoin": "Salir y reingresar",
+  "player.cancelAndLeave": "Cancelar y salir",
+  "player.playingAs": "Jugando como {{name}}",
+  "player.waitingForSession": "Esperando datos de la sesión...",
+
+  "gm.connectedPlayers": "Jugadores conectados",
+  "gm.noPlayersConnected": "No hay jugadores conectados. Comparte el código de sala con tus jugadores.",
+  "gm.typeMessageAsGM": "Escribe un mensaje como DJ...",
 
   "rewards.noTreasureFound": "No se encontr\u00f3 tesoro",
   "rewards.randomNoTreasure": "El encuentro aleatorio no produjo tesoro (50% de probabilidad).",

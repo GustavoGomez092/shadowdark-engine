@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useLocale } from '@/hooks/use-locale.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
@@ -27,6 +28,7 @@ export const Route = createFileRoute('/gm/session/$sessionId')({
 })
 
 function GMSessionPage() {
+  const { t } = useLocale()
   const navigate = useNavigate()
   const { sessionId } = Route.useParams()
   const session = useSessionStore(s => s.session)
@@ -638,7 +640,7 @@ function GMSessionPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Connected Players + Character Assignment */}
         <div className="rounded-xl border border-border bg-card p-4">
-          <h2 className="mb-3 font-semibold shrink-0">Connected Players</h2>
+          <h2 className="mb-3 font-semibold shrink-0">{t('gm.connectedPlayers')}</h2>
           {players.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No players connected. Share the room code with your players.
@@ -871,7 +873,7 @@ function GMSessionPage() {
 
         {/* Chat Log */}
         <div className="rounded-xl border border-border bg-card p-4 flex flex-col h-[480px]">
-          <h2 className="mb-3 font-semibold">Chat</h2>
+          <h2 className="mb-3 font-semibold">{t('chat.title')}</h2>
           <AutoScrollContainer className="min-h-0 space-y-1 overflow-y-auto mb-3 flex-1" deps={[session.chatLog.length]}>
             {session.chatLog.length === 0 ? (
               <p className="text-sm text-muted-foreground">No messages yet.</p>
@@ -1114,6 +1116,7 @@ function GMSessionPage() {
 }
 
 function GMChatInput({ onSend }: { onSend: (content: string) => void }) {
+  const { t } = useLocale()
   const [value, setValue] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
@@ -1129,11 +1132,11 @@ function GMChatInput({ onSend }: { onSend: (content: string) => void }) {
         type="text"
         value={value}
         onChange={e => setValue(e.target.value)}
-        placeholder="Type a message as GM..."
+        placeholder={t('chat.typeMessage')}
         className="flex-1 rounded-lg border border-input bg-background px-3 py-1.5 text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-ring"
       />
       <button type="submit" className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground">
-        Send
+        {t('common.send')}
       </button>
     </form>
   )

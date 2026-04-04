@@ -26,7 +26,7 @@ export const Route = createFileRoute('/player/session')({
 })
 
 function PlayerSessionPage() {
-  const { t, locale, setLocale, availableLocales } = useLocale()
+  const { t, ti, locale, setLocale, availableLocales } = useLocale()
   const navigate = useNavigate()
   const hydrate = usePlayerStore(s => s.hydrate)
   const hydrated = usePlayerStore(s => s.hydrated)
@@ -137,7 +137,7 @@ function PlayerSessionPage() {
                 onClick={handleLeave}
                 className="rounded-lg border border-red-500/30 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition"
               >
-                Leave & Rejoin
+                {t('player.leaveAndRejoin')}
               </button>
             </div>
           </>
@@ -150,7 +150,7 @@ function PlayerSessionPage() {
               onClick={handleLeave}
               className="mt-4 rounded-lg border border-border px-4 py-2 text-sm hover:bg-accent transition"
             >
-              Cancel & Leave
+              {t('player.cancelAndLeave')}
             </button>
           </>
         )}
@@ -185,19 +185,19 @@ function PlayerSessionPage() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">{state?.room.name ?? 'Session'}</h1>
-          <p className="text-sm text-muted-foreground">Playing as {displayName}</p>
+          <p className="text-sm text-muted-foreground">{ti('player.playingAs', { name: displayName ?? '' })}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             {isConnected ? (
               <>
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                <span className="text-sm text-muted-foreground">Connected</span>
+                <span className="text-sm text-muted-foreground">{t('player.connected')}</span>
               </>
             ) : (
               <>
                 <Spinner size="sm" />
-                <span className="text-sm text-amber-400">Reconnecting...</span>
+                <span className="text-sm text-amber-400">{t('player.reconnecting')}</span>
               </>
             )}
           </div>
@@ -214,7 +214,7 @@ function PlayerSessionPage() {
             onClick={handleLeave}
             className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-accent transition"
           >
-            Leave
+            {t('player.leave')}
           </button>
         </div>
       </div>
@@ -418,7 +418,7 @@ function PlayerSessionPage() {
             )}
 
             <div className="rounded-xl border border-border bg-card p-4">
-              <h2 className="mb-3 text-sm font-semibold">Chat</h2>
+              <h2 className="mb-3 text-sm font-semibold">{t('chat.title')}</h2>
               <AutoScrollContainer className="max-h-48 space-y-1 overflow-y-auto mb-2" deps={[state.chatLog.length]}>
                 {state.chatLog.length === 0 ? (
                   <p className="text-xs text-muted-foreground">No messages yet.</p>
@@ -461,7 +461,7 @@ function PlayerSessionPage() {
       ) : (
         <div className="flex flex-col items-center justify-center py-16">
           <Spinner size="lg" />
-          <p className="mt-4 text-muted-foreground">Waiting for session data...</p>
+          <p className="mt-4 text-muted-foreground">{t('player.waitingForSession')}</p>
         </div>
       )}
     </main>
@@ -485,7 +485,7 @@ function ChatInput({ onSend, disabled }: { onSend: (content: string) => void; di
         type="text"
         value={value}
         onChange={e => setValue(e.target.value)}
-        placeholder={disabled ? 'Reconnecting...' : 'Type a message...'}
+        placeholder={disabled ? t('chat.reconnecting') : t('chat.typeMessage')}
         disabled={disabled}
         className="flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-ring disabled:opacity-50"
       />
