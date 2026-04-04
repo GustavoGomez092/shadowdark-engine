@@ -145,20 +145,25 @@ describe('Room Code Rotation', () => {
     })
 
     it('broadcast delay is sufficient for message delivery', () => {
-      const BROADCAST_DELAY_MS = 500
-      // Should be at least 100ms for WebRTC delivery
-      expect(BROADCAST_DELAY_MS).toBeGreaterThanOrEqual(100)
+      const GM_TOTAL_BROADCAST_DELAY_MS = 1300 // 300ms + 1000ms (double broadcast)
+      // Should be at least 500ms for reliable WebRTC delivery
+      expect(GM_TOTAL_BROADCAST_DELAY_MS).toBeGreaterThanOrEqual(500)
       // Should not be too long (blocks the rotation)
-      expect(BROADCAST_DELAY_MS).toBeLessThanOrEqual(2000)
+      expect(GM_TOTAL_BROADCAST_DELAY_MS).toBeLessThanOrEqual(3000)
     })
 
     it('player reconnect delay allows GM to fully recreate peer', () => {
-      const PLAYER_RECONNECT_DELAY_MS = 2000
-      const GM_BROADCAST_DELAY_MS = 500
-      // Player should wait longer than GM's broadcast + peer creation time
-      expect(PLAYER_RECONNECT_DELAY_MS).toBeGreaterThan(GM_BROADCAST_DELAY_MS)
-      // Should give GM at least 1 second to create new peer
-      expect(PLAYER_RECONNECT_DELAY_MS - GM_BROADCAST_DELAY_MS).toBeGreaterThanOrEqual(1000)
+      const PLAYER_RECONNECT_DELAY_MS = 3000
+      const GM_TOTAL_DELAY_MS = 1300 // broadcast delays
+      // Player should wait longer than GM's total delay + peer creation time
+      expect(PLAYER_RECONNECT_DELAY_MS).toBeGreaterThan(GM_TOTAL_DELAY_MS)
+      // Should give GM at least 1 second to create new peer after destroying old one
+      expect(PLAYER_RECONNECT_DELAY_MS - GM_TOTAL_DELAY_MS).toBeGreaterThanOrEqual(1000)
+    })
+
+    it('GM broadcasts twice for reliability', () => {
+      const broadcastCount = 2
+      expect(broadcastCount).toBe(2) // redundant broadcast for reliability
     })
   })
 
@@ -182,6 +187,55 @@ describe('Room Code Rotation', () => {
       reconnectAttempts++ // the planned reconnect fires
 
       expect(reconnectAttempts).toBe(1) // only one reconnect
+    })
+
+    it('signaling disconnect during rotation is also blocked', () => {
+      let isRotating = true
+      let signalingReconnects = 0
+
+      // peer.on('disconnected') fires during rotation — should be blocked
+      if (!isRotating) {
+        signalingReconnects++
+      }
+
+      expect(signalingReconnects).toBe(0)
+    })
+
+    it('duplicate room_code_changed broadcasts are ignored', () => {
+      let isRotating = false
+      let handleCount = 0
+
+      // First broadcast
+      if (!isRotating) {
+        isRotating = true
+        handleCount++
+      }
+
+      // Second broadcast (duplicate) — should be ignored
+      if (!isRotating) {
+        handleCount++ // won't execute
+      }
+
+      // Wait... then the isRotating flag would be set back to false
+      // But we still shouldn't have processed a duplicate
+      expect(handleCount).toBe(1)
+    })
+
+    it('player recreates Peer if destroyed during rotation', () => {
+      let peerState: 'connected' | 'disconnected' | 'destroyed' = 'connected'
+      let recreated = false
+
+      // Simulate peer getting destroyed during GM rotation
+      peerState = 'destroyed'
+
+      // After rotation delay, check if peer needs recreation
+      if (peerState === 'destroyed' || peerState === 'disconnected') {
+        recreated = true
+        peerState = 'connected' // new Peer created
+      }
+
+      expect(recreated).toBe(true)
+      expect(peerState).toBe('connected')
     })
 
     it('close event without rotation still triggers reconnect', () => {

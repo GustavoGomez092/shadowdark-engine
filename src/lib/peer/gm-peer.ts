@@ -217,10 +217,13 @@ export class GMPeerHost {
     console.log(`[GM Peer] Rotating room code: ${this._roomCode} → ${newCode}`)
 
     // 1. Broadcast the new code to all connected players BEFORE destroying
+    // Send it multiple times to increase delivery reliability over WebRTC
+    this.broadcast({ type: 'room_code_changed', newRoomCode: newCode })
+    await new Promise(resolve => setTimeout(resolve, 300))
     this.broadcast({ type: 'room_code_changed', newRoomCode: newCode })
 
-    // 2. Wait briefly so messages can be delivered
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 2. Wait for WebRTC message delivery (1s is safer than 500ms)
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
     // 3. Close all current connections and destroy old peer
     for (const peer of this.connections.values()) {

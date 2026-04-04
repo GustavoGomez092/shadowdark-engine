@@ -61,6 +61,11 @@ export class PlayerPeerClient {
         console.log('[Player Peer] Disconnected from signaling')
         this._isConnected = false
         this.callbacks.onDisconnected()
+        // If rotating, the room_code_changed handler manages reconnection
+        if (this._isRotating) {
+          console.log('[Player Peer] Room rotation in progress, skipping signaling reconnect')
+          return
+        }
         this.attemptReconnect()
       })
     })
@@ -133,19 +138,47 @@ export class PlayerPeerClient {
         this.destroy()
         break
       case 'room_code_changed':
+        // Ignore duplicate broadcasts (GM sends twice for reliability)
+        if (this._isRotating) {
+          console.log('[Player Peer] Ignoring duplicate room_code_changed')
+          break
+        }
         console.log(`[Player Peer] Room code rotating to: ${message.newRoomCode}`)
-        this._isRotating = true  // Prevent attemptDataReconnect from racing
+        this._isRotating = true  // Prevent all auto-reconnect handlers from racing
         this.roomCode = message.newRoomCode
         this.callbacks.onRoomCodeChanged?.(message.newRoomCode)
-        // Close current connection and reconnect to new code
+        // Close current connection
         this.connection?.close()
         this._isConnected = false
-        // Wait for GM to finish creating new peer, then reconnect
+        // Wait for GM to finish destroying old peer + creating new peer, then reconnect
+        // 3s total: 500ms GM broadcast delay + ~1-2s peer creation
         setTimeout(() => {
           this._isRotating = false
+          this.reconnectAttempts = 0
           this.dataReconnectAttempts = 0
-          this.connectToRoom(message.newRoomCode)
-        }, 2000)
+          // Recreate our own Peer if it got disconnected/destroyed during rotation
+          if (!this.peer || this.peer.destroyed || this.peer.disconnected) {
+            console.log('[Player Peer] Recreating Peer for rotation reconnect')
+            this.peer?.destroy()
+            this.peer = new Peer()
+            this.peer.on('open', () => {
+              console.log('[Player Peer] New Peer ready, connecting to rotated room')
+              this.connectToRoom(message.newRoomCode)
+            })
+            this.peer.on('error', (err) => {
+              console.error('[Player Peer] Peer recreation error:', err)
+              this.callbacks.onError('Failed to reconnect after room rotation')
+            })
+            this.peer.on('disconnected', () => {
+              if (!this._isRotating) {
+                this.callbacks.onDisconnected()
+                this.attemptReconnect()
+              }
+            })
+          } else {
+            this.connectToRoom(message.newRoomCode)
+          }
+        }, 3000)
         break
       default:
         this.callbacks.onMessage(message)
