@@ -76,6 +76,7 @@ export interface SessionMeta {
 // FILTERED STATE — sent to each player
 export interface PlayerVisibleState {
   room: { id: string; name: string };
+  currentRoomCode: string;  // Live peer ID — may change during session
   myCharacter: Character | null;
   otherCharacters: PublicCharacterInfo[];
   combat: CombatState | null;

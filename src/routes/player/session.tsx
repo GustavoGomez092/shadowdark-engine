@@ -60,6 +60,10 @@ function PlayerSessionPage() {
   const handleStateSync = (newState: PlayerVisibleState) => {
     setPlayerState(newState)
     setIsReconnecting(false)
+    // Keep connection info in sync with latest room code from GM
+    if (connectionInfo && newState.currentRoomCode && newState.currentRoomCode !== connectionInfo.roomCode) {
+      usePlayerStore.getState().saveConnectionInfo({ ...connectionInfo, roomCode: newState.currentRoomCode })
+    }
   }
 
   const handleMessage = (message: GMToPlayerMessage) => {
@@ -104,8 +108,13 @@ function PlayerSessionPage() {
       setIsReconnecting(false)
     }, 10000)
 
+    // Use the latest room code from cached state (updated every state sync)
+    // Falls back to the stored connectionInfo code
+    const cachedState = usePlayerStore.getState().state
+    const latestRoomCode = cachedState?.currentRoomCode || connectionInfo.roomCode
+
     connect(
-      connectionInfo.roomCode,
+      latestRoomCode,
       connectionInfo.displayName,
       connectionInfo.password,
       connectionInfo.characterId,

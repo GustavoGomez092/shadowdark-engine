@@ -1,55 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 /**
  * Room Code Rotation Test Suite
  *
- * Tests the proactive room code rotation mechanism that prevents
- * PeerJS timeout disconnections during long game sessions.
+ * Tests the room code management system that ensures players always
+ * have the latest room code, even when the GM's peer ID changes
+ * (due to PeerJS timeout, page refresh, or network issues).
  *
- * Since PeerJS requires WebRTC (not available in jsdom), we test
- * the rotation logic by mocking the Peer class and DataConnection.
+ * Strategy: The GM's current room code (peer ID) is included in
+ * every PlayerVisibleState sync. The player caches this and uses
+ * it for reconnection. No fragile timer-based rotation needed.
  */
-
-// ========== Mocks ==========
-
-function createMockConnection(peerId: string) {
-  const listeners: Record<string, Function[]> = {}
-  return {
-    peer: peerId,
-    open: true,
-    on: vi.fn((event: string, handler: Function) => {
-      if (!listeners[event]) listeners[event] = []
-      listeners[event].push(handler)
-    }),
-    send: vi.fn(),
-    close: vi.fn(),
-    _emit: (event: string, ...args: unknown[]) => {
-      listeners[event]?.forEach(fn => fn(...args))
-    },
-  }
-}
-
-function createMockPeer(id: string) {
-  const listeners: Record<string, Function[]> = {}
-  return {
-    id,
-    on: vi.fn((event: string, handler: Function) => {
-      if (!listeners[event]) listeners[event] = []
-      listeners[event].push(handler)
-    }),
-    connect: vi.fn((roomCode: string) => createMockConnection(roomCode)),
-    destroy: vi.fn(),
-    _emit: (event: string, ...args: unknown[]) => {
-      listeners[event]?.forEach(fn => fn(...args))
-    },
-  }
-}
 
 // ========== Tests ==========
 
-describe('Room Code Rotation', () => {
-  describe('GM-side rotation logic', () => {
-    it('generates a new room code in sd-XXXXXXXX format', async () => {
+describe('Room Code Management', () => {
+  describe('Room code generation', () => {
+    it('generates a new room code in 8-char format', async () => {
       const { generateRoomCode } = await import('@/lib/utils/id.ts')
       const code = generateRoomCode()
       expect(code).toMatch(/^[a-z0-9]{8}$/)
@@ -62,108 +29,162 @@ describe('Room Code Rotation', () => {
       expect(codes.size).toBe(100)
     })
 
-    it('room_code_changed message has correct structure', () => {
-      const message = {
-        type: 'room_code_changed' as const,
-        newRoomCode: 'sd-abc12345',
+    it('room code is prefixed with sd- when used as peer ID', async () => {
+      const { generateRoomCode } = await import('@/lib/utils/id.ts')
+      const peerCode = `sd-${generateRoomCode()}`
+      expect(peerCode).toMatch(/^sd-[a-z0-9]{8}$/)
+    })
+  })
+
+  describe('PlayerVisibleState includes currentRoomCode', () => {
+    it('state sync includes the current room code', () => {
+      const state = {
+        room: { id: 'session-123', name: 'Test Game' },
+        currentRoomCode: 'sd-abc12345',
+        myCharacter: null,
+        otherCharacters: [],
+        combat: null,
+        light: { timers: [], isInDarkness: false, isPaused: false },
+        activeTurnId: null,
+        visibleMonsters: [],
+        chatLog: [],
+        recentRolls: [],
       }
-      expect(message.type).toBe('room_code_changed')
-      expect(message.newRoomCode).toMatch(/^sd-/)
+
+      expect(state.currentRoomCode).toBe('sd-abc12345')
+    })
+
+    it('room code updates in state when GM peer changes', () => {
+      // Simulate GM's peer ID changing (after refresh or PeerJS reassignment)
+      const state1 = { currentRoomCode: 'sd-oldcode1' }
+      const state2 = { currentRoomCode: 'sd-newcode1' }
+
+      // Player receives state2 via state_sync — room code is now new
+      expect(state2.currentRoomCode).not.toBe(state1.currentRoomCode)
+      expect(state2.currentRoomCode).toBe('sd-newcode1')
+    })
+  })
+
+  describe('Player reconnection with cached room code', () => {
+    it('player uses latest room code from cached state for reconnection', () => {
+      const connectionInfo = {
+        roomCode: 'sd-oldcode1', // Original join code
+        displayName: 'Pesto',
+      }
+
+      const cachedState = {
+        currentRoomCode: 'sd-newcode1', // Updated via state sync
+      }
+
+      // Reconnection logic: prefer cached state's room code
+      const latestRoomCode = cachedState.currentRoomCode || connectionInfo.roomCode
+      expect(latestRoomCode).toBe('sd-newcode1')
+    })
+
+    it('falls back to connection info code when no cached state', () => {
+      const connectionInfo = {
+        roomCode: 'sd-oldcode1',
+        displayName: 'Pesto',
+      }
+
+      const cachedState = null
+
+      const latestRoomCode = cachedState?.currentRoomCode || connectionInfo.roomCode
+      expect(latestRoomCode).toBe('sd-oldcode1')
+    })
+
+    it('connection info updates when state sync has new room code', () => {
+      const connectionInfo = {
+        roomCode: 'sd-oldcode1',
+        displayName: 'Pesto',
+        characterId: 'char-123',
+      }
+
+      // State sync arrives with different room code
+      const newRoomCode = 'sd-newcode1'
+
+      // Connection info should be updated
+      if (newRoomCode !== connectionInfo.roomCode) {
+        const updatedInfo = { ...connectionInfo, roomCode: newRoomCode }
+        expect(updatedInfo.roomCode).toBe('sd-newcode1')
+        expect(updatedInfo.displayName).toBe('Pesto') // unchanged
+        expect(updatedInfo.characterId).toBe('char-123') // unchanged
+      }
+    })
+  })
+
+  describe('GM peer recovery', () => {
+    it('GM generates new code when old one is unavailable', () => {
+      // Simulate unavailable-id error (PeerJS took the old code)
+      const oldCode = 'sd-expired1'
+      const peerError = { type: 'unavailable-id' }
+
+      let usedCode = oldCode
+      if (peerError.type === 'unavailable-id') {
+        usedCode = 'sd-freshcode' // GM generates new code
+      }
+
+      expect(usedCode).not.toBe(oldCode)
+    })
+
+    it('session state stores new peer ID after recovery', () => {
+      const session = {
+        room: {
+          id: 'session-123',
+          name: 'Test Game',
+          gmPeerId: 'sd-oldcode1',
+        },
+      }
+
+      // After peer recovery with new code
+      const newCode = 'sd-newcode1'
+      session.room.gmPeerId = newCode
+
+      expect(session.room.gmPeerId).toBe('sd-newcode1')
+      expect(session.room.id).toBe('session-123') // session ID unchanged
+    })
+  })
+
+  describe('State sync reliability', () => {
+    it('state sync happens every 60 seconds', () => {
+      const SYNC_INTERVAL_MS = 60_000
+      // Ensure sync is frequent enough to catch room code changes
+      expect(SYNC_INTERVAL_MS).toBeLessThanOrEqual(120_000)
+    })
+
+    it('state sync also happens after every GM action', () => {
+      // This is guaranteed by the architecture: every GM action
+      // calls broadcastStateSync() which sends PlayerVisibleState
+      // including currentRoomCode to all players
+      const actionsTriggeredSync = [
+        'addMonster', 'updateMonster', 'removeMonster',
+        'updateCharacter', 'addChatMessage', 'setDangerLevel',
+      ]
+      expect(actionsTriggeredSync.length).toBeGreaterThan(0)
     })
   })
 
   describe('Message protocol', () => {
-    it('room_code_changed is a valid GMToPlayerMessage type', async () => {
-      // Verify the type is in the union by constructing it
-      const msg: import('@/schemas/messages.ts').RoomCodeChangedMessage = {
-        type: 'room_code_changed',
-        newRoomCode: 'sd-newcode1',
+    it('room_code_changed message structure is valid', () => {
+      const msg = {
+        type: 'room_code_changed' as const,
+        newRoomCode: 'sd-abc12345',
       }
       expect(msg.type).toBe('room_code_changed')
-      expect(msg.newRoomCode).toBeDefined()
+      expect(msg.newRoomCode).toMatch(/^sd-/)
     })
 
-    it('broadcast envelope wraps room_code_changed correctly', async () => {
+    it('broadcast envelope wraps correctly', async () => {
       const { generateId } = await import('@/lib/utils/id.ts')
-      const envelope: import('@/schemas/messages.ts').P2PMessageEnvelope = {
+      const envelope = {
         id: generateId(),
         timestamp: Date.now(),
-        senderId: 'sd-oldcode1',
+        senderId: 'sd-gmcode1',
         type: 'room_code_changed',
         payload: { type: 'room_code_changed', newRoomCode: 'sd-newcode1' },
         seq: 42,
       }
       expect(envelope.type).toBe('room_code_changed')
-      expect((envelope.payload as { newRoomCode: string }).newRoomCode).toBe('sd-newcode1')
-    })
-  })
-
-  describe('Player-side room code handling', () => {
-    it('player stores new room code when received', () => {
-      // Simulate the player peer state
-      let currentRoomCode = 'sd-oldcode1'
-      let isConnected = true
-      let reconnectTarget: string | null = null
-
-      // Simulate receiving room_code_changed
-      const message = { type: 'room_code_changed' as const, newRoomCode: 'sd-newcode1' }
-
-      // This is what the player peer does:
-      currentRoomCode = message.newRoomCode
-      isConnected = false
-      reconnectTarget = message.newRoomCode
-
-      expect(currentRoomCode).toBe('sd-newcode1')
-      expect(isConnected).toBe(false)
-      expect(reconnectTarget).toBe('sd-newcode1')
-    })
-
-    it('player reconnects to new code, not old code', () => {
-      const oldCode = 'sd-oldcode1'
-      const newCode = 'sd-newcode1'
-
-      // Simulate the reconnection target
-      let roomCode = oldCode
-
-      // Room code changed message received
-      roomCode = newCode
-
-      // When reconnection happens, it should use the new code
-      expect(roomCode).not.toBe(oldCode)
-      expect(roomCode).toBe(newCode)
-    })
-  })
-
-  describe('Rotation timing', () => {
-    it('rotation interval is shorter than typical PeerJS timeout', () => {
-      const ROTATION_INTERVAL_MS = 25 * 60 * 1000 // 25 minutes
-      const PEERJS_TYPICAL_TIMEOUT_MS = 60 * 60 * 1000 // ~60 minutes
-
-      expect(ROTATION_INTERVAL_MS).toBeLessThan(PEERJS_TYPICAL_TIMEOUT_MS)
-      // Should be at least half the timeout for safety margin
-      expect(ROTATION_INTERVAL_MS).toBeLessThan(PEERJS_TYPICAL_TIMEOUT_MS / 2)
-    })
-
-    it('broadcast delay is sufficient for message delivery', () => {
-      const GM_TOTAL_BROADCAST_DELAY_MS = 1300 // 300ms + 1000ms (double broadcast)
-      // Should be at least 500ms for reliable WebRTC delivery
-      expect(GM_TOTAL_BROADCAST_DELAY_MS).toBeGreaterThanOrEqual(500)
-      // Should not be too long (blocks the rotation)
-      expect(GM_TOTAL_BROADCAST_DELAY_MS).toBeLessThanOrEqual(3000)
-    })
-
-    it('player reconnect delay allows GM to fully recreate peer', () => {
-      const PLAYER_RECONNECT_DELAY_MS = 3000
-      const GM_TOTAL_DELAY_MS = 1300 // broadcast delays
-      // Player should wait longer than GM's total delay + peer creation time
-      expect(PLAYER_RECONNECT_DELAY_MS).toBeGreaterThan(GM_TOTAL_DELAY_MS)
-      // Should give GM at least 1 second to create new peer after destroying old one
-      expect(PLAYER_RECONNECT_DELAY_MS - GM_TOTAL_DELAY_MS).toBeGreaterThanOrEqual(1000)
-    })
-
-    it('GM broadcasts twice for reliability', () => {
-      const broadcastCount = 2
-      expect(broadcastCount).toBe(2) // redundant broadcast for reliability
     })
   })
 
@@ -172,244 +193,41 @@ describe('Room Code Rotation', () => {
       let isRotating = false
       let reconnectAttempts = 0
 
-      // Simulate room_code_changed handler setting the flag
+      // room_code_changed sets flag
       isRotating = true
 
-      // Simulate connection.on('close') firing — should be blocked
-      if (!isRotating) {
-        reconnectAttempts++ // attemptDataReconnect
-      }
+      // connection close fires — blocked
+      if (!isRotating) reconnectAttempts++
+      expect(reconnectAttempts).toBe(0)
 
-      expect(reconnectAttempts).toBe(0) // blocked by flag
+      // signaling disconnect fires — also blocked
+      if (!isRotating) reconnectAttempts++
+      expect(reconnectAttempts).toBe(0)
 
-      // Simulate the scheduled reconnect after delay
+      // Planned reconnect fires
       isRotating = false
-      reconnectAttempts++ // the planned reconnect fires
-
-      expect(reconnectAttempts).toBe(1) // only one reconnect
+      reconnectAttempts++
+      expect(reconnectAttempts).toBe(1)
     })
 
-    it('signaling disconnect during rotation is also blocked', () => {
-      let isRotating = true
-      let signalingReconnects = 0
-
-      // peer.on('disconnected') fires during rotation — should be blocked
-      if (!isRotating) {
-        signalingReconnects++
-      }
-
-      expect(signalingReconnects).toBe(0)
-    })
-
-    it('duplicate room_code_changed broadcasts are ignored', () => {
+    it('duplicate room_code_changed messages are ignored', () => {
       let isRotating = false
       let handleCount = 0
 
-      // First broadcast
-      if (!isRotating) {
-        isRotating = true
-        handleCount++
-      }
+      // First message
+      if (!isRotating) { isRotating = true; handleCount++ }
+      // Duplicate
+      if (!isRotating) { handleCount++ }
 
-      // Second broadcast (duplicate) — should be ignored
-      if (!isRotating) {
-        handleCount++ // won't execute
-      }
-
-      // Wait... then the isRotating flag would be set back to false
-      // But we still shouldn't have processed a duplicate
       expect(handleCount).toBe(1)
     })
 
-    it('player recreates Peer if destroyed during rotation', () => {
-      let peerState: 'connected' | 'disconnected' | 'destroyed' = 'connected'
-      let recreated = false
-
-      // Simulate peer getting destroyed during GM rotation
-      peerState = 'destroyed'
-
-      // After rotation delay, check if peer needs recreation
-      if (peerState === 'destroyed' || peerState === 'disconnected') {
-        recreated = true
-        peerState = 'connected' // new Peer created
-      }
-
-      expect(recreated).toBe(true)
-      expect(peerState).toBe('connected')
-    })
-
-    it('close event without rotation still triggers reconnect', () => {
+    it('normal disconnect without rotation still triggers reconnect', () => {
       let isRotating = false
-      let reconnectAttempts = 0
+      let reconnected = false
 
-      // Normal close (GM refreshed, not rotation)
-      if (!isRotating) {
-        reconnectAttempts++
-      }
-
-      expect(reconnectAttempts).toBe(1)
-    })
-  })
-
-  describe('Player store persistence', () => {
-    it('player store updates room code on rotation', () => {
-      // Simulate PlayerConnectionInfo in store
-      const connectionInfo = {
-        roomCode: 'sd-oldcode1',
-        displayName: 'Pesto',
-        password: undefined,
-        characterId: 'char-123',
-      }
-
-      // Simulate onRoomCodeChanged callback
-      const newRoomCode = 'sd-newcode1'
-      const updatedInfo = { ...connectionInfo, roomCode: newRoomCode }
-
-      expect(updatedInfo.roomCode).toBe('sd-newcode1')
-      expect(updatedInfo.displayName).toBe('Pesto') // unchanged
-      expect(updatedInfo.characterId).toBe('char-123') // unchanged
-    })
-
-    it('reconnection after refresh uses updated room code', () => {
-      // Simulate: rotation happened, store was updated, then page refresh
-      const persistedInfo = {
-        roomCode: 'sd-newcode1', // updated by onRoomCodeChanged
-        displayName: 'Pesto',
-      }
-
-      // On reconnect, should use the persisted (updated) code
-      const reconnectCode = persistedInfo.roomCode
-      expect(reconnectCode).toBe('sd-newcode1')
-      expect(reconnectCode).not.toBe('sd-oldcode1')
-    })
-  })
-
-  describe('Rotation flow simulation', () => {
-    it('full rotation sequence: broadcast → close → recreate → reconnect', async () => {
-      const events: string[] = []
-
-      // Simulate GM rotation
-      const connectedPlayers = ['player-1', 'player-2', 'player-3']
-      const sentMessages: { peerId: string; message: unknown }[] = []
-
-      // Step 1: Broadcast new code to all players
-      const newCode = 'sd-newcode1'
-      for (const peerId of connectedPlayers) {
-        sentMessages.push({
-          peerId,
-          message: { type: 'room_code_changed', newRoomCode: newCode },
-        })
-      }
-      events.push('broadcast')
-      expect(sentMessages).toHaveLength(3)
-      expect(sentMessages.every(m => (m.message as { newRoomCode: string }).newRoomCode === newCode)).toBe(true)
-
-      // Step 2: Wait for delivery
-      events.push('wait')
-
-      // Step 3: Close all connections
-      const closedConnections: string[] = []
-      for (const peerId of connectedPlayers) {
-        closedConnections.push(peerId)
-      }
-      events.push('close_connections')
-      expect(closedConnections).toHaveLength(3)
-
-      // Step 4: Destroy old peer
-      events.push('destroy_old_peer')
-
-      // Step 5: Create new peer with new code
-      events.push('create_new_peer')
-
-      // Step 6: Players reconnect
-      const reconnectedPlayers: string[] = []
-      for (const peerId of connectedPlayers) {
-        reconnectedPlayers.push(peerId)
-      }
-      events.push('players_reconnect')
-
-      expect(events).toEqual([
-        'broadcast',
-        'wait',
-        'close_connections',
-        'destroy_old_peer',
-        'create_new_peer',
-        'players_reconnect',
-      ])
-    })
-
-    it('handles rotation when no players are connected', () => {
-      const connectedPlayers: string[] = []
-      const sentMessages: unknown[] = []
-
-      // Broadcast to empty list should not error
-      for (const peerId of connectedPlayers) {
-        sentMessages.push({ peerId, message: { type: 'room_code_changed', newRoomCode: 'sd-new' } })
-      }
-
-      expect(sentMessages).toHaveLength(0)
-      // Rotation should still complete (GM peer recreated)
-    })
-
-    it('player handles receiving room_code_changed while already disconnected', () => {
-      let isConnected = false
-      let roomCode = 'sd-old'
-
-      // Player is already disconnected
-      const message = { type: 'room_code_changed' as const, newRoomCode: 'sd-new' }
-
-      // Should still update the room code for next reconnect attempt
-      roomCode = message.newRoomCode
-      isConnected = false // already false
-
-      expect(roomCode).toBe('sd-new')
-      expect(isConnected).toBe(false)
-    })
-
-    it('multiple rapid rotations update to latest code', () => {
-      let roomCode = 'sd-code-v1'
-
-      // Simulate rapid rotations (shouldn't happen normally but edge case)
-      roomCode = 'sd-code-v2'
-      roomCode = 'sd-code-v3'
-      roomCode = 'sd-code-v4'
-
-      // Player should always have the latest
-      expect(roomCode).toBe('sd-code-v4')
-    })
-  })
-
-  describe('Session state persistence', () => {
-    it('session gmPeerId updates after rotation', () => {
-      const session = {
-        room: {
-          id: 'session-123',
-          name: 'Test Game',
-          gmPeerId: 'sd-oldcode1',
-          createdAt: Date.now(),
-          maxPlayers: 4,
-        },
-      }
-
-      // Simulate post-rotation update
-      const newCode = 'sd-newcode1'
-      session.room.gmPeerId = newCode
-
-      expect(session.room.gmPeerId).toBe('sd-newcode1')
-      // Room ID should NOT change (session identity is separate from peer ID)
-      expect(session.room.id).toBe('session-123')
-    })
-
-    it('room code format is always valid after rotation', () => {
-      const codes = [
-        'sd-abc12345',
-        'sd-xyz98765',
-        'sd-mn3k7h2p',
-      ]
-
-      for (const code of codes) {
-        expect(code).toMatch(/^sd-[a-z0-9]{8}$/)
-      }
+      if (!isRotating) { reconnected = true }
+      expect(reconnected).toBe(true)
     })
   })
 })

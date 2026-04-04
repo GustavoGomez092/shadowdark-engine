@@ -433,6 +433,7 @@ export const useSessionStore = create<SessionStore>()(
 
       return {
         room: { id: session.room.id, name: session.room.name },
+        currentRoomCode: session.room.gmPeerId,
         myCharacter,
         otherCharacters,
         combat: session.combat,
