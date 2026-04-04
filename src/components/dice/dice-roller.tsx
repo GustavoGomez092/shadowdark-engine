@@ -297,9 +297,7 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, 
               : 'bg-primary text-primary-foreground hover:brightness-110 active:scale-[0.98]'
           }`}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="opacity-80">
-            <path d="M6.5 2L2 14h3.5l1-2.5h3l1 2.5H14L9.5 2H6.5zM7.5 9L8 6.5 8.5 9H7.5z" fill="currentColor"/>
-          </svg>
+          <DieIcon type={selectedDie} size={16} />
           {phase === 'rolling' ? t('dice.rollingButton') : t('dice.rollButton')}
         </button>
       </div>
