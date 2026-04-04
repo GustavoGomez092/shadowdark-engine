@@ -9,7 +9,9 @@ const NAV_ITEMS = [
   { label: 'Monsters', href: '/gm/monsters', icon: '🐉', matchEnd: false },
   { label: 'Stores', href: '/gm/stores', icon: '🏪', matchEnd: false },
   { label: 'Reference', href: '/gm/tables', icon: '📖', matchEnd: false },
+  { label: 'Compendium', href: '/compendium/monsters', icon: '📚', matchEnd: false },
   { label: 'Settings', href: '/gm/settings', icon: '⚙️', matchEnd: false },
+  { label: 'Sessions', href: '/gm/create', icon: '💾', matchEnd: false },
 ]
 
 export function GMHeader() {
@@ -40,6 +42,10 @@ export function GMHeader() {
     if (href.includes('$sessionId')) {
       const resolved = href.replace('$sessionId', sessionId)
       return currentPath === resolved
+    }
+    // Compendium: highlight for any /compendium/* page
+    if (href.startsWith('/compendium/')) {
+      return currentPath.startsWith('/compendium')
     }
     return currentPath.startsWith(href)
   }
