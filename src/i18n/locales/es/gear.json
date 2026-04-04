@@ -1,0 +1,274 @@
+{
+  "arrows-20": {
+    "name": "Flechas (20)",
+    "description": "Paquete de 20 flechas para arco largo o arco corto."
+  },
+  "bolts-20": {
+    "name": "Virotes de Ballesta (20)",
+    "description": "Paquete de 20 virotes para ballesta."
+  },
+  "silver-arrows-5": {
+    "name": "Flechas de Plata (5)",
+    "description": "Flechas con punta de plata. Efectivas contra criaturas que solo pueden ser danadas por plata."
+  },
+  "silver-bolts-5": {
+    "name": "Virotes de Plata (5)",
+    "description": "Virotes de ballesta con punta de plata. Efectivos contra criaturas que solo pueden ser danadas por plata."
+  },
+  "backpack": {
+    "name": "Mochila",
+    "description": "Contiene tu equipo. La primera no ocupa espacios de equipo."
+  },
+  "caltrops": {
+    "name": "Abrojos (una bolsa)",
+    "description": "Las criaturas vivientes que los pisen reciben 1 de dano y solo pueden moverse a la mitad de velocidad durante 10 asaltos."
+  },
+  "chain-10": {
+    "name": "Cadena, 3 metros",
+    "description": "Cadena de hierro, 3 metros de largo."
+  },
+  "chalk-10": {
+    "name": "Tiza (10 piezas)",
+    "description": "Para marcar paredes, pisos u objetos."
+  },
+  "crowbar": {
+    "name": "Palanca",
+    "description": "Otorga ventaja en tiradas para forzar objetos atascados."
+  },
+  "flask": {
+    "name": "Frasco o Botella",
+    "description": "Contenedor vacio para liquidos."
+  },
+  "flint-steel": {
+    "name": "Pedernal y Acero",
+    "description": "Los intentos rutinarios de encender fuego siempre tienen exito."
+  },
+  "grappling-hook": {
+    "name": "Garfio de Escalada",
+    "description": "Gancho de metal para anclar cuerdas."
+  },
+  "holy-symbol": {
+    "name": "Simbolo Sagrado",
+    "description": "Requerido para Expulsar Muertos Vivientes y magia divina. No ocupa espacios de equipo."
+  },
+  "holy-water": {
+    "name": "Agua Bendita",
+    "description": "Lanzar contra muertos vivientes dentro del alcance cercano. Inflige 1d8 de dano si impacta."
+  },
+  "iron-spikes-10": {
+    "name": "Clavos de Hierro (10)",
+    "description": "Clavos de metal para asegurar puertas, escalar, etc."
+  },
+  "mirror": {
+    "name": "Espejo",
+    "description": "Pequeno espejo de mano."
+  },
+  "padlock": {
+    "name": "Candado",
+    "description": "Candado de hierro con llave."
+  },
+  "pole": {
+    "name": "Pertiga",
+    "description": "Pertiga de madera, 3 metros de largo."
+  },
+  "rope-60": {
+    "name": "Cuerda, 18 m",
+    "description": "Cuerda de canamo, 18 metros de largo."
+  },
+  "sack": {
+    "name": "Saco (grande)",
+    "description": "Saco grande de arpillera."
+  },
+  "thieves-tools": {
+    "name": "Herramientas de Ladron",
+    "description": "Requeridas para abrir cerraduras y desactivar trampas. Los ladrones comienzan con estas gratis (sin espacios)."
+  },
+  "tinderbox": {
+    "name": "Yesquero",
+    "description": "Pedernal, acero y yesca para encender fuegos."
+  },
+  "waterskin": {
+    "name": "Odre",
+    "description": "Contiene agua para un dia."
+  },
+  "torch": {
+    "name": "Antorcha",
+    "description": "Ilumina a distancia cercana. Arde durante 1 hora en tiempo real."
+  },
+  "lantern": {
+    "name": "Linterna",
+    "description": "Ilumina al doble de distancia cercana. Requiere aceite. Tiene un obturador."
+  },
+  "oil-flask": {
+    "name": "Aceite, frasco",
+    "description": "Alimenta una linterna durante 1 hora en tiempo real. Puede verterse sobre un area cercana y encenderse, ardiendo durante 4 asaltos e infligiendo 1d4 de dano cada asalto."
+  },
+  "rations-3": {
+    "name": "Raciones (3)",
+    "description": "Tres dias de comida y agua para una persona."
+  },
+  "rations-1": {
+    "name": "Racion (1)",
+    "description": "Un dia de comida y agua para una persona."
+  },
+  "potion-healing": {
+    "name": "Pocion de Curacion",
+    "description": "Cura segun el nivel: NV 1-3 = 1d6 PG, NV 4-6 = 2d8 PG, NV 7-9 = 3d10 PG, NV 10+ = 4d12 PG."
+  },
+  "potion-invisibility": {
+    "name": "Pocion de Invisibilidad",
+    "description": "Invisible durante 10 asaltos o hasta que ataques o lances un conjuro."
+  },
+  "antidote": {
+    "name": "Antidoto",
+    "description": "Cura un veneno o enfermedad."
+  },
+  "scroll-tier1": {
+    "name": "Pergamino de Conjuro (rango 1)",
+    "description": "Pergamino de un solo uso de un conjuro de rango 1. Se consume en cualquier intento de lanzamiento."
+  },
+  "scroll-tier2": {
+    "name": "Pergamino de Conjuro (rango 2)",
+    "description": "Pergamino de un solo uso de un conjuro de rango 2. Se consume en cualquier intento de lanzamiento."
+  },
+  "gem-10": {
+    "name": "Gema (10 po)",
+    "description": "Una pequena gema preciosa con un valor de 10 po."
+  },
+  "gem-25": {
+    "name": "Gema (25 po)",
+    "description": "Una gema valiosa con un valor de 25 po."
+  },
+  "gem-50": {
+    "name": "Gema (50 po)",
+    "description": "Una gema fina con un valor de 50 po."
+  },
+  "gem-100": {
+    "name": "Gema (100 po)",
+    "description": "Una gema rara y valiosa con un valor de 100 po."
+  },
+  "pearl": {
+    "name": "Perla",
+    "description": "Una perla lustrosa con un valor de 40 po."
+  },
+  "gold-jewelry": {
+    "name": "Joyeria de Oro",
+    "description": "Una pieza de joyeria de oro con un valor de 30 po."
+  },
+  "silver-jewelry": {
+    "name": "Joyeria de Plata",
+    "description": "Una pieza de joyeria de plata con un valor de 10 po."
+  },
+  "silvered-dagger": {
+    "name": "Daga Plateada",
+    "description": "Una daga banada en plata. Efectiva contra criaturas que solo pueden ser danadas por plata. 1d4 de dano."
+  },
+  "silvered-sword": {
+    "name": "Espada Larga Plateada",
+    "description": "Una espada larga banada en plata. Efectiva contra criaturas que solo pueden ser danadas por plata. 1d8 de dano."
+  },
+  "magic-wand-tier1": {
+    "name": "Varita (conjuro de rango 1)",
+    "description": "Lanza un conjuro de rango 1. Si fallas la tirada de lanzamiento, deja de funcionar hasta descansar. Con un 1 natural, la varita se rompe permanentemente."
+  },
+  "magic-wand-tier2": {
+    "name": "Varita (conjuro de rango 2)",
+    "description": "Lanza un conjuro de rango 2. Si fallas la tirada de lanzamiento, deja de funcionar hasta descansar. Con un 1 natural, la varita se rompe permanentemente."
+  },
+  "bag-of-holding": {
+    "name": "Bolsa de Contencion",
+    "description": "Espacio interdimensional que contiene 10 espacios de equipo. Colocarla dentro de otra Bolsa de Contencion o un Agujero Portatil destruye ambos."
+  },
+  "boots-of-the-cat": {
+    "name": "Botas del Gato",
+    "description": "Salta hasta distancia cercana desde parado. Las tiradas de movimiento silencioso siempre son CD 9."
+  },
+  "bracers-of-defense": {
+    "name": "Brazales de Defensa",
+    "description": "+1 de bonificador a la CA mientras se llevan puestos."
+  },
+  "cloak-of-elvenkind": {
+    "name": "Capa Elfica",
+    "description": "Las tiradas para ocultarse siempre son CD 9. 1/dia, invisible durante 5 asaltos (termina al atacar/lanzar conjuros)."
+  },
+  "gauntlets-of-might": {
+    "name": "Guanteletes de Poder",
+    "description": "FUE se convierte en 18 (+4) mientras se llevan puestos."
+  },
+  "immovable-rod": {
+    "name": "Vara Inamovible",
+    "description": "Presiona el boton para fijarla en el espacio. Presiona de nuevo para liberarla."
+  },
+  "kytherian-cog": {
+    "name": "Engranaje de Kytheros",
+    "description": "Comienza cada sesion con una ficha de suerte."
+  },
+  "pearl-of-power": {
+    "name": "Perla de Poder",
+    "description": "1/dia, recupera un conjuro perdido. No puede restaurar conjuros perdidos por fallo critico de lanzamiento."
+  },
+  "scarab-of-protection": {
+    "name": "Escarabajo de Proteccion",
+    "description": "Si mueres, haz una tirada de CON CD 18. Si tienes exito, caes inconsciente en lugar de morir."
+  },
+  "staff-of-healing": {
+    "name": "Baston de Curacion",
+    "description": "Baston +1. 1/dia, toca a una criatura para curar 1d6 PG."
+  },
+  "ophidian-armor": {
+    "name": "Armadura Ofidiana",
+    "description": "Cuero reluciente y suave de escamas esmeralda moteadas. Armadura de cuero +1. Ventaja en tiradas para evitar efectos de veneno."
+  },
+  "jewel-of-barbalt": {
+    "name": "Joya de Barbalt",
+    "description": "Un rubi reluciente del tamano de un coco sostenido por garras doradas. Exito critico en 18-20. Maldicion: fallo critico en 1-3."
+  },
+  "sword-of-the-ancients": {
+    "name": "Espada de los Ancestros",
+    "description": "Una hoja mellada y oxidada con empunadura de cuero aceitado. Espada larga +2. Irrompible y puede cortar cualquier material."
+  },
+  "asterion": {
+    "name": "Asterion",
+    "description": "Una criatura no puede mover al portador contra su voluntad."
+  },
+  "vigilant": {
+    "name": "Vigilante",
+    "description": "El portador no puede ser sorprendido."
+  },
+  "braks-cube-of-perfection": {
+    "name": "Cubo de Perfeccion de Brak",
+    "description": "Un cubo metalico y liso que aumenta permanentemente una caracteristica en 2 (hasta un maximo de 20) al activarse. Un solo uso."
+  },
+  "potion-of-extirpation": {
+    "name": "Pocion de Extirpacion",
+    "description": "Elimina todas las maldiciones y aflicciones magicas del bebedor."
+  },
+  "herbal-salve": {
+    "name": "Ungueento",
+    "description": "Remedio herbal (Herbalismo de Explorador CD 11). Cura 1 PG. Expira en 3 asaltos si no se usa."
+  },
+  "herbal-stimulant": {
+    "name": "Estimulante",
+    "description": "Remedio herbal (Herbalismo de Explorador CD 12). No puedes ser sorprendido durante 10 asaltos. Expira en 3 asaltos si no se usa."
+  },
+  "herbal-foebane": {
+    "name": "Veneno de Enemigo",
+    "description": "Remedio herbal (Herbalismo de Explorador CD 13). Ventaja en ataques y dano contra un tipo de criatura durante 1d6 asaltos. Expira en 3 asaltos si no se usa."
+  },
+  "herbal-restorative": {
+    "name": "Restaurador",
+    "description": "Remedio herbal (Herbalismo de Explorador CD 14). Termina un veneno o enfermedad. Expira en 3 asaltos si no se usa."
+  },
+  "herbal-curative": {
+    "name": "Curativo",
+    "description": "Remedio herbal (Herbalismo de Explorador CD 15). Equivalente a una Pocion de Curacion. Expira en 3 asaltos si no se usa."
+  },
+  "basilisk-egg": {
+    "name": "Huevo de Basilisco",
+    "description": "Un huevo de basilisco petrificado. Se lanza como arma a distancia cercana."
+  },
+  "crawling-kit": {
+    "name": "Kit de Explorador",
+    "description": "Mochila, pedernal y acero, 2 antorchas, 3 raciones, 10 clavos de hierro, garfio de escalada, 18 m de cuerda."
+  }
+}

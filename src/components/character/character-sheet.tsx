@@ -39,7 +39,7 @@ export function CharacterSheet({
   onRest,
   onLevelUp,
 }: Props) {
-  const { t, ti } = useLocale()
+  const { t, ti, tData } = useLocale()
   const [showLevelUp, setShowLevelUp] = useState(false)
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
   const xpNeeded = getXpToNextLevel(c)
@@ -159,7 +159,7 @@ export function CharacterSheet({
           <div className="text-2xl font-bold">{fmt(c.computed.spellCheckBonus)}</div>
           {c.spells.activeFocusSpell && (
             <p className="text-xs text-amber-600 dark:text-amber-400">
-              {ti('character.focusing', { spell: getSpell(c.spells.activeFocusSpell.spellId)?.name ?? 'Unknown' })}
+              {ti('character.focusing', { spell: (() => { const s = getSpell(c.spells.activeFocusSpell.spellId); return s ? tData('spells', s.id, 'name', s.name) : 'Unknown' })() })}
             </p>
           )}
         </div>
@@ -173,7 +173,7 @@ export function CharacterSheet({
         if (features.length === 0) return null
         return (
           <div className="rounded-xl border border-border bg-card p-4">
-            <h3 className="mb-3 font-semibold">{ti('character.abilities', { className: cls.name })}</h3>
+            <h3 className="mb-3 font-semibold">{ti('character.abilities', { className: tData('classes', cls.id, 'name', cls.name) })}</h3>
             <div className="space-y-2 text-sm">
               {features.map(f => (
                 <div key={f.name} className="rounded-lg border border-border p-2">
@@ -260,7 +260,7 @@ export function CharacterSheet({
                   ks.isAvailable ? 'border-border' : 'border-border/50 opacity-50'
                 }`}>
                   <div>
-                    <span className="font-medium">{spell.name}</span>
+                    <span className="font-medium">{tData('spells', spell.id, 'name', spell.name)}</span>
                     <span className="ml-2 text-xs text-muted-foreground">{ti('character.tier', { tier: spell.tier })}</span>
                     {spell.isFocus && <span className="ml-1 text-xs text-amber-600">{t('character.focus')}</span>}
                     {ks.hasAdvantage && <span className="ml-1 text-xs text-green-600">{t('character.advantage')}</span>}

@@ -295,7 +295,7 @@ function RulesCheatSheet() {
 
 // ========== SPELLS ==========
 function SpellsRef({ search }: { search: string }) {
-  const { t } = useLocale()
+  const { t, tData } = useLocale()
   const [classFilter, setClassFilter] = useState<"all" | "wizard" | "priest">(
     "all",
   )
@@ -332,7 +332,7 @@ function SpellsRef({ search }: { search: string }) {
             className="rounded-xl border border-border bg-card p-3"
           >
             <div className="flex items-start justify-between mb-1">
-              <h3 className="font-semibold">{spell.name}</h3>
+              <h3 className="font-semibold">{tData('spells', spell.id, 'name', spell.name)}</h3>
               <div className="flex gap-1">
                 {spell.isFocus && (
                   <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
@@ -354,7 +354,7 @@ function SpellsRef({ search }: { search: string }) {
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {spell.description}
+              {tData('spells', spell.id, 'description', spell.description)}
             </p>
           </div>
         ))}
@@ -365,7 +365,7 @@ function SpellsRef({ search }: { search: string }) {
 
 // ========== ITEMS ==========
 function ItemsRef({ search }: { search: string }) {
-  const { t } = useLocale()
+  const { t, tData } = useLocale()
   const q = search.toLowerCase()
   const weapons = WEAPONS.filter((w) => !q || w.name.toLowerCase().includes(q))
   const armor = ARMOR.filter((a) => !q || a.name.toLowerCase().includes(q))
@@ -393,7 +393,7 @@ function ItemsRef({ search }: { search: string }) {
                 className="rounded-lg border border-border bg-card p-2 text-xs"
               >
                 <div className="flex justify-between">
-                  <span className="font-semibold">{w.name}</span>
+                  <span className="font-semibold">{tData('weapons', w.id, 'name', w.name)}</span>
                   <span className="text-muted-foreground">
                     {formatCost(w.cost)}
                   </span>
@@ -422,7 +422,7 @@ function ItemsRef({ search }: { search: string }) {
                 className="rounded-lg border border-border bg-card p-2 text-xs"
               >
                 <div className="flex justify-between">
-                  <span className="font-semibold">{a.name}</span>
+                  <span className="font-semibold">{tData('armor', a.id, 'name', a.name)}</span>
                   <span className="text-muted-foreground">
                     {formatCost(a.cost)}
                   </span>
@@ -452,13 +452,13 @@ function ItemsRef({ search }: { search: string }) {
                 className="rounded-lg border border-border bg-card p-2 text-xs"
               >
                 <div className="flex justify-between">
-                  <span className="font-semibold">{g.name}</span>
+                  <span className="font-semibold">{tData('gear', g.id, 'name', g.name)}</span>
                   <span className="text-muted-foreground">
                     {formatCost(g.cost)} · {g.slots}s
                   </span>
                 </div>
                 <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                  {g.description}
+                  {tData('gear', g.id, 'description', g.description)}
                 </p>
               </div>
             ))}
@@ -471,7 +471,7 @@ function ItemsRef({ search }: { search: string }) {
 
 // ========== MONSTERS ==========
 function MonstersRef({ search }: { search: string }) {
-  const { t } = useLocale()
+  const { t, tData } = useLocale()
   const filtered = MONSTERS.filter(
     (m) => !search || m.name.toLowerCase().includes(search.toLowerCase()),
   )
@@ -483,7 +483,7 @@ function MonstersRef({ search }: { search: string }) {
         <div key={m.id} className="rounded-xl border border-border bg-card p-4">
           {/* Header */}
           <div className="flex items-baseline justify-between mb-2">
-            <h3 className="text-lg font-bold">{m.name}</h3>
+            <h3 className="text-lg font-bold">{tData('monsters', m.id, 'name', m.name)}</h3>
             <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold text-red-400">{t('reference.monsters.lv')} {m.level}</span>
           </div>
 
@@ -552,7 +552,7 @@ function MonstersRef({ search }: { search: string }) {
 
 // ========== WORLD ==========
 function WorldRef() {
-  const { t } = useLocale()
+  const { t, tData } = useLocale()
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-xl border border-border bg-card p-4">
@@ -561,10 +561,10 @@ function WorldRef() {
           {ANCESTRIES.map((a) => (
             <div key={a.id} className="rounded-lg bg-secondary/30 p-2.5">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="font-semibold text-sm">{a.name}</span>
-                <span className="text-xs font-medium text-primary">{a.traitName}</span>
+                <span className="font-semibold text-sm">{tData('ancestries', a.id, 'name', a.name)}</span>
+                <span className="text-xs font-medium text-primary">{tData('ancestries', a.id, 'traitName', a.traitName)}</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{a.traitDescription}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{tData('ancestries', a.id, 'traitDescription', a.traitDescription)}</p>
               <div className="mt-1.5 flex gap-1">
                 {a.languages.map(l => (
                   <span key={l} className="rounded-full bg-secondary px-2 py-0.5 text-[9px]">{l}</span>
@@ -581,10 +581,10 @@ function WorldRef() {
           {CLASSES.map((c) => (
             <div key={c.id} className="rounded-lg bg-secondary/30 p-2.5">
               <div className="flex items-baseline justify-between mb-0.5">
-                <span className="font-semibold text-sm">{c.name}</span>
+                <span className="font-semibold text-sm">{tData('classes', c.id, 'name', c.name)}</span>
                 <span className="font-mono text-xs text-muted-foreground">{c.hitDie}</span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-1.5">{c.description}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-1.5">{tData('classes', c.id, 'description', c.description)}</p>
               <div className="flex flex-wrap gap-1">
                 {c.features.map(f => (
                   <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{f.name}</span>
@@ -601,13 +601,13 @@ function WorldRef() {
           {DEITIES.map((d) => (
             <div key={d.id} className="rounded-lg bg-secondary/30 p-2.5">
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-sm">{d.name}</span>
+                <span className="font-semibold text-sm">{tData('deities', d.id, 'name', d.name)}</span>
                 <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${d.alignment === "lawful" ? "bg-blue-500/20 text-blue-400" : d.alignment === "neutral" ? "bg-secondary text-muted-foreground" : "bg-red-500/20 text-red-400"}`}>
                   {d.alignment}
                 </span>
               </div>
               <p className="text-[10px] font-semibold text-primary mb-0.5">{d.domain}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{d.description}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{tData('deities', d.id, 'description', d.description)}</p>
             </div>
           ))}
         </div>
@@ -618,8 +618,8 @@ function WorldRef() {
         <div className="grid gap-1.5">
           {BACKGROUNDS.map((b) => (
             <div key={b.id} className="rounded-lg bg-secondary/30 px-3 py-2 text-xs flex items-baseline gap-1.5">
-              <span className="font-semibold">{b.name}:</span>{" "}
-              <span className="text-muted-foreground">{b.description}</span>
+              <span className="font-semibold">{tData('backgrounds', b.id, 'name', b.name)}:</span>{" "}
+              <span className="text-muted-foreground">{tData('backgrounds', b.id, 'description', b.description)}</span>
             </div>
           ))}
         </div>

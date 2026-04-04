@@ -1,0 +1,754 @@
+{
+  "aboleth": {
+    "name": "Aboleth",
+    "description": "Un antiguo horror acuático con dominio psíquico sobre mentes inferiores."
+  },
+  "acolyte": {
+    "name": "Acólito",
+    "description": "Un sacerdote de bajo rango devoto a una deidad."
+  },
+  "animated-armor": {
+    "name": "Armadura Animada",
+    "description": "Una armadura de placas animada por magia arcana para custodiar un lugar."
+  },
+  "bandit": {
+    "name": "Bandido",
+    "description": "Un forajido común que acecha a los viajeros."
+  },
+  "bat-giant": {
+    "name": "Murciélago Gigante",
+    "description": "Un murciélago del tamaño de un perro con una mordida feroz."
+  },
+  "bear-brown": {
+    "name": "Oso Pardo",
+    "description": "Un oso enorme y poderoso que defiende su territorio con ferocidad."
+  },
+  "beastman": {
+    "name": "Hombre Bestia",
+    "description": "Un humanoide salvaje con cabeza de cabra que saquea y arrasa."
+  },
+  "boar": {
+    "name": "Jabalí",
+    "description": "Un cerdo salvaje con colmillos afilados y mal temperamento."
+  },
+  "cave-brute": {
+    "name": "Bruto de las Cavernas",
+    "description": "Un depredador subterráneo corpulento con garras poderosas y mandíbulas aplastantes."
+  },
+  "cave-creeper": {
+    "name": "Reptador de las Cavernas",
+    "description": "Un artrópodo de muchas patas que acecha en los techos de las cavernas."
+  },
+  "crocodile": {
+    "name": "Cocodrilo",
+    "description": "Un reptil grande y acorazado que embosca presas cerca del agua."
+  },
+  "cultist": {
+    "name": "Cultista",
+    "description": "Un seguidor fanático de un poder oscuro."
+  },
+  "darkmantle": {
+    "name": "Manto Oscuro",
+    "description": "Una criatura similar a un murciélago que envuelve a sus presas en oscuridad mágica."
+  },
+  "dragon-swamp": {
+    "name": "Dragón de Pantano",
+    "description": "Un dragón astuto que habita en ciénagas fétidas, exhalando nubes de smog asfixiante."
+  },
+  "dryad": {
+    "name": "Dríade",
+    "description": "Un tímido espíritu del bosque vinculado a un gran árbol."
+  },
+  "dung-beetle-giant": {
+    "name": "Escarabajo Pelotero Gigante",
+    "description": "Un escarabajo sobredimensionado que empuja bolas de inmundicia por los túneles subterráneos."
+  },
+  "ettercap": {
+    "name": "Ettercap",
+    "description": "Un humanoide arácnido que teje redes pegajosas y venenosas."
+  },
+  "fairy": {
+    "name": "Hada",
+    "description": "Un diminuto embaucador alado armado con una aguja soporífera."
+  },
+  "gelatinous-cube": {
+    "name": "Cubo Gelatinoso",
+    "description": "Un cieno casi transparente que llena pasillos enteros, disolviendo todo lo que engulle."
+  },
+  "ghost": {
+    "name": "Fantasma",
+    "description": "Un espíritu atormentado atado al mundo mortal por asuntos pendientes."
+  },
+  "jellyfish": {
+    "name": "Medusa Marina"
+  },
+  "kobold": {
+    "name": "Kóbold"
+  },
+  "rat": {
+    "name": "Rata"
+  },
+  "scorpion": {
+    "name": "Escorpión"
+  },
+  "spider": {
+    "name": "Araña"
+  },
+  "apprentice": {
+    "name": "Aprendiz"
+  },
+  "badger": {
+    "name": "Tejón"
+  },
+  "basilisk-hatchling": {
+    "name": "Cría de Basilisco"
+  },
+  "brachiosaurus": {
+    "name": "Braquiosaurio"
+  },
+  "centipede-giant": {
+    "name": "Ciempiés Gigante"
+  },
+  "goblin": {
+    "name": "Trasgo"
+  },
+  "guard": {
+    "name": "Guardia"
+  },
+  "mastiff": {
+    "name": "Mastín"
+  },
+  "orc": {
+    "name": "Orco"
+  },
+  "peasant": {
+    "name": "Campesino"
+  },
+  "pirate": {
+    "name": "Pirata"
+  },
+  "rat-giant": {
+    "name": "Rata Gigante"
+  },
+  "snake-cobra": {
+    "name": "Serpiente Cobra"
+  },
+  "stingbat": {
+    "name": "Murciélago Aguijón"
+  },
+  "thug": {
+    "name": "Matón"
+  },
+  "vulture": {
+    "name": "Buitre"
+  },
+  "ape": {
+    "name": "Simio"
+  },
+  "berserker": {
+    "name": "Berserker"
+  },
+  "camel": {
+    "name": "Camello"
+  },
+  "deep-one": {
+    "name": "Ser de las Profundidades"
+  },
+  "demon-dretch": {
+    "name": "Demonio Dretch"
+  },
+  "devil-imp": {
+    "name": "Diablo Diablillo"
+  },
+  "drow": {
+    "name": "Drow"
+  },
+  "duergar": {
+    "name": "Duergar"
+  },
+  "elf": {
+    "name": "Elfo"
+  },
+  "frog-giant": {
+    "name": "Rana Gigante"
+  },
+  "ghoul": {
+    "name": "Gul"
+  },
+  "gnoll": {
+    "name": "Gnoll"
+  },
+  "gray-ooze": {
+    "name": "Cieno Gris"
+  },
+  "hobgoblin": {
+    "name": "Hobgoblin"
+  },
+  "horse": {
+    "name": "Caballo"
+  },
+  "hydra": {
+    "name": "Hidra"
+  },
+  "leech-giant": {
+    "name": "Sanguijuela Gigante"
+  },
+  "lizardfolk": {
+    "name": "Hombre Lagarto"
+  },
+  "merfolk": {
+    "name": "Tritón"
+  },
+  "rat-dire": {
+    "name": "Rata Atroz"
+  },
+  "rot-flower": {
+    "name": "Flor Pútrida"
+  },
+  "sahuagin": {
+    "name": "Sahuagin"
+  },
+  "skeleton": {
+    "name": "Esqueleto"
+  },
+  "soldier": {
+    "name": "Soldado"
+  },
+  "spider-swarm": {
+    "name": "Enjambre de Arañas"
+  },
+  "velociraptor": {
+    "name": "Velocirráptor"
+  },
+  "violet-fungus": {
+    "name": "Hongo Violeta"
+  },
+  "wasp-giant": {
+    "name": "Avispa Gigante"
+  },
+  "will-o-wisp": {
+    "name": "Fuego Fatuo"
+  },
+  "wolf": {
+    "name": "Lobo"
+  },
+  "zombie": {
+    "name": "Zombi"
+  },
+  "angel-seraph": {
+    "name": "Ángel Serafín"
+  },
+  "ankheg": {
+    "name": "Ankheg"
+  },
+  "azer": {
+    "name": "Azer"
+  },
+  "bugbear": {
+    "name": "Bugbear"
+  },
+  "centaur": {
+    "name": "Centauro"
+  },
+  "cockatrice": {
+    "name": "Cocatriz"
+  },
+  "devil-barbed": {
+    "name": "Diablo Barbado"
+  },
+  "gladiator": {
+    "name": "Gladiador"
+  },
+  "gnome-deep": {
+    "name": "Gnomo de las Profundidades"
+  },
+  "harpy": {
+    "name": "Arpía"
+  },
+  "hippogriff": {
+    "name": "Hipogrifo"
+  },
+  "knight": {
+    "name": "Caballero"
+  },
+  "kobold-sorcerer": {
+    "name": "Kóbold Hechicero"
+  },
+  "lion": {
+    "name": "León"
+  },
+  "mushroomfolk": {
+    "name": "Pueblo Hongo"
+  },
+  "panther": {
+    "name": "Pantera"
+  },
+  "pegasus": {
+    "name": "Pegaso"
+  },
+  "piranha-swarm": {
+    "name": "Enjambre de Pirañas"
+  },
+  "scarab-swarm": {
+    "name": "Enjambre de Escarabajos"
+  },
+  "scarecrow": {
+    "name": "Espantapájaros"
+  },
+  "scorpion-giant": {
+    "name": "Escorpión Gigante"
+  },
+  "shadow": {
+    "name": "Sombra"
+  },
+  "shark": {
+    "name": "Tiburón"
+  },
+  "smilodon": {
+    "name": "Smilodon"
+  },
+  "spider-giant": {
+    "name": "Araña Gigante"
+  },
+  "strangler": {
+    "name": "Estrangulador"
+  },
+  "thief": {
+    "name": "Ladrón"
+  },
+  "viperian": {
+    "name": "Viperiano"
+  },
+  "wererat": {
+    "name": "Hombre Rata"
+  },
+  "wight": {
+    "name": "Tumulario"
+  },
+  "worg": {
+    "name": "Wargo"
+  },
+  "ape-snow": {
+    "name": "Simio de las Nieves"
+  },
+  "bat-swarm": {
+    "name": "Enjambre de Murciélagos"
+  },
+  "centipede-swarm": {
+    "name": "Enjambre de Ciempiés"
+  },
+  "doppelganger": {
+    "name": "Doppelgänger"
+  },
+  "gargoyle": {
+    "name": "Gárgola"
+  },
+  "ghast": {
+    "name": "Ghast"
+  },
+  "gibbering-mouther": {
+    "name": "Susurrador Demente"
+  },
+  "goblin-boss": {
+    "name": "Trasgo Jefe"
+  },
+  "goblin-shaman": {
+    "name": "Trasgo Chamán"
+  },
+  "gorilla": {
+    "name": "Gorila"
+  },
+  "grick": {
+    "name": "Grick"
+  },
+  "griffon": {
+    "name": "Grifo"
+  },
+  "hell-hound": {
+    "name": "Sabueso Infernal"
+  },
+  "leprechaun": {
+    "name": "Leprechaun"
+  },
+  "moose": {
+    "name": "Alce"
+  },
+  "ochre-jelly": {
+    "name": "Gelatina Ocre"
+  },
+  "orc-chieftain": {
+    "name": "Orco Caudillo"
+  },
+  "pterodactyl": {
+    "name": "Pterodáctilo"
+  },
+  "rust-monster": {
+    "name": "Monstruo del Óxido"
+  },
+  "shambling-mound": {
+    "name": "Montículo Andante"
+  },
+  "siren": {
+    "name": "Sirena"
+  },
+  "snake-swarm": {
+    "name": "Enjambre de Serpientes"
+  },
+  "unicorn": {
+    "name": "Unicornio"
+  },
+  "werewolf": {
+    "name": "Hombre Lobo"
+  },
+  "wolf-dire": {
+    "name": "Lobo Atroz"
+  },
+  "basilisk": {
+    "name": "Basilisco"
+  },
+  "chuul": {
+    "name": "Chuul"
+  },
+  "crab-giant": {
+    "name": "Cangrejo Gigante"
+  },
+  "demon-vrock": {
+    "name": "Demonio Vrock"
+  },
+  "hippopotamus": {
+    "name": "Hipopótamo"
+  },
+  "mimic": {
+    "name": "Mímico"
+  },
+  "octopus-giant": {
+    "name": "Pulpo Gigante"
+  },
+  "priest": {
+    "name": "Sacerdote"
+  },
+  "rhinoceros": {
+    "name": "Rinoceronte"
+  },
+  "salamander": {
+    "name": "Salamandra"
+  },
+  "snake-giant": {
+    "name": "Serpiente Gigante"
+  },
+  "troll": {
+    "name": "Trol"
+  },
+  "vampire-spawn": {
+    "name": "Engendro Vampírico"
+  },
+  "void-spider": {
+    "name": "Araña del Vacío"
+  },
+  "wolf-winter": {
+    "name": "Lobo Invernal"
+  },
+  "black-pudding": {
+    "name": "Pudín Negro"
+  },
+  "cloaker": {
+    "name": "Embozado"
+  },
+  "devil-cubi": {
+    "name": "Diablo Cubi"
+  },
+  "drow-drider": {
+    "name": "Drow Drider"
+  },
+  "drow-priestess": {
+    "name": "Drow Sacerdotisa"
+  },
+  "elemental-air-lesser": {
+    "name": "Elemental de Aire (Menor)"
+  },
+  "elemental-earth-lesser": {
+    "name": "Elemental de Tierra (Menor)"
+  },
+  "elemental-fire-lesser": {
+    "name": "Elemental de Fuego (Menor)"
+  },
+  "elemental-water-lesser": {
+    "name": "Elemental de Agua (Menor)"
+  },
+  "hag-sea": {
+    "name": "Bruja del Mar"
+  },
+  "hag-weald": {
+    "name": "Bruja del Bosque"
+  },
+  "invisible-stalker": {
+    "name": "Acechador Invisible"
+  },
+  "mage": {
+    "name": "Mago"
+  },
+  "manticore": {
+    "name": "Mantícora"
+  },
+  "naga-bone": {
+    "name": "Naga de Hueso"
+  },
+  "nightmare": {
+    "name": "Pesadilla"
+  },
+  "ogre": {
+    "name": "Ogro"
+  },
+  "owlbear": {
+    "name": "Oso Búho"
+  },
+  "plesiosaurus": {
+    "name": "Plesiosaurio"
+  },
+  "primordial-slime": {
+    "name": "Cieno Primordial"
+  },
+  "rat-swarm": {
+    "name": "Enjambre de Ratas"
+  },
+  "reaver": {
+    "name": "Saqueador"
+  },
+  "roper": {
+    "name": "Roper"
+  },
+  "viperian-ophid": {
+    "name": "Viperiano Ófido"
+  },
+  "bear-polar": {
+    "name": "Oso Polar"
+  },
+  "devil-horned": {
+    "name": "Diablo Cornudo"
+  },
+  "druid": {
+    "name": "Druida"
+  },
+  "elephant": {
+    "name": "Elefante"
+  },
+  "giant-hill": {
+    "name": "Gigante de las Colinas"
+  },
+  "golem-flesh": {
+    "name": "Gólem de Carne"
+  },
+  "gorgon": {
+    "name": "Gorgona"
+  },
+  "minotaur": {
+    "name": "Minotauro"
+  },
+  "oni": {
+    "name": "Oni"
+  },
+  "otyugh": {
+    "name": "Otyugh"
+  },
+  "triceratops": {
+    "name": "Triceratops"
+  },
+  "troll-frost": {
+    "name": "Trol de Escarcha"
+  },
+  "void-spawn": {
+    "name": "Engendro del Vacío"
+  },
+  "assassin": {
+    "name": "Asesino"
+  },
+  "brain-eater": {
+    "name": "Devorador de Cerebros"
+  },
+  "bulette": {
+    "name": "Bulette"
+  },
+  "cyclops": {
+    "name": "Cíclope"
+  },
+  "demon-glabrezu": {
+    "name": "Demonio Glabrezu"
+  },
+  "giant-goat": {
+    "name": "Gigante Cabra"
+  },
+  "giant-stone": {
+    "name": "Gigante de Piedra"
+  },
+  "golem-clay": {
+    "name": "Gólem de Arcilla"
+  },
+  "golem-stone": {
+    "name": "Gólem de Piedra"
+  },
+  "hag-night": {
+    "name": "Bruja Nocturna"
+  },
+  "manta-ray-giant": {
+    "name": "Mantarraya Gigante"
+  },
+  "medusa": {
+    "name": "Medusa"
+  },
+  "rakshasa": {
+    "name": "Rakshasa"
+  },
+  "shark-megalodon": {
+    "name": "Tiburón Megalodón"
+  },
+  "treant": {
+    "name": "Treant"
+  },
+  "viperian-wizard": {
+    "name": "Viperiano Mago"
+  },
+  "wraith": {
+    "name": "Espectro"
+  },
+  "wyvern": {
+    "name": "Guiverno"
+  },
+  "angel-domini": {
+    "name": "Ángel Dominación"
+  },
+  "couatl": {
+    "name": "Couatl"
+  },
+  "demon-marilith": {
+    "name": "Demonio Marilith"
+  },
+  "devil-erinyes": {
+    "name": "Diablo Erinias"
+  },
+  "efreeti": {
+    "name": "Efrit"
+  },
+  "elemental-air-greater": {
+    "name": "Elemental de Aire (Mayor)"
+  },
+  "elemental-earth-greater": {
+    "name": "Elemental de Tierra (Mayor)"
+  },
+  "elemental-fire-greater": {
+    "name": "Elemental de Fuego (Mayor)"
+  },
+  "elemental-water-greater": {
+    "name": "Elemental de Agua (Mayor)"
+  },
+  "giant-fire": {
+    "name": "Gigante de Fuego"
+  },
+  "giant-frost": {
+    "name": "Gigante de Escarcha"
+  },
+  "grimlow": {
+    "name": "Grimlow"
+  },
+  "mammoth": {
+    "name": "Mamut"
+  },
+  "naga": {
+    "name": "Naga"
+  },
+  "rime-walker": {
+    "name": "Caminante de Escarcha"
+  },
+  "sphinx": {
+    "name": "Esfinge"
+  },
+  "tyrannosaurus": {
+    "name": "Tiranosaurio"
+  },
+  "archmage": {
+    "name": "Archimago"
+  },
+  "chimera": {
+    "name": "Quimera"
+  },
+  "djinni": {
+    "name": "Djinn"
+  },
+  "giant-cloud": {
+    "name": "Gigante de las Nubes"
+  },
+  "golem-iron": {
+    "name": "Gólem de Hierro"
+  },
+  "mummy": {
+    "name": "Momia"
+  },
+  "remorhaz": {
+    "name": "Remorhaz"
+  },
+  "angel-principi": {
+    "name": "Ángel Principado"
+  },
+  "vampire": {
+    "name": "Vampiro"
+  },
+  "dragon-forest": {
+    "name": "Dragón del Bosque"
+  },
+  "giant-storm": {
+    "name": "Gigante de la Tormenta"
+  },
+  "purple-worm": {
+    "name": "Gusano Púrpura"
+  },
+  "dragon-desert": {
+    "name": "Dragón del Desierto"
+  },
+  "lich": {
+    "name": "Liche"
+  },
+  "phoenix": {
+    "name": "Fénix"
+  },
+  "dragon-frost": {
+    "name": "Dragón de Escarcha"
+  },
+  "roc": {
+    "name": "Roc"
+  },
+  "the-wandering-merchant": {
+    "name": "El Mercader Errante"
+  },
+  "archangel": {
+    "name": "Arcángel"
+  },
+  "archdevil": {
+    "name": "Archidiablo"
+  },
+  "demon-balor": {
+    "name": "Demonio Balor"
+  },
+  "dragon-sea": {
+    "name": "Dragón del Mar"
+  },
+  "obe-ixx-of-azarumme": {
+    "name": "Obe-ixx de Azarumme"
+  },
+  "dragon-fire": {
+    "name": "Dragón de Fuego"
+  },
+  "kraken": {
+    "name": "Kraken"
+  },
+  "the-ten-eyed-oracle": {
+    "name": "El Oráculo de los Diez Ojos"
+  },
+  "mordanticus-the-flayed": {
+    "name": "Mordanticus el Desollado"
+  },
+  "rathgamnon": {
+    "name": "Rathgamnon"
+  },
+  "the-tarrasque": {
+    "name": "El Tarrasque"
+  }
+}

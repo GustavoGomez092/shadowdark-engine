@@ -287,7 +287,7 @@ export function EncounterPanel({
 function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
   instance: MonsterInstance; definition: MonsterDefinition; onHpChange: (delta: number) => void; onDefeat: () => void
 }) {
-  const { t } = useLocale()
+  const { t, tData } = useLocale()
   const hpPercent = instance.maxHp > 0 ? (instance.currentHp / instance.maxHp) * 100 : 0
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 
@@ -353,7 +353,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
       {definition.description && (
         <div>
           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.monsterDescription')}</p>
-          <p className="text-xs text-muted-foreground italic leading-relaxed">{definition.description}</p>
+          <p className="text-xs text-muted-foreground italic leading-relaxed">{tData('monsters', definition.id, 'description', definition.description)}</p>
         </div>
       )}
       {definition.tags.length > 0 && (

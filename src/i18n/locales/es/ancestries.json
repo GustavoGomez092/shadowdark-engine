@@ -1,0 +1,37 @@
+{
+  "dwarf": {
+    "name": "Enano",
+    "traitName": "Robusto",
+    "traitDescription": "Comienzas con +2 PG. Tira los puntos de golpe por nivel con ventaja."
+  },
+  "elf": {
+    "name": "Elfo",
+    "traitName": "Vision Lejana",
+    "traitDescription": "+1 de bonificador a las tiradas de ataque con armas a distancia O +1 de bonificador a las tiradas de lanzamiento de conjuros (elige uno)."
+  },
+  "goblin": {
+    "name": "Trasgo",
+    "traitName": "Sentidos Agudos",
+    "traitDescription": "No puedes ser sorprendido."
+  },
+  "halfling": {
+    "name": "Mediano",
+    "traitName": "Sigiloso",
+    "traitDescription": "Una vez al dia, te vuelves invisible durante 3 asaltos."
+  },
+  "half-orc": {
+    "name": "Semiorco",
+    "traitName": "Poderoso",
+    "traitDescription": "+1 de bonificador a las tiradas de ataque y dano con armas cuerpo a cuerpo."
+  },
+  "human": {
+    "name": "Humano",
+    "traitName": "Ambicioso",
+    "traitDescription": "Obtienes una tirada de talento adicional en el nivel 1."
+  },
+  "kobold": {
+    "name": "Kobold",
+    "traitName": "Habilidad Innata",
+    "traitDescription": "Elige uno: +1 a tiradas de lanzamiento de conjuros O comienzas cada sesion con una ficha de suerte."
+  }
+}

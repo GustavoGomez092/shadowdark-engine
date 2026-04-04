@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { getLocale, setLocale, subscribe, t, ti, getAvailableLocales } from '@/i18n/index.ts'
+import { getLocale, setLocale, subscribe, t, ti, tData, getAvailableLocales } from '@/i18n/index.ts'
 import type { SupportedLocale } from '@/i18n/index.ts'
 
 let version = 0
@@ -23,6 +23,7 @@ export function useLocale() {
   return {
     t,
     ti,
+    tData,
     locale: getLocale(),
     setLocale: setLocale as (locale: SupportedLocale) => void,
     availableLocales: getAvailableLocales(),

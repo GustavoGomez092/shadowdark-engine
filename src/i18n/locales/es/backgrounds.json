@@ -1,0 +1,242 @@
+{
+  "urchin": {
+    "name": "Pilluelo",
+    "description": "Creciste en las calles despiadadas de una gran ciudad."
+  },
+  "wanted": {
+    "name": "Buscado",
+    "description": "Hay un precio por tu cabeza, pero tienes aliados."
+  },
+  "cult-initiate": {
+    "name": "Iniciado de Culto",
+    "description": "Conoces secretos y rituales blasfemos."
+  },
+  "thieves-guild": {
+    "name": "Gremio de Ladrones",
+    "description": "Tienes conexiones, contactos y deudas."
+  },
+  "banished": {
+    "name": "Desterrado",
+    "description": "Fuiste expulsado por supuestos crimenes."
+  },
+  "orphaned": {
+    "name": "Huerfano",
+    "description": "Un guardian inusual te rescato y te crio."
+  },
+  "wizards-apprentice": {
+    "name": "Aprendiz de Mago",
+    "description": "Tienes un don y ojo para la magia."
+  },
+  "jeweler": {
+    "name": "Joyero",
+    "description": "Puedes evaluar facilmente el valor y autenticidad de los objetos."
+  },
+  "herbalist": {
+    "name": "Herbalista",
+    "description": "Conoces las plantas, las medicinas y los venenos."
+  },
+  "barbarian": {
+    "name": "Barbaro",
+    "description": "Dejaste la horda, pero nunca te abandono del todo."
+  },
+  "mercenary": {
+    "name": "Mercenario",
+    "description": "Luchaste contra amigos y enemigos por igual a cambio de monedas."
+  },
+  "sailor": {
+    "name": "Marinero",
+    "description": "Fuiste pirata, corsario o marinero mercante."
+  },
+  "acolyte": {
+    "name": "Acolito",
+    "description": "Estas bien entrenado en ritos y doctrinas religiosas."
+  },
+  "soldier": {
+    "name": "Soldado",
+    "description": "Serviste como combatiente en un ejercito organizado."
+  },
+  "ranger": {
+    "name": "Guardabosques",
+    "description": "Los bosques y las tierras salvajes son tu verdadero hogar."
+  },
+  "scout": {
+    "name": "Explorador",
+    "description": "Sobreviviste gracias al sigilo, la observacion y la velocidad."
+  },
+  "minstrel": {
+    "name": "Juglar",
+    "description": "Viajaste lejos con encanto y talento."
+  },
+  "scholar": {
+    "name": "Erudito",
+    "description": "Sabes mucho sobre historia antigua y sabiduria."
+  },
+  "noble": {
+    "name": "Noble",
+    "description": "Tu nombre famoso te ha abierto muchas puertas."
+  },
+  "chirurgeon": {
+    "name": "Cirujano",
+    "description": "Conoces la anatomia, la cirugia y los primeros auxilios."
+  },
+  "amnesiac": {
+    "name": "Amnesico",
+    "description": "Tu pasado es una neblina, pero algunos recuerdos regresan."
+  },
+  "ascetic": {
+    "name": "Asceta",
+    "description": "La gente te teme, pero busca tu guia."
+  },
+  "blacksmith": {
+    "name": "Herrero",
+    "description": "Armas, armaduras, herraduras; lo haces todo."
+  },
+  "bowyer": {
+    "name": "Arquero Artesano",
+    "description": "Puedes fabricar y reparar cualquier arco o flecha."
+  },
+  "chosen": {
+    "name": "Elegido",
+    "description": "Un ser arcano te selecciono para un proposito."
+  },
+  "crafter": {
+    "name": "Artesano",
+    "description": "Puedes fabricar y reparar cualquier objeto utilitario."
+  },
+  "criminal": {
+    "name": "Criminal",
+    "description": "Fuiste exiliado de tu aldea por un crimen."
+  },
+  "crop-farmer": {
+    "name": "Agricultor",
+    "description": "Trabajas la tierra y conoces todas las plantas."
+  },
+  "demonborn": {
+    "name": "Engendro Demoniaco",
+    "description": "Un ancestro tuyo es un demonio poderoso."
+  },
+  "displaced": {
+    "name": "Desplazado",
+    "description": "Huiste despues de que un jarl rival atacara tu aldea."
+  },
+  "drawn": {
+    "name": "Atraido",
+    "description": "Escuchas un llamado susurrado y lo sigues."
+  },
+  "drifter": {
+    "name": "Vagabundo",
+    "description": "Aun no has encontrado un jarl digno de tu lealtad."
+  },
+  "enforcer": {
+    "name": "Ejecutor",
+    "description": "Haces cumplir la ley del jarl en tu aldea."
+  },
+  "fallen": {
+    "name": "Caido",
+    "description": "Caiste en desgracia. Te redimiras o lo abrazaras?"
+  },
+  "far-traveler": {
+    "name": "Viajero Lejano",
+    "description": "Conoces muchos pueblos y costumbres distantes."
+  },
+  "feytouched": {
+    "name": "Tocado por las Hadas",
+    "description": "Un hada se hizo tu amiga en tu infancia."
+  },
+  "fisher": {
+    "name": "Pescador",
+    "description": "Conoces todas las criaturas marinas y leyendas."
+  },
+  "forager": {
+    "name": "Recolector",
+    "description": "Sabes como encontrar lo comestible y lo mortal."
+  },
+  "freed": {
+    "name": "Liberado",
+    "description": "Eras un esclavo, pero escapaste o ganaste tu libertad."
+  },
+  "fugitive": {
+    "name": "Fugitivo",
+    "description": "Un salvador anonimo te ayudo a desaparecer."
+  },
+  "gods-blood": {
+    "name": "Sangre Divina",
+    "description": "Desciendes de un dios; eso te marca."
+  },
+  "haunted": {
+    "name": "Atormentado",
+    "description": "Un espiritu inquieto quiere algo de ti."
+  },
+  "healer": {
+    "name": "Sanador",
+    "description": "Comprendes como la vida y la muerte se entrelazan."
+  },
+  "hermit": {
+    "name": "Ermitano",
+    "description": "Las tierras salvajes (y sus criaturas) son tu familia."
+  },
+  "heroborn": {
+    "name": "Hijo de Heroe",
+    "description": "Eres el descendiente de un guerrero famoso."
+  },
+  "hunter": {
+    "name": "Cazador",
+    "description": "Sabes como moverte en silencio por las tierras salvajes."
+  },
+  "livestock-farmer": {
+    "name": "Ganadero",
+    "description": "Tienes intuicion sobre todos los animales."
+  },
+  "marked": {
+    "name": "Marcado",
+    "description": "Llevas una marca arcana. Es una maldicion o un don?"
+  },
+  "marooned": {
+    "name": "Abandonado",
+    "description": "Te dejaron atras, pero te negaste a morir."
+  },
+  "nobleborn": {
+    "name": "De Cuna Noble",
+    "description": "Eres hijo de un jarl."
+  },
+  "outcast": {
+    "name": "Marginado",
+    "description": "Fuiste expulsado por crimenes reales o supuestos."
+  },
+  "redeemer": {
+    "name": "Redentor",
+    "description": "Debes redimir el nombre de tu estirpe."
+  },
+  "sacrifice": {
+    "name": "Sacrificio",
+    "description": "Ibas a ser sacrificado ritualmente, pero escapaste."
+  },
+  "seers-apprentice": {
+    "name": "Aprendiz de Vidente",
+    "description": "Conoces algunas de las artes misticas."
+  },
+  "shipwright": {
+    "name": "Carpintero Naval",
+    "description": "Sabes como construir y reparar drakkars."
+  },
+  "skald": {
+    "name": "Escaldo",
+    "description": "Eres poeta y conoces todas las baladas antiguas."
+  },
+  "trader": {
+    "name": "Comerciante",
+    "description": "Tienes conexiones mercantiles en cada aldea."
+  },
+  "witchborn": {
+    "name": "Hijo de Bruja",
+    "description": "Quemaron a tu madre, pero te perdonaron a ti."
+  },
+  "wolfchild": {
+    "name": "Hijo de los Lobos",
+    "description": "Hace mucho tiempo, llegaste al pueblo vistiendo pieles."
+  },
+  "woodborn": {
+    "name": "Nacido del Bosque",
+    "description": "Te encontraron en el hueco de un roble."
+  }
+}

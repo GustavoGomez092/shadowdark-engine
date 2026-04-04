@@ -2,6 +2,18 @@
 import enUi from './locales/en/ui.json'
 import esUi from './locales/es/ui.json'
 
+// Data overlays — Spanish translations for game content
+import esMonsters from './locales/es/monsters.json'
+import esSpells from './locales/es/spells.json'
+import esClasses from './locales/es/classes.json'
+import esGear from './locales/es/gear.json'
+import esWeapons from './locales/es/weapons.json'
+import esArmor from './locales/es/armor.json'
+import esAncestries from './locales/es/ancestries.json'
+import esBackgrounds from './locales/es/backgrounds.json'
+import esDeities from './locales/es/deities.json'
+import esTitles from './locales/es/titles.json'
+
 const STORAGE_KEY = 'shadowdark:locale'
 const SUPPORTED_LOCALES = ['en', 'es'] as const
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
@@ -15,6 +27,24 @@ export const LOCALE_LABELS: Record<SupportedLocale, string> = {
 const UI_TRANSLATIONS: Record<string, Record<string, string>> = {
   en: enUi,
   es: esUi,
+}
+
+// Data overlays: locale → category → id → { field: translated value }
+type DataOverlay = Record<string, Record<string, Record<string, string>>>
+
+const DATA_OVERLAYS: Record<string, DataOverlay> = {
+  es: {
+    monsters: esMonsters,
+    spells: esSpells,
+    classes: esClasses,
+    gear: esGear,
+    weapons: esWeapons,
+    armor: esArmor,
+    ancestries: esAncestries,
+    backgrounds: esBackgrounds,
+    deities: esDeities,
+    titles: esTitles,
+  },
 }
 
 // ========== Locale State ==========
@@ -80,7 +110,7 @@ export function t(key: string, fallback?: string): string {
 
 /**
  * Translate with interpolation. Replaces {{name}} placeholders.
- * Example: t('greeting', { name: 'Kingler' }) → "Hello, Kingler!"
+ * Example: ti('greeting', { name: 'Kingler' }) → "Hello, Kingler!"
  */
 export function ti(key: string, vars: Record<string, string | number>): string {
   let result = t(key)
@@ -88,4 +118,21 @@ export function ti(key: string, vars: Record<string, string | number>): string {
     result = result.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v))
   }
   return result
+}
+
+// ========== Data Translation ==========
+
+/**
+ * Translate game data fields. Falls back to the original English value.
+ * Usage: tData('monsters', 'goblin', 'name', 'Goblin') → "Trasgo" (es) or "Goblin" (en)
+ */
+export function tData(category: string, id: string, field: string, fallback: string): string {
+  if (currentLocale === 'en') return fallback
+  const overlay = DATA_OVERLAYS[currentLocale]
+  if (!overlay) return fallback
+  const categoryData = overlay[category]
+  if (!categoryData) return fallback
+  const itemData = categoryData[id]
+  if (!itemData) return fallback
+  return itemData[field] ?? fallback
 }

@@ -17,7 +17,7 @@ export const Route = createFileRoute('/gm/monsters')({
 })
 
 function GMMonstersPage() {
-  const { t, ti } = useLocale()
+  const { t, ti, tData } = useLocale()
   useDataRegistry()
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState<number>(0)
@@ -144,7 +144,7 @@ function GMMonstersPage() {
           return (
           <div key={m.id} className="rounded-xl border border-border bg-card p-4" style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}>
             <div className="mb-2 flex items-baseline justify-between">
-              <h2 className="text-lg font-bold">{m.name}</h2>
+              <h2 className="text-lg font-bold">{tData('monsters', m.id, 'name', m.name)}</h2>
               <span className="text-sm text-muted-foreground">LV {m.level}</span>
             </div>
             <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">

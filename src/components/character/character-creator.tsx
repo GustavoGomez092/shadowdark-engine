@@ -27,7 +27,7 @@ interface Props {
 
 export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }: Props) {
   useDataRegistry()
-  const { t, ti } = useLocale()
+  const { t, ti, tData } = useLocale()
   const [step, setStep] = useState(0)
   const [stats, setStats] = useState<AbilityScores | null>(null)
   const [rerollsUsed, setRerollsUsed] = useState(0)
@@ -182,9 +182,9 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                   ancestry === a.id ? 'border-primary bg-primary/5 ring-2 ring-primary' : 'border-border bg-card hover:border-primary/50'
                 }`}
               >
-                <h3 className="font-bold">{a.name}</h3>
-                <p className="text-sm font-medium text-primary">{a.traitName}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{a.traitDescription}</p>
+                <h3 className="font-bold">{tData('ancestries', a.id, 'name', a.name)}</h3>
+                <p className="text-sm font-medium text-primary">{tData('ancestries', a.id, 'traitName', a.traitName)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{tData('ancestries', a.id, 'traitDescription', a.traitDescription)}</p>
                 <div className="mt-2 flex gap-1">
                   {a.languages.map(l => (
                     <span key={l} className="rounded bg-secondary px-1.5 py-0.5 text-xs">{l}</span>
@@ -231,10 +231,10 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                   }`}
                 >
                   <div className="flex items-baseline justify-between">
-                    <h3 className="font-bold">{c.name}</h3>
+                    <h3 className="font-bold">{tData('classes', c.id, 'name', c.name)}</h3>
                     <span className="text-sm font-mono text-muted-foreground">{c.hitDie}</span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{c.description}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{tData('classes', c.id, 'description', c.description)}</p>
 
                   {/* Collapsed: feature names only */}
                   {!isSelected && (
@@ -295,7 +295,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
               >
                 {BACKGROUNDS.map(b => (
-                  <option key={b.id} value={b.id}>{b.name} — {b.description}</option>
+                  <option key={b.id} value={b.id}>{tData('backgrounds', b.id, 'name', b.name)} — {tData('backgrounds', b.id, 'description', b.description)}</option>
                 ))}
               </select>
             </div>
@@ -327,7 +327,7 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
                 >
                   <option value="">{t('character.creator.selectDeity')}</option>
                   {DEITIES.filter(d => d.alignment === alignment || d.alignment === 'neutral').map(d => (
-                    <option key={d.id} value={d.id}>{d.name} ({d.alignment}) — {d.domain}</option>
+                    <option key={d.id} value={d.id}>{tData('deities', d.id, 'name', d.name)} ({d.alignment}) — {d.domain}</option>
                   ))}
                 </select>
               </div>
@@ -360,8 +360,8 @@ export function CharacterCreator({ playerId, onComplete, onCancel, maxRerolls }:
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><span className="font-semibold">{t('character.background')}</span> {BACKGROUNDS.find(b => b.id === background)?.name}</div>
-              {deity && <div><span className="font-semibold">{t('character.deity')}</span> {DEITIES.find(d => d.id === deity)?.name}</div>}
+              <div><span className="font-semibold">{t('character.background')}</span> {(() => { const b = BACKGROUNDS.find(b => b.id === background); return b ? tData('backgrounds', b.id, 'name', b.name) : '' })()}</div>
+              {deity && <div><span className="font-semibold">{t('character.deity')}</span> {(() => { const d = DEITIES.find(d => d.id === deity); return d ? tData('deities', d.id, 'name', d.name) : '' })()}</div>}
               <div><span className="font-semibold">{t('character.creator.hitDie')}</span> {CLASSES.find(c => c.id === characterClass)?.hitDie}</div>
             </div>
 

@@ -1,0 +1,574 @@
+{
+  "cure-wounds": {
+    "name": "Curar Heridas",
+    "description": "Tira d6s iguales a 1 + la mitad de tu nivel (redondeado hacia abajo). El objetivo recupera esa cantidad de PV."
+  },
+  "holy-weapon": {
+    "name": "Arma Sagrada",
+    "description": "Un arma se vuelve mágica con +1 a las tiradas de ataque y daño durante 5 asaltos."
+  },
+  "light-priest": {
+    "name": "Luz",
+    "description": "Un objeto que toques brilla con una luz intensa sin calor, iluminando hasta distancia cercana durante 1 hora en tiempo real."
+  },
+  "protection-from-evil-priest": {
+    "name": "Protección contra el Mal",
+    "description": "Los seres caóticos tienen desventaja en tiradas de ataque y pruebas de lanzamiento hostil contra el objetivo. No pueden poseer, obligar ni engañar al objetivo."
+  },
+  "shield-of-faith": {
+    "name": "Escudo de Fe",
+    "description": "Bonificación de +2 a la CA durante 5 asaltos."
+  },
+  "turn-undead": {
+    "name": "Expulsar No Muertos",
+    "description": "Presenta un símbolo sagrado. Los no muertos a distancia cercana realizan una prueba de CAR contra tu prueba de lanzamiento. Fallar por 10+ Y ser de nivel igual o menor al tuyo = destruido. En caso contrario, si falla = huye durante 5 asaltos."
+  },
+  "augury": {
+    "name": "Augurio",
+    "description": "Haz al DJ una pregunta sobre un curso de acción específico. El DJ responde «bien» o «mal»."
+  },
+  "bless": {
+    "name": "Bendición",
+    "description": "Una criatura que toques obtiene una ficha de suerte."
+  },
+  "blind-deafen": {
+    "name": "Cegar/Ensordecer",
+    "description": "Ciega o ensordece a una criatura que puedas ver. El objetivo tiene desventaja en tareas que requieran el sentido perdido."
+  },
+  "cleansing-weapon": {
+    "name": "Arma Purificadora",
+    "description": "Un arma se envuelve en llamas purificadoras. Inflige 1d4 de daño adicional (1d6 contra no muertos) durante 5 asaltos."
+  },
+  "smite": {
+    "name": "Castigo Divino",
+    "description": "Invocas llamas punitivas sobre una criatura que puedas ver. Inflige 1d6 de daño."
+  },
+  "zone-of-truth": {
+    "name": "Zona de Verdad",
+    "description": "Obligas a una criatura a decir la verdad. No puede pronunciar una mentira deliberada mientras esté a tu alcance."
+  },
+  "alarm": {
+    "name": "Alarma",
+    "description": "Toca un objeto. Una campana mágica suena en tu mente si cualquier criatura no designada lo toca o pasa junto a él. Dura 1 día."
+  },
+  "burning-hands": {
+    "name": "Manos Ardientes",
+    "description": "Un círculo de llamas llena el área cercana a tu alrededor. Las criaturas en el área reciben 1d6 de daño. Los objetos inflamables desatendidos se encienden."
+  },
+  "charm-person": {
+    "name": "Encantar Persona",
+    "description": "Embauca a un humanoide de nivel 2 o menor. Te considera un amigo durante 1d8 días. Termina si tú o tus aliados lo hieren. El objetivo sabe que fue encantado al terminar el hechizo."
+  },
+  "detect-magic": {
+    "name": "Detectar Magia",
+    "description": "Percibes la presencia de magia a distancia cercana. Concéntrate durante dos asaltos para discernir propiedades generales. Barreras completas bloquean este hechizo."
+  },
+  "feather-fall": {
+    "name": "Caída de Pluma",
+    "description": "Lánzalo cuando caes. Aterrizas a salvo de pie."
+  },
+  "floating-disk": {
+    "name": "Disco Flotante",
+    "description": "Un disco circular flotante de fuerza. Carga hasta 20 espacios de equipo. Flota a la altura de la cintura, permanece a distancia cercana de ti."
+  },
+  "hold-portal": {
+    "name": "Cerrar Portal",
+    "description": "Mantiene un portal cerrado durante 10 asaltos. Una criatura debe superar una prueba de FUE contra tu prueba de lanzamiento para abrirlo. El hechizo Llamar termina este efecto."
+  },
+  "light-wizard": {
+    "name": "Luz",
+    "description": "Un objeto que toques brilla con una luz intensa sin calor, iluminando hasta distancia cercana durante 1 hora en tiempo real."
+  },
+  "mage-armor": {
+    "name": "Armadura de Mago",
+    "description": "Tu CA se convierte en 14 (18 con una prueba de lanzamiento crítica) durante 10 asaltos."
+  },
+  "magic-missile": {
+    "name": "Misil Mágico",
+    "description": "Un proyectil luminoso de fuerza inflige 1d4 de daño a un objetivo. Tienes ventaja en la prueba para lanzar este hechizo."
+  },
+  "protection-from-evil-wizard": {
+    "name": "Protección contra el Mal",
+    "description": "Los seres caóticos tienen desventaja en tiradas de ataque y pruebas de lanzamiento hostil contra el objetivo. No pueden poseer, obligar ni engañar al objetivo."
+  },
+  "sleep": {
+    "name": "Sueño",
+    "description": "Un cubo del tamaño cercano que se extiende desde ti. Las criaturas vivientes de NV 2 o menor caen en un sueño profundo. Sacudirlas con fuerza o herirlas las despierta."
+  },
+  "acid-arrow": {
+    "name": "Flecha Ácida",
+    "description": "Un proyectil corrosivo impacta a un enemigo, infligiendo 1d6 de daño por asalto mientras mantengas la concentración."
+  },
+  "alter-self": {
+    "name": "Alterar Forma",
+    "description": "Cambias tu forma física durante 5 asaltos, obteniendo un rasgo que modifica tu anatomía existente (p. ej., branquias, garras de oso). No puedes hacer crecer alas o extremidades."
+  },
+  "detect-thoughts": {
+    "name": "Detectar Pensamientos",
+    "description": "Sondeas la mente de una criatura. Cada asalto aprendes sus pensamientos inmediatos. El objetivo hace una prueba de SAB contra tu última prueba de lanzamiento; si tiene éxito, te detecta y el hechizo termina."
+  },
+  "fixed-object": {
+    "name": "Objeto Fijo",
+    "description": "Un objeto que toques (máx. 2,5 kg) queda fijo en su posición durante 5 asaltos. Puede soportar hasta 2.500 kg."
+  },
+  "hold-person": {
+    "name": "Paralizar Persona",
+    "description": "Paralizas a una criatura humanoide de NV 4 o menor que puedas ver."
+  },
+  "invisibility": {
+    "name": "Invisibilidad",
+    "description": "Una criatura que toques se vuelve invisible durante 10 asaltos. Termina si el objetivo ataca o lanza un hechizo."
+  },
+  "knock": {
+    "name": "Llamar",
+    "description": "Una puerta, ventana, portón, cofre o portal se abre al instante, derrotando todas las cerraduras y barreras mundanas. Crea un golpe fuerte audible para todos a su alcance."
+  },
+  "levitate": {
+    "name": "Levitar",
+    "description": "Flotas a una distancia cercana verticalmente por asalto. Puedes empujarte contra objetos sólidos para moverte horizontalmente."
+  },
+  "mirror-image": {
+    "name": "Imagen Espejo",
+    "description": "Creas duplicados ilusorios iguales a la mitad de tu nivel (redondeado hacia abajo, mín. 1). Cada vez que te atacan, el ataque falla y un duplicado se evapora."
+  },
+  "misty-step": {
+    "name": "Paso Brumoso",
+    "description": "Te teletransportas a una distancia cercana a un área que puedas ver."
+  },
+  "silence": {
+    "name": "Silencio",
+    "description": "Silencias el sonido en un cubo cercano. Las criaturas dentro quedan ensordecidas. Los sonidos que crean no pueden ser escuchados."
+  },
+  "web": {
+    "name": "Telaraña",
+    "description": "Un cubo del tamaño cercano de densa tela de araña pegajosa. Una criatura atrapada no puede moverse. Debe superar una prueba de FUE contra tu prueba de lanzamiento para liberarse."
+  },
+  "cauldron": {
+    "name": "Caldero",
+    "description": "Conjuras un caldero burbujeante a tu lado. Puede producir uno de los siguientes efectos: cualquier objeto mundano roto colocado dentro se repara; un sapo gordo y croante salta fuera y sigue tus instrucciones durante los siguientes 3 asaltos; puedes colocar hasta 3 espacios de objetos dentro del caldero."
+  },
+  "chant": {
+    "name": "Cántico",
+    "description": "Comienzas un cántico sobrenatural que eleva tu visión más allá de sus limitaciones ordinarias. Mientras dure el hechizo, puedes ver todas las cosas invisibles y ocultas como si fueran claramente visibles. Este hechizo no te permite ver de una manera que normalmente no podrías, como en la oscuridad o a través de paredes."
+  },
+  "evoke-rage": {
+    "name": "Evocar Furia",
+    "description": "Invocas la furia berserker encerrada dentro de alguien. Un humanoide voluntario que toques entra en estado berserker. El objetivo es inmune a pruebas de moral, tiene VEN en pruebas de FUE y ataques cuerpo a cuerpo, e inflige +1d4 de daño mientras dure el hechizo. Si el objetivo no ataca a otra criatura en su turno, el hechizo termina."
+  },
+  "eyebite": {
+    "name": "Mirada Maligna",
+    "description": "Una criatura que selecciones recibe 1d4 de daño, y no puede verte hasta el final de su próximo turno."
+  },
+  "fog": {
+    "name": "Niebla",
+    "description": "Una espesa nube de niebla surge en un área cercana a tu alrededor, haciéndote difícil de ver. La nube se mueve contigo. Los ataques contra criaturas en la nube tienen desventaja."
+  },
+  "hypnotize": {
+    "name": "Hipnotizar",
+    "description": "Una criatura de NV 3 o menor que pueda verte queda estupefacta. Romper la línea de visión de la criatura hacia ti le permite hacer una prueba de CAR CD 15. Si tiene éxito, el hechizo termina."
+  },
+  "oak-ash-thorn": {
+    "name": "Roble, Fresno, Espino",
+    "description": "Mientras dure el hechizo, las hadas, demonios y diablos no pueden atacarte. Estos seres tampoco pueden poseerte, obligarte ni engañarte."
+  },
+  "potion": {
+    "name": "Poción",
+    "description": "Como parte del lanzamiento de este hechizo, debes bendecir un solo trago de cualquier líquido. El líquido adquiere propiedades curativas durante 1 día. Una criatura que lo beba puede terminar los efectos de un veneno o puede dejar de morir inmediatamente (la criatura permanece a 0 PV)."
+  },
+  "puppet": {
+    "name": "Marioneta",
+    "description": "Una criatura humanoide de NV 2 o menor que toques queda atrapada por tus movimientos. En tu turno, la criatura imita todos tus movimientos. Si imitarte le causara daño directo a sí misma o a un aliado, puede hacer una prueba de CAR CD 15. Si tiene éxito, resiste imitarte."
+  },
+  "shadowdance": {
+    "name": "Danza de Sombras",
+    "description": "Hilas materia de sombra en una ilusión visual y auditiva convincente en un punto a distancia cercana. La ilusión puede ser tan grande como una persona y puede moverse dentro de una distancia cercana de donde apareció. La ilusión no puede afectar objetos físicos. Tocar la ilusión revela su naturaleza falsa."
+  },
+  "trance": {
+    "name": "Trance",
+    "description": "Entras en un trance, vislumbrando pequeños fragmentos del destino de una criatura. Una criatura humanoide que toques (no puedes seleccionarte a ti mismo) obtiene una ficha de suerte. No puede tener más de una ficha de suerte a la vez."
+  },
+  "willowman": {
+    "name": "El Hombre Sauce",
+    "description": "Invocas al Hombre Sauce para que aparezca en la mente de una criatura, llenándola de terror sobrenatural. Elige una criatura de NV 2 o menor dentro del alcance. Esa criatura debe hacer inmediatamente una prueba de moral. Incluso las criaturas que normalmente no están sujetas a pruebas de moral (como los no muertos) deben hacerlo."
+  },
+  "witchlight": {
+    "name": "Luz de Bruja",
+    "description": "Invocas una luz flotante de pantano que se balancea en el aire y proyecta luz en un radio cercano a su alrededor. La luz puede cambiar de colores y adoptar formas vagas. Puede flotar hasta una distancia cercana en tu turno."
+  },
+  "bogboil": {
+    "name": "Ciénaga Hirviente",
+    "description": "Conviertes un cubo de suelo del tamaño cercano dentro del alcance en un pantano fangoso e hirviente de arenas movedizas. Una criatura atrapada en el pantano no puede moverse y debe superar una prueba de Destreza contra tu prueba de lanzamiento para liberarse."
+  },
+  "cacklerot": {
+    "name": "Risa Pútrida",
+    "description": "Un objetivo que toques de NV 4 o menor colapsa indefenso con una risa perturbadora y dolorosa mientras dure el hechizo."
+  },
+  "cats-eye": {
+    "name": "Ojo de Gato",
+    "description": "Tus iris crecen hasta llenar tus ojos y tus pupilas se convierten en ranuras verticales negras. Puedes ver criaturas invisibles y puertas secretas mientras dure el hechizo."
+  },
+  "fate": {
+    "name": "Destino",
+    "description": "Retuerces dolorosamente los hilos dorados del destino de una criatura. Una criatura que selecciones dentro del alcance recibe 1d10 de daño y pierde cualquier ficha de suerte que tenga."
+  },
+  "frog-rain": {
+    "name": "Lluvia de Ranas",
+    "description": "Una lluvia de ranas indignadas azota un cubo del tamaño cercano alrededor de un punto que puedas ver dentro del alcance. Todas las criaturas dentro de la lluvia de ranas reciben 1d6 de daño. Las ranas supervivientes saltan y desaparecen."
+  },
+  "poison": {
+    "name": "Veneno",
+    "description": "Un objeto llevado o portado que toques se vuelve tóxico mientras dure el hechizo. Cualquier criatura en contacto con el objeto al inicio de su turno recibe 1d6 de daño."
+  },
+  "read-the-runes": {
+    "name": "Leer las Runas",
+    "description": "Preguntas a los dioses e interpretas las piedras rúnicas. Haz al Director de Juego una pregunta de sí o no. El DJ responde verazmente «sí» o «no»."
+  },
+  "sacrifice": {
+    "name": "Sacrificio",
+    "description": "Como parte del lanzamiento de este hechizo, debes sacrificar ritualmente a una criatura viviente de NV 2 o mayor. El objetivo que toques obtiene una bonificación a su próxima prueba o tirada de ataque igual al nivel de la criatura sacrificada."
+  },
+  "soulbind": {
+    "name": "Atar Alma",
+    "description": "Sellas el alma de una criatura viviente, impidiendo que la magia penetre en ella. Una criatura que toques se vuelve casi impermeable a toda magia. Mientras dure el hechizo, todos los demás hechizos que la afecten (dañinos o beneficiosos) son CD 18 para lanzar. Este hechizo termina tan pronto como el objetivo sea afectado por otro hechizo."
+  },
+  "spidersilk": {
+    "name": "Seda de Araña",
+    "description": "Seda de araña pegajosa cubre tus manos y pies. Mientras dure el hechizo, puedes caminar por superficies verticales tan fácilmente como si fueran suelo plano."
+  },
+  "toadstool": {
+    "name": "Seta Venenosa",
+    "description": "Conjuras un hongo rechoncho y moteado en tu mano. Desaparece al final de tu próximo turno. Una criatura que coma el hongo recupera 1d6 puntos de golpe."
+  },
+  "animate-dead": {
+    "name": "Animar Muertos",
+    "description": "Tocas los restos de un humanoide, y se levanta como un zombi o esqueleto bajo tu control. Los restos deben tener al menos tres extremidades y la cabeza intacta. La criatura no muerta actúa en tu turno. Después de 1 día, la criatura se desintegra en polvo de tumba."
+  },
+  "broomstick": {
+    "name": "Escoba Voladora",
+    "description": "Conjuras una escoba voladora en tu mano. El jinete de la escoba puede volar una distancia cercana cada asalto y puede flotar en el aire."
+  },
+  "cast-out": {
+    "name": "Expulsar",
+    "description": "Repeles a una criatura, arrojándola lejos de tu presencia. Elige una criatura que puedas ver. Mientras dure el hechizo, esa criatura no puede acercarse a distancia cercana de ti. Aún puede atacarte desde fuera de esa distancia."
+  },
+  "command": {
+    "name": "Ordenar",
+    "description": "Das una orden verbal a una criatura dentro del alcance que pueda entenderte. La orden debe ser de una sola palabra, como «arrodíllate». El objetivo obedece la orden mientras mantengas la concentración. Si tu orden es directamente dañina para la criatura, puede hacer una prueba de Carisma contra tu última prueba de lanzamiento. Si tiene éxito, el hechizo termina."
+  },
+  "coven": {
+    "name": "Aquelarre",
+    "description": "Invocas la magia que compartes con tus compañeras brujas. Recuperas el uso de un hechizo de nivel 3 o inferior que ya no puedas lanzar en el día. Tras lanzar este hechizo con éxito, no puedes hacerlo de nuevo hasta completar un descanso."
+  },
+  "dispel-magic": {
+    "name": "Disipar Magia",
+    "description": "Terminas un hechizo que afecta a un objetivo que puedas ver dentro del alcance."
+  },
+  "fabricate": {
+    "name": "Fabricar",
+    "description": "Este hechizo no puede afectar criaturas. Conviertes una colección de materias primas del tamaño de un árbol en una obra terminada. Por ejemplo, conviertes un montón de ladrillos o rocas en un puente. La obra terminada vuelve a ser materias primas cuando el hechizo termina."
+  },
+  "fireball": {
+    "name": "Bola de Fuego",
+    "description": "Lanzas una pequeña llama que estalla en una explosión ardiente. Todas las criaturas en un cubo del tamaño cercano alrededor de donde aterriza la llama reciben 4d6 de daño."
+  },
+  "fly": {
+    "name": "Volar",
+    "description": "Tus pies se elevan del suelo y surcas el aire como un colibrí. Puedes volar a distancia cercana mientras dure el hechizo y puedes flotar en el aire."
+  },
+  "gaseous-form": {
+    "name": "Forma Gaseosa",
+    "description": "Tú y tu equipo se transforman en una nube de humo mientras dure el hechizo. Puedes volar y pasar por cualquier hueco por el que pasaría el humo. Puedes percibir el terreno y cualquier movimiento a tu alrededor hasta una distancia cercana. No puedes lanzar hechizos en esta forma."
+  },
+  "hallucinate": {
+    "name": "Alucinar",
+    "description": "Una criatura que selecciones a distancia cercana cuyo nivel sea menor o igual al tuyo es invadida por visiones de lo que aún podría suceder. Mientras dure el hechizo, el objetivo no puede actuar en su turno a menos que supere una prueba de Sabiduría igual a tu última prueba de lanzamiento."
+  },
+  "howl": {
+    "name": "Aullido",
+    "description": "Todos los enemigos a distancia cercana de ti deben hacer inmediatamente una prueba de moral. Este hechizo no afecta a criaturas inmunes a las pruebas de moral."
+  },
+  "illusion": {
+    "name": "Ilusión",
+    "description": "Creas una ilusión visual y auditiva convincente que llena hasta un cubo del tamaño cercano dentro del alcance. La ilusión no puede causar daño, pero las criaturas que crean que es real reaccionan como si lo fuera. Una criatura que inspeccione la ilusión desde lejos debe superar una prueba de Sabiduría contra tu última prueba de lanzamiento."
+  },
+  "lay-to-rest": {
+    "name": "Dar Eterno Reposo",
+    "description": "Envías al instante a una criatura no muerta que toques a su último más allá, destruyéndola por completo. Puedes afectar a una criatura no muerta de NV 9 o menor."
+  },
+  "lightning-bolt": {
+    "name": "Rayo",
+    "description": "Disparas un rayo de relámpago azul blanquecino de tus manos, golpeando a todas las criaturas en línea recta hasta una distancia lejana. Las criaturas alcanzadas por el rayo reciben 3d6 de daño."
+  },
+  "magic-circle": {
+    "name": "Círculo Mágico",
+    "description": "Conjuras un círculo de runas que se extiende hasta un cubo del tamaño cercano centrado en ti y nombras un tipo de criatura (por ejemplo, demonios). Mientras dure el hechizo, las criaturas del tipo elegido no pueden atacar ni lanzar un hechizo hostil contra nadie dentro del círculo. Las criaturas elegidas tampoco pueden poseer, obligar ni engañar a nadie dentro."
+  },
+  "mass-cure": {
+    "name": "Curación en Masa",
+    "description": "Todos los aliados a distancia cercana de ti recuperan 2d6 puntos de golpe."
+  },
+  "mistletoe": {
+    "name": "Muérdago",
+    "description": "Dos criaturas que puedas ver a distancia cercana quedan encantadas la una con la otra durante 1d8 días. Cada vez que una de las criaturas afectadas recibe daño, puede hacer una prueba de CAR CD 15. Si tiene éxito, el hechizo termina."
+  },
+  "pin-doll": {
+    "name": "Muñeco de Alfileres",
+    "description": "Fijas un mechón de pelo o trozo de carne tomado de una criatura a un pequeño muñeco de arpillera que el hechizo conjura. En tu turno, mientras mantengas la concentración, puedes clavar un alfiler en el muñeco. Cada vez que lo hagas, la criatura a la que pertenecía el pelo o la carne recibe 2d6 de daño. Después de que este hechizo termine, el material pierde su vínculo."
+  },
+  "protection-from-energy": {
+    "name": "Protección contra Energía",
+    "description": "Una criatura que toques se vuelve impermeable a la furia salvaje de los elementos. Elige fuego, frío o electricidad. Mientras dure el hechizo, el objetivo es inmune al daño de la energía elegida."
+  },
+  "raven": {
+    "name": "Cuervo",
+    "description": "Susurras un mensaje a los cuervos de Odín, y ellos lo llevan a través de todos los mundos hasta su destinatario. Di una frase corta y el nombre de su destinatario, vivo o muerto. Esa criatura escucha tu mensaje susurrado en su mente."
+  },
+  "rebuke-unholy": {
+    "name": "Reprender lo Profano",
+    "description": "Reprendes a las criaturas que se oponen a tu alineamiento, obligándolas a huir. Debes presentar un símbolo sagrado para lanzar este hechizo. Si eres legal o neutral, este hechizo afecta a demonios, diablos y foráneos. Si eres caótico, este hechizo afecta a ángeles y criaturas naturales de lo salvaje."
+  },
+  "restoration": {
+    "name": "Restauración",
+    "description": "Con el toque de tus manos, eliminas maldiciones y enfermedades. Una maldición, enfermedad o aflicción a tu elección que afecte a la criatura objetivo termina."
+  },
+  "sending": {
+    "name": "Enviar Mensaje",
+    "description": "Envías un breve mensaje mental a cualquier criatura con la que estés familiarizado que se encuentre en el mismo plano."
+  },
+  "speak-with-dead": {
+    "name": "Hablar con los Muertos",
+    "description": "Un cadáver que toques responde a tus preguntas con una voz distante y sibilante. Puedes hacerle hasta tres preguntas de sí o no (una a la vez). El DJ responde verazmente «sí» o «no» a cada una. Si lanzas este hechizo más de una vez en 24 horas, trata un fallo en la prueba de lanzamiento como un fallo crítico."
+  },
+  "swarm": {
+    "name": "Enjambre",
+    "description": "Un denso enjambre de murciélagos, ratas o langostas mordedoras aparece en un cubo del tamaño cercano alrededor de un punto que puedas ver dentro del alcance. Todas las criaturas que comiencen su turno dentro del enjambre reciben 2d6 de daño y quedan cegadas."
+  },
+  "void-stare": {
+    "name": "Mirada del Vacío",
+    "description": "Tus ojos se vuelven negros mientras miras hacia la oscuridad entre las estrellas. Una criatura de NV 6 o menor que puedas ver cae bajo tu control. Tú decides sus acciones durante su turno."
+  },
+  "whisper": {
+    "name": "Susurro",
+    "description": "Susurras al oído de otra criatura, plantando un recuerdo falso en su mente. Describes un breve recuerdo falso que el objetivo cree verdadero de ahí en adelante. Si fallas la prueba de lanzamiento, el DJ elige un recuerdo breve y falso para plantar en tu mente."
+  },
+  "wolfshape": {
+    "name": "Forma de Lobo",
+    "description": "Tú y tu equipo se transforman en un lobo mientras dure el hechizo. Asumes la FUE, DES, CON, PV, CA, velocidad, ataques y características físicas del lobo, pero conservas tu INT, SAB y CAR. Puedes lanzar hechizos en esta forma. Si llegas a 0 PV, vuelves a tu forma verdadera a 0 PV."
+  },
+  "arcane-eye": {
+    "name": "Ojo Arcano",
+    "description": "Conjuras un ojo invisible del tamaño de una uva dentro del alcance. Puedes ver a través del ojo. Puede ver en la oscuridad hasta distancia cercana, volar a distancia cercana en tu turno y pasar por aberturas tan estrechas como el ojo de una cerradura."
+  },
+  "beguile": {
+    "name": "Embelesar",
+    "description": "Conjuras una ilusión visual y auditiva convincente dentro del alcance. Las criaturas que perciben la ilusión reaccionan como si fuera real, aunque no puede causar daño real. Tocar la ilusión revela al instante su naturaleza falsa."
+  },
+  "cloak-of-night": {
+    "name": "Manto de la Noche",
+    "description": "Te envuelves en un manto arremolinado de sombras. Mientras dure el hechizo, tu clase de armadura se convierte en 17 (20 con una prueba de lanzamiento crítica). Tienes ventaja en pruebas de Destreza para escabullirte y esconderte."
+  },
+  "cloud-kill": {
+    "name": "Nube Mortífera",
+    "description": "Una nube pútrida de veneno amarillo llena un cubo del tamaño cercano dentro del alcance. Se expande por las esquinas. Las criaturas dentro de la nube quedan cegadas y reciben 2d6 de daño al inicio de sus turnos. Una criatura de NV 9 o menor que termine su turno completamente dentro de la nube muere."
+  },
+  "commune": {
+    "name": "Comunión",
+    "description": "Buscas el consejo de tu dios. Haz al DJ hasta tres preguntas de sí o no. El DJ responde verazmente «sí» o «no» a cada una. Si lanzas este hechizo más de una vez en 24 horas, trata un fallo en la prueba de lanzamiento como un fallo crítico."
+  },
+  "confusion": {
+    "name": "Confusión",
+    "description": "Hipnotizas a una criatura que puedas ver dentro del alcance. El objetivo no puede realizar acciones y se mueve en una dirección aleatoria en su turno. Si el objetivo es NV 9+, puede hacer una prueba de SAB contra tu última prueba de lanzamiento al inicio de su turno para terminar el hechizo."
+  },
+  "control-water": {
+    "name": "Controlar Agua",
+    "description": "Mueves y moldeas el agua. Puedes hacer que una sección de agua de hasta 30 metros de ancho y profundidad cambie de forma, desafíe la gravedad o fluya en una dirección diferente."
+  },
+  "curse": {
+    "name": "Maldición",
+    "description": "Una criatura que toques es afligida por una de las siguientes maldiciones: forúnculos y verrugas horribles; toda la comida sabe a ceniza; la voz se vuelve chillona; pesadillas perturbadoras; siempre pierde en las apuestas; un aliado se convierte en enemigo; miedo a algo ordinario."
+  },
+  "dimension-door": {
+    "name": "Puerta Dimensional",
+    "description": "Te teletransportas a ti mismo y hasta otra criatura voluntaria a distancia cercana a cualquier punto que puedas ver."
+  },
+  "divination": {
+    "name": "Adivinación",
+    "description": "Lanzas los huesos de adivinación o miras hacia la oscuridad entre las estrellas, buscando un presagio. Puedes hacerle al DJ una pregunta de sí o no. El DJ responde verazmente. Si lanzas este hechizo más de una vez en 24 horas, trata un fallo en la prueba de lanzamiento como un fallo crítico."
+  },
+  "flame-strike": {
+    "name": "Columna de Fuego",
+    "description": "Invocas un pilar sagrado de fuego, inmolando a una criatura que puedas ver dentro del alcance. El objetivo recibe 2d6 de daño."
+  },
+  "freyas-omen": {
+    "name": "Augurio de Freya",
+    "description": "Mientras dure el hechizo, no pierdes la capacidad de lanzar un hechizo si fallas su prueba de lanzamiento. Si sacas un fallo crítico en una prueba de lanzamiento, puedes volver a tirar una vez. Debes usar el nuevo resultado."
+  },
+  "glassbones": {
+    "name": "Huesos de Cristal",
+    "description": "Una criatura que toques se vuelve frágil. Recibe el doble de daño mientras dure el hechizo."
+  },
+  "lokis-trickery": {
+    "name": "Ardid de Loki",
+    "description": "Te llenas del carisma hipnótico de Loki. Las criaturas que te escuchen hablar alterarán sus propias creencias y recuerdos para coincidir con tu sugerencia. Selecciona una criatura que pueda oírte y entenderte dentro del alcance. Haces una declaración plausible, verdadera o no. El objetivo debe hacer una prueba de Sabiduría contra tu prueba de lanzamiento."
+  },
+  "moonbeam": {
+    "name": "Rayo Lunar",
+    "description": "Un rayo vacilante de luz de luna plateada golpea a una criatura dentro de distancia lejana. Recibe 3d6 de daño."
+  },
+  "nightmare": {
+    "name": "Pesadilla",
+    "description": "Visitas los sueños de una criatura dormida, enviándole pesadillas que detienen el corazón. Puedes seleccionar una criatura cuyo nivel sea menor o igual a la mitad del tuyo redondeado hacia abajo (mínimo 1). El objetivo debe estar dormido, y debes haberlo visto antes en persona."
+  },
+  "odins-wisdom": {
+    "name": "Sabiduría de Odín",
+    "description": "Mientras dure el hechizo, añade tu nivel como bonificación adicional a tus pruebas de Sabiduría y pruebas de lanzamiento."
+  },
+  "passwall": {
+    "name": "Pasapared",
+    "description": "Un túnel de tu altura se abre en una barrera que toques y dura mientras dure el hechizo. El pasaje puede tener hasta una distancia cercana de largo y debe ser en línea recta."
+  },
+  "pillar-of-salt": {
+    "name": "Pilar de Sal",
+    "description": "Una criatura que selecciones se convierte en una estatua de sal endurecida. Puedes afectar a una criatura que puedas ver de NV 5 o menor. Si mantienes la concentración con éxito durante 3 asaltos seguidos, la transformación se vuelve permanente."
+  },
+  "polymorph": {
+    "name": "Polimorfismo",
+    "description": "Transformas a una criatura que toques en otra criatura natural de tu elección de tamaño igual o menor. Cualquier equipo que el objetivo lleve se fusiona con su nueva forma. El objetivo obtiene las estadísticas físicas de la criatura, pero conserva sus estadísticas no físicas. Si el objetivo llega a 0 PV, vuelve a su forma original."
+  },
+  "regenerate": {
+    "name": "Regenerar",
+    "description": "Una criatura que toques recupera 1d4 puntos de golpe en tu turno mientras dure el hechizo. Este hechizo también regenera partes del cuerpo perdidas."
+  },
+  "resilient-sphere": {
+    "name": "Esfera Resistente",
+    "description": "Conjuras una esfera ingrávida y vítrea a tu alrededor que se extiende hasta distancia cercana. Mientras dure el hechizo, nada puede atravesar o aplastar la esfera. Puedes hacer rodar la esfera una distancia cercana en tu turno."
+  },
+  "stoneskin": {
+    "name": "Piel de Piedra",
+    "description": "Tu piel se vuelve como granito. Mientras dure el hechizo, tu clase de armadura se convierte en 17 (20 con una prueba de lanzamiento crítica)."
+  },
+  "telekinesis": {
+    "name": "Telequinesis",
+    "description": "Levantas una criatura u objeto con tu mente. Elige un objetivo que pese 450 kg o menos. Puedes moverlo una distancia cercana en cualquier dirección y mantenerlo en su lugar."
+  },
+  "thors-thunder": {
+    "name": "Trueno de Thor",
+    "description": "Thor lanza un rayo para golpear a un objetivo. El objetivo recibe 3d6 de daño."
+  },
+  "wall-of-force": {
+    "name": "Muro de Fuerza",
+    "description": "Alzas las manos, conjurando un muro transparente de fuerza. El delgado muro debe ser contiguo y puede cubrir un área del tamaño cercano en ancho y largo. Tú eliges su forma. Nada en el mismo plano puede atravesar físicamente el muro."
+  },
+  "wrath": {
+    "name": "Ira",
+    "description": "Tus armas se vuelven mágicas +2 e infligen un d8 adicional de daño mientras dure el hechizo."
+  },
+  "anathema": {
+    "name": "Anatema",
+    "description": "Todos los aliados repudian y abandonan a la criatura que toques durante 1 día. Cada vez que tú o tus aliados dañen al objetivo, sus antiguos aliados pueden superar una prueba de SAB CD 15 para terminar los efectos del hechizo."
+  },
+  "antimagic-shell": {
+    "name": "Caparazón Antimagia",
+    "description": "Un cubo invisible del tamaño cercano de magia nula aparece centrado en ti. Dentro del cubo, no se pueden lanzar hechizos. Los objetos mágicos y hechizos no tienen efecto en la zona, y ninguna magia puede entrar. El cubo se mueve contigo. Hechizos como disipar magia no tienen efecto sobre él."
+  },
+  "create-undead": {
+    "name": "Crear No Muerto",
+    "description": "Conjuras una criatura no muerta vengativa para que cumpla tus órdenes. Al lanzar este hechizo, eliges invocar un tumulario o un espectro. Aparece junto a ti y está bajo tu control. La criatura no muerta actúa en tu turno. Después de 1 día, se desvanece en humo."
+  },
+  "disintegrate": {
+    "name": "Desintegrar",
+    "description": "Un rayo verde sale de tu dedo y convierte a una criatura u objeto en cenizas. Una criatura objetivo de NV 5 o menor muere al instante. Si es NV 6+, recibe 3d8 de daño en su lugar. Un objeto no mágico del tamaño de un árbol grande es destruido."
+  },
+  "divine-vengeance": {
+    "name": "Venganza Divina",
+    "description": "Te conviertes en el avatar divino de la ira de tu dios, envuelto en llamas sagradas o un aura negra de corrupción humeante. Mientras dure el hechizo, puedes volar a distancia cercana, tus armas son mágicas y tienes una bonificación de +4 a tus ataques y daño con armas."
+  },
+  "dominion": {
+    "name": "Dominio",
+    "description": "Seres poderosos acuden en tu ayuda. Los seres deben tener un total combinado de 16 niveles o menos. Los PJ caóticos invocan demonios/diablos, y los PJ legales o neutrales invocan ángeles. Los seres actúan con voluntad propia para ayudarte en tu turno. Después de 10 asaltos, regresan a sus reinos."
+  },
+  "dreamwalk": {
+    "name": "Caminar en Sueños",
+    "description": "Tú y cualquier criatura voluntaria que elijas a distancia cercana entran en el sueño de una criatura dormida que nombres y que esté en tu mismo plano. Tú y quienes te acompañen pueden salir junto a la criatura, apareciendo a su lado como si se hubieran teletransportado."
+  },
+  "enfeeble": {
+    "name": "Debilitar",
+    "description": "Una criatura que toques tiene una estadística aleatoria reducida a 3 (-4) durante una semana. Tira un d6 para determinar cuál: 1. Fuerza, 2. Destreza, 3. Constitución, 4. Inteligencia, 5. Sabiduría, 6. Carisma. Si fallas la prueba de lanzamiento, una de tus estadísticas aleatorias se reduce a 3 durante una semana."
+  },
+  "finger-of-death": {
+    "name": "Dedo de la Muerte",
+    "description": "Una criatura que toques de NV 9 o menor muere. Trata un fallo en la prueba de lanzamiento de este hechizo como un fallo crítico, y tira la pifia con desventaja."
+  },
+  "heal": {
+    "name": "Sanar",
+    "description": "Una criatura que toques es sanada hasta su máximo de puntos de golpe. No puedes lanzar este hechizo de nuevo hasta completar un descanso."
+  },
+  "hold-monster": {
+    "name": "Paralizar Monstruo",
+    "description": "Paralizas a una criatura que puedas ver dentro del alcance. Si el objetivo es NV 9+, puede hacer una prueba de FUE contra tu última prueba de lanzamiento al inicio de su turno para terminar el hechizo."
+  },
+  "judgment": {
+    "name": "Juicio",
+    "description": "Destierras al instante a una criatura que toques, enviándola junto con todas sus posesiones a enfrentar el juicio de tu dios. Puedes desterrar a una criatura inteligente de NV 10 o menor. Cuando la criatura regresa en 5 asaltos, ha sido sanada por completo si sus acciones agradaron a tu dios, o reducida a 1 PV si no."
+  },
+  "mother-of-night": {
+    "name": "Madre de la Noche",
+    "description": "Suplicas a la Madre de la Noche que te preste su poder. Pide un único deseo, formulándolo lo más exactamente posible. Tu deseo se cumple, según lo interprete el DJ. Si fallas la prueba de lanzamiento, la Madre de la Noche te arrastra al Crepúsculo para ser juzgado."
+  },
+  "plane-shift": {
+    "name": "Cambiar de Plano",
+    "description": "Pliegas el espacio y el tiempo, transportándote a ti y a todas las criaturas voluntarias a distancia cercana a una ubicación en otro plano de tu elección. A menos que hayas estado antes en tu destino previsto, apareces en un lugar aleatorio del plano de destino."
+  },
+  "power-word-kill": {
+    "name": "Palabra de Poder: Matar",
+    "description": "Pronuncias la Palabra de Perdición. Una criatura que selecciones de NV 9 o menor muere si te escucha. Trata un fallo en la prueba de lanzamiento de este hechizo como un fallo crítico, y tira la pifia con desventaja."
+  },
+  "prismatic-orb": {
+    "name": "Orbe Prismático",
+    "description": "Envías un orbe estroboscópico de energía hacia un objetivo dentro del alcance. Elige un tipo de energía entre fuego, frío o electricidad. El orbe inflige 3d8 de daño y libera una onda concusiva del tipo de energía elegido."
+  },
+  "prophecy": {
+    "name": "Profecía",
+    "description": "Te comunicas directamente con tu dios para obtener guía. Haz al DJ una pregunta. El DJ responde verazmente usando el conocimiento que tu dios posee. Las deidades son poderosas, pero no omniscientes. No puedes lanzar este hechizo de nuevo hasta completar una penitencia."
+  },
+  "ragnarok": {
+    "name": "Ragnarök",
+    "description": "Miras profundamente en los hilos del destino, aprendiendo el destino final de un alma tras la batalla del Ragnarök. Elige una criatura dentro del alcance. Solo puedes seleccionar la misma criatura con este hechizo una vez. Esa criatura debe superar una prueba de CON igual a tu prueba de lanzamiento o muere."
+  },
+  "scrying": {
+    "name": "Escudriñar",
+    "description": "Miras en una bola de cristal o espejo de agua, invocando imágenes de un lugar distante. Mientras dure el hechizo, puedes ver y oír a una criatura o ubicación que elijas que esté en el mismo plano. Este hechizo es CD 18 si intentas escudriñar una criatura o ubicación desconocida."
+  },
+  "shapechanger": {
+    "name": "Cambiaformas",
+    "description": "Te transformas a ti y a cualquier equipo que lleves en otra criatura natural que hayas visto de nivel 10 o menor. Asumes las estadísticas físicas de la criatura, pero conservas tus estadísticas no físicas (como INT, SAB y CAR). Si llegas a 0 PV mientras estés bajo los efectos de este hechizo, vuelves a tu forma verdadera."
+  },
+  "soul-jar": {
+    "name": "Frasco de Almas",
+    "description": "Transfieres el alma de una criatura que toques de NV 9 o menor a un recipiente, como un frasco. El cuerpo de la criatura entra en coma, pero no muere. Si el recipiente se abre o se rompe, el alma de la criatura regresa a su cuerpo. Puedes poseer el cuerpo vacío con tu propio espíritu, tomando control de él."
+  },
+  "summon-extraplanar": {
+    "name": "Invocar Ser Extraplanar",
+    "description": "Extiendes tu mano hacia los planos exteriores, invocando una criatura. Invocas un elemental o foráneo de NV 7 o menor. La criatura está bajo tu control y actúa en tu turno. Si pierdes la concentración, pierdes el control de la criatura y se vuelve hostil hacia ti y tus aliados."
+  },
+  "teleport": {
+    "name": "Teletransportar",
+    "description": "Tú y cualquier criatura voluntaria que elijas a distancia cercana se teletransportan a una ubicación que especifiques en tu mismo plano. Puedes viajar a un sigilo de teletransportación conocido o a un lugar que hayas visitado antes. De lo contrario, tienes un 50% de probabilidad de llegar fuera del objetivo."
+  },
+  "valkyrie": {
+    "name": "Valquiria",
+    "description": "Invocas una valquiria en tu ayuda. Aparece en un lugar a distancia cercana y actúa con voluntad propia para ayudarte. Regresa al Valhalla cuando el hechizo termina. No puedes lanzar esto de nuevo hasta completar una penitencia."
+  },
+  "wish": {
+    "name": "Deseo",
+    "description": "Este poderoso hechizo altera la realidad. Pide un único deseo, formulándolo lo más exactamente posible. Tu deseo se cumple, según lo interprete el DJ. Trata un fallo en la prueba de lanzamiento de este hechizo como un fallo crítico, y tira la pifia con desventaja."
+  },
+  "world-serpent": {
+    "name": "Serpiente del Mundo",
+    "description": "El veneno tortuoso de la Serpiente del Mundo gotea de las armas de una criatura que toques. El objetivo inflige x2 de daño con cada ataque (x4 en golpe crítico) mientras dure el hechizo."
+  },
+  "world-tree": {
+    "name": "Árbol del Mundo",
+    "description": "Las raíces del Árbol del Mundo, dador de vida, envuelven el alma de una criatura que toques. Mientras dure el hechizo, el objetivo no puede ser reducido por debajo de 1 PV."
+  }
+}

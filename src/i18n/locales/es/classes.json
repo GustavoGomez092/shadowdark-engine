@@ -1,0 +1,353 @@
+{
+  "fighter": {
+    "name": "Guerrero",
+    "description": "Maestros de armas y armaduras, los guerreros sobresalen en el combate fisico.",
+    "features": {
+      "hauler": {
+        "name": "Cargador",
+        "description": "Suma tu modificador de CON (si es positivo) a tu capacidad de espacios de equipo."
+      },
+      "grit": {
+        "name": "Determinacion",
+        "description": "Elige FUE o DES. Tienes ventaja en tiradas de esa caracteristica para superar una fuerza opuesta."
+      },
+      "weapon-mastery": {
+        "name": "Maestria con Armas",
+        "description": "Elige un tipo de arma. Obtienes +1 a las tiradas de ataque y dano con ese tipo, mas la mitad de tu nivel (redondeado hacia abajo)."
+      }
+    },
+    "talents": {
+      "2": "Obtener Maestria con Armas con un tipo de arma adicional",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES o CON",
+      "10-11": "Elige un tipo de armadura. +1 CA con esa armadura.",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "priest": {
+    "name": "Sacerdote",
+    "description": "Lanzadores de conjuros divinos devotos de su deidad, los sacerdotes curan aliados y castigan enemigos.",
+    "features": {
+      "turn-undead": {
+        "name": "Expulsar Muertos Vivientes",
+        "description": "Conoces el conjuro Expulsar Muertos Vivientes de forma gratuita. No cuenta para tu numero de conjuros conocidos."
+      },
+      "spellcasting": {
+        "name": "Lanzamiento de Conjuros",
+        "description": "Puedes lanzar conjuros de sacerdote usando tu modificador de SAB."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja al lanzar un conjuro que conozcas",
+      "3-6": "+1 a ataques cuerpo a cuerpo o a distancia",
+      "7-9": "+1 a tiradas de lanzamiento de conjuros de sacerdote",
+      "10-11": "+2 a FUE o SAB",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "thief": {
+    "name": "Ladron",
+    "description": "Astutos y sigilosos, los ladrones sobresalen encontrando trampas, abriendo cerraduras y atacando desde las sombras.",
+    "features": {
+      "backstab": {
+        "name": "Punalada Traicionera",
+        "description": "Si golpeas a una criatura que no es consciente de tu ataque, infliges un dado de dano del arma adicional. Anade dados de dano del arma adicionales iguales a la mitad de tu nivel (redondeado hacia abajo)."
+      },
+      "thievery": {
+        "name": "Latrocinio",
+        "description": "Eres experto en habilidades de ladron. Tienes ventaja en tiradas de escalar, sigilo, ocultarse, disfrazarse, encontrar y desactivar trampas, y tareas delicadas como robar bolsillos y abrir cerraduras."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja en tiradas de iniciativa",
+      "3-5": "Punalada Traicionera inflige +1 dado de dano",
+      "6-9": "+2 a FUE, DES o CAR",
+      "10-11": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "wizard": {
+    "name": "Mago",
+    "description": "Lanzadores de conjuros arcanos que ejercen magia poderosa a traves del estudio y el intelecto.",
+    "features": {
+      "spellcasting": {
+        "name": "Lanzamiento de Conjuros",
+        "description": "Puedes lanzar conjuros de mago usando tu modificador de INT."
+      },
+      "learning-spells": {
+        "name": "Aprender Conjuros",
+        "description": "Puedes aprender permanentemente un conjuro de mago de un pergamino de conjuro estudiandolo durante un dia y superando una tirada de INT CD 15. El pergamino se consume tanto si tienes exito como si fallas."
+      }
+    },
+    "talents": {
+      "2": "Crear un objeto magico aleatorio (ver Guia del DJ)",
+      "3-7": "+2 a INT o +1 a tiradas de lanzamiento de conjuros de mago",
+      "8-9": "Obtener ventaja al lanzar un conjuro que conozcas",
+      "10-11": "Aprender un conjuro de mago adicional de cualquier rango que conozcas",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "bard": {
+    "name": "Bardo",
+    "description": "Los bardos son viajeros bienvenidos y sabios consejeros; su tarea es proteger y compartir el conocimiento transmitido a traves de las eras.",
+    "features": {
+      "bardic-arts": {
+        "name": "Artes Bardicas",
+        "description": "Estas entrenado en oratoria, artes escenicas, sabiduria antigua y diplomacia. Tienes ventaja en tiradas relacionadas."
+      },
+      "presence": {
+        "name": "Presencia",
+        "description": "Haz una tirada de CAR CD 12 para Inspirar (un objetivo cercano obtiene una ficha de suerte) o Fascinar (concentracion: embelesar a todos los objetivos elegidos de nivel 4 o menos dentro del alcance cercano)."
+      },
+      "magical-dabbler": {
+        "name": "Aficionado Magico",
+        "description": "Puedes activar pergaminos de conjuros y varitas usando Carisma como tu caracteristica de lanzamiento de conjuros. Si obtienes un fallo critico, tira en la tabla de percances de mago."
+      },
+      "prolific": {
+        "name": "Prolifico",
+        "description": "Anade 1d6 a tus tiradas de aprendizaje. Los grupos que festejan con 1 o mas bardos anaden 1d6 a sus tiradas."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja al lanzar un pergamino/varita que uses",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES, CON, INT, SAB o CAR",
+      "10-11": "+1 a tiradas de Aficionado Magico O CD de Presencia mejorada (solo puedes tomar cada uno una vez)",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "ranger": {
+    "name": "Explorador",
+    "description": "Rastreadores habiles, vagabundos sigilosos y guerreros sin igual que llaman hogar a las tierras salvajes.",
+    "features": {
+      "wayfinder": {
+        "name": "Orientador",
+        "description": "Tienes ventaja en tiradas relacionadas con navegacion, rastreo, supervivencia en la naturaleza, sigilo y animales salvajes."
+      },
+      "herbalism": {
+        "name": "Herbalismo",
+        "description": "Haz una tirada de INT para preparar un remedio herbal: Ungueento (CD 11, cura 1 PG), Estimulante (CD 12, no puedes ser sorprendido por 10 asaltos), Veneno de Enemigo (CD 13, VEN en ataques contra un tipo de criatura), Restaurador (CD 14, termina veneno/enfermedad), Curativo (CD 15, como Pocion de Curacion). Los remedios sin usar expiran en 3 asaltos."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja en tiradas de Herbalismo",
+      "3-6": "+1 a ataques y dano cuerpo a cuerpo o a distancia",
+      "7-9": "+2 a FUE, DES, INT o SAB",
+      "10-11": "Aumentar el dado de dano de un arma en un paso",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "warlock": {
+    "name": "Brujo",
+    "description": "Guerreros aullantes con dientes afilados, oradores enloquecidos predicando sobre La Disolucion, y cazadores de saber encapuchados que portan la Marca oculta de Shune.",
+    "features": {
+      "patron": {
+        "name": "Patron",
+        "description": "Elige un patron al cual servir. Tu patron es la fuente de tus dones sobrenaturales. Si tu patron esta descontento contigo, puede retener sus dones."
+      },
+      "patron-boon": {
+        "name": "Don del Patron",
+        "description": "En el nivel 1, obtienes un talento aleatorio de Don del Patron basado en tu patron elegido. Siempre que obtengas una nueva tirada de talento, puedes elegir tirar en tu tabla de Don del Patron."
+      }
+    },
+    "talents": {
+      "2": "Tirar en tu tabla de Don del Patron",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES, CON, INT, SAB o CAR",
+      "10-11": "+1 a tiradas de dano",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "witch": {
+    "name": "Bruja",
+    "description": "Viejas cacareantes encorvadas sobre calderos, chamanes cantores untados en sangre y arcilla, y doncellas marginadas con ojos lechosos que ven presagios y secretos.",
+    "features": {
+      "spellcasting": {
+        "name": "Lanzamiento de Conjuros",
+        "description": "Puedes lanzar conjuros de bruja usando tu modificador de CAR. La CD es 10 + el rango del conjuro. Con un 1 natural, tira en la tabla de Percances Diabolicos."
+      },
+      "familiar": {
+        "name": "Familiar",
+        "description": "Tienes un animal pequeno (cuervo, rata, rana, etc.) que te sirve lealmente y puede hablar Comun. Tu familiar puede ser el origen de los conjuros que lanzas. Si muere, puedes restaurarlo sacrificando permanentemente 1d4 PG."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja al lanzar un conjuro que conozcas",
+      "3-7": "+1 a tiradas de lanzamiento de conjuros de bruja",
+      "8-9": "Aprender un conjuro de bruja adicional de cualquier rango que conozcas",
+      "10-11": "+2 a INT o CAR",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "knight-of-st-ydris": {
+    "name": "Caballero de San Ydris",
+    "description": "Caballeros malditos que recorren el sendero de San Ydris el Profano, el Poseido. Abrazan la oscuridad para combatirla, purificando el mal con una lluvia de acero y hechiceria prohibida.",
+    "features": {
+      "demonic-possession": {
+        "name": "Posesion Demoniaca",
+        "description": "3/dia, obtienes un bonificador de +1 a tus tiradas de dano que dura 3 asaltos. Ademas, suma la mitad de tu nivel al bonificador de dano (redondeado hacia abajo)."
+      },
+      "spellcasting": {
+        "name": "Lanzamiento de Conjuros",
+        "description": "A partir del nivel 3, puedes lanzar conjuros de bruja usando tu modificador de CAR. Con un 1 natural, tira en la tabla de Percances Diabolicos."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja al lanzar un conjuro que conozcas",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+1 a tiradas de lanzamiento de conjuros de bruja",
+      "10-11": "+2 a FUE, CON o CAR",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "seer": {
+    "name": "Vidente",
+    "description": "Siniestros adivinos que apestan a humo y sangre. Descifran los susurros de los dioses leyendo las runas, los huesos y las estrellas. Su conocimiento del destino les permite moldearlo.",
+    "features": {
+      "spellcasting": {
+        "name": "Lanzamiento de Conjuros",
+        "description": "Puedes lanzar conjuros de vidente usando tu modificador de SAB. La CD es 10 + el rango del conjuro. Con un 1 natural, debes completar la Penitencia del Vidente."
+      },
+      "omen": {
+        "name": "Presagio",
+        "description": "3/dia, haz una tirada de SAB CD 9. Si tienes exito, obtienes una ficha de suerte (no puedes tener mas de una a la vez)."
+      },
+      "destined": {
+        "name": "Predestinado",
+        "description": "Siempre que uses una ficha de suerte, anade 1d6 a la tirada."
+      }
+    },
+    "talents": {
+      "2": "Obtener ventaja al lanzar un conjuro que conozcas",
+      "3-6": "+1 a tiradas de lanzamiento de conjuros de vidente",
+      "7-9": "+2 a FUE, DES, CON, INT, SAB o CAR",
+      "10-11": "Aprender un conjuro de vidente adicional de cualquier rango que conozcas",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "basilisk-warrior": {
+    "name": "Guerrero Basilisco",
+    "description": "Guerreros de ojos ardientes que cubren su piel con barro y piedra. Su antiguo estilo de combate imita la pose regia y los feroces golpes del basilisco.",
+    "features": {
+      "stone-skin": {
+        "name": "Piel de Piedra",
+        "description": "Suma 2 + la mitad de tu nivel (redondeado hacia abajo) a tu CA. Tienes ventaja en tiradas para ocultarte en entornos naturales."
+      },
+      "basilisk-blood": {
+        "name": "Sangre de Basilisco",
+        "description": "Tienes ventaja en tiradas de CON para evitar enfermedades daninas, venenos o aflicciones."
+      },
+      "petrifying-gaze": {
+        "name": "Mirada Petrificante",
+        "description": "Una criatura de tu nivel o menos que encuentre tu mirada debe superar una tirada de CON CD 15 o quedar petrificada durante 1d4 asaltos. Usos por dia iguales a tu modificador de CON (minimo 1)."
+      }
+    },
+    "talents": {
+      "2": "Obtener +1 CA (mejora de armadura natural)",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES, CON o SAB",
+      "10-11": "+1 a tiradas de dano",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "desert-rider": {
+    "name": "Jinete del Desierto",
+    "description": "Barbaros aullantes galopando por la arena sobre caballos salvajes, espias elficos blandiendo hojas curvas sobre camellos plateados, o bandidos envueltos en sedas coloridas corriendo sobre esbeltos corceles del desierto.",
+    "features": {
+      "charge": {
+        "name": "Carga",
+        "description": "3/dia, puedes cargar al combate moviendote al menos a distancia cercana antes de atacar. Cada vez que haces esto, tus ataques cuerpo a cuerpo infligen dano doble ese asalto."
+      },
+      "mount": {
+        "name": "Montura",
+        "description": "Tienes un camello o caballo comun que viene cuando lo llamas y nunca se espanta. Mientras montas, ambos obtienen un bonificador a la CA igual a la mitad de tu nivel (redondeado hacia abajo). Tu montura tiene niveles adicionales iguales a la mitad de tu nivel (redondeado hacia abajo)."
+      }
+    },
+    "talents": {
+      "2": "Tu montura obtiene +2 a ataque y dano",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES, CON o CAR",
+      "10-11": "+1 a tiradas de dano",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "pit-fighter": {
+    "name": "Gladiador",
+    "description": "Guerreros empapados en sangre que se rodean en arenas rugientes, bandidos del desierto llenos de cicatrices que duelen por el derecho a liderar su banda, o camorristas audaces de taberna que nunca rechazan un desafio.",
+    "features": {
+      "flourish": {
+        "name": "Floritura",
+        "description": "3/dia, recupera 1d6 puntos de golpe cuando golpeas a un enemigo con un ataque cuerpo a cuerpo."
+      },
+      "relentless": {
+        "name": "Implacable",
+        "description": "3/dia, cuando eres reducido a 0 PG, haz una tirada de CON CD 18. Si tienes exito, quedas en 1 PG en su lugar."
+      },
+      "implacable": {
+        "name": "Inquebrantable",
+        "description": "Tienes ventaja en tiradas de Constitucion para resistir heridas, veneno o soportar entornos extremos."
+      },
+      "last-stand": {
+        "name": "Ultimo Aliento",
+        "description": "Te levantas de la muerte con 1 punto de golpe con una tirada natural de d20 de 18-20."
+      }
+    },
+    "talents": {
+      "2": "+1 a ataques cuerpo a cuerpo",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES, CON o CAR",
+      "10-11": "+1 a tiradas de dano",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "sea-wolf": {
+    "name": "Lobo de Mar",
+    "description": "Asaltantes maritimos que merodean las islas en busca de botin en drakkars con cabeza de dragon. Cuando suena el cuerno de guerra, se convierten en feroces berserkers y doncellas escuderas que esperan complacer a sus dioses con una muerte valiente.",
+    "features": {
+      "seafarer": {
+        "name": "Marinero",
+        "description": "Tienes ventaja en tiradas relacionadas con navegar y tripular embarcaciones."
+      },
+      "old-gods": {
+        "name": "Dioses Antiguos",
+        "description": "Cada dia, tu proposito se alinea con uno de los Dioses Antiguos. Elige despues de descansar: Odin (recupera 1d4 PG al matar), Freya (ficha de suerte + bonificador de 1d6 al usarla), o Loki (ventaja en tiradas de mentir/sigilo/ocultarse)."
+      },
+      "shield-wall": {
+        "name": "Muro de Escudos",
+        "description": "Si empunas un escudo, puedes usar tu accion para tomar una postura defensiva. Tu CA se convierte en 20 durante este tiempo."
+      }
+    },
+    "talents": {
+      "2": "Entrar en Furia Berserker (habilidad especial)",
+      "3-6": "+1 a ataques cuerpo a cuerpo y a distancia",
+      "7-9": "+2 a FUE, DES, CON o SAB",
+      "10-11": "+1 a tiradas de dano",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  },
+  "ras-godai": {
+    "name": "Ras-Godai",
+    "description": "Asesinos vestidos de negro que entrenan desde la infancia en un monasterio oculto del desierto. Obtienen sus poderes hechiceros de una legendaria flor de loto negro que les fue entregada por un demonio.",
+    "features": {
+      "smoke-step": {
+        "name": "Paso de Humo",
+        "description": "3/dia, teletransportate a un lugar que puedas ver dentro del alcance cercano. Esto no usa tu accion."
+      },
+      "black-lotus": {
+        "name": "Loto Negro",
+        "description": "Ganaste el derecho a comer un petalo de la legendaria flor de loto negro y sobreviviste. Tira un talento en la tabla de Talentos del Loto Negro."
+      },
+      "trained-assassin": {
+        "name": "Asesino Entrenado",
+        "description": "Tienes ventaja en tiradas de sigilo y ocultarse. Tus ataques infligen dano doble contra objetivos que no son conscientes de tu presencia."
+      }
+    },
+    "talents": {
+      "2": "Tirar un talento adicional del Loto Negro",
+      "3-6": "+1 a ataques cuerpo a cuerpo",
+      "7-9": "+2 a FUE, DES, CON o CAR",
+      "10-11": "Obtener un uso adicional de Paso de Humo por dia",
+      "12": "Elige un talento o +2 puntos para distribuir entre caracteristicas"
+    }
+  }
+}

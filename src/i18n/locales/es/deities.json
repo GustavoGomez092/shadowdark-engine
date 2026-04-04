@@ -1,0 +1,82 @@
+{
+  "saint-terragnis": {
+    "name": "Saint Terragnis",
+    "domain": "Rectitud, justicia",
+    "description": "Patrono de la mayoria de los humanos legales. Un caballero legendario y la encarnacion de la rectitud y la justicia."
+  },
+  "madeera": {
+    "name": "Madeera the Covenant",
+    "domain": "Ley, realidad",
+    "description": "La primera manifestacion de la Ley. Lleva cada ley de la realidad (el Pacto) escrita en su piel."
+  },
+  "gede": {
+    "name": "Gede",
+    "domain": "Festines, alegria, tierras salvajes",
+    "description": "Diosa de los festines, la alegria y las tierras salvajes. Usualmente pacifica, pero tormentas primigenias rugen cuando se enfurece. Muchos elfos y medianos la veneran."
+  },
+  "ord": {
+    "name": "Ord",
+    "domain": "Magia, conocimiento, secretos",
+    "description": "El Inquebrantable, el Sabio, el Guardian de Secretos. Dios de la magia, el conocimiento, los secretos y el equilibrio."
+  },
+  "memnon": {
+    "name": "Memnon",
+    "domain": "Caos, ambicion",
+    "description": "La primera manifestacion del Caos. Gemelo de Madeera, un ser leonino de melena roja con la ambicion de arrancar el Pacto de la piel de su hermana."
+  },
+  "shune": {
+    "name": "Shune the Vile",
+    "domain": "Secretos arcanos, hechiceria",
+    "description": "Susurra secretos arcanos a hechiceros y brujas. Conspira para desplazar a Ord y controlar toda la magia."
+  },
+  "ramlaat": {
+    "name": "Ramlaat",
+    "domain": "Guerra, barbarie",
+    "description": "El Saqueador, el Barbaro, la Horda. Muchos orcos lo veneran. Profecia del Rito de Sangre: solo los mas fuertes sobreviviran a una perdicion venidera."
+  },
+  "the-lost": {
+    "name": "The Lost",
+    "domain": "Misterio, conocimiento prohibido",
+    "description": "Dos de Los Nueve se han perdido a traves de las eras, sus nombres borrados de la historia y la memoria. Sin embargo, su leyenda susurrada perdura en textos antiguos y prohibidos y en lugares secretos y profundos..."
+  },
+  "odin": {
+    "name": "Odin",
+    "domain": "Fuerza, astucia, guerra",
+    "description": "El Padre de Todo. Odin el Tuerto valora la fuerza y la astucia. Sus cuervos gemelos surcan la noche, espiando suenos y recuerdos. Los guerreros dignos son llevados al Valhalla."
+  },
+  "freya": {
+    "name": "Freya",
+    "domain": "Amor, odio, profecia",
+    "description": "La diosa del amor y el odio. La Reina de las Doncellas Escuderas cuyas valquirias llevan las almas dignas al Gran Festin. La Primera Vidente que coloca sus presagios en huesos, sangre y entranas."
+  },
+  "loki": {
+    "name": "Loki",
+    "domain": "Engano, ingenio, trampas",
+    "description": "El Embaucador que gana con ingenio y artimana. El lobo que se disfraza de oveja. Loki es elocuente e irritante; sus palabras cortan como el acero y su risa aulla como un vendaval."
+  },
+  "almazzat": {
+    "name": "Almazzat",
+    "domain": "Demonios, tiempo, conquista",
+    "description": "Un archidemon con cabeza de lobo, seis ojos y seis cuernos. Almazzat busca arrebatar las Arenas del Tiempo a su padre, Kytheros."
+  },
+  "kytheros": {
+    "name": "Kytheros",
+    "domain": "Tiempo, destino, sino",
+    "description": "El Senor del Tiempo que ve todos los futuros posibles. Kytheros busca el cumplimiento de todos los destinos tal como fueron concebidos."
+  },
+  "mugdulblub": {
+    "name": "Mugdulblub",
+    "domain": "Cieno, disolucion, vacio",
+    "description": "El Cieno Primordial que se filtra entre las grietas de la memoria y la oscuridad entre las estrellas. Mugdulblub busca la disolucion de toda forma fisica."
+  },
+  "the-willowman": {
+    "name": "The Willowman",
+    "domain": "Miedo, pesadillas, bosques",
+    "description": "Un ser fantasmal y alargado que acecha bosques brumosos y observa desde el borde de las pesadillas. El Willowman busca el miedo."
+  },
+  "titania": {
+    "name": "Titania",
+    "domain": "Hadas, travesuras, belleza",
+    "description": "La caprichosa Reina de las Hadas que ve toda la existencia como un sueno fantasioso con significado oculto y drama conmovedor. Titania busca travesuras, belleza y arte."
+  }
+}

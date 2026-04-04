@@ -1,0 +1,99 @@
+{
+  "bastard-sword": {
+    "name": "Espada Bastarda"
+  },
+  "club": {
+    "name": "Garrote"
+  },
+  "crossbow": {
+    "name": "Ballesta"
+  },
+  "dagger": {
+    "name": "Daga",
+    "description": "Puede ser lanzada a distancia cercana"
+  },
+  "greataxe": {
+    "name": "Gran Hacha"
+  },
+  "greatsword": {
+    "name": "Mandoble"
+  },
+  "javelin": {
+    "name": "Jabalina",
+    "description": "Puede ser lanzada a distancia lejana"
+  },
+  "longbow": {
+    "name": "Arco Largo"
+  },
+  "longsword": {
+    "name": "Espada Larga"
+  },
+  "mace": {
+    "name": "Maza"
+  },
+  "shortbow": {
+    "name": "Arco Corto"
+  },
+  "shortsword": {
+    "name": "Espada Corta"
+  },
+  "spear": {
+    "name": "Lanza",
+    "description": "Puede ser lanzada a distancia cercana"
+  },
+  "staff": {
+    "name": "Baston"
+  },
+  "warhammer": {
+    "name": "Martillo de Guerra"
+  },
+  "handaxe": {
+    "name": "Hacha de Mano",
+    "description": "Puede ser lanzada a distancia cercana"
+  },
+  "scimitar": {
+    "name": "Cimitarra"
+  },
+  "pike": {
+    "name": "Pica",
+    "description": "Arma de largo alcance"
+  },
+  "whip": {
+    "name": "Latigo",
+    "description": "Puede alcanzar objetivos cercanos"
+  },
+  "blowgun": {
+    "name": "Cerbatana",
+    "description": "Arma a distancia silenciosa"
+  },
+  "bolas": {
+    "name": "Boleadoras",
+    "description": "Puede enredar objetivos"
+  },
+  "boomerang": {
+    "name": "Bumeran",
+    "description": "Regresa si falla"
+  },
+  "razor-chain": {
+    "name": "Cadena con Cuchillas",
+    "description": "Puede alcanzar objetivos cercanos"
+  },
+  "shuriken": {
+    "name": "Shuriken",
+    "description": "Estrella arrojadiza"
+  },
+  "spear-thrower": {
+    "name": "Lanzadardos",
+    "description": "Lanza jabalinas a distancia lejana"
+  },
+  "stave": {
+    "name": "Vara Runica",
+    "description": "Vara tallada con runas usada por videntes"
+  },
+  "morningstar": {
+    "name": "Lucero del Alba"
+  },
+  "sling": {
+    "name": "Honda"
+  }
+}

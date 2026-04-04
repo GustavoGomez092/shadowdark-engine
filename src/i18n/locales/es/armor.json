@@ -1,0 +1,20 @@
+{
+  "leather": {
+    "name": "Armadura de Cuero"
+  },
+  "chainmail": {
+    "name": "Cota de Malla"
+  },
+  "plate-mail": {
+    "name": "Armadura de Placas"
+  },
+  "shield": {
+    "name": "Escudo"
+  },
+  "mithral-chainmail": {
+    "name": "Cota de Malla de Mithral"
+  },
+  "mithral-plate": {
+    "name": "Armadura de Placas de Mithral"
+  }
+}
