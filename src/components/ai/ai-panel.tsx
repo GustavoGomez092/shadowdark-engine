@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useAI } from '@/hooks/use-ai.ts'
 import { useAISettings } from '@/hooks/use-ai-settings.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
-import { PURPOSE_LABELS, PURPOSE_ICONS } from '@/lib/ai/prompts.ts'
+import { PURPOSE_LABELS, PURPOSE_LABEL_KEYS, PURPOSE_ICONS } from '@/lib/ai/prompts.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
 import type { AIPurpose } from '@/schemas/ai.ts'
 
@@ -216,7 +216,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                   {t('ai.quickActions')}
                 </p>
                 <div className="grid grid-cols-2 gap-1.5">
-                  {(Object.keys(PURPOSE_LABELS) as AIPurpose[]).filter(
+                  {(Object.keys(PURPOSE_LABEL_KEYS) as AIPurpose[]).filter(
                     (p) => p !== 'treasure_description' && p !== 'general'
                   ).map(
                     (purpose) => (
@@ -228,7 +228,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                       >
                         <span>{PURPOSE_ICONS[purpose]}</span>
                         <span className="truncate">
-                          {PURPOSE_LABELS[purpose]}
+                          {t(PURPOSE_LABEL_KEYS[purpose])}
                         </span>
                       </button>
                     ),
@@ -256,7 +256,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
                   {PURPOSE_ICONS[conversation.purpose]}
                 </span>
                 <span className="text-xs font-medium">
-                  {PURPOSE_LABELS[conversation.purpose]}
+                  {t(PURPOSE_LABEL_KEYS[conversation.purpose])}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   &middot; {ti('ai.messagesCount', { count: conversation.messages.length })}

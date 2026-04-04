@@ -4,6 +4,20 @@ import { getMonster } from '@/data/index.ts'
 
 // ========== Purpose Labels & Icons ==========
 
+// Translation keys for purpose labels — render with t() at call site
+export const PURPOSE_LABEL_KEYS: Record<AIPurpose, string> = {
+  encounter_description: 'ai.purpose.encounter',
+  npc_dialogue: 'ai.purpose.npc',
+  adventure_hook: 'ai.purpose.adventureHook',
+  ruling_help: 'ai.purpose.rulingHelp',
+  treasure_description: 'ai.purpose.treasure',
+  store_generation: 'ai.purpose.store',
+  room_description: 'ai.purpose.room',
+  trap_description: 'ai.purpose.trap',
+  general: 'ai.purpose.general',
+}
+
+// English fallback labels (used in non-UI contexts like conversation titles)
 export const PURPOSE_LABELS: Record<AIPurpose, string> = {
   encounter_description: 'Describe Encounter',
   npc_dialogue: 'NPC Dialogue',
