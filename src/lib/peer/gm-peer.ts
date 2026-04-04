@@ -55,19 +55,31 @@ export class GMPeerHost {
       })
     }
 
-    // Try existing room code first, fall back to new one if taken
+    // Try existing room code first, with retries for PeerJS cooldown after refresh
     if (existingRoomCode) {
-      try {
-        return await tryConnect(existingRoomCode)
-      } catch (err: unknown) {
-        const peerErr = err as { type?: string }
-        if (peerErr.type === 'unavailable-id') {
-          console.warn('[GM Peer] Old room code taken, generating new one')
-          this.peer?.destroy()
-          const newCode = `sd-${generateRoomCode()}`
-          return await tryConnect(newCode)
+      const MAX_RETRIES = 3
+      const RETRY_DELAY = 2000 // PeerJS cooldown is typically 1-3 seconds
+
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          return await tryConnect(existingRoomCode)
+        } catch (err: unknown) {
+          const peerErr = err as { type?: string }
+          if (peerErr.type === 'unavailable-id') {
+            this.peer?.destroy()
+            if (attempt < MAX_RETRIES) {
+              console.warn(`[GM Peer] Room code unavailable (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${RETRY_DELAY}ms...`)
+              await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+            } else {
+              // All retries exhausted — truly taken by another peer, generate new code
+              console.warn('[GM Peer] Room code permanently unavailable, generating new one')
+              const newCode = `sd-${generateRoomCode()}`
+              return await tryConnect(newCode)
+            }
+          } else {
+            throw err
+          }
         }
-        throw err
       }
     }
 
