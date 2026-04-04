@@ -6,6 +6,7 @@ interface Props {
   characterName?: string
   onRoll?: (result: DiceRollResult) => void
   compact?: boolean
+  lockedDie?: DieType  // Lock to a specific die, hide selector and controls
 }
 
 const DIE_OPTIONS: { type: DieType; max: number; label: string }[] = [
@@ -21,8 +22,8 @@ const DIE_OPTIONS: { type: DieType; max: number; label: string }[] = [
 type RollMode = 'advantage' | 'normal' | 'disadvantage'
 type Phase = 'idle' | 'rolling' | 'result'
 
-export function DiceRoller({ characterName, onRoll, compact = false }: Props) {
-  const [selectedDie, setSelectedDie] = useState<DieType>('d20')
+export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }: Props) {
+  const [selectedDie, setSelectedDie] = useState<DieType>(lockedDie ?? 'd20')
   const [modifier, setModifier] = useState(0)
   const [rollMode, setRollMode] = useState<RollMode>('normal')
   const [phase, setPhase] = useState<Phase>('idle')
@@ -190,28 +191,30 @@ export function DiceRoller({ characterName, onRoll, compact = false }: Props) {
         )}
       </div>
 
-      {/* Die Type Selector */}
-      <div className="px-3 pb-3">
-        <div className="flex justify-center gap-1">
-          {DIE_OPTIONS.map(d => (
-            <button
-              key={d.type}
-              onClick={() => handleSelectDie(d.type)}
-              className={`flex flex-col items-center gap-0.5 rounded-lg p-2 transition ${
-                selectedDie === d.type
-                  ? 'bg-primary/15 border border-primary/40 text-primary'
-                  : 'border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent'
-              }`}
-            >
-              <DieIcon type={d.type} size={compact ? 16 : 20} />
-              <span className="text-[9px] font-semibold">{d.label}</span>
-            </button>
-          ))}
+      {/* Die Type Selector (hidden when locked) */}
+      {!lockedDie && (
+        <div className="px-3 pb-3">
+          <div className="flex justify-center gap-1">
+            {DIE_OPTIONS.map(d => (
+              <button
+                key={d.type}
+                onClick={() => handleSelectDie(d.type)}
+                className={`flex flex-col items-center gap-0.5 rounded-lg p-2 transition ${
+                  selectedDie === d.type
+                    ? 'bg-primary/15 border border-primary/40 text-primary'
+                    : 'border border-transparent text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
+              >
+                <DieIcon type={d.type} size={compact ? 16 : 20} />
+                <span className="text-[9px] font-semibold">{d.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Roll Mode + Modifier */}
-      {!compact && (
+      {/* Roll Mode + Modifier (hidden when locked) */}
+      {!compact && !lockedDie && (
         <div className="px-3 pb-3 flex items-center justify-between gap-3">
           {/* Roll Mode */}
           <div className="flex gap-0.5 rounded-lg border border-border p-0.5">

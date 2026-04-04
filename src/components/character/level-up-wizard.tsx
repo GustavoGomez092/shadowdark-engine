@@ -8,8 +8,10 @@ import type {
   ClassDefinition,
 } from '@/schemas/character.ts'
 import type { SpellDefinition } from '@/schemas/spells.ts'
+import type { DieType } from '@/schemas/dice.ts'
 import { getAbilityModifier } from '@/schemas/reference.ts'
 import { rollDice } from '@/lib/dice/roller.ts'
+import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import { gainsTalentAtLevel, computeEffectiveStats } from '@/lib/rules/character.ts'
 import { getClass, getTitle, getSpellsByClassAndTier, getSpell } from '@/data/index.ts'
 import { generateId } from '@/lib/utils/id.ts'
@@ -333,12 +335,24 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
         </div>
 
         {!hpRollState ? (
-          <button
-            onClick={handleRollHp}
-            className="w-full rounded-lg border-2 border-dashed border-primary/50 bg-primary/5 py-6 text-lg font-bold text-primary hover:bg-primary/10 transition"
-          >
-            Roll HP
-          </button>
+          <DiceRoller
+            lockedDie={hitDie as DieType}
+            compact
+            characterName={character.name}
+            onRoll={(result) => {
+              const roll1 = result.total
+              if (isDwarf) {
+                const result2 = rollDice(`1${hitDie}`)
+                const roll2 = result2.total
+                const chosenRoll = Math.max(roll1, roll2)
+                const hpGain = Math.max(1, chosenRoll + conMod)
+                setHpRollState({ roll1, roll2, chosenRoll, hpGain })
+              } else {
+                const hpGain = Math.max(1, roll1 + conMod)
+                setHpRollState({ roll1, chosenRoll: roll1, hpGain })
+              }
+            }}
+          />
         ) : (
           <div className="rounded-lg bg-secondary p-4 space-y-3">
             {isDwarf && hpRollState.roll2 !== undefined ? (
@@ -423,12 +437,12 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
               </table>
             </div>
 
-            <button
-              onClick={handleRollTalent}
-              className="w-full rounded-lg border-2 border-dashed border-primary/50 bg-primary/5 py-6 text-lg font-bold text-primary hover:bg-primary/10 transition"
-            >
-              Roll Talent
-            </button>
+            <DiceRoller
+              lockedDie="d6"
+              compact
+              characterName={character.name}
+              onRoll={() => handleRollTalent()}
+            />
           </>
         ) : (
           <div className="space-y-3">
