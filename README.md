@@ -4,6 +4,8 @@ A real-time, web-based game management engine for [ShadowDark RPG](https://www.t
 
 The GM creates a room, players join with a code, and the entire session state is managed through the GM's browser with real-time sync to all connected players.
 
+![Feature Tour](docs/feature-tour.gif)
+
 ## Features
 
 ### Core Architecture
@@ -207,6 +209,8 @@ src/
 ```
 
 ## Data Packs
+
+![Data Pack Upload Demo](docs/data-pack-demo.gif)
 
 ### Creating a Data Pack
 
