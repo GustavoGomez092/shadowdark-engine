@@ -31,6 +31,7 @@ export type PlayerToGMMessage =
   | PlayerLuckTokenUse
   | PlayerShopAction
   | PlayerCharacterUpdate
+  | PlayerLevelUp
   | PlayerCreateCharacter
   | PlayerStabilizeAction
   | PlayerDeathTimerRoll
@@ -132,6 +133,14 @@ export interface PlayerCharacterUpdate {
   type: 'player_character_update';
   characterId: string;
   updates: { notes?: string };
+}
+
+export interface PlayerLevelUp {
+  type: 'player_level_up';
+  characterId: string;
+  hpRoll: number;
+  talent?: import('@/schemas/character.ts').AppliedTalent;
+  newSpellIds?: string[];
 }
 
 export interface PlayerCreateCharacter {

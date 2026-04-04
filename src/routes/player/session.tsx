@@ -282,6 +282,9 @@ function PlayerSessionPage() {
                 onNotesChange={(notes) => {
                   send({ type: 'player_character_update', characterId: state.myCharacter!.id, updates: { notes } })
                 }}
+                onLevelUp={(updates) => {
+                  send({ type: 'player_level_up', characterId: state.myCharacter!.id, hpRoll: updates.hpRoll, talent: updates.talent, newSpellIds: updates.newSpellIds })
+                }}
               />
               {/* Rest Button */}
               <RestButton character={state.myCharacter} onRest={() => {

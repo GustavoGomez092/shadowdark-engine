@@ -497,6 +497,26 @@ function GMSessionPage() {
       addChatMessage(createActionLog(`${player.displayName} created ${character.name} (${character.ancestry} ${character.class})`))
       setTimeout(() => broadcastStateSyncRef.current(), 50)
     }
+
+    if (message.type === 'player_level_up') {
+      const msg = message as import('@/schemas/messages.ts').PlayerLevelUp
+      const char = useSessionStore.getState().session?.characters[msg.characterId]
+      if (!char) return
+
+      const updated = levelUpCharacter(char, msg.hpRoll, msg.talent)
+      if (msg.newSpellIds) {
+        for (const spellId of msg.newSpellIds) {
+          updated.spells.knownSpells.push({ spellId, isAvailable: true, source: 'class', hasAdvantage: false })
+        }
+      }
+      updateCharacter(msg.characterId, (c) => { Object.assign(c, updated) })
+      addChatMessage({
+        id: generateId(), senderId: 'system', senderName: 'System',
+        type: 'system', content: `${char.name} leveled up to Level ${updated.level}!`,
+        timestamp: Date.now(), isPublic: true,
+      })
+      setTimeout(() => broadcastStateSyncRef.current(), 50)
+    }
   }, [addChatMessage, updateCharacter, updatePlayer])
 
   const handlePlayerDisconnect = useCallback((peerId: string) => {
