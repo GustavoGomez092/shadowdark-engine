@@ -10,6 +10,7 @@ type Listener = {
   onDisconnected?: () => void
   onError?: (error: string) => void
   onJoinResponse?: (success: boolean, error?: string, state?: PlayerVisibleState, characterId?: string) => void
+  onRoomCodeChanged?: (newRoomCode: string) => void
 }
 
 /**
@@ -66,6 +67,9 @@ class PlayerPeerManager {
       onError: (error) => {
         this._error = error
         this.listeners.onError?.(error)
+      },
+      onRoomCodeChanged: (newRoomCode) => {
+        this.listeners.onRoomCodeChanged?.(newRoomCode)
       },
     }
 

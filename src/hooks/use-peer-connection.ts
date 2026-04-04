@@ -82,7 +82,7 @@ interface UsePlayerPeerOptions {
   onMessage: (message: GMToPlayerMessage) => void
 }
 
-export function usePlayerPeer(options: UsePlayerPeerOptions) {
+export function usePlayerPeer(options: UsePlayerPeerOptions & { onRoomCodeChanged?: (newRoomCode: string) => void }) {
   const [isConnected, setIsConnected] = useState(playerPeer.isConnected)
   const [isJoined, setIsJoined] = useState(playerPeer.isJoined)
   const [error, setError] = useState<string | null>(playerPeer.error)
@@ -109,6 +109,7 @@ export function usePlayerPeer(options: UsePlayerPeerOptions) {
       onStateSync: (state) => optionsRef.current.onStateSync(state),
       onMessage: (msg) => optionsRef.current.onMessage(msg),
       onError: (err) => setError(err),
+      onRoomCodeChanged: (newRoomCode) => optionsRef.current.onRoomCodeChanged?.(newRoomCode),
     })
   }, [])
 

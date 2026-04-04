@@ -83,6 +83,12 @@ function PlayerSessionPage() {
   const { isConnected, isJoined, error, connect, send, disconnect } = usePlayerPeer({
     onStateSync: handleStateSync,
     onMessage: handleMessage,
+    onRoomCodeChanged: (newRoomCode) => {
+      // Update persisted connection info with new room code so reconnects use the right code
+      if (connectionInfo) {
+        usePlayerStore.getState().saveConnectionInfo({ ...connectionInfo, roomCode: newRoomCode })
+      }
+    },
   })
 
   // Auto-reconnect on page load if we have saved connection info

@@ -11,6 +11,7 @@ export interface PlayerPeerCallbacks {
   onStateSync: (state: PlayerVisibleState) => void
   onMessage: (message: GMToPlayerMessage) => void
   onError: (error: string) => void
+  onRoomCodeChanged?: (newRoomCode: string) => void
 }
 
 export class PlayerPeerClient {
@@ -23,6 +24,7 @@ export class PlayerPeerClient {
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private roomCode: string | null = null
+  private _isRotating = false  // Guard against race condition during room code rotation
   private displayName: string | null = null
   private password: string | undefined
   private existingCharacterId: string | undefined
@@ -96,9 +98,14 @@ export class PlayerPeerClient {
     })
 
     this.connection.on('close', () => {
-      console.log('[Player Peer] Connection closed — will attempt reconnect')
+      console.log('[Player Peer] Connection closed')
       this._isConnected = false
       this.callbacks.onDisconnected()
+      // If rotating, the room_code_changed handler is managing reconnection — don't race
+      if (this._isRotating) {
+        console.log('[Player Peer] Room rotation in progress, skipping auto-reconnect')
+        return
+      }
       // GM likely refreshed — try reconnecting the data connection
       this.attemptDataReconnect()
     })
@@ -127,14 +134,18 @@ export class PlayerPeerClient {
         break
       case 'room_code_changed':
         console.log(`[Player Peer] Room code rotating to: ${message.newRoomCode}`)
+        this._isRotating = true  // Prevent attemptDataReconnect from racing
         this.roomCode = message.newRoomCode
+        this.callbacks.onRoomCodeChanged?.(message.newRoomCode)
         // Close current connection and reconnect to new code
         this.connection?.close()
         this._isConnected = false
-        // Brief delay then reconnect to the new room code
+        // Wait for GM to finish creating new peer, then reconnect
         setTimeout(() => {
+          this._isRotating = false
+          this.dataReconnectAttempts = 0
           this.connectToRoom(message.newRoomCode)
-        }, 1000)
+        }, 2000)
         break
       default:
         this.callbacks.onMessage(message)

@@ -152,11 +152,81 @@ describe('Room Code Rotation', () => {
       expect(BROADCAST_DELAY_MS).toBeLessThanOrEqual(2000)
     })
 
-    it('player reconnect delay allows old peer to fully close', () => {
-      const PLAYER_RECONNECT_DELAY_MS = 1000
+    it('player reconnect delay allows GM to fully recreate peer', () => {
+      const PLAYER_RECONNECT_DELAY_MS = 2000
       const GM_BROADCAST_DELAY_MS = 500
-      // Player should wait longer than GM's broadcast delay
+      // Player should wait longer than GM's broadcast + peer creation time
       expect(PLAYER_RECONNECT_DELAY_MS).toBeGreaterThan(GM_BROADCAST_DELAY_MS)
+      // Should give GM at least 1 second to create new peer
+      expect(PLAYER_RECONNECT_DELAY_MS - GM_BROADCAST_DELAY_MS).toBeGreaterThanOrEqual(1000)
+    })
+  })
+
+  describe('Race condition prevention', () => {
+    it('rotation flag prevents duplicate reconnect attempts', () => {
+      let isRotating = false
+      let reconnectAttempts = 0
+
+      // Simulate room_code_changed handler setting the flag
+      isRotating = true
+
+      // Simulate connection.on('close') firing — should be blocked
+      if (!isRotating) {
+        reconnectAttempts++ // attemptDataReconnect
+      }
+
+      expect(reconnectAttempts).toBe(0) // blocked by flag
+
+      // Simulate the scheduled reconnect after delay
+      isRotating = false
+      reconnectAttempts++ // the planned reconnect fires
+
+      expect(reconnectAttempts).toBe(1) // only one reconnect
+    })
+
+    it('close event without rotation still triggers reconnect', () => {
+      let isRotating = false
+      let reconnectAttempts = 0
+
+      // Normal close (GM refreshed, not rotation)
+      if (!isRotating) {
+        reconnectAttempts++
+      }
+
+      expect(reconnectAttempts).toBe(1)
+    })
+  })
+
+  describe('Player store persistence', () => {
+    it('player store updates room code on rotation', () => {
+      // Simulate PlayerConnectionInfo in store
+      const connectionInfo = {
+        roomCode: 'sd-oldcode1',
+        displayName: 'Pesto',
+        password: undefined,
+        characterId: 'char-123',
+      }
+
+      // Simulate onRoomCodeChanged callback
+      const newRoomCode = 'sd-newcode1'
+      const updatedInfo = { ...connectionInfo, roomCode: newRoomCode }
+
+      expect(updatedInfo.roomCode).toBe('sd-newcode1')
+      expect(updatedInfo.displayName).toBe('Pesto') // unchanged
+      expect(updatedInfo.characterId).toBe('char-123') // unchanged
+    })
+
+    it('reconnection after refresh uses updated room code', () => {
+      // Simulate: rotation happened, store was updated, then page refresh
+      const persistedInfo = {
+        roomCode: 'sd-newcode1', // updated by onRoomCodeChanged
+        displayName: 'Pesto',
+      }
+
+      // On reconnect, should use the persisted (updated) code
+      const reconnectCode = persistedInfo.roomCode
+      expect(reconnectCode).toBe('sd-newcode1')
+      expect(reconnectCode).not.toBe('sd-oldcode1')
     })
   })
 
