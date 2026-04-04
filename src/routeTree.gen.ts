@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PlayerRouteRouteImport } from './routes/player/route'
 import { Route as GmRouteRouteImport } from './routes/gm/route'
-import { Route as CompendiumRouteRouteImport } from './routes/compendium/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlayerSessionRouteImport } from './routes/player/session'
 import { Route as PlayerJoinRouteImport } from './routes/player/join'
@@ -21,11 +20,6 @@ import { Route as GmSettingsRouteImport } from './routes/gm/settings'
 import { Route as GmMonstersRouteImport } from './routes/gm/monsters'
 import { Route as GmCreateRouteImport } from './routes/gm/create'
 import { Route as GmCharactersRouteImport } from './routes/gm/characters'
-import { Route as CompendiumSpellsRouteImport } from './routes/compendium/spells'
-import { Route as CompendiumMonstersRouteImport } from './routes/compendium/monsters'
-import { Route as CompendiumItemsRouteImport } from './routes/compendium/items'
-import { Route as CompendiumClassesRouteImport } from './routes/compendium/classes'
-import { Route as CompendiumAncestriesRouteImport } from './routes/compendium/ancestries'
 import { Route as GmSessionSessionIdRouteImport } from './routes/gm/session.$sessionId'
 
 const PlayerRouteRoute = PlayerRouteRouteImport.update({
@@ -36,11 +30,6 @@ const PlayerRouteRoute = PlayerRouteRouteImport.update({
 const GmRouteRoute = GmRouteRouteImport.update({
   id: '/gm',
   path: '/gm',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompendiumRouteRoute = CompendiumRouteRouteImport.update({
-  id: '/compendium',
-  path: '/compendium',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -88,31 +77,6 @@ const GmCharactersRoute = GmCharactersRouteImport.update({
   path: '/characters',
   getParentRoute: () => GmRouteRoute,
 } as any)
-const CompendiumSpellsRoute = CompendiumSpellsRouteImport.update({
-  id: '/spells',
-  path: '/spells',
-  getParentRoute: () => CompendiumRouteRoute,
-} as any)
-const CompendiumMonstersRoute = CompendiumMonstersRouteImport.update({
-  id: '/monsters',
-  path: '/monsters',
-  getParentRoute: () => CompendiumRouteRoute,
-} as any)
-const CompendiumItemsRoute = CompendiumItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => CompendiumRouteRoute,
-} as any)
-const CompendiumClassesRoute = CompendiumClassesRouteImport.update({
-  id: '/classes',
-  path: '/classes',
-  getParentRoute: () => CompendiumRouteRoute,
-} as any)
-const CompendiumAncestriesRoute = CompendiumAncestriesRouteImport.update({
-  id: '/ancestries',
-  path: '/ancestries',
-  getParentRoute: () => CompendiumRouteRoute,
-} as any)
 const GmSessionSessionIdRoute = GmSessionSessionIdRouteImport.update({
   id: '/session/$sessionId',
   path: '/session/$sessionId',
@@ -121,14 +85,8 @@ const GmSessionSessionIdRoute = GmSessionSessionIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/compendium': typeof CompendiumRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
-  '/compendium/ancestries': typeof CompendiumAncestriesRoute
-  '/compendium/classes': typeof CompendiumClassesRoute
-  '/compendium/items': typeof CompendiumItemsRoute
-  '/compendium/monsters': typeof CompendiumMonstersRoute
-  '/compendium/spells': typeof CompendiumSpellsRoute
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
   '/gm/monsters': typeof GmMonstersRoute
@@ -141,14 +99,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/compendium': typeof CompendiumRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
-  '/compendium/ancestries': typeof CompendiumAncestriesRoute
-  '/compendium/classes': typeof CompendiumClassesRoute
-  '/compendium/items': typeof CompendiumItemsRoute
-  '/compendium/monsters': typeof CompendiumMonstersRoute
-  '/compendium/spells': typeof CompendiumSpellsRoute
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
   '/gm/monsters': typeof GmMonstersRoute
@@ -162,14 +114,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/compendium': typeof CompendiumRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
-  '/compendium/ancestries': typeof CompendiumAncestriesRoute
-  '/compendium/classes': typeof CompendiumClassesRoute
-  '/compendium/items': typeof CompendiumItemsRoute
-  '/compendium/monsters': typeof CompendiumMonstersRoute
-  '/compendium/spells': typeof CompendiumSpellsRoute
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
   '/gm/monsters': typeof GmMonstersRoute
@@ -184,14 +130,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/compendium'
     | '/gm'
     | '/player'
-    | '/compendium/ancestries'
-    | '/compendium/classes'
-    | '/compendium/items'
-    | '/compendium/monsters'
-    | '/compendium/spells'
     | '/gm/characters'
     | '/gm/create'
     | '/gm/monsters'
@@ -204,14 +144,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/compendium'
     | '/gm'
     | '/player'
-    | '/compendium/ancestries'
-    | '/compendium/classes'
-    | '/compendium/items'
-    | '/compendium/monsters'
-    | '/compendium/spells'
     | '/gm/characters'
     | '/gm/create'
     | '/gm/monsters'
@@ -224,14 +158,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/compendium'
     | '/gm'
     | '/player'
-    | '/compendium/ancestries'
-    | '/compendium/classes'
-    | '/compendium/items'
-    | '/compendium/monsters'
-    | '/compendium/spells'
     | '/gm/characters'
     | '/gm/create'
     | '/gm/monsters'
@@ -245,7 +173,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CompendiumRouteRoute: typeof CompendiumRouteRouteWithChildren
   GmRouteRoute: typeof GmRouteRouteWithChildren
   PlayerRouteRoute: typeof PlayerRouteRouteWithChildren
 }
@@ -264,13 +191,6 @@ declare module '@tanstack/react-router' {
       path: '/gm'
       fullPath: '/gm'
       preLoaderRoute: typeof GmRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/compendium': {
-      id: '/compendium'
-      path: '/compendium'
-      fullPath: '/compendium'
-      preLoaderRoute: typeof CompendiumRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -336,41 +256,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GmCharactersRouteImport
       parentRoute: typeof GmRouteRoute
     }
-    '/compendium/spells': {
-      id: '/compendium/spells'
-      path: '/spells'
-      fullPath: '/compendium/spells'
-      preLoaderRoute: typeof CompendiumSpellsRouteImport
-      parentRoute: typeof CompendiumRouteRoute
-    }
-    '/compendium/monsters': {
-      id: '/compendium/monsters'
-      path: '/monsters'
-      fullPath: '/compendium/monsters'
-      preLoaderRoute: typeof CompendiumMonstersRouteImport
-      parentRoute: typeof CompendiumRouteRoute
-    }
-    '/compendium/items': {
-      id: '/compendium/items'
-      path: '/items'
-      fullPath: '/compendium/items'
-      preLoaderRoute: typeof CompendiumItemsRouteImport
-      parentRoute: typeof CompendiumRouteRoute
-    }
-    '/compendium/classes': {
-      id: '/compendium/classes'
-      path: '/classes'
-      fullPath: '/compendium/classes'
-      preLoaderRoute: typeof CompendiumClassesRouteImport
-      parentRoute: typeof CompendiumRouteRoute
-    }
-    '/compendium/ancestries': {
-      id: '/compendium/ancestries'
-      path: '/ancestries'
-      fullPath: '/compendium/ancestries'
-      preLoaderRoute: typeof CompendiumAncestriesRouteImport
-      parentRoute: typeof CompendiumRouteRoute
-    }
     '/gm/session/$sessionId': {
       id: '/gm/session/$sessionId'
       path: '/session/$sessionId'
@@ -380,26 +265,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface CompendiumRouteRouteChildren {
-  CompendiumAncestriesRoute: typeof CompendiumAncestriesRoute
-  CompendiumClassesRoute: typeof CompendiumClassesRoute
-  CompendiumItemsRoute: typeof CompendiumItemsRoute
-  CompendiumMonstersRoute: typeof CompendiumMonstersRoute
-  CompendiumSpellsRoute: typeof CompendiumSpellsRoute
-}
-
-const CompendiumRouteRouteChildren: CompendiumRouteRouteChildren = {
-  CompendiumAncestriesRoute: CompendiumAncestriesRoute,
-  CompendiumClassesRoute: CompendiumClassesRoute,
-  CompendiumItemsRoute: CompendiumItemsRoute,
-  CompendiumMonstersRoute: CompendiumMonstersRoute,
-  CompendiumSpellsRoute: CompendiumSpellsRoute,
-}
-
-const CompendiumRouteRouteWithChildren = CompendiumRouteRoute._addFileChildren(
-  CompendiumRouteRouteChildren,
-)
 
 interface GmRouteRouteChildren {
   GmCharactersRoute: typeof GmCharactersRoute
@@ -440,7 +305,6 @@ const PlayerRouteRouteWithChildren = PlayerRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CompendiumRouteRoute: CompendiumRouteRouteWithChildren,
   GmRouteRoute: GmRouteRouteWithChildren,
   PlayerRouteRoute: PlayerRouteRouteWithChildren,
 }
