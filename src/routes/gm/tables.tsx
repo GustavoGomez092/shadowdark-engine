@@ -79,195 +79,195 @@ function ReferencePage() {
 
 // ========== RULES ==========
 function RulesCheatSheet() {
+  const { t } = useLocale()
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Difficulty Classes</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.difficultyClasses')}</h3>
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <span>Easy</span>
+            <span>{t('reference.rules.easy')}</span>
             <span className="font-mono font-bold">DC 9</span>
           </div>
           <div className="flex justify-between">
-            <span>Normal</span>
+            <span>{t('reference.rules.normal')}</span>
             <span className="font-mono font-bold">DC 12</span>
           </div>
           <div className="flex justify-between">
-            <span>Hard</span>
+            <span>{t('reference.rules.hard')}</span>
             <span className="font-mono font-bold">DC 15</span>
           </div>
           <div className="flex justify-between">
-            <span>Extreme</span>
+            <span>{t('reference.rules.extreme')}</span>
             <span className="font-mono font-bold">DC 18</span>
           </div>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Combat</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.combat')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">Initiative:</span> d20
-            + DEX mod. Highest first, then clockwise.
+            <span className="text-foreground font-medium">{t('reference.rules.initiativeLabel')}</span>{" "}
+            {t('reference.rules.initiativeDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Attack:</span> d20 +
-            STR (melee) or DEX (ranged) vs AC.
+            <span className="text-foreground font-medium">{t('reference.rules.attackLabel')}</span>{" "}
+            {t('reference.rules.attackDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Nat 20:</span>{" "}
-            Critical hit — double damage dice (not modifier).
+            <span className="text-foreground font-medium">{t('reference.rules.nat20Label')}</span>{" "}
+            {t('reference.rules.nat20Desc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Nat 1:</span> Auto
-            miss.
+            <span className="text-foreground font-medium">{t('reference.rules.nat1Label')}</span>{" "}
+            {t('reference.rules.nat1Desc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Morale:</span> Half
-            numbers/HP → DC 15 WIS or flee.
+            <span className="text-foreground font-medium">{t('reference.rules.moraleLabel')}</span>{" "}
+            {t('reference.rules.moraleDesc')}
           </p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Death & Dying</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.deathDying')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">0 HP:</span> Fall
-            unconscious and dying.
+            <span className="text-foreground font-medium">{t('reference.rules.zeroHpLabel')}</span>{" "}
+            {t('reference.rules.zeroHpDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Death timer:</span>{" "}
-            1d4 + CON mod rounds (min 1).
+            <span className="text-foreground font-medium">{t('reference.rules.deathTimerLabel')}</span>{" "}
+            {t('reference.rules.deathTimerDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Stabilize:</span> Ally
-            at close range, DC 15 INT check.
+            <span className="text-foreground font-medium">{t('reference.rules.stabilizeLabel')}</span>{" "}
+            {t('reference.rules.stabilizeDesc')}
           </p>
           <p>
             <span className="text-foreground font-medium">
-              Nat 20 while dying:
+              {t('reference.rules.nat20DyingLabel')}
             </span>{" "}
-            Rise with 1 HP.
+            {t('reference.rules.nat20DyingDesc')}
           </p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Light & Darkness</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.lightDarkness')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">Torch:</span> Near
-            distance, 1 hour real time.
+            <span className="text-foreground font-medium">{t('reference.rules.torchLabel')}</span>{" "}
+            {t('reference.rules.torchDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Lantern:</span> Double
-            near, 1 hour (needs oil).
+            <span className="text-foreground font-medium">{t('reference.rules.lanternLabel')}</span>{" "}
+            {t('reference.rules.lanternDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Campfire:</span> 3
-            torches, up to 8 hours, stationary.
+            <span className="text-foreground font-medium">{t('reference.rules.campfireLabel')}</span>{" "}
+            {t('reference.rules.campfireDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Darkness:</span>{" "}
-            Disadvantage on most tasks. Encounter check every round.
+            <span className="text-foreground font-medium">{t('reference.rules.darknessLabel')}</span>{" "}
+            {t('reference.rules.darknessDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Ride along:</span> New
-            light resets timer to full.
+            <span className="text-foreground font-medium">{t('reference.rules.rideAlongLabel')}</span>{" "}
+            {t('reference.rules.rideAlongDesc')}
           </p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Spellcasting</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.spellcasting')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">Cast:</span> d20 + INT
-            (wizard) or WIS (priest) vs DC 10 + tier.
+            <span className="text-foreground font-medium">{t('reference.rules.castLabel')}</span>{" "}
+            {t('reference.rules.castDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Fail:</span> Spell
-            lost until rest.
+            <span className="text-foreground font-medium">{t('reference.rules.failLabel')}</span>{" "}
+            {t('reference.rules.failDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Nat 1 wizard:</span>{" "}
-            Spell lost + roll on mishap table.
+            <span className="text-foreground font-medium">{t('reference.rules.nat1WizardLabel')}</span>{" "}
+            {t('reference.rules.nat1WizardDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Nat 1 priest:</span>{" "}
-            Spell lost + penance required.
+            <span className="text-foreground font-medium">{t('reference.rules.nat1PriestLabel')}</span>{" "}
+            {t('reference.rules.nat1PriestDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Nat 20:</span> Double
-            one numerical effect.
+            <span className="text-foreground font-medium">{t('reference.rules.nat20SpellLabel')}</span>{" "}
+            {t('reference.rules.nat20SpellDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Focus:</span> Check
-            each turn. Fail = ends (not lost).
+            <span className="text-foreground font-medium">{t('reference.rules.focusLabel')}</span>{" "}
+            {t('reference.rules.focusDesc')}
           </p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">XP & Level Up</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.xpLevelUp')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">Level up at:</span>{" "}
-            Level × 10 XP. XP resets to 0.
+            <span className="text-foreground font-medium">{t('reference.rules.levelUpAtLabel')}</span>{" "}
+            {t('reference.rules.levelUpAtDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Poor:</span> 0 XP ·{" "}
-            <span className="text-foreground font-medium">Normal:</span> 1 XP ·{" "}
-            <span className="text-foreground font-medium">Fabulous:</span> 3 XP
-            · <span className="text-foreground font-medium">Legendary:</span> 10
-            XP
+            <span className="text-foreground font-medium">{t('reference.rules.poorLabel')}</span> {t('reference.rules.poorValue')} ·{" "}
+            <span className="text-foreground font-medium">{t('reference.rules.normalLabel')}</span> {t('reference.rules.normalValue')} ·{" "}
+            <span className="text-foreground font-medium">{t('reference.rules.fabulousLabel')}</span> {t('reference.rules.fabulousValue')}
+            {" "}· <span className="text-foreground font-medium">{t('reference.rules.legendaryLabel')}</span> {t('reference.rules.legendaryValue')}
           </p>
           <p>
             <span className="text-foreground font-medium">
-              Each PC gets full XP
+              {t('reference.rules.fullXpLabel')}
             </span>{" "}
-            (not split).
+            {t('reference.rules.fullXpDesc')}
           </p>
           <p>
             <span className="text-foreground font-medium">
-              Clever thinking:
+              {t('reference.rules.cleverThinkingLabel')}
             </span>{" "}
-            GM awards 1 XP.
+            {t('reference.rules.cleverThinkingDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Talents:</span> At
-            levels 1, 3, 5, 7, 9.
+            <span className="text-foreground font-medium">{t('reference.rules.talentsLabel')}</span>{" "}
+            {t('reference.rules.talentsDesc')}
           </p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Resting</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.resting')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">Rest:</span> 8 hours
-            sleep + 1 ration consumed.
+            <span className="text-foreground font-medium">{t('reference.rules.restLabel')}</span>{" "}
+            {t('reference.rules.restDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Restores:</span> All
-            HP, all spells, conditions cleared.
+            <span className="text-foreground font-medium">{t('reference.rules.restoresLabel')}</span>{" "}
+            {t('reference.rules.restoresDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">Interruption:</span>{" "}
-            DC 12 CON or no benefit.
+            <span className="text-foreground font-medium">{t('reference.rules.interruptionLabel')}</span>{" "}
+            {t('reference.rules.interruptionDesc')}
           </p>
           <p>
             <span className="text-foreground font-medium">
-              Encounter checks while resting:
+              {t('reference.rules.encounterChecksLabel')}
             </span>{" "}
-            Unsafe every 3h, Risky every 2h, Deadly every 1h.
+            {t('reference.rules.encounterChecksDesc')}
           </p>
         </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Ability Modifiers</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.abilityModifiers')}</h3>
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
           {[
             [1, "-4"],
@@ -295,6 +295,7 @@ function RulesCheatSheet() {
 
 // ========== SPELLS ==========
 function SpellsRef({ search }: { search: string }) {
+  const { t } = useLocale()
   const [classFilter, setClassFilter] = useState<"all" | "wizard" | "priest">(
     "all",
   )
@@ -305,6 +306,12 @@ function SpellsRef({ search }: { search: string }) {
     return true
   })
 
+  const classFilterLabels: Record<string, string> = {
+    all: t('reference.spells.all'),
+    wizard: t('reference.spells.wizard'),
+    priest: t('reference.spells.priest'),
+  }
+
   return (
     <div>
       <div className="mb-4 flex gap-1 rounded-lg border border-border p-1 w-fit">
@@ -314,7 +321,7 @@ function SpellsRef({ search }: { search: string }) {
             onClick={() => setClassFilter(c)}
             className={`rounded-md px-3 py-1 text-xs font-medium transition ${classFilter === c ? "bg-primary text-primary-foreground" : "hover:bg-accent"}`}
           >
-            {c === "all" ? "All" : c.charAt(0).toUpperCase() + c.slice(1)}
+            {classFilterLabels[c]}
           </button>
         ))}
       </div>
@@ -329,20 +336,20 @@ function SpellsRef({ search }: { search: string }) {
               <div className="flex gap-1">
                 {spell.isFocus && (
                   <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
-                    Focus
+                    {t('reference.spells.focus')}
                   </span>
                 )}
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${spell.class === "wizard" ? "bg-blue-500/20 text-blue-400" : "bg-yellow-500/20 text-yellow-400"}`}
                 >
-                  {spell.class === "wizard" ? "Wiz" : "Pri"} T{spell.tier}
+                  {spell.class === "wizard" ? t('reference.spells.wizAbbr') : t('reference.spells.priAbbr')} {t('reference.spells.tier')}{spell.tier}
                 </span>
               </div>
             </div>
             <div className="flex gap-3 text-[10px] text-muted-foreground mb-1">
-              <span>Range: {spell.range}</span>
+              <span>{t('reference.spells.range')} {spell.range}</span>
               <span>
-                Duration: {spell.duration}
+                {t('reference.spells.duration')} {spell.duration}
                 {spell.durationValue ? ` (${spell.durationValue})` : ""}
               </span>
             </div>
@@ -358,6 +365,7 @@ function SpellsRef({ search }: { search: string }) {
 
 // ========== ITEMS ==========
 function ItemsRef({ search }: { search: string }) {
+  const { t } = useLocale()
   const q = search.toLowerCase()
   const weapons = WEAPONS.filter((w) => !q || w.name.toLowerCase().includes(q))
   const armor = ARMOR.filter((a) => !q || a.name.toLowerCase().includes(q))
@@ -376,7 +384,7 @@ function ItemsRef({ search }: { search: string }) {
       {weapons.length > 0 && (
         <div>
           <h3 className="mb-2 font-bold text-primary">
-            Weapons ({weapons.length})
+            {t('reference.items.weapons')} ({weapons.length})
           </h3>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {weapons.map((w) => (
@@ -405,7 +413,7 @@ function ItemsRef({ search }: { search: string }) {
       {armor.length > 0 && (
         <div>
           <h3 className="mb-2 font-bold text-primary">
-            Armor ({armor.length})
+            {t('reference.items.armor')} ({armor.length})
           </h3>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {armor.map((a) => (
@@ -422,10 +430,10 @@ function ItemsRef({ search }: { search: string }) {
                 <div className="text-muted-foreground mt-0.5">
                   AC {a.type === "shield" ? "+2" : a.acBase}
                   {a.addDex ? " + DEX" : ""} · {a.slots}s
-                  {a.stealthPenalty && " · stealth disadv."}
+                  {a.stealthPenalty && ` · ${t('reference.items.stealthDisadv')}`}
                   {a.swimPenalty !== "none" &&
-                    ` · ${a.swimPenalty === "cannot" ? "no swim" : "swim disadv."}`}
-                  {a.isMithral && " · mithral"}
+                    ` · ${a.swimPenalty === "cannot" ? t('reference.items.noSwim') : t('reference.items.swimDisadv')}`}
+                  {a.isMithral && ` · ${t('reference.items.mithral')}`}
                 </div>
               </div>
             ))}
@@ -435,7 +443,7 @@ function ItemsRef({ search }: { search: string }) {
       {gear.length > 0 && (
         <div>
           <h3 className="mb-2 font-bold text-primary">
-            Gear & Consumables ({gear.length})
+            {t('reference.items.gearConsumables')} ({gear.length})
           </h3>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {gear.map((g) => (
@@ -463,6 +471,7 @@ function ItemsRef({ search }: { search: string }) {
 
 // ========== MONSTERS ==========
 function MonstersRef({ search }: { search: string }) {
+  const { t } = useLocale()
   const filtered = MONSTERS.filter(
     (m) => !search || m.name.toLowerCase().includes(search.toLowerCase()),
   )
@@ -475,22 +484,22 @@ function MonstersRef({ search }: { search: string }) {
           {/* Header */}
           <div className="flex items-baseline justify-between mb-2">
             <h3 className="text-lg font-bold">{m.name}</h3>
-            <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold text-red-400">LV {m.level}</span>
+            <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold text-red-400">{t('reference.monsters.lv')} {m.level}</span>
           </div>
 
           {/* Core stats */}
           <div className="flex gap-2 mb-3">
             <div className="flex-1 rounded-lg bg-secondary/50 p-2 text-center">
-              <div className="text-[9px] text-muted-foreground">AC</div>
+              <div className="text-[9px] text-muted-foreground">{t('reference.monsters.ac')}</div>
               <div className="text-lg font-bold">{m.ac}</div>
             </div>
             <div className="flex-1 rounded-lg bg-secondary/50 p-2 text-center">
-              <div className="text-[9px] text-muted-foreground">HP</div>
+              <div className="text-[9px] text-muted-foreground">{t('reference.monsters.hp')}</div>
               <div className="text-lg font-bold">{m.hp}</div>
             </div>
             <div className="flex-1 rounded-lg bg-secondary/50 p-2 text-center">
-              <div className="text-[9px] text-muted-foreground">Speed</div>
-              <div className="text-sm font-bold capitalize">{m.movement.double ? 'Dbl ' : ''}{m.movement.normal}</div>
+              <div className="text-[9px] text-muted-foreground">{t('reference.monsters.speed')}</div>
+              <div className="text-sm font-bold capitalize">{m.movement.double ? t('reference.monsters.double') + ' ' : ''}{m.movement.normal}</div>
             </div>
           </div>
 
@@ -543,10 +552,11 @@ function MonstersRef({ search }: { search: string }) {
 
 // ========== WORLD ==========
 function WorldRef() {
+  const { t } = useLocale()
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Ancestries</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.world.ancestries')}</h3>
         <div className="space-y-2">
           {ANCESTRIES.map((a) => (
             <div key={a.id} className="rounded-lg bg-secondary/30 p-2.5">
@@ -566,7 +576,7 @@ function WorldRef() {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Classes</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.world.classes')}</h3>
         <div className="space-y-2">
           {CLASSES.map((c) => (
             <div key={c.id} className="rounded-lg bg-secondary/30 p-2.5">
@@ -586,7 +596,7 @@ function WorldRef() {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Deities</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.world.deities')}</h3>
         <div className="space-y-2">
           {DEITIES.map((d) => (
             <div key={d.id} className="rounded-lg bg-secondary/30 p-2.5">
@@ -604,7 +614,7 @@ function WorldRef() {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">Backgrounds</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.world.backgrounds')}</h3>
         <div className="grid gap-1.5">
           {BACKGROUNDS.map((b) => (
             <div key={b.id} className="rounded-lg bg-secondary/30 px-3 py-2 text-xs flex items-baseline gap-1.5">
@@ -620,6 +630,7 @@ function WorldRef() {
 
 // ========== GENERATORS ==========
 function Generators() {
+  const { t, ti } = useLocale()
   const [results, setResults] = useState<
     { id: number; label: string; value: string }[]
   >([])
@@ -634,29 +645,29 @@ function Generators() {
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <button
-            onClick={() => add("Adventure Name", generateAdventureName())}
+            onClick={() => add(t('reference.generators.adventureName'), generateAdventureName())}
             className="rounded-lg border border-border p-3 text-left text-sm hover:bg-accent transition"
           >
-            <div className="text-base mb-1">🗺️</div>Adventure Name
+            <div className="text-base mb-1">🗺️</div>{t('reference.generators.adventureName')}
           </button>
           <button
             onClick={() =>
               add(
-                "Trap",
+                t('reference.generators.trap'),
                 (() => {
-                  const t = getRandomTrap()
-                  return `${t.trap} (${t.trigger}) — ${t.effect}`
+                  const tr = getRandomTrap()
+                  return `${tr.trap} (${tr.trigger}) — ${tr.effect}`
                 })(),
               )
             }
             className="rounded-lg border border-border p-3 text-left text-sm hover:bg-accent transition"
           >
-            <div className="text-base mb-1">⚠️</div>Random Trap
+            <div className="text-base mb-1">⚠️</div>{t('reference.generators.randomTrap')}
           </button>
           <button
             onClick={() =>
               add(
-                "Hazard",
+                t('reference.generators.hazard'),
                 (() => {
                   const h = getRandomHazard()
                   return `${h.movement} / ${h.damage} / ${h.weaken}`
@@ -665,35 +676,35 @@ function Generators() {
             }
             className="rounded-lg border border-border p-3 text-left text-sm hover:bg-accent transition"
           >
-            <div className="text-base mb-1">💀</div>Random Hazard
+            <div className="text-base mb-1">💀</div>{t('reference.generators.randomHazard')}
           </button>
           <button
             onClick={() =>
               add(
-                "D6 Decider",
+                t('reference.generators.d6Decider'),
                 (() => {
                   const r = rollDice("1d6")
                   return r.total >= 4
-                    ? `Favorable (${r.total})`
-                    : `Unfavorable (${r.total})`
+                    ? `${t('reference.generators.favorable')} (${r.total})`
+                    : `${t('reference.generators.unfavorable')} (${r.total})`
                 })(),
               )
             }
             className="rounded-lg border border-border p-3 text-left text-sm hover:bg-accent transition"
           >
-            <div className="text-base mb-1">🎲</div>D6 Decider
+            <div className="text-base mb-1">🎲</div>{t('reference.generators.d6Decider')}
           </button>
         </div>
         <div>
           <p className="mb-2 text-xs font-semibold text-muted-foreground">
-            NPC Names
+            {t('reference.generators.npcNames')}
           </p>
           <div className="flex flex-wrap gap-2">
             {["human", "dwarf", "elf", "halfling", "half-orc", "goblin"].map(
               (a) => (
                 <button
                   key={a}
-                  onClick={() => add(`${a} Name`, getRandomName(a))}
+                  onClick={() => add(ti('reference.generators.name', { ancestry: a }), getRandomName(a))}
                   className="rounded-lg border border-border px-3 py-1.5 text-xs capitalize hover:bg-accent transition"
                 >
                   {a}
@@ -706,20 +717,20 @@ function Generators() {
 
       <div className="rounded-xl border border-border bg-card p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold">Results</h3>
+          <h3 className="text-sm font-semibold">{t('reference.generators.results')}</h3>
           {results.length > 0 && (
             <button
               onClick={() => setResults([])}
               className="text-[10px] text-muted-foreground hover:text-foreground"
             >
-              Clear
+              {t('reference.generators.clear')}
             </button>
           )}
         </div>
         <div className="max-h-96 space-y-1.5 overflow-y-auto">
           {results.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              Click a generator to see results.
+              {t('reference.generators.clickToSeeResults')}
             </p>
           ) : (
             results.map((r) => (
