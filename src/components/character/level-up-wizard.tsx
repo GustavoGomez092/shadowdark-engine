@@ -444,6 +444,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
 
             <DiceRoller
               lockedDie="d6"
+              diceCount={2}
               compact
               characterName={character.name}
               onRoll={() => handleRollTalent()}

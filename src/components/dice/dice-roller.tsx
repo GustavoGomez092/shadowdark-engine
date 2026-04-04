@@ -8,6 +8,7 @@ interface Props {
   onRoll?: (result: DiceRollResult) => void
   compact?: boolean
   lockedDie?: DieType  // Lock to a specific die, hide selector and controls
+  diceCount?: number   // Roll multiple dice at once (default 1). Shows each die with animation.
 }
 
 const DIE_OPTIONS: { type: DieType; max: number; label: string }[] = [
@@ -23,13 +24,15 @@ const DIE_OPTIONS: { type: DieType; max: number; label: string }[] = [
 type RollMode = 'advantage' | 'normal' | 'disadvantage'
 type Phase = 'idle' | 'rolling' | 'result'
 
-export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }: Props) {
+export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, diceCount = 1 }: Props) {
   const { t, ti } = useLocale()
+  const count = Math.max(1, diceCount)
   const [selectedDie, setSelectedDie] = useState<DieType>(lockedDie ?? 'd20')
   const [modifier, setModifier] = useState(0)
   const [rollMode, setRollMode] = useState<RollMode>('normal')
   const [phase, setPhase] = useState<Phase>('idle')
-  const [displayNumber, setDisplayNumber] = useState(20)
+  const [displayNumbers, setDisplayNumbers] = useState<number[]>(() => Array(count).fill(20))
+  const [finalValues, setFinalValues] = useState<number[]>([])
   const [lastRoll, setLastRoll] = useState<DiceRollResult | null>(null)
   const [resultClass, setResultClass] = useState('')
   const cycleRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -41,10 +44,10 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
   useEffect(() => {
     if (phase !== 'idle') return
     cycleRef.current = setInterval(() => {
-      setDisplayNumber(Math.floor(Math.random() * dieMax) + 1)
+      setDisplayNumbers(prev => prev.map(() => Math.floor(Math.random() * dieMax) + 1))
     }, 80)
     return () => { if (cycleRef.current) clearInterval(cycleRef.current) }
-  }, [phase, dieMax])
+  }, [phase, dieMax, count])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -59,6 +62,7 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
     setPhase('idle')
     setResultClass('')
     setLastRoll(null)
+    setFinalValues([])
   }, [])
 
   const handleRoll = useCallback(() => {
@@ -71,6 +75,7 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
 
     setPhase('rolling')
     setResultClass('')
+    setFinalValues([])
 
     // Phase 1: Spin-up — fast cycling (30ms)
     let interval = 30
@@ -78,23 +83,20 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
     const maxSteps = 25
 
     const spinCycle = () => {
-      setDisplayNumber(Math.floor(Math.random() * dieMax) + 1)
+      setDisplayNumbers(prev => prev.map(() => Math.floor(Math.random() * dieMax) + 1))
       step++
 
       if (step < 8) {
-        // Fast phase
         interval = 30
       } else if (step < 16) {
-        // Medium phase — decelerate
         interval = 50 + (step - 8) * 15
       } else if (step < maxSteps) {
-        // Slow phase — heavy deceleration
         interval = 120 + (step - 16) * 30
       } else {
         // Land — do the actual roll
         const expr = modifier !== 0
-          ? `1${selectedDie}${modifier > 0 ? '+' : ''}${modifier}`
-          : `1${selectedDie}`
+          ? `${count}${selectedDie}${modifier > 0 ? '+' : ''}${modifier}`
+          : `${count}${selectedDie}`
 
         const result = rollDice(expr, {
           rolledBy: characterName ?? 'unknown',
@@ -103,11 +105,12 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
           disadvantage: rollMode === 'disadvantage',
         })
 
-        setDisplayNumber(result.total)
+        const values = result.dice.map(d => d.value)
+        setDisplayNumbers(values.length >= count ? values.slice(0, count) : [...values, ...Array(count - values.length).fill(0)])
+        setFinalValues(values)
         setLastRoll(result)
         setPhase('result')
 
-        // Apply result effects
         const isNat20 = result.dice[0]?.isNat20
         const isNat1 = result.dice[0]?.isNat1
 
@@ -121,7 +124,6 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
 
         onRoll?.(result)
 
-        // Return to idle after a moment
         const t = setTimeout(() => {
           setResultClass('')
           setPhase('idle')
@@ -135,10 +137,11 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
     }
 
     spinCycle()
-  }, [phase, selectedDie, modifier, rollMode, dieMax, characterName, onRoll])
+  }, [phase, selectedDie, modifier, rollMode, dieMax, characterName, onRoll, count])
 
   const isNat20 = lastRoll?.dice[0]?.isNat20
   const isNat1 = lastRoll?.dice[0]?.isNat1
+  const isMulti = count > 1
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -155,24 +158,55 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie }
           {phase === 'rolling' ? t('dice.rolling') : phase === 'result' ? t('dice.lastRoll') : t('dice.ready')}
         </p>
 
-        <div className={`relative ${resultClass}`}>
-          <span className={`font-bold tabular-nums transition-colors duration-200 ${
-            compact ? 'text-4xl' : 'text-6xl'
-          } ${
-            phase === 'idle' ? 'text-muted-foreground/40 dice-cycling' :
-            phase === 'rolling' ? 'text-foreground/60' :
-            isNat20 ? 'text-green-400' :
-            isNat1 ? 'text-red-400' :
-            'text-primary'
-          }`}>
-            {displayNumber}
-          </span>
-        </div>
+        {isMulti ? (
+          /* Multi-dice display: show each die side by side */
+          <div className={`relative ${resultClass}`}>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              {displayNumbers.map((num, i) => (
+                <span key={i} className="contents">
+                  {i > 0 && <span className="text-muted-foreground/50 text-lg font-bold">+</span>}
+                  <div className={`rounded-lg border px-3 py-1 min-w-[3rem] text-center transition-colors duration-200 ${
+                    phase === 'result' ? 'border-primary/40 bg-primary/10' : 'border-border/50'
+                  }`}>
+                    <span className={`font-bold tabular-nums text-2xl ${
+                      phase === 'idle' ? 'text-muted-foreground/40 dice-cycling' :
+                      phase === 'rolling' ? 'text-foreground/60' :
+                      'text-primary'
+                    }`}>{num}</span>
+                  </div>
+                </span>
+              ))}
+              {phase === 'result' && (
+                <>
+                  <span className="text-muted-foreground/50 text-lg font-bold">=</span>
+                  <span className={`font-bold tabular-nums text-3xl text-primary`}>
+                    {finalValues.reduce((a, b) => a + b, 0) + modifier}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Single die display */
+          <div className={`relative ${resultClass}`}>
+            <span className={`font-bold tabular-nums transition-colors duration-200 ${
+              compact ? 'text-4xl' : 'text-6xl'
+            } ${
+              phase === 'idle' ? 'text-muted-foreground/40 dice-cycling' :
+              phase === 'rolling' ? 'text-foreground/60' :
+              isNat20 ? 'text-green-400' :
+              isNat1 ? 'text-red-400' :
+              'text-primary'
+            }`}>
+              {displayNumbers[0]}
+            </span>
+          </div>
+        )}
 
         {/* Die type + special labels */}
         <div className="mt-1 flex items-center justify-center gap-2 relative">
           <DieIcon type={selectedDie} size={14} className="text-primary" />
-          <span className="text-xs text-muted-foreground">{selectedDie}</span>
+          <span className="text-xs text-muted-foreground">{isMulti ? `${count}${selectedDie}` : selectedDie}</span>
           {modifier !== 0 && <span className="text-xs text-muted-foreground">{modifier > 0 ? '+' : ''}{modifier}</span>}
           {rollMode !== 'normal' && <span className="text-[10px] uppercase text-amber-400">{rollMode === 'advantage' ? t('dice.advantage') : t('dice.disadvantage')}</span>}
         </div>
