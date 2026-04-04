@@ -156,7 +156,7 @@ In **Settings**, customize torch, lantern, and campfire durations for faster-pac
 - [x] **JSON-based extensible data** -- drop-in content packs for homebrew monsters, spells, items, with pack color tagging, source filters, and content preview
 - [x] **AI Integration** -- LLM-powered GM assistant (Ollama + OpenAI-compatible) with encounter narration, NPC generation, room descriptions, store creation, ruling help, and contextual scene awareness
 - [x] **Session export/import** -- save full sessions as JSON files for backup and sharing, with drag-and-drop import
-- [ ] **Level-up wizard** -- guided level-up flow with HP rolling, talent selection, new spells
+- [x] **Level-up wizard** -- guided level-up flow with HP rolling, talent selection, new spells
 - [ ] **Multi-language support** -- i18n for UI text, character sheets, and compendium with community-contributed translations
 
 ## License

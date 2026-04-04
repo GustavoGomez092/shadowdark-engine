@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import type { Character, AbilityScore } from '@/schemas/character.ts'
 import type { InventoryItem } from '@/schemas/inventory.ts'
 import { getSpell, getClass } from '@/data/index.ts'
-import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
+import { getXpToNextLevel, canLevelUp, levelUpCharacter } from '@/lib/rules/character.ts'
+import { LevelUpWizard } from './level-up-wizard.tsx'
+import { useSessionStore } from '@/stores/session-store.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
 
@@ -34,6 +37,7 @@ export function CharacterSheet({
   onNotesChange,
   onRest,
 }: Props) {
+  const [showLevelUp, setShowLevelUp] = useState(false)
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
   const xpNeeded = getXpToNextLevel(c)
   const xpThreshold = c.level * 10
@@ -75,7 +79,15 @@ export function CharacterSheet({
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
             <span>XP: {c.xp} / {xpThreshold}</span>
             {canLevelUp(c) ? (
-              <span className="font-bold text-primary">Ready to Level Up!</span>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-primary">Ready to Level Up!</span>
+                <button
+                  onClick={() => setShowLevelUp(true)}
+                  className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-black hover:bg-amber-400 transition animate-pulse"
+                >
+                  Level Up!
+                </button>
+              </div>
             ) : (
               <span>{xpNeeded} XP to next level</span>
             )}
@@ -293,6 +305,34 @@ export function CharacterSheet({
         >
           Take a Rest (8 hours + ration)
         </button>
+      )}
+
+      {/* Level Up Wizard */}
+      {showLevelUp && (
+        <LevelUpWizard
+          character={c}
+          onComplete={(updates) => {
+            const updated = levelUpCharacter(c, updates.hpRoll, updates.talent)
+            // If there are new spells, add them to the character's known spells
+            if (updates.newSpellIds && updates.newSpellIds.length > 0) {
+              for (const spellId of updates.newSpellIds) {
+                updated.spells.knownSpells.push({
+                  spellId,
+                  isAvailable: true,
+                  source: 'class',
+                  hasAdvantage: false,
+                })
+              }
+            }
+            // Update character in session store
+            const store = useSessionStore.getState()
+            store.updateCharacter(c.id, (ch) => {
+              Object.assign(ch, updated)
+            })
+            setShowLevelUp(false)
+          }}
+          onCancel={() => setShowLevelUp(false)}
+        />
       )}
     </div>
   )
