@@ -26,7 +26,7 @@ export const Route = createFileRoute('/player/session')({
 })
 
 function PlayerSessionPage() {
-  const { t, ti, locale, setLocale, availableLocales } = useLocale()
+  const { t, ti, tData, locale, setLocale, availableLocales } = useLocale()
   const navigate = useNavigate()
   const hydrate = usePlayerStore(s => s.hydrate)
   const hydrated = usePlayerStore(s => s.hydrated)
@@ -400,7 +400,7 @@ function PlayerSessionPage() {
                     <div key={c.id} className="flex items-center justify-between text-sm">
                       <div>
                         <span className="font-medium">{c.name}</span>
-                        <span className="ml-1 text-xs text-muted-foreground capitalize">{c.class} {c.level}</span>
+                        <span className="ml-1 text-xs text-muted-foreground capitalize">{tData('classes', c.class, 'name', c.class)} {c.level}</span>
                       </div>
                       <span className={`text-xs font-medium ${
                         c.hpStatus === 'healthy' ? 'text-green-400' :

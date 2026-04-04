@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function EncounterView({ monsters, myCharacter, otherCharacters, activeTurnId }: Props) {
-  const { t, ti } = useLocale()
+  const { t, ti, tData } = useLocale()
   if (monsters.length === 0) return null
 
   // Resolve who has active turn
@@ -108,7 +108,7 @@ export function EncounterView({ monsters, myCharacter, otherCharacters, activeTu
               <div key={c.id} className="rounded-lg border border-border/50 p-2">
                 <div className="flex items-baseline justify-between">
                   <span className="text-sm font-medium">{c.name}</span>
-                  <span className="text-[10px] text-muted-foreground capitalize">Lv{c.level} {c.class}</span>
+                  <span className="text-[10px] text-muted-foreground capitalize">Lv{c.level} {tData('classes', c.class, 'name', c.class)}</span>
                 </div>
                 <span className={`text-xs font-medium capitalize ${
                   c.hpStatus === 'healthy' ? 'text-green-400' :

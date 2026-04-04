@@ -35,7 +35,22 @@ export function EncounterPanel({
   onUpdateCharacterHp,
   onResolveEncounter,
 }: Props) {
-  const { t, ti } = useLocale()
+  const { t, ti, tData, tDataNested } = useLocale()
+
+  // Translate a monster instance name using the definition overlay
+  function translateMonsterName(m: MonsterInstance) {
+    const def = getMonster(m.definitionId)
+    if (!def) return m.name
+    const translated = tData('monsters', m.definitionId, 'name', def.name)
+    // If the instance name was customized (e.g., "Goblin 2"), keep the number suffix
+    if (m.name === def.name) return translated
+    if (m.name.startsWith(def.name + ' ')) {
+      const suffix = m.name.slice(def.name.length)
+      return translated + suffix
+    }
+    return m.name
+  }
+
   const [encounterType, setEncounterType] = useState<'random' | 'story'>('random')
   const [selection, setSelection] = useState<Selection>(
     monsters[0] ? { type: 'monster', id: monsters[0].id } : null
@@ -144,7 +159,7 @@ export function EncounterPanel({
                         className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'}`}
                         title={t('combat.setActiveTurn')}
                       >{isActiveTurn ? '■' : '▷'}</button>
-                      <span className="text-sm font-semibold">{m.name}</span>
+                      <span className="text-sm font-semibold">{translateMonsterName(m)}</span>
                     </div>
                   </div>
                   <div className="mt-1">
@@ -175,7 +190,7 @@ export function EncounterPanel({
                 <p className="mb-1 text-[9px] uppercase text-muted-foreground">{t('combat.defeated')}</p>
                 {defeatedMonsters.map((m) => (
                   <div key={m.id} className="flex items-center justify-between py-0.5 text-xs text-muted-foreground line-through">
-                    <span>{m.name}</span>
+                    <span>{translateMonsterName(m)}</span>
                     <button onClick={() => onRemoveMonster(m.id)} className="text-[10px] hover:text-red-400">✕</button>
                   </div>
                 ))}
@@ -256,7 +271,7 @@ export function EncounterPanel({
                       >{isActiveTurn ? '■' : '▷'}</button>
                       <span className="text-sm font-semibold">{c.name}</span>
                       <span className="text-[10px] text-muted-foreground capitalize">
-                        Lv{c.level} {c.class}
+                        Lv{c.level} {tData('classes', c.class, 'name', c.class)}
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">AC {c.computed.ac}</span>
@@ -295,7 +310,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
     <div className="space-y-3">
       <div>
         <div className="flex items-baseline justify-between">
-          <h3 className="text-xl font-bold">{instance.name}</h3>
+          <h3 className="text-xl font-bold">{tData('monsters', instance.definitionId, 'name', instance.name)}</h3>
           <span className={`text-2xl font-bold ${hpPercent > 50 ? "text-green-400" : hpPercent > 25 ? "text-amber-400" : "text-red-400"}`}>
             HP {instance.currentHp}
           </span>
@@ -386,7 +401,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
             HP {c.currentHp}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground capitalize">{c.title} · {c.ancestry} {c.class} · Level {c.level} · {c.alignment}</p>
+        <p className="text-xs text-muted-foreground capitalize">{tData('titles', `${c.class}-${c.alignment}-${c.level <= 2 ? 1 : c.level <= 4 ? 3 : c.level <= 6 ? 5 : c.level <= 8 ? 7 : 9}-${(c.level <= 2 ? 1 : c.level <= 4 ? 3 : c.level <= 6 ? 5 : c.level <= 8 ? 7 : 9) + 1}`, 'title', c.title)} · {tData('ancestries', c.ancestry, 'name', c.ancestry)} {tData('classes', c.class, 'name', c.class)} · {t('character.level')} {c.level} · {t(`character.alignment.${c.alignment}`)}</p>
       </div>
       <div className="flex items-center justify-center gap-4">
         <button onClick={() => onHpChange(-5)} className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-400 hover:bg-red-500/20">-5</button>

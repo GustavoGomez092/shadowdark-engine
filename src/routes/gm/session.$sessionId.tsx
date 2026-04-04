@@ -830,7 +830,7 @@ function GMSessionPage() {
                           const taken = owner && owner !== p.displayName
                           return (
                             <option key={c.id} value={c.id} disabled={!!taken}>
-                              {c.name} ({c.ancestry} {c.class} Lv{c.level}){taken ? ` — ${owner}` : ''}
+                              {c.name} ({tData('ancestries', c.ancestry, 'name', c.ancestry)} {tData('classes', c.class, 'name', c.class)} Lv{c.level}){taken ? ` — ${owner}` : ''}
                             </option>
                           )
                         })}
