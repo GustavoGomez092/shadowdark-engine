@@ -19,9 +19,8 @@ import type { PlayerToGMMessage } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
-import { computeCharacterValues, levelUpCharacter } from '@/lib/rules/character.ts'
+import { computeCharacterValues, levelUpCharacter, canLevelUp } from '@/lib/rules/character.ts'
 import { rollDeathSave } from '@/lib/rules/combat.ts'
-import { LevelUpWizard } from '@/components/character/level-up-wizard.tsx'
 
 export const Route = createFileRoute('/gm/session/$sessionId')({
   component: GMSessionPage,
@@ -600,7 +599,6 @@ function GMSessionPage() {
   }, [isReady, broadcastStateSync])
 
   const [rewardsState, setRewardsState] = useState<{ show: boolean; hasTreasure: boolean; encounterType: 'random' | 'story' }>({ show: false, hasTreasure: false, encounterType: 'random' })
-  const [levelUpQueue, setLevelUpQueue] = useState<string[]>([]) // character IDs pending level-up
 
 
   // Loading while PeerJS starts
@@ -702,6 +700,9 @@ function GMSessionPage() {
                         <span className="text-sm font-medium">{p.displayName}</span>
                         {isPlayerActiveTurn && (
                           <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-bold text-amber-400 uppercase">Active</span>
+                        )}
+                        {p.characterId && session.characters[p.characterId] && canLevelUp(session.characters[p.characterId]) && (
+                          <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[9px] font-bold text-primary uppercase animate-pulse">Level Up!</span>
                         )}
                       </div>
                       <PlayerMenu
@@ -1056,9 +1057,6 @@ function GMSessionPage() {
               timestamp: Date.now(),
               isPublic: true,
             })
-            if (levelUps.length > 0) {
-              setLevelUpQueue(levelUps)
-            }
             setRewardsState({ show: false, hasTreasure: false, encounterType: 'random' })
             setTimeout(() => gmPeer.broadcastStateSync(), 50)
           }}
@@ -1110,35 +1108,6 @@ function GMSessionPage() {
         </p>
       </div>
 
-      {/* Level-Up Wizard (auto-triggered after encounter rewards) */}
-      {levelUpQueue.length > 0 && session && (() => {
-        const charId = levelUpQueue[0]
-        const char = session.characters[charId]
-        if (!char) { setLevelUpQueue(q => q.slice(1)); return null }
-        return (
-          <LevelUpWizard
-            character={char}
-            onComplete={(updates) => {
-              const updated = levelUpCharacter(char, updates.hpRoll, updates.talent)
-              if (updates.newSpellIds) {
-                for (const spellId of updates.newSpellIds) {
-                  updated.spells.knownSpells.push({
-                    spellId, isAvailable: true, source: 'class', hasAdvantage: false,
-                  })
-                }
-              }
-              updateCharacter(charId, (c) => { Object.assign(c, updated) })
-              addChatMessage({
-                id: generateId(), senderId: 'system', senderName: 'System',
-                type: 'system', content: `${char.name} leveled up to Level ${updated.level}!`,
-                timestamp: Date.now(), isPublic: true,
-              })
-              setLevelUpQueue(q => q.slice(1))
-            }}
-            onCancel={() => setLevelUpQueue(q => q.slice(1))}
-          />
-        )
-      })()}
 
     </main>
   )

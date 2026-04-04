@@ -4,7 +4,7 @@ import { CharacterCreator } from '@/components/character/character-creator.tsx'
 import { CharacterSheet } from '@/components/character/character-sheet.tsx'
 import type { Character } from '@/schemas/character.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
-import { computeCharacterValues, restCharacter, levelUpCharacter } from '@/lib/rules/character.ts'
+import { computeCharacterValues, restCharacter } from '@/lib/rules/character.ts'
 import { equipItem, unequipItem, removeItem } from '@/lib/rules/inventory.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 
@@ -175,17 +175,6 @@ function GMCharactersPage() {
                 }}
                 onRest={() => {
                   updateChar(selected.id, c => restCharacter(c))
-                }}
-                onLevelUp={(updates) => {
-                  updateChar(selected.id, c => {
-                    const updated = levelUpCharacter(c, updates.hpRoll, updates.talent)
-                    if (updates.newSpellIds) {
-                      for (const spellId of updates.newSpellIds) {
-                        updated.spells.knownSpells.push({ spellId, isAvailable: true, source: 'class', hasAdvantage: false })
-                      }
-                    }
-                    return updated
-                  })
                 }}
               />
             ) : (
