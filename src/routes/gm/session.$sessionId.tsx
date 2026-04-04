@@ -1085,13 +1085,13 @@ function GMSessionPage() {
 
       {/* Danger Level */}
       <div className="mt-6 rounded-xl border border-border bg-card p-4">
-        <h2 className="mb-3 font-semibold">Danger Level</h2>
+        <h2 className="mb-3 font-semibold">{t('gm.dangerLevel')}</h2>
         <div className="flex gap-2">
           {(['unsafe', 'risky', 'deadly'] as const).map(level => (
             <button
               key={level}
               onClick={() => useSessionStore.getState().setDangerLevel(level)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition ${
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
                 session.dangerLevel === level
                   ? level === 'deadly' ? 'bg-red-500 text-white' :
                     level === 'risky' ? 'bg-amber-500 text-white' :
@@ -1099,14 +1099,14 @@ function GMSessionPage() {
                   : 'border border-border hover:bg-accent'
               }`}
             >
-              {level}
+              {t(`gm.${level}`)}
             </button>
           ))}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          {session.dangerLevel === 'unsafe' && 'Check for random encounters every 3 crawling rounds.'}
-          {session.dangerLevel === 'risky' && 'Check for random encounters every 2 crawling rounds.'}
-          {session.dangerLevel === 'deadly' && 'Check for random encounters every crawling round.'}
+          {session.dangerLevel === 'unsafe' && t('gm.dangerUnsafe')}
+          {session.dangerLevel === 'risky' && t('gm.dangerRisky')}
+          {session.dangerLevel === 'deadly' && t('gm.dangerDeadly')}
         </p>
       </div>
 

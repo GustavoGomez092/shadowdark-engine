@@ -392,6 +392,13 @@
   "player.playingAs": "Playing as {{name}}",
   "player.waitingForSession": "Waiting for session data...",
 
+  "gm.dangerLevel": "Danger Level",
+  "gm.unsafe": "Unsafe",
+  "gm.risky": "Risky",
+  "gm.deadly": "Deadly",
+  "gm.dangerUnsafe": "Check for random encounters every 3 crawling rounds.",
+  "gm.dangerRisky": "Check for random encounters every 2 crawling rounds.",
+  "gm.dangerDeadly": "Check for random encounters every crawling round.",
   "gm.connectedPlayers": "Connected Players",
   "gm.noPlayersConnected": "No players connected. Share the room code with your players.",
   "gm.typeMessageAsGM": "Type a message as GM...",

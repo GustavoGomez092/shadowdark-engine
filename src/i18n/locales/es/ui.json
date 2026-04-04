@@ -392,6 +392,13 @@
   "player.playingAs": "Jugando como {{name}}",
   "player.waitingForSession": "Esperando datos de la sesión...",
 
+  "gm.dangerLevel": "Nivel de peligro",
+  "gm.unsafe": "Inseguro",
+  "gm.risky": "Riesgoso",
+  "gm.deadly": "Mortal",
+  "gm.dangerUnsafe": "Verificar encuentros aleatorios cada 3 rondas de exploración.",
+  "gm.dangerRisky": "Verificar encuentros aleatorios cada 2 rondas de exploración.",
+  "gm.dangerDeadly": "Verificar encuentros aleatorios cada ronda de exploración.",
   "gm.connectedPlayers": "Jugadores conectados",
   "gm.noPlayersConnected": "No hay jugadores conectados. Comparte el código de sala con tus jugadores.",
   "gm.typeMessageAsGM": "Escribe un mensaje como DJ...",
