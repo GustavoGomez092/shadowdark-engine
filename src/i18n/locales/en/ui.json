@@ -406,6 +406,8 @@
   "player.waitingForSession": "Waiting for session data...",
 
   "gm.dangerLevel": "Danger Level",
+  "gm.safe": "Safe",
+  "gm.dangerSafe": "No random encounter checks. Safe for story and roleplay.",
   "gm.unsafe": "Unsafe",
   "gm.risky": "Risky",
   "gm.deadly": "Deadly",

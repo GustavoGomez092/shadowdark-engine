@@ -1092,7 +1092,7 @@ function GMSessionPage() {
       <div className="mt-6 rounded-xl border border-border bg-card p-4">
         <h2 className="mb-3 font-semibold">{t('gm.dangerLevel')}</h2>
         <div className="flex gap-2">
-          {(['unsafe', 'risky', 'deadly'] as const).map(level => (
+          {(['safe', 'unsafe', 'risky', 'deadly'] as const).map(level => (
             <button
               key={level}
               onClick={() => useSessionStore.getState().setDangerLevel(level)}
@@ -1100,7 +1100,8 @@ function GMSessionPage() {
                 session.dangerLevel === level
                   ? level === 'deadly' ? 'bg-red-500 text-white' :
                     level === 'risky' ? 'bg-amber-500 text-white' :
-                    'bg-blue-500 text-white'
+                    level === 'unsafe' ? 'bg-blue-500 text-white' :
+                    'bg-green-600 text-white'
                   : 'border border-border hover:bg-accent'
               }`}
             >
@@ -1109,6 +1110,7 @@ function GMSessionPage() {
           ))}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
+          {session.dangerLevel === 'safe' && t('gm.dangerSafe')}
           {session.dangerLevel === 'unsafe' && t('gm.dangerUnsafe')}
           {session.dangerLevel === 'risky' && t('gm.dangerRisky')}
           {session.dangerLevel === 'deadly' && t('gm.dangerDeadly')}

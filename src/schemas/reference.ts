@@ -1,4 +1,4 @@
-export type DangerLevel = 'unsafe' | 'risky' | 'deadly';
+export type DangerLevel = 'safe' | 'unsafe' | 'risky' | 'deadly';
 export type RangeCategory = 'close' | 'near' | 'far';
 export type Alignment = 'lawful' | 'neutral' | 'chaotic';
 
@@ -36,6 +36,7 @@ export const TALENT_LEVELS = [1, 3, 5, 7, 9] as const;
 
 // Encounter check intervals (crawling rounds between checks)
 export const ENCOUNTER_CHECK_INTERVALS: Record<DangerLevel, number> = {
+  safe: 0,    // No random encounter checks
   unsafe: 3,
   risky: 2,
   deadly: 1,

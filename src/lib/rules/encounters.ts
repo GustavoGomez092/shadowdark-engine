@@ -12,7 +12,9 @@ export function checkForEncounter(): { roll: number; isEncounter: boolean } {
 }
 
 export function shouldCheckEncounter(roundsSinceCheck: number, dangerLevel: DangerLevel): boolean {
-  return roundsSinceCheck >= ENCOUNTER_CHECK_INTERVALS[dangerLevel]
+  const interval = ENCOUNTER_CHECK_INTERVALS[dangerLevel]
+  if (interval === 0) return false // Safe — no encounter checks
+  return roundsSinceCheck >= interval
 }
 
 export function generateEncounter(chaModifier: number = 0, partyLevel: number = 1): RandomEncounter {

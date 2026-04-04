@@ -159,9 +159,9 @@ export const useSessionStore = create<SessionStore>()(
         light: {
           timers: [],
           isInDarkness: true,
-          isPaused: false,
+          isPaused: true,
         },
-        dangerLevel: 'risky',
+        dangerLevel: 'safe',
         crawlingRoundsSinceCheck: 0,
         activeTurnId: null,
         activeEncounters: [],

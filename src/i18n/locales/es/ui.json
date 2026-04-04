@@ -406,6 +406,8 @@
   "player.waitingForSession": "Esperando datos de la sesión...",
 
   "gm.dangerLevel": "Nivel de peligro",
+  "gm.safe": "Seguro",
+  "gm.dangerSafe": "Sin verificación de encuentros aleatorios. Seguro para historia y roleplay.",
   "gm.unsafe": "Inseguro",
   "gm.risky": "Riesgoso",
   "gm.deadly": "Mortal",
