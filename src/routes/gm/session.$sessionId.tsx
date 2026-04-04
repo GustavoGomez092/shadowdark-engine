@@ -571,11 +571,12 @@ function GMSessionPage() {
       start(existingPeerId).then(code => {
         // Save the peer ID so reconnection works after refresh
         if (session.room.gmPeerId !== code) {
-          const s = useSessionStore.getState()
-          if (s.session) {
-            s.session.room.gmPeerId = code
-            s.saveNow()
-          }
+          useSessionStore.setState((state) => {
+            if (state.session) {
+              state.session.room.gmPeerId = code
+            }
+          })
+          useSessionStore.getState().saveNow()
         }
       }).catch(err => console.error('Failed to start peer:', err))
     }
