@@ -121,6 +121,8 @@
 
   "gm.kickPlayer": "Expulsar jugador",
 
+  "settings.language": "Idioma",
+  "settings.languageDescription": "Elige tu idioma preferido para la interfaz.",
   "settings.title": "Configuraci\u00f3n",
   "settings.sessionInfo": "Info de la sesi\u00f3n",
   "settings.name": "Nombre:",

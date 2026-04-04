@@ -121,6 +121,8 @@
 
   "gm.kickPlayer": "Kick Player",
 
+  "settings.language": "Language",
+  "settings.languageDescription": "Choose your preferred display language for the interface.",
   "settings.title": "Settings",
   "settings.sessionInfo": "Session Info",
   "settings.name": "Name:",
