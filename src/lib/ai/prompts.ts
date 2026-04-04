@@ -1,6 +1,7 @@
 import type { AIPurpose, AIGameContext, AIMonsterContext, AIPartyMemberContext } from '@/schemas/ai.ts'
 import type { SessionState } from '@/schemas/session.ts'
 import { getMonster } from '@/data/index.ts'
+import { getLocale, LOCALE_LABELS } from '@/i18n/index.ts'
 
 // ========== Purpose Labels & Icons ==========
 
@@ -249,6 +250,13 @@ export function buildSystemPrompt(
 
   if (customPrompt) {
     parts.push(`\nADDITIONAL INSTRUCTIONS:\n${customPrompt}`)
+  }
+
+  // Language instruction — respond in the user's locale
+  const locale = getLocale()
+  if (locale !== 'en') {
+    const langName = LOCALE_LABELS[locale] ?? locale
+    parts.push(`\nIMPORTANT: You MUST respond entirely in ${langName}. All output text must be in ${langName}. Do not respond in English.`)
   }
 
   return parts.join('\n')
