@@ -84,7 +84,7 @@ function getNewSpellSlots(classDef: ClassDefinition, currentLevel: number, newLe
 // ========== Component ==========
 
 export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizardProps) {
-  const { t, ti } = useLocale()
+  const { t, ti, tData, tDataNested } = useLocale()
   const newLevel = character.level + 1
   const classDef = getClass(character.class)
   const effectiveStats = computeEffectiveStats(character)
@@ -406,7 +406,7 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
 
   function renderTalentStep() {
     if (!classDef) return null
-    const className = classDef.name
+    const className = tData('classes', classDef.id, 'name', classDef.name)
 
     return (
       <div className="space-y-4">
@@ -427,14 +427,17 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                   </tr>
                 </thead>
                 <tbody>
-                  {classDef.talentTable.map((entry, i) => (
+                  {classDef.talentTable.map((entry, i) => {
+                    const rollKey = typeof entry.roll === 'number' ? String(entry.roll) : `${entry.roll[0]}-${entry.roll[1]}`
+                    return (
                     <tr key={i} className="border-t border-border/30">
                       <td className="px-2 py-1 text-muted-foreground whitespace-nowrap">
-                        {typeof entry.roll === 'number' ? entry.roll : `${entry.roll[0]}-${entry.roll[1]}`}
+                        {rollKey}
                       </td>
-                      <td className="px-2 py-1">{entry.description}</td>
+                      <td className="px-2 py-1">{tDataNested('classes', classDef.id, ['talents', rollKey], entry.description)}</td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -462,7 +465,10 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                 <span className="mx-1 text-muted-foreground">=</span>
                 <div className="text-2xl font-bold text-primary">{talentRollState.rollTotal}</div>
               </div>
-              <p className="text-sm font-semibold">{talentRollState.matchedEntry.description}</p>
+              <p className="text-sm font-semibold">{(() => {
+                const rk = typeof talentRollState.matchedEntry.roll === 'number' ? String(talentRollState.matchedEntry.roll) : `${talentRollState.matchedEntry.roll[0]}-${talentRollState.matchedEntry.roll[1]}`
+                return tDataNested('classes', classDef?.id ?? '', ['talents', rk], talentRollState.matchedEntry.description)
+              })()}</p>
             </div>
 
             {/* Stat choice picker */}
@@ -524,7 +530,9 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                   <div className="space-y-1">
                     {classDef.talentTable
                       .filter((_e, i) => i < classDef.talentTable.length - 1) // exclude the choose_talent_or_stats entry itself
-                      .map((entry, i) => (
+                      .map((entry, i) => {
+                        const rk = typeof entry.roll === 'number' ? String(entry.roll) : `${entry.roll[0]}-${entry.roll[1]}`
+                        return (
                         <button
                           key={i}
                           onClick={() => setChosenTalentIndex(i)}
@@ -534,9 +542,10 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                               : 'border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30'
                           }`}
                         >
-                          {entry.description}
+                          {tDataNested('classes', classDef?.id ?? '', ['talents', rk], entry.description)}
                         </button>
-                      ))}
+                        )
+                      })}
                   </div>
                 )}
 
