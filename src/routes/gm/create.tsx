@@ -70,7 +70,8 @@ function CreateGamePage() {
       }
       const newId = importSession(result.session)
       setSavedSessions(getSavedSessions())
-      setImportSuccess(`Imported "${result.session.room.name}" — ready to resume`)
+      const packMsg = result.packsInstalled ? ` (${result.packsInstalled} data pack${result.packsInstalled !== 1 ? 's' : ''} installed)` : ''
+      setImportSuccess(`Imported "${result.session.room.name}"${packMsg} — ready to resume`)
       setTimeout(() => setImportSuccess(null), 5000)
       if (fileRef.current) fileRef.current.value = ''
       void newId // used for index registration

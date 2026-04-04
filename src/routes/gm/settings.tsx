@@ -251,7 +251,8 @@ function SessionBackupCard({ session }: { session: import('@/schemas/session.ts'
         return
       }
       importSessionFn(result.session)
-      setImportSuccess(`Imported "${result.session.room.name}" — available in saved sessions`)
+      const packMsg = result.packsInstalled ? ` (${result.packsInstalled} data pack${result.packsInstalled !== 1 ? 's' : ''} installed)` : ''
+      setImportSuccess(`Imported "${result.session.room.name}"${packMsg} — available in saved sessions`)
       setTimeout(() => setImportSuccess(null), 5000)
       if (fileRef.current) fileRef.current.value = ''
     }

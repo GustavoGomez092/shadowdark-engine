@@ -1,16 +1,19 @@
 import type { SessionState } from '@/schemas/session.ts'
+import type { DataPack } from '@/lib/data/types.ts'
 import { generateRoomCode } from '@/lib/utils/id.ts'
+import { dataRegistry } from '@/lib/data/registry.ts'
 
 export interface SessionExport {
-  version: 1
+  version: 2
   exportedAt: number
   engineVersion: string
   session: SessionState
+  dataPacks?: DataPack[]
 }
 
 /**
  * Sanitize and export a session as a JSON string.
- * Strips connection-specific data (peer IDs, connected players).
+ * Includes all installed data packs so the session is fully self-contained.
  */
 export function exportSession(session: SessionState): string {
   const sanitized: SessionState = {
@@ -23,11 +26,21 @@ export function exportSession(session: SessionState): string {
     activeTurnId: null,
   }
 
+  // Include all installed data packs (strip 'enabled' field — they'll default to enabled on import)
+  const packs = dataRegistry.getPacks()
+  const fullPacks: DataPack[] = packs.map(meta => {
+    const pack = dataRegistry.getPackById(meta.id)
+    if (!pack) return null
+    const { enabled: _, ...rest } = pack
+    return rest as DataPack
+  }).filter((p): p is DataPack => p !== null)
+
   const envelope: SessionExport = {
-    version: 1,
+    version: 2,
     exportedAt: Date.now(),
     engineVersion: '1.0.0',
     session: sanitized,
+    dataPacks: fullPacks.length > 0 ? fullPacks : undefined,
   }
 
   return JSON.stringify(envelope, null, 2)
@@ -55,11 +68,19 @@ export function downloadJson(json: string, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+export interface SessionImportResult {
+  valid: boolean
+  error?: string
+  session?: SessionState
+  dataPacks?: DataPack[]
+  packsInstalled?: number
+}
+
 /**
  * Parse and validate an imported session JSON string.
- * Assigns a new room ID and resets connection state.
+ * Assigns a new room ID, resets connection state, and extracts bundled data packs.
  */
-export function parseSessionImport(json: string): { valid: boolean; error?: string; session?: SessionState } {
+export function parseSessionImport(json: string): SessionImportResult {
   let parsed: unknown
   try {
     parsed = JSON.parse(json)
@@ -75,11 +96,15 @@ export function parseSessionImport(json: string): { valid: boolean; error?: stri
 
   // Accept both raw SessionState and SessionExport envelope
   let session: SessionState
+  let dataPacks: DataPack[] | undefined
   if (obj.version && obj.session && typeof obj.session === 'object') {
     // SessionExport envelope
     session = obj.session as SessionState
+    if (Array.isArray(obj.dataPacks)) {
+      dataPacks = obj.dataPacks as DataPack[]
+    }
   } else if (obj.room && obj.characters && typeof obj.room === 'object') {
-    // Raw SessionState
+    // Raw SessionState (v1 or manual)
     session = parsed as SessionState
   } else {
     return { valid: false, error: 'Not a valid session file. Expected a ShadowDark Engine session export.' }
@@ -106,5 +131,17 @@ export function parseSessionImport(json: string): { valid: boolean; error?: stri
     lastSavedAt: Date.now(),
   }
 
-  return { valid: true, session }
+  // Install bundled data packs (skip already-installed ones)
+  let packsInstalled = 0
+  if (dataPacks && dataPacks.length > 0) {
+    for (const pack of dataPacks) {
+      const existing = dataRegistry.getPackById(pack.id)
+      if (!existing) {
+        dataRegistry.addPack(pack)
+        packsInstalled++
+      }
+    }
+  }
+
+  return { valid: true, session, dataPacks, packsInstalled }
 }
