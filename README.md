@@ -4,7 +4,7 @@ A real-time, web-based game management engine for [ShadowDark RPG](https://www.t
 
 The GM creates a room, players join with a code, and the entire session state is managed through the GM's browser with real-time sync to all connected players.
 
-![Feature Tour](docs/feature-tour.gif)
+![Landing Page](docs/screenshots/01-landing.png)
 
 ## Features
 
@@ -82,6 +82,18 @@ The GM creates a room, players join with a code, and the entire session state is
 - **Active turn indicator** -- GM sets whose turn it is, player sees "It's your turn!" + dice roller appears
 - **Darkness system** -- darkness banner for all players when no light source active, hidden when paused
 - **Level-up badge** -- pulsing badge in Connected Players when a character has enough XP to level up
+
+### Rules Reference
+
+![Rules Reference](docs/screenshots/04-reference-rules.png)
+
+### Spells Reference
+
+![Spells Reference](docs/screenshots/05-reference-spells.png)
+
+### Monster Compendium
+
+![Monster Compendium](docs/screenshots/06-reference-monsters.png)
 
 ### ShadowDark Rules Implementation
 - **244 monsters** with stat blocks, abilities, attacks, and descriptions
@@ -210,7 +222,7 @@ src/
 
 ## Data Packs
 
-![Data Pack Upload Demo](docs/data-pack-demo.gif)
+![Data Packs Manager](docs/screenshots/08-data-packs.png)
 
 ### Creating a Data Pack
 
@@ -255,6 +267,8 @@ Three sample packs are included in the `sample-packs/` directory:
 
 ## AI Integration
 
+![AI Settings](docs/screenshots/09-ai-settings.png)
+
 ### Setup
 
 1. Install [Ollama](https://ollama.com/) for free local AI (recommended)
@@ -288,6 +302,8 @@ Use the **Scene Context** text area to set the stage before clicking any quick a
 
 ## Session Export/Import
 
+![Sessions Page](docs/screenshots/10-sessions.png)
+
 ### Exporting
 
 - **From Settings**: click **Export Current Session** to download the active session
@@ -309,6 +325,11 @@ On import:
 - The session appears in the saved sessions list, ready to resume
 
 ## Multi-Language Support
+
+| English | Español |
+|---------|---------|
+| ![English Landing](docs/screenshots/01-landing.png) | ![Spanish Landing](docs/screenshots/13-landing-es.png) |
+| ![English Rules](docs/screenshots/04-reference-rules.png) | ![Spanish Rules](docs/screenshots/15-reference-rules-es.png) |
 
 ### For Users
 
@@ -384,6 +405,8 @@ PeerJS cloud signaling servers typically expire inactive peer IDs after ~60 minu
 Room rotation is completely seamless. Players may see a brief "Reconnecting..." flash during rotation, then they're back. No action needed -- the client automatically reconnects to the new room code.
 
 ## Configuration
+
+![Settings](docs/screenshots/07-settings.png)
 
 ### Light Source Durations
 In **Settings**, customize torch, lantern, and campfire durations for faster-paced games. Defaults match official ShadowDark rules (1 hour real time for torches/lanterns, 8 hours for campfires).
