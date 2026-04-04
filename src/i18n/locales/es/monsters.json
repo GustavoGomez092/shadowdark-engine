@@ -1,754 +1,1883 @@
 {
+  "__tags": {
+    "humanoid": "humanoide",
+    "undead": "no muerto",
+    "beast": "bestia",
+    "construct": "constructo",
+    "aberration": "aberración",
+    "dragon": "dragón",
+    "fey": "feérico",
+    "fiend": "infernal",
+    "elemental": "elemental",
+    "ooze": "cieno",
+    "plant": "planta",
+    "spellcaster": "lanzador de conjuros",
+    "aquatic": "acuático",
+    "swarm": "enjambre",
+    "incorporeal": "incorpóreo",
+    "leader": "líder",
+    "monstrosity": "monstruosidad",
+    "underground": "subterráneo"
+  },
   "aboleth": {
     "name": "Aboleth",
-    "description": "Un antiguo horror acuático con dominio psíquico sobre mentes inferiores."
+    "description": "Un antiguo horror acuático con dominio psíquico sobre mentes inferiores.",
+    "attacks": {
+      "Tentacle": "Tentáculo",
+      "Tail": "Cola"
+    },
+    "abilities": {
+      "Curse": {
+        "name": "Maldición",
+        "description": "Una criatura golpeada por un tentáculo debe pasar DC 15 CON o contraer una enfermedad mucosa. En 1d4 horas solo podrá respirar bajo el agua."
+      },
+      "Enslave": {
+        "name": "Esclavizar",
+        "description": "El aboleth selecciona una criatura dentro de rango near. DC 15 WIS o encantado por 1 día. Puede repetir la tirada de salvación cuando recibe daño."
+      },
+      "Telepathic": {
+        "name": "Telepático",
+        "description": "El aboleth se comunica telepáticamente con cualquier criatura dentro de rango far."
+      }
+    }
   },
   "acolyte": {
     "name": "Acólito",
-    "description": "Un sacerdote de bajo rango devoto a una deidad."
+    "description": "Un sacerdote de bajo rango devoto a una deidad.",
+    "attacks": {
+      "Mace": "Maza",
+      "Spell": "Conjuro"
+    },
+    "abilities": {
+      "Healing Touch": {
+        "name": "Toque Sanador",
+        "description": "Una vez al día, el acólito puede curar a una criatura dentro de rango close por 1d4 HP."
+      }
+    }
   },
   "animated-armor": {
     "name": "Armadura Animada",
-    "description": "Una armadura de placas animada por magia arcana para custodiar un lugar."
+    "description": "Una armadura de placas animada por magia arcana para custodiar un lugar.",
+    "attacks": {
+      "Longsword": "Espada Larga"
+    },
+    "abilities": {
+      "Statue": {
+        "name": "Estatua",
+        "description": "La armadura animada parece una armadura normal cuando está inmóvil. Es indistinguible hasta que se mueve."
+      }
+    }
   },
   "bandit": {
     "name": "Bandido",
-    "description": "Un forajido común que acecha a los viajeros."
+    "description": "Un forajido común que acecha a los viajeros.",
+    "attacks": {
+      "Club": "Garrote",
+      "Shortbow": "Arco Corto"
+    },
+    "abilities": {
+      "Ambush": {
+        "name": "Emboscada",
+        "description": "Si el bandido sorprende a un objetivo, inflige 1d6 de daño adicional en su primer ataque."
+      }
+    }
   },
   "bat-giant": {
     "name": "Murciélago Gigante",
-    "description": "Un murciélago del tamaño de un perro con una mordida feroz."
+    "description": "Un murciélago del tamaño de un perro con una mordida feroz.",
+    "attacks": {
+      "Bite": "Mordida"
+    },
+    "abilities": {}
   },
   "bear-brown": {
     "name": "Oso Pardo",
-    "description": "Un oso enorme y poderoso que defiende su territorio con ferocidad."
+    "description": "Un oso enorme y poderoso que defiende su territorio con ferocidad.",
+    "attacks": {
+      "Claw": "Garra"
+    },
+    "abilities": {
+      "Crush": {
+        "name": "Aplastar",
+        "description": "Si ambos ataques de garra golpean al mismo objetivo, el oso lo aplasta por 1d8 de daño adicional."
+      }
+    }
   },
   "beastman": {
     "name": "Hombre Bestia",
-    "description": "Un humanoide salvaje con cabeza de cabra que saquea y arrasa."
+    "description": "Un humanoide salvaje con cabeza de cabra que saquea y arrasa.",
+    "attacks": {
+      "Spear": "Lanza"
+    },
+    "abilities": {
+      "Brutal": {
+        "name": "Brutal",
+        "description": "+1 de daño en ataques cuerpo a cuerpo (ya incluido en el daño)."
+      }
+    }
   },
   "boar": {
     "name": "Jabalí",
-    "description": "Un cerdo salvaje con colmillos afilados y mal temperamento."
+    "description": "Un cerdo salvaje con colmillos afilados y mal temperamento.",
+    "attacks": {
+      "Tusk": "Colmillo"
+    },
+    "abilities": {
+      "Gore": {
+        "name": "Embestida",
+        "description": "Si el jabalí se mueve todo su movimiento en línea recta y golpea con un ataque de colmillo, el objetivo recibe 1d6 de daño adicional."
+      }
+    }
   },
   "cave-brute": {
     "name": "Bruto de las Cavernas",
-    "description": "Un depredador subterráneo corpulento con garras poderosas y mandíbulas aplastantes."
+    "description": "Un depredador subterráneo corpulento con garras poderosas y mandíbulas aplastantes.",
+    "attacks": {
+      "Claw": "Garra",
+      "Mandible": "Mandíbula"
+    },
+    "abilities": {
+      "Bewilder": {
+        "name": "Aturdir",
+        "description": "Una vez por ronda, una criatura golpeada por una garra debe pasar DC 12 WIS o quedar aturdida por 1 ronda (desventaja en ataques)."
+      }
+    }
   },
   "cave-creeper": {
     "name": "Reptador de las Cavernas",
-    "description": "Un artrópodo de muchas patas que acecha en los techos de las cavernas."
+    "description": "Un artrópodo de muchas patas que acecha en los techos de las cavernas.",
+    "attacks": {
+      "Bite": "Mordida",
+      "Tentacles": "Tentáculos"
+    },
+    "abilities": {
+      "Toxin": {
+        "name": "Toxina",
+        "description": "Una criatura golpeada por los tentáculos debe pasar DC 12 CON o quedar paralizada por 1d4 rondas."
+      }
+    }
   },
   "crocodile": {
     "name": "Cocodrilo",
-    "description": "Un reptil grande y acorazado que embosca presas cerca del agua."
+    "description": "Un reptil grande y acorazado que embosca presas cerca del agua.",
+    "attacks": {
+      "Bite": "Mordida"
+    },
+    "abilities": {}
   },
   "cultist": {
     "name": "Cultista",
-    "description": "Un seguidor fanático de un poder oscuro."
+    "description": "Un seguidor fanático de un poder oscuro.",
+    "attacks": {
+      "Longsword": "Espada Larga",
+      "Spell": "Conjuro"
+    },
+    "abilities": {
+      "Fearless": {
+        "name": "Intrépido",
+        "description": "El cultista nunca realiza chequeos de moral."
+      },
+      "Deathtouch": {
+        "name": "Toque Mortal",
+        "description": "Una vez al día, el cultista puede hacer un ataque de conjuro cuerpo a cuerpo (+2). Si golpea, el objetivo recibe 2d6 de daño necrótico."
+      }
+    }
   },
   "darkmantle": {
     "name": "Manto Oscuro",
-    "description": "Una criatura similar a un murciélago que envuelve a sus presas en oscuridad mágica."
+    "description": "Una criatura similar a un murciélago que envuelve a sus presas en oscuridad mágica.",
+    "attacks": {
+      "Bite": "Mordida"
+    },
+    "abilities": {
+      "Darkness": {
+        "name": "Oscuridad",
+        "description": "El manto oscuro puede lanzar oscuridad mágica en un radio near alrededor de sí mismo una vez al día. La oscuridad dura 10 rondas."
+      }
+    }
   },
   "dragon-swamp": {
     "name": "Dragón de Pantano",
-    "description": "Un dragón astuto que habita en ciénagas fétidas, exhalando nubes de smog asfixiante."
+    "description": "Un dragón astuto que habita en ciénagas fétidas, exhalando nubes de smog asfixiante.",
+    "attacks": {
+      "Rend": "Desgarrar"
+    },
+    "abilities": {
+      "Smog Breath": {
+        "name": "Aliento de Smog",
+        "description": "El dragón exhala una nube de smog venenoso en un cono de tamaño near. Todas las criaturas en el área deben pasar DC 15 CON o recibir 4d8 de daño de veneno y quedar cegadas por 1d4 rondas. Con éxito, la mitad de daño y no cegadas. Se recarga con 5-6 en 1d6 cada ronda."
+      }
+    }
   },
   "dryad": {
     "name": "Dríade",
-    "description": "Un tímido espíritu del bosque vinculado a un gran árbol."
+    "description": "Un tímido espíritu del bosque vinculado a un gran árbol.",
+    "attacks": {
+      "Staff": "Bastón"
+    },
+    "abilities": {
+      "Charm": {
+        "name": "Encantar",
+        "description": "La dríade selecciona una criatura dentro de rango near. DC 15 WIS o la criatura queda encantada por 1 día y considera a la dríade como un aliado de confianza."
+      },
+      "Meld": {
+        "name": "Fusión",
+        "description": "La dríade puede fusionarse con cualquier árbol, volviéndose invisible e inalcanzable. Puede emerger del mismo o de cualquier árbol conectado dentro de rango far."
+      }
+    }
   },
   "dung-beetle-giant": {
     "name": "Escarabajo Pelotero Gigante",
-    "description": "Un escarabajo sobredimensionado que empuja bolas de inmundicia por los túneles subterráneos."
+    "description": "Un escarabajo sobredimensionado que empuja bolas de inmundicia por los túneles subterráneos.",
+    "attacks": {
+      "Horn": "Cuerno"
+    },
+    "abilities": {
+      "Knock": {
+        "name": "Derribar",
+        "description": "Si golpea, el objetivo debe pasar DC 12 STR o ser derribado."
+      }
+    }
   },
   "ettercap": {
     "name": "Ettercap",
-    "description": "Un humanoide arácnido que teje redes pegajosas y venenosas."
+    "description": "Un humanoide arácnido que teje redes pegajosas y venenosas.",
+    "attacks": {
+      "Bite": "Mordida",
+      "Poison Web": "Red Venenosa"
+    },
+    "abilities": {
+      "Poison Web": {
+        "name": "Red Venenosa",
+        "description": "En lugar de morder, el ettercap puede lanzar una red a un objetivo dentro de rango near. DC 12 DEX o el objetivo queda apresado. Un objetivo apresado también debe pasar DC 12 CON o quedar envenenado por 1d4 rondas."
+      }
+    }
   },
   "fairy": {
     "name": "Hada",
-    "description": "Un diminuto embaucador alado armado con una aguja soporífera."
+    "description": "Un diminuto embaucador alado armado con una aguja soporífera.",
+    "attacks": {
+      "Needle": "Aguja"
+    },
+    "abilities": {
+      "Poison": {
+        "name": "Veneno",
+        "description": "Una criatura golpeada por la aguja del hada debe pasar DC 12 CON o caer en un sueño profundo y mágico por 1d4 horas."
+      }
+    }
   },
   "gelatinous-cube": {
     "name": "Cubo Gelatinoso",
-    "description": "Un cieno casi transparente que llena pasillos enteros, disolviendo todo lo que engulle."
+    "description": "Un cieno casi transparente que llena pasillos enteros, disolviendo todo lo que engulle.",
+    "attacks": {
+      "Touch": "Toque"
+    },
+    "abilities": {
+      "Engulf": {
+        "name": "Engullir",
+        "description": "El cubo se mueve al espacio de una criatura. La criatura debe pasar DC 12 DEX o ser engullida. Las criaturas engullidas quedan cegadas, apresadas y reciben 2d6 de daño de ácido al inicio de cada uno de sus turnos."
+      },
+      "Rubbery": {
+        "name": "Elástico",
+        "description": "El cubo recibe la mitad de daño de ataques contundentes."
+      },
+      "Toxin": {
+        "name": "Toxina",
+        "description": "Una criatura golpeada por el cubo debe pasar DC 12 CON o quedar paralizada por 1d4 rondas."
+      }
+    }
   },
   "ghost": {
     "name": "Fantasma",
-    "description": "Un espíritu atormentado atado al mundo mortal por asuntos pendientes."
+    "description": "Un espíritu atormentado atado al mundo mortal por asuntos pendientes.",
+    "attacks": {
+      "Death Touch": "Toque Mortal"
+    },
+    "abilities": {
+      "Greater Undead": {
+        "name": "No Muerto Superior",
+        "description": "El fantasma es inmune a chequeos de moral, sueño, encantamiento y efectos de miedo."
+      },
+      "Incorporeal": {
+        "name": "Incorpóreo",
+        "description": "El fantasma puede moverse a través de objetos sólidos y criaturas. Las armas no mágicas lo atraviesan sin causar daño."
+      },
+      "Life Drain": {
+        "name": "Drenar Vida",
+        "description": "Una criatura reducida a 0 HP por el toque mortal del fantasma no puede ser curada hasta que un sacerdote lance un conjuro de nivel 2+ sobre ella."
+      },
+      "Possess": {
+        "name": "Poseer",
+        "description": "El fantasma selecciona una criatura dentro de rango near. DC 15 CHA o el fantasma toma control del cuerpo del objetivo por hasta 1 hora. El cuerpo del fantasma desaparece. El huésped puede repetir la tirada de salvación cada ronda cuando recibe daño."
+      }
+    }
   },
   "jellyfish": {
-    "name": "Medusa Marina"
+    "name": "Medusa Marina",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "kobold": {
-    "name": "Kóbold"
+    "name": "Kóbold",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rat": {
-    "name": "Rata"
+    "name": "Rata",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "scorpion": {
-    "name": "Escorpión"
+    "name": "Escorpión",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "spider": {
-    "name": "Araña"
+    "name": "Araña",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "apprentice": {
-    "name": "Aprendiz"
+    "name": "Aprendiz",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "badger": {
-    "name": "Tejón"
+    "name": "Tejón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "basilisk-hatchling": {
-    "name": "Cría de Basilisco"
+    "name": "Cría de Basilisco",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "brachiosaurus": {
-    "name": "Braquiosaurio"
+    "name": "Braquiosaurio",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "centipede-giant": {
-    "name": "Ciempiés Gigante"
+    "name": "Ciempiés Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "goblin": {
-    "name": "Trasgo"
+    "name": "Trasgo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "guard": {
-    "name": "Guardia"
+    "name": "Guardia",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mastiff": {
-    "name": "Mastín"
+    "name": "Mastín",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "orc": {
-    "name": "Orco"
+    "name": "Orco",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "peasant": {
-    "name": "Campesino"
+    "name": "Campesino",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "pirate": {
-    "name": "Pirata"
+    "name": "Pirata",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rat-giant": {
-    "name": "Rata Gigante"
+    "name": "Rata Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "snake-cobra": {
-    "name": "Serpiente Cobra"
+    "name": "Serpiente Cobra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "stingbat": {
-    "name": "Murciélago Aguijón"
+    "name": "Murciélago Aguijón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "thug": {
-    "name": "Matón"
+    "name": "Matón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "vulture": {
-    "name": "Buitre"
+    "name": "Buitre",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ape": {
-    "name": "Simio"
+    "name": "Simio",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "berserker": {
-    "name": "Berserker"
+    "name": "Berserker",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "camel": {
-    "name": "Camello"
+    "name": "Camello",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "deep-one": {
-    "name": "Ser de las Profundidades"
+    "name": "Ser de las Profundidades",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "demon-dretch": {
-    "name": "Demonio Dretch"
+    "name": "Demonio Dretch",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "devil-imp": {
-    "name": "Diablo Diablillo"
+    "name": "Diablo Diablillo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "drow": {
-    "name": "Drow"
+    "name": "Drow",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "duergar": {
-    "name": "Duergar"
+    "name": "Duergar",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elf": {
-    "name": "Elfo"
+    "name": "Elfo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "frog-giant": {
-    "name": "Rana Gigante"
+    "name": "Rana Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ghoul": {
-    "name": "Gul"
+    "name": "Gul",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gnoll": {
-    "name": "Gnoll"
+    "name": "Gnoll",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gray-ooze": {
-    "name": "Cieno Gris"
+    "name": "Cieno Gris",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hobgoblin": {
-    "name": "Hobgoblin"
+    "name": "Hobgoblin",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "horse": {
-    "name": "Caballo"
+    "name": "Caballo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hydra": {
-    "name": "Hidra"
+    "name": "Hidra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "leech-giant": {
-    "name": "Sanguijuela Gigante"
+    "name": "Sanguijuela Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "lizardfolk": {
-    "name": "Hombre Lagarto"
+    "name": "Hombre Lagarto",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "merfolk": {
-    "name": "Tritón"
+    "name": "Tritón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rat-dire": {
-    "name": "Rata Atroz"
+    "name": "Rata Atroz",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rot-flower": {
-    "name": "Flor Pútrida"
+    "name": "Flor Pútrida",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "sahuagin": {
-    "name": "Sahuagin"
+    "name": "Sahuagin",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "skeleton": {
-    "name": "Esqueleto"
+    "name": "Esqueleto",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "soldier": {
-    "name": "Soldado"
+    "name": "Soldado",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "spider-swarm": {
-    "name": "Enjambre de Arañas"
+    "name": "Enjambre de Arañas",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "velociraptor": {
-    "name": "Velocirráptor"
+    "name": "Velocirráptor",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "violet-fungus": {
-    "name": "Hongo Violeta"
+    "name": "Hongo Violeta",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wasp-giant": {
-    "name": "Avispa Gigante"
+    "name": "Avispa Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "will-o-wisp": {
-    "name": "Fuego Fatuo"
+    "name": "Fuego Fatuo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wolf": {
-    "name": "Lobo"
+    "name": "Lobo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "zombie": {
-    "name": "Zombi"
+    "name": "Zombi",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "angel-seraph": {
-    "name": "Ángel Serafín"
+    "name": "Ángel Serafín",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ankheg": {
-    "name": "Ankheg"
+    "name": "Ankheg",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "azer": {
-    "name": "Azer"
+    "name": "Azer",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "bugbear": {
-    "name": "Bugbear"
+    "name": "Bugbear",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "centaur": {
-    "name": "Centauro"
+    "name": "Centauro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "cockatrice": {
-    "name": "Cocatriz"
+    "name": "Cocatriz",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "devil-barbed": {
-    "name": "Diablo Barbado"
+    "name": "Diablo Barbado",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gladiator": {
-    "name": "Gladiador"
+    "name": "Gladiador",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gnome-deep": {
-    "name": "Gnomo de las Profundidades"
+    "name": "Gnomo de las Profundidades",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "harpy": {
-    "name": "Arpía"
+    "name": "Arpía",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hippogriff": {
-    "name": "Hipogrifo"
+    "name": "Hipogrifo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "knight": {
-    "name": "Caballero"
+    "name": "Caballero",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "kobold-sorcerer": {
-    "name": "Kóbold Hechicero"
+    "name": "Kóbold Hechicero",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "lion": {
-    "name": "León"
+    "name": "León",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mushroomfolk": {
-    "name": "Pueblo Hongo"
+    "name": "Pueblo Hongo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "panther": {
-    "name": "Pantera"
+    "name": "Pantera",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "pegasus": {
-    "name": "Pegaso"
+    "name": "Pegaso",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "piranha-swarm": {
-    "name": "Enjambre de Pirañas"
+    "name": "Enjambre de Pirañas",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "scarab-swarm": {
-    "name": "Enjambre de Escarabajos"
+    "name": "Enjambre de Escarabajos",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "scarecrow": {
-    "name": "Espantapájaros"
+    "name": "Espantapájaros",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "scorpion-giant": {
-    "name": "Escorpión Gigante"
+    "name": "Escorpión Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "shadow": {
-    "name": "Sombra"
+    "name": "Sombra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "shark": {
-    "name": "Tiburón"
+    "name": "Tiburón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "smilodon": {
-    "name": "Smilodon"
+    "name": "Smilodon",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "spider-giant": {
-    "name": "Araña Gigante"
+    "name": "Araña Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "strangler": {
-    "name": "Estrangulador"
+    "name": "Estrangulador",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "thief": {
-    "name": "Ladrón"
+    "name": "Ladrón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "viperian": {
-    "name": "Viperiano"
+    "name": "Viperiano",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wererat": {
-    "name": "Hombre Rata"
+    "name": "Hombre Rata",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wight": {
-    "name": "Tumulario"
+    "name": "Tumulario",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "worg": {
-    "name": "Wargo"
+    "name": "Wargo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ape-snow": {
-    "name": "Simio de las Nieves"
+    "name": "Simio de las Nieves",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "bat-swarm": {
-    "name": "Enjambre de Murciélagos"
+    "name": "Enjambre de Murciélagos",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "centipede-swarm": {
-    "name": "Enjambre de Ciempiés"
+    "name": "Enjambre de Ciempiés",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "doppelganger": {
-    "name": "Doppelgänger"
+    "name": "Doppelgänger",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gargoyle": {
-    "name": "Gárgola"
+    "name": "Gárgola",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ghast": {
-    "name": "Ghast"
+    "name": "Ghast",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gibbering-mouther": {
-    "name": "Susurrador Demente"
+    "name": "Susurrador Demente",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "goblin-boss": {
-    "name": "Trasgo Jefe"
+    "name": "Trasgo Jefe",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "goblin-shaman": {
-    "name": "Trasgo Chamán"
+    "name": "Trasgo Chamán",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gorilla": {
-    "name": "Gorila"
+    "name": "Gorila",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "grick": {
-    "name": "Grick"
+    "name": "Grick",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "griffon": {
-    "name": "Grifo"
+    "name": "Grifo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hell-hound": {
-    "name": "Sabueso Infernal"
+    "name": "Sabueso Infernal",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "leprechaun": {
-    "name": "Leprechaun"
+    "name": "Leprechaun",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "moose": {
-    "name": "Alce"
+    "name": "Alce",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ochre-jelly": {
-    "name": "Gelatina Ocre"
+    "name": "Gelatina Ocre",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "orc-chieftain": {
-    "name": "Orco Caudillo"
+    "name": "Orco Caudillo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "pterodactyl": {
-    "name": "Pterodáctilo"
+    "name": "Pterodáctilo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rust-monster": {
-    "name": "Monstruo del Óxido"
+    "name": "Monstruo del Óxido",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "shambling-mound": {
-    "name": "Montículo Andante"
+    "name": "Montículo Andante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "siren": {
-    "name": "Sirena"
+    "name": "Sirena",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "snake-swarm": {
-    "name": "Enjambre de Serpientes"
+    "name": "Enjambre de Serpientes",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "unicorn": {
-    "name": "Unicornio"
+    "name": "Unicornio",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "werewolf": {
-    "name": "Hombre Lobo"
+    "name": "Hombre Lobo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wolf-dire": {
-    "name": "Lobo Atroz"
+    "name": "Lobo Atroz",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "basilisk": {
-    "name": "Basilisco"
+    "name": "Basilisco",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "chuul": {
-    "name": "Chuul"
+    "name": "Chuul",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "crab-giant": {
-    "name": "Cangrejo Gigante"
+    "name": "Cangrejo Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "demon-vrock": {
-    "name": "Demonio Vrock"
+    "name": "Demonio Vrock",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hippopotamus": {
-    "name": "Hipopótamo"
+    "name": "Hipopótamo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mimic": {
-    "name": "Mímico"
+    "name": "Mímico",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "octopus-giant": {
-    "name": "Pulpo Gigante"
+    "name": "Pulpo Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "priest": {
-    "name": "Sacerdote"
+    "name": "Sacerdote",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rhinoceros": {
-    "name": "Rinoceronte"
+    "name": "Rinoceronte",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "salamander": {
-    "name": "Salamandra"
+    "name": "Salamandra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "snake-giant": {
-    "name": "Serpiente Gigante"
+    "name": "Serpiente Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "troll": {
-    "name": "Trol"
+    "name": "Trol",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "vampire-spawn": {
-    "name": "Engendro Vampírico"
+    "name": "Engendro Vampírico",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "void-spider": {
-    "name": "Araña del Vacío"
+    "name": "Araña del Vacío",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wolf-winter": {
-    "name": "Lobo Invernal"
+    "name": "Lobo Invernal",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "black-pudding": {
-    "name": "Pudín Negro"
+    "name": "Pudín Negro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "cloaker": {
-    "name": "Embozado"
+    "name": "Embozado",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "devil-cubi": {
-    "name": "Diablo Cubi"
+    "name": "Diablo Cubi",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "drow-drider": {
-    "name": "Drow Drider"
+    "name": "Drow Drider",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "drow-priestess": {
-    "name": "Drow Sacerdotisa"
+    "name": "Drow Sacerdotisa",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-air-lesser": {
-    "name": "Elemental de Aire (Menor)"
+    "name": "Elemental de Aire (Menor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-earth-lesser": {
-    "name": "Elemental de Tierra (Menor)"
+    "name": "Elemental de Tierra (Menor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-fire-lesser": {
-    "name": "Elemental de Fuego (Menor)"
+    "name": "Elemental de Fuego (Menor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-water-lesser": {
-    "name": "Elemental de Agua (Menor)"
+    "name": "Elemental de Agua (Menor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hag-sea": {
-    "name": "Bruja del Mar"
+    "name": "Bruja del Mar",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hag-weald": {
-    "name": "Bruja del Bosque"
+    "name": "Bruja del Bosque",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "invisible-stalker": {
-    "name": "Acechador Invisible"
+    "name": "Acechador Invisible",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mage": {
-    "name": "Mago"
+    "name": "Mago",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "manticore": {
-    "name": "Mantícora"
+    "name": "Mantícora",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "naga-bone": {
-    "name": "Naga de Hueso"
+    "name": "Naga de Hueso",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "nightmare": {
-    "name": "Pesadilla"
+    "name": "Pesadilla",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "ogre": {
-    "name": "Ogro"
+    "name": "Ogro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "owlbear": {
-    "name": "Oso Búho"
+    "name": "Oso Búho",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "plesiosaurus": {
-    "name": "Plesiosaurio"
+    "name": "Plesiosaurio",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "primordial-slime": {
-    "name": "Cieno Primordial"
+    "name": "Cieno Primordial",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rat-swarm": {
-    "name": "Enjambre de Ratas"
+    "name": "Enjambre de Ratas",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "reaver": {
-    "name": "Saqueador"
+    "name": "Saqueador",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "roper": {
-    "name": "Roper"
+    "name": "Roper",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "viperian-ophid": {
-    "name": "Viperiano Ófido"
+    "name": "Viperiano Ófido",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "bear-polar": {
-    "name": "Oso Polar"
+    "name": "Oso Polar",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "devil-horned": {
-    "name": "Diablo Cornudo"
+    "name": "Diablo Cornudo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "druid": {
-    "name": "Druida"
+    "name": "Druida",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elephant": {
-    "name": "Elefante"
+    "name": "Elefante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-hill": {
-    "name": "Gigante de las Colinas"
+    "name": "Gigante de las Colinas",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "golem-flesh": {
-    "name": "Gólem de Carne"
+    "name": "Gólem de Carne",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "gorgon": {
-    "name": "Gorgona"
+    "name": "Gorgona",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "minotaur": {
-    "name": "Minotauro"
+    "name": "Minotauro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "oni": {
-    "name": "Oni"
+    "name": "Oni",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "otyugh": {
-    "name": "Otyugh"
+    "name": "Otyugh",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "triceratops": {
-    "name": "Triceratops"
+    "name": "Triceratops",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "troll-frost": {
-    "name": "Trol de Escarcha"
+    "name": "Trol de Escarcha",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "void-spawn": {
-    "name": "Engendro del Vacío"
+    "name": "Engendro del Vacío",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "assassin": {
-    "name": "Asesino"
+    "name": "Asesino",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "brain-eater": {
-    "name": "Devorador de Cerebros"
+    "name": "Devorador de Cerebros",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "bulette": {
-    "name": "Bulette"
+    "name": "Bulette",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "cyclops": {
-    "name": "Cíclope"
+    "name": "Cíclope",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "demon-glabrezu": {
-    "name": "Demonio Glabrezu"
+    "name": "Demonio Glabrezu",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-goat": {
-    "name": "Gigante Cabra"
+    "name": "Gigante Cabra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-stone": {
-    "name": "Gigante de Piedra"
+    "name": "Gigante de Piedra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "golem-clay": {
-    "name": "Gólem de Arcilla"
+    "name": "Gólem de Arcilla",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "golem-stone": {
-    "name": "Gólem de Piedra"
+    "name": "Gólem de Piedra",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "hag-night": {
-    "name": "Bruja Nocturna"
+    "name": "Bruja Nocturna",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "manta-ray-giant": {
-    "name": "Mantarraya Gigante"
+    "name": "Mantarraya Gigante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "medusa": {
-    "name": "Medusa"
+    "name": "Medusa",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rakshasa": {
-    "name": "Rakshasa"
+    "name": "Rakshasa",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "shark-megalodon": {
-    "name": "Tiburón Megalodón"
+    "name": "Tiburón Megalodón",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "treant": {
-    "name": "Treant"
+    "name": "Treant",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "viperian-wizard": {
-    "name": "Viperiano Mago"
+    "name": "Viperiano Mago",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wraith": {
-    "name": "Espectro"
+    "name": "Espectro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "wyvern": {
-    "name": "Guiverno"
+    "name": "Guiverno",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "angel-domini": {
-    "name": "Ángel Dominación"
+    "name": "Ángel Dominación",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "couatl": {
-    "name": "Couatl"
+    "name": "Couatl",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "demon-marilith": {
-    "name": "Demonio Marilith"
+    "name": "Demonio Marilith",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "devil-erinyes": {
-    "name": "Diablo Erinias"
+    "name": "Diablo Erinias",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "efreeti": {
-    "name": "Efrit"
+    "name": "Efrit",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-air-greater": {
-    "name": "Elemental de Aire (Mayor)"
+    "name": "Elemental de Aire (Mayor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-earth-greater": {
-    "name": "Elemental de Tierra (Mayor)"
+    "name": "Elemental de Tierra (Mayor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-fire-greater": {
-    "name": "Elemental de Fuego (Mayor)"
+    "name": "Elemental de Fuego (Mayor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "elemental-water-greater": {
-    "name": "Elemental de Agua (Mayor)"
+    "name": "Elemental de Agua (Mayor)",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-fire": {
-    "name": "Gigante de Fuego"
+    "name": "Gigante de Fuego",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-frost": {
-    "name": "Gigante de Escarcha"
+    "name": "Gigante de Escarcha",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "grimlow": {
-    "name": "Grimlow"
+    "name": "Grimlow",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mammoth": {
-    "name": "Mamut"
+    "name": "Mamut",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "naga": {
-    "name": "Naga"
+    "name": "Naga",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rime-walker": {
-    "name": "Caminante de Escarcha"
+    "name": "Caminante de Escarcha",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "sphinx": {
-    "name": "Esfinge"
+    "name": "Esfinge",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "tyrannosaurus": {
-    "name": "Tiranosaurio"
+    "name": "Tiranosaurio",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "archmage": {
-    "name": "Archimago"
+    "name": "Archimago",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "chimera": {
-    "name": "Quimera"
+    "name": "Quimera",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "djinni": {
-    "name": "Djinn"
+    "name": "Djinn",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-cloud": {
-    "name": "Gigante de las Nubes"
+    "name": "Gigante de las Nubes",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "golem-iron": {
-    "name": "Gólem de Hierro"
+    "name": "Gólem de Hierro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mummy": {
-    "name": "Momia"
+    "name": "Momia",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "remorhaz": {
-    "name": "Remorhaz"
+    "name": "Remorhaz",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "angel-principi": {
-    "name": "Ángel Principado"
+    "name": "Ángel Principado",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "vampire": {
-    "name": "Vampiro"
+    "name": "Vampiro",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "dragon-forest": {
-    "name": "Dragón del Bosque"
+    "name": "Dragón del Bosque",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "giant-storm": {
-    "name": "Gigante de la Tormenta"
+    "name": "Gigante de la Tormenta",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "purple-worm": {
-    "name": "Gusano Púrpura"
+    "name": "Gusano Púrpura",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "dragon-desert": {
-    "name": "Dragón del Desierto"
+    "name": "Dragón del Desierto",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "lich": {
-    "name": "Liche"
+    "name": "Liche",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "phoenix": {
-    "name": "Fénix"
+    "name": "Fénix",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "dragon-frost": {
-    "name": "Dragón de Escarcha"
+    "name": "Dragón de Escarcha",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "roc": {
-    "name": "Roc"
+    "name": "Roc",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "the-wandering-merchant": {
-    "name": "El Mercader Errante"
+    "name": "El Mercader Errante",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "archangel": {
-    "name": "Arcángel"
+    "name": "Arcángel",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "archdevil": {
-    "name": "Archidiablo"
+    "name": "Archidiablo",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "demon-balor": {
-    "name": "Demonio Balor"
+    "name": "Demonio Balor",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "dragon-sea": {
-    "name": "Dragón del Mar"
+    "name": "Dragón del Mar",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "obe-ixx-of-azarumme": {
-    "name": "Obe-ixx de Azarumme"
+    "name": "Obe-ixx de Azarumme",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "dragon-fire": {
-    "name": "Dragón de Fuego"
+    "name": "Dragón de Fuego",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "kraken": {
-    "name": "Kraken"
+    "name": "Kraken",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "the-ten-eyed-oracle": {
-    "name": "El Oráculo de los Diez Ojos"
+    "name": "El Oráculo de los Diez Ojos",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "mordanticus-the-flayed": {
-    "name": "Mordanticus el Desollado"
+    "name": "Mordanticus el Desollado",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "rathgamnon": {
-    "name": "Rathgamnon"
+    "name": "Rathgamnon",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   },
   "the-tarrasque": {
-    "name": "El Tarrasque"
+    "name": "El Tarrasque",
+    "attacks": {
+      "Attack": "Ataque"
+    },
+    "abilities": {}
   }
 }

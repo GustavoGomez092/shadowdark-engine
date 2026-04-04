@@ -28,7 +28,7 @@ export const Route = createFileRoute('/gm/session/$sessionId')({
 })
 
 function GMSessionPage() {
-  const { t } = useLocale()
+  const { t, ti, tData, tDataNested } = useLocale()
   const navigate = useNavigate()
   const { sessionId } = Route.useParams()
   const session = useSessionStore(s => s.session)
@@ -846,15 +846,18 @@ function GMSessionPage() {
                       if (features.length === 0) return null
                       return (
                         <div className="mt-2 rounded-md border border-border/50 bg-background/50 px-2 py-1.5">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{cls.name} Abilities</p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{ti('character.abilities', { className: tData('classes', cls.id, 'name', cls.name) })}</p>
                           <div className="space-y-1">
-                            {features.map(f => (
+                            {features.map(f => {
+                              const fk = f.mechanic.type.replace(/_/g, '-')
+                              return (
                               <div key={f.name}>
-                                <span className="text-xs font-medium">{f.name}</span>
+                                <span className="text-xs font-medium">{tDataNested('classes', cls.id, ['features', fk, 'name'], f.name)}</span>
                                 {f.level > 1 && <span className="ml-1 text-[10px] text-muted-foreground">Lv {f.level}</span>}
-                                <p className="text-[11px] text-muted-foreground leading-tight">{f.description}</p>
+                                <p className="text-[11px] text-muted-foreground leading-tight">{tDataNested('classes', cls.id, ['features', fk, 'description'], f.description)}</p>
                               </div>
-                            ))}
+                              )
+                            })}
                           </div>
                         </div>
                       )

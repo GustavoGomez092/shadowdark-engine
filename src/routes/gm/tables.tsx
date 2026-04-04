@@ -471,7 +471,7 @@ function ItemsRef({ search }: { search: string }) {
 
 // ========== MONSTERS ==========
 function MonstersRef({ search }: { search: string }) {
-  const { t, tData } = useLocale()
+  const { t, tData, tDataNested } = useLocale()
   const filtered = MONSTERS.filter(
     (m) => !search || m.name.toLowerCase().includes(search.toLowerCase()),
   )
@@ -518,7 +518,7 @@ function MonstersRef({ search }: { search: string }) {
           <div className="space-y-1 mb-2">
             {m.attacks.map((a, i) => (
               <div key={i} className="flex items-baseline justify-between rounded-lg bg-secondary/30 px-2 py-1 text-xs">
-                <span className="font-semibold">{a.name} <span className="text-muted-foreground">{fmt(a.bonus)}</span></span>
+                <span className="font-semibold">{tDataNested('monsters', m.id, ['attacks', a.name], a.name)} <span className="text-muted-foreground">{fmt(a.bonus)}</span></span>
                 <span className="font-mono text-primary">{a.damage}</span>
               </div>
             ))}
@@ -529,8 +529,8 @@ function MonstersRef({ search }: { search: string }) {
             <div className="border-t border-border/30 pt-2 space-y-1">
               {m.abilities.map((a, i) => (
                 <p key={i} className="text-[11px]">
-                  <span className="font-semibold text-primary">{a.name}:</span>{" "}
-                  <span className="text-muted-foreground">{a.description}</span>
+                  <span className="font-semibold text-primary">{tDataNested('monsters', m.id, ['abilities', a.name, 'name'], a.name)}:</span>{" "}
+                  <span className="text-muted-foreground">{tDataNested('monsters', m.id, ['abilities', a.name, 'description'], a.description)}</span>
                 </p>
               ))}
             </div>
@@ -540,7 +540,7 @@ function MonstersRef({ search }: { search: string }) {
           {m.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {m.tags.map(tag => (
-                <span key={tag} className="rounded-full bg-secondary px-2 py-0.5 text-[9px] capitalize">{tag}</span>
+                <span key={tag} className="rounded-full bg-secondary px-2 py-0.5 text-[9px] capitalize">{tData('monsters', '__tags', tag, tag)}</span>
               ))}
             </div>
           )}
