@@ -76,6 +76,7 @@ interface SessionStore {
   // Session list
   getSavedSessions: () => { id: string; name: string; lastPlayed: number }[]
   deleteSession: (id: string) => void
+  importSession: (session: SessionState) => string
 }
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null
@@ -483,6 +484,18 @@ export const useSessionStore = create<SessionStore>()(
         }
       } catch (err) {
         console.error('[Session Store] Delete failed:', err)
+      }
+    },
+
+    importSession: (session) => {
+      try {
+        const key = `${STORAGE_PREFIX}:session:${session.room.id}`
+        localStorage.setItem(key, JSON.stringify(session))
+        updateSessionIndex(session)
+        return session.room.id
+      } catch (err) {
+        console.error('[Session Store] Import failed:', err)
+        return session.room.id
       }
     },
   }))
