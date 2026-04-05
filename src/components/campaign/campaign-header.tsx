@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { key: 'campaign.nav.lore', href: '/campaign/$campaignId/lore', matchEnd: false },
   { key: 'campaign.nav.map', href: '/campaign/$campaignId/map', matchEnd: false },
   { key: 'campaign.nav.ai', href: '/campaign/$campaignId/ai', matchEnd: false },
+  { key: 'campaign.nav.mapgen2', href: '/campaign/$campaignId/mapgen2', matchEnd: false },
 ]
 
 export function CampaignHeader() {

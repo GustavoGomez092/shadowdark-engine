@@ -686,5 +686,6 @@
   "campaign.nav.adventure": "Adventure",
   "campaign.nav.lore": "Lore",
   "campaign.nav.map": "Map",
-  "campaign.nav.ai": "AI Helper"
+  "campaign.nav.ai": "AI Helper",
+  "campaign.nav.mapgen2": "Map Gen v2"
 }

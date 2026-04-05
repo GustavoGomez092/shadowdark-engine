@@ -686,5 +686,6 @@
   "campaign.nav.adventure": "Aventura",
   "campaign.nav.lore": "Trasfondo",
   "campaign.nav.map": "Mapa",
-  "campaign.nav.ai": "Asistente IA"
+  "campaign.nav.ai": "Asistente IA",
+  "campaign.nav.mapgen2": "Gen Mapa v2"
 }
