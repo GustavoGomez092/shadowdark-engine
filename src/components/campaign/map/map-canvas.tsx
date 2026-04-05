@@ -607,73 +607,188 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
 // ── Polished Export Renderer ──
 // ══════════════════════════════════════════════════
 
-/** Draw a stone/rock texture pattern on a region */
-function drawStoneTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, density: number = 0.15) {
-  ctx.save()
-  ctx.fillStyle = '#555'
-  ctx.strokeStyle = '#444'
-  ctx.lineWidth = 0.5
-  // Random small irregular shapes to simulate stone blocks
-  const seed = (x * 31 + y * 17) % 1000
-  const rng = (i: number) => ((seed + i * 7 + i * i * 3) % 1000) / 1000
-  const count = Math.floor(w * h * density / 100)
-  for (let i = 0; i < count; i++) {
-    const rx = x + rng(i * 2) * w
-    const ry = y + rng(i * 2 + 1) * h
-    const rw = 2 + rng(i * 3) * 4
-    const rh = 1.5 + rng(i * 3 + 1) * 3
-    ctx.fillStyle = `rgba(0,0,0,${0.05 + rng(i * 5) * 0.1})`
-    ctx.fillRect(rx, ry, rw, rh)
-  }
-  ctx.restore()
+// ── Seeded pseudo-random for deterministic textures ──
+function seededRng(seed: number) {
+  let s = seed
+  return () => { s = (s * 16807 + 0) % 2147483647; return (s & 0x7fffffff) / 2147483647 }
 }
 
-/** Draw crosshatch lines for dirt/cave texture */
-function drawDirtTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+/** Stone/rock fill — irregular block shapes with mortar lines */
+function drawStoneTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const rng = seededRng(Math.floor(x * 31 + y * 17))
   ctx.save()
-  ctx.strokeStyle = 'rgba(0,0,0,0.08)'
-  ctx.lineWidth = 0.5
-  const seed = (x * 13 + y * 23) % 500
-  const rng = (i: number) => ((seed + i * 11) % 500) / 500
+  // Random mortar lines (horizontal + vertical offsets)
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'
+  ctx.lineWidth = 0.6
+  const rows = Math.floor(h / 6) + 1
+  for (let r = 0; r < rows; r++) {
+    const ry = y + r * (h / rows) + (rng() - 0.5) * 2
+    ctx.beginPath(); ctx.moveTo(x, ry); ctx.lineTo(x + w, ry); ctx.stroke()
+    // Vertical joints (offset each row)
+    const offset = r % 2 === 0 ? 0 : w * 0.4
+    for (let c = 0; c < 3; c++) {
+      const cx = x + offset + c * (w / 2.5) + (rng() - 0.5) * 4
+      if (cx > x && cx < x + w) {
+        const nextRy = y + (r + 1) * (h / rows)
+        ctx.beginPath(); ctx.moveTo(cx, ry); ctx.lineTo(cx, Math.min(nextRy, y + h)); ctx.stroke()
+      }
+    }
+  }
+  // Scattered dark specks
+  ctx.fillStyle = 'rgba(0,0,0,0.08)'
   for (let i = 0; i < 8; i++) {
-    const sx = x + rng(i) * w
-    const sy = y + rng(i + 10) * h
     ctx.beginPath()
-    ctx.moveTo(sx, sy)
-    ctx.lineTo(sx + rng(i + 20) * 6 - 3, sy + rng(i + 30) * 6 - 3)
-    ctx.stroke()
-  }
-  ctx.restore()
-}
-
-/** Draw stipple dots for sand texture */
-function drawSandTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
-  ctx.save()
-  const seed = (x * 7 + y * 19) % 400
-  const rng = (i: number) => ((seed + i * 13) % 400) / 400
-  for (let i = 0; i < 6; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${0.06 + rng(i * 3) * 0.06})`
-    ctx.beginPath()
-    ctx.arc(x + rng(i) * w, y + rng(i + 8) * h, 0.5 + rng(i + 16) * 0.8, 0, Math.PI * 2)
+    ctx.arc(x + rng() * w, y + rng() * h, 0.3 + rng() * 0.6, 0, Math.PI * 2)
     ctx.fill()
   }
   ctx.restore()
 }
 
-/** Draw water ripple lines */
-function drawWaterTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, deep: boolean) {
+/** Dirt/earth — dense short hatch marks like reference image A */
+function drawDirtTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const rng = seededRng(Math.floor(x * 13 + y * 23))
   ctx.save()
-  ctx.strokeStyle = deep ? 'rgba(0,60,120,0.15)' : 'rgba(0,80,160,0.1)'
-  ctx.lineWidth = 0.6
-  const seed = (x * 11 + y * 29) % 300
-  const rng = (i: number) => ((seed + i * 17) % 300) / 300
-  for (let i = 0; i < 3; i++) {
-    const cy = y + h * 0.25 + i * h * 0.25
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)'
+  ctx.lineWidth = 0.4
+  // Dense short lines in random directions
+  const count = Math.floor(w * h / 15)
+  for (let i = 0; i < count; i++) {
+    const sx = x + rng() * w
+    const sy = y + rng() * h
+    const angle = rng() * Math.PI * 2
+    const len = 1.5 + rng() * 3
     ctx.beginPath()
-    ctx.moveTo(x + 2, cy)
-    ctx.quadraticCurveTo(x + w * 0.3, cy - 2 + rng(i) * 4, x + w * 0.5, cy)
-    ctx.quadraticCurveTo(x + w * 0.7, cy + 2 - rng(i + 5) * 4, x + w - 2, cy)
+    ctx.moveTo(sx, sy)
+    ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
     ctx.stroke()
+  }
+  // Small pebble circles
+  ctx.fillStyle = 'rgba(0,0,0,0.06)'
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath()
+    ctx.arc(x + rng() * w, y + rng() * h, 0.8 + rng() * 1.2, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+/** Sand — scattered stipple dots like reference image C */
+function drawSandTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const rng = seededRng(Math.floor(x * 7 + y * 19))
+  ctx.save()
+  const count = Math.floor(w * h / 12)
+  for (let i = 0; i < count; i++) {
+    const dotX = x + rng() * w
+    const dotY = y + rng() * h
+    const size = 0.2 + rng() * 0.7
+    ctx.fillStyle = `rgba(0,0,0,${0.08 + rng() * 0.12})`
+    ctx.beginPath()
+    ctx.arc(dotX, dotY, size, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  // Occasional larger pebble clusters
+  for (let i = 0; i < 2; i++) {
+    const cx = x + rng() * w
+    const cy = y + rng() * h
+    for (let j = 0; j < 3; j++) {
+      ctx.fillStyle = `rgba(0,0,0,${0.05 + rng() * 0.08})`
+      ctx.beginPath()
+      ctx.arc(cx + (rng() - 0.5) * 4, cy + (rng() - 0.5) * 4, 0.4 + rng() * 0.8, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
+  ctx.restore()
+}
+
+/** Water — wavy ripple lines */
+function drawWaterTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, deep: boolean) {
+  const rng = seededRng(Math.floor(x * 11 + y * 29))
+  ctx.save()
+  ctx.strokeStyle = deep ? 'rgba(0,60,120,0.2)' : 'rgba(0,80,160,0.12)'
+  ctx.lineWidth = 0.6
+  const lines = deep ? 5 : 3
+  for (let i = 0; i < lines; i++) {
+    const cy = y + (i + 1) * h / (lines + 1)
+    const amp = 1.5 + rng() * 2
+    ctx.beginPath()
+    ctx.moveTo(x + 1, cy)
+    for (let px = 0; px <= w; px += 3) {
+      ctx.lineTo(x + px, cy + Math.sin(px * 0.15 + rng() * 6) * amp)
+    }
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+/** Grass — dense organic marks with small leaf/grass blade strokes like reference A */
+function drawGrassTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const rng = seededRng(Math.floor(x * 41 + y * 37))
+  ctx.save()
+  ctx.strokeStyle = 'rgba(0,80,0,0.15)'
+  ctx.lineWidth = 0.5
+  // Dense grass blades
+  const count = Math.floor(w * h / 8)
+  for (let i = 0; i < count; i++) {
+    const bx = x + rng() * w
+    const by = y + rng() * h
+    const bh = 2 + rng() * 4
+    const lean = (rng() - 0.5) * 2
+    ctx.beginPath()
+    ctx.moveTo(bx, by)
+    ctx.quadraticCurveTo(bx + lean, by - bh * 0.6, bx + lean * 0.5, by - bh)
+    ctx.stroke()
+  }
+  // Small rock clusters
+  ctx.fillStyle = 'rgba(0,0,0,0.06)'
+  for (let i = 0; i < 2; i++) {
+    const rx = x + rng() * w, ry = y + rng() * h
+    ctx.beginPath(); ctx.arc(rx, ry, 1 + rng() * 1.5, 0, Math.PI * 2); ctx.fill()
+  }
+  ctx.restore()
+}
+
+/** Tile/cobblestone — clean sub-grid lines like reference B */
+function drawTileTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, isCobble: boolean) {
+  ctx.save()
+  ctx.strokeStyle = isCobble ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.1)'
+  ctx.lineWidth = isCobble ? 0.6 : 0.4
+  // Sub-grid: divide cell into 2x2 or 3x3
+  const divs = isCobble ? 3 : 2
+  for (let i = 1; i < divs; i++) {
+    ctx.beginPath(); ctx.moveTo(x + i * w / divs, y); ctx.lineTo(x + i * w / divs, y + h); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(x, y + i * h / divs); ctx.lineTo(x + w, y + i * h / divs); ctx.stroke()
+  }
+  if (isCobble) {
+    // Slight irregularity in cobblestone
+    const rng = seededRng(Math.floor(x * 53 + y * 47))
+    ctx.fillStyle = 'rgba(0,0,0,0.03)'
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath(); ctx.arc(x + rng() * w, y + rng() * h, 0.5 + rng(), 0, Math.PI * 2); ctx.fill()
+    }
+  }
+  ctx.restore()
+}
+
+/** Lava — hot ripples with glow effect */
+function drawLavaTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  const rng = seededRng(Math.floor(x * 17 + y * 43))
+  ctx.save()
+  // Dark crust lines
+  ctx.strokeStyle = 'rgba(80,0,0,0.2)'
+  ctx.lineWidth = 0.8
+  for (let i = 0; i < 4; i++) {
+    const cy = y + rng() * h
+    ctx.beginPath()
+    ctx.moveTo(x, cy)
+    for (let px = 0; px <= w; px += 4) {
+      ctx.lineTo(x + px, cy + Math.sin(px * 0.2 + i) * 2)
+    }
+    ctx.stroke()
+  }
+  // Bright glow spots
+  ctx.fillStyle = 'rgba(255,200,0,0.15)'
+  for (let i = 0; i < 2; i++) {
+    ctx.beginPath(); ctx.arc(x + rng() * w, y + rng() * h, 2 + rng() * 3, 0, Math.PI * 2); ctx.fill()
   }
   ctx.restore()
 }
@@ -801,26 +916,33 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
     ctx.fillStyle = color
     ctx.fillRect(px, py, cs, cs)
 
-    // Texture overlays
+    // Texture overlays — detailed patterns per terrain type
     if (cell.terrain === 'stone_wall' || cell.terrain === 'cave_wall') {
-      drawStoneTexture(ctx, px, py, cs, cs, 0.2)
-    } else if (cell.terrain === 'dirt' || cell.terrain === 'mud') {
+      drawStoneTexture(ctx, px, py, cs, cs)
+    } else if (cell.terrain === 'dirt' || cell.terrain === 'mud' || cell.terrain === 'cave_floor') {
       drawDirtTexture(ctx, px, py, cs, cs)
     } else if (cell.terrain === 'sand') {
       drawSandTexture(ctx, px, py, cs, cs)
     } else if (cell.terrain === 'water' || cell.terrain === 'deep_water') {
       drawWaterTexture(ctx, px, py, cs, cs, cell.terrain === 'deep_water')
     } else if (cell.terrain === 'grass') {
-      drawDirtTexture(ctx, px, py, cs, cs) // reuse with green tint
+      drawGrassTexture(ctx, px, py, cs, cs)
     } else if (cell.terrain === 'lava') {
-      drawWaterTexture(ctx, px, py, cs, cs, true)
-    } else if (cell.terrain === 'cobblestone' || cell.terrain === 'tiles') {
-      // Draw subtle grid lines within the cell
-      ctx.strokeStyle = 'rgba(0,0,0,0.08)'
-      ctx.lineWidth = 0.3
-      const half = cs / 2
-      ctx.beginPath(); ctx.moveTo(px + half, py); ctx.lineTo(px + half, py + cs); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(px, py + half); ctx.lineTo(px + cs, py + half); ctx.stroke()
+      drawLavaTexture(ctx, px, py, cs, cs)
+    } else if (cell.terrain === 'cobblestone') {
+      drawTileTexture(ctx, px, py, cs, cs, true)
+    } else if (cell.terrain === 'tiles' || cell.terrain === 'marble') {
+      drawTileTexture(ctx, px, py, cs, cs, false)
+    } else if (cell.terrain === 'wooden_floor') {
+      // Horizontal wood grain lines
+      ctx.save()
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)'
+      ctx.lineWidth = 0.4
+      for (let i = 0; i < 4; i++) {
+        const ly = py + (i + 0.5) * cs / 4
+        ctx.beginPath(); ctx.moveTo(px, ly); ctx.lineTo(px + cs, ly); ctx.stroke()
+      }
+      ctx.restore()
     }
   }
 

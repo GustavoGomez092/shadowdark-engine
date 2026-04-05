@@ -205,15 +205,16 @@ function MapEditorPage() {
 
         {/* Terrain selector (when paint or fill tool active) */}
         {(activeTool === 'floor' || activeTool === 'bucket') && (
-          <div className="flex gap-0.5 items-center flex-wrap">
+          <div className="flex gap-1 items-center flex-wrap">
             {TERRAIN_OPTIONS.map(t => (
               <button
                 key={t.type}
                 onClick={() => setActiveTerrainType(t.type)}
-                title={t.label}
-                className={`h-6 w-6 rounded transition ${activeTerrainType === t.type ? 'ring-2 ring-primary' : 'ring-1 ring-border'}`}
-                style={{ backgroundColor: t.color }}
-              />
+                className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition ${activeTerrainType === t.type ? 'ring-2 ring-primary bg-primary/10 text-primary' : 'ring-1 ring-border text-muted-foreground hover:text-foreground'}`}
+              >
+                <span className="h-3 w-3 rounded-sm shrink-0" style={{ backgroundColor: t.color }} />
+                {t.label}
+              </button>
             ))}
           </div>
         )}
