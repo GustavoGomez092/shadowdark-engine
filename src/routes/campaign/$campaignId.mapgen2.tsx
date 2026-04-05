@@ -36,7 +36,12 @@ function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: numb
     bx0 = Math.min(bx0, r.x); by0 = Math.min(by0, r.y)
     bx1 = Math.max(bx1, r.x + r.w); by1 = Math.max(by1, r.y + r.h)
   }
-  const pad = 4, titleCells = 5
+  // Also include note positions in bounding box
+  for (const n of data.notes) {
+    bx0 = Math.min(bx0, n.pos.x - 4); by0 = Math.min(by0, n.pos.y - 2)
+    bx1 = Math.max(bx1, n.pos.x + 4); by1 = Math.max(by1, n.pos.y + 2)
+  }
+  const pad = 6, titleCells = 6
   bx0 -= pad; by0 -= (pad + titleCells); bx1 += pad; by1 += pad
 
   const gw = bx1 - bx0, gh = by1 - by0
@@ -175,15 +180,20 @@ function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: numb
     drawDoor(ctx, cx, cy, isH, door.type)
   }
 
-  // ══════ PASS 9: Room numbers ══════
+  // ══════ PASS 9: Room numbers (only rooms referenced by notes) ══════
+  // Build a set of note refs to know which numbers to show
+  const noteRefs = new Set(data.notes.map(n => n.ref))
+  // Number rooms sequentially, but only display if a note references it
   for (let i = 0; i < rooms.length; i++) {
+    const num = String(i + 1)
+    if (!noteRefs.has(num)) continue
     const r = rooms[i]
     const cx = ox + (r.x + r.w / 2) * C, cy = oy + (r.y + r.h / 2) * C
     const fs = Math.min(r.w, r.h) * C * 0.35
     ctx.font = `bold ${fs}px 'Georgia','Times New Roman',serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillStyle = INK
-    ctx.fillText(String(i + 1), cx, cy + 1)
+    ctx.fillText(num, cx, cy + 1)
   }
 
   // ══════ PASS 10: Notes ══════
