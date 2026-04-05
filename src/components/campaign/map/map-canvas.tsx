@@ -1018,10 +1018,10 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
       ctx.lineWidth = 0.6
       const density = 12
       for (let i = 0; i < density; i++) {
-        const sx = px + rng.next() * cs
-        const sy = py + rng.next() * cs
-        const angle = rng.next() * Math.PI
-        const len = 3 + rng.next() * (cs * 0.5)
+        const sx = px + rng() * cs
+        const sy = py + rng() * cs
+        const angle = rng() * Math.PI
+        const len = 3 + rng() * (cs * 0.5)
         ctx.beginPath()
         ctx.moveTo(sx, sy)
         ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
@@ -1030,10 +1030,10 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
       // Extra short strokes for density
       ctx.lineWidth = 0.4
       for (let i = 0; i < density / 2; i++) {
-        const sx = px + rng.next() * cs
-        const sy = py + rng.next() * cs
-        const angle = rng.next() * Math.PI * 2
-        const len = 1.5 + rng.next() * 3
+        const sx = px + rng() * cs
+        const sy = py + rng() * cs
+        const angle = rng() * Math.PI * 2
+        const len = 1.5 + rng() * 3
         ctx.beginPath()
         ctx.moveTo(sx, sy)
         ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
