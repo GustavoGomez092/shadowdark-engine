@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PlayerRouteRouteImport } from './routes/player/route'
 import { Route as GmRouteRouteImport } from './routes/gm/route'
+import { Route as CampaignRouteRouteImport } from './routes/campaign/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CampaignIndexRouteImport } from './routes/campaign/index'
 import { Route as PlayerSessionRouteImport } from './routes/player/session'
 import { Route as PlayerJoinRouteImport } from './routes/player/join'
 import { Route as GmTablesRouteImport } from './routes/gm/tables'
@@ -20,7 +22,14 @@ import { Route as GmSettingsRouteImport } from './routes/gm/settings'
 import { Route as GmMonstersRouteImport } from './routes/gm/monsters'
 import { Route as GmCreateRouteImport } from './routes/gm/create'
 import { Route as GmCharactersRouteImport } from './routes/gm/characters'
+import { Route as CampaignCampaignIdRouteImport } from './routes/campaign/$campaignId'
+import { Route as CampaignCampaignIdIndexRouteImport } from './routes/campaign/$campaignId.index'
 import { Route as GmSessionSessionIdRouteImport } from './routes/gm/session.$sessionId'
+import { Route as CampaignCampaignIdMapRouteImport } from './routes/campaign/$campaignId.map'
+import { Route as CampaignCampaignIdLoreRouteImport } from './routes/campaign/$campaignId.lore'
+import { Route as CampaignCampaignIdContentRouteImport } from './routes/campaign/$campaignId.content'
+import { Route as CampaignCampaignIdAiRouteImport } from './routes/campaign/$campaignId.ai'
+import { Route as CampaignCampaignIdAdventureRouteImport } from './routes/campaign/$campaignId.adventure'
 
 const PlayerRouteRoute = PlayerRouteRouteImport.update({
   id: '/player',
@@ -32,10 +41,20 @@ const GmRouteRoute = GmRouteRouteImport.update({
   path: '/gm',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignRouteRoute = CampaignRouteRouteImport.update({
+  id: '/campaign',
+  path: '/campaign',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignIndexRoute = CampaignIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CampaignRouteRoute,
 } as any)
 const PlayerSessionRoute = PlayerSessionRouteImport.update({
   id: '/session',
@@ -77,16 +96,55 @@ const GmCharactersRoute = GmCharactersRouteImport.update({
   path: '/characters',
   getParentRoute: () => GmRouteRoute,
 } as any)
+const CampaignCampaignIdRoute = CampaignCampaignIdRouteImport.update({
+  id: '/$campaignId',
+  path: '/$campaignId',
+  getParentRoute: () => CampaignRouteRoute,
+} as any)
+const CampaignCampaignIdIndexRoute = CampaignCampaignIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CampaignCampaignIdRoute,
+} as any)
 const GmSessionSessionIdRoute = GmSessionSessionIdRouteImport.update({
   id: '/session/$sessionId',
   path: '/session/$sessionId',
   getParentRoute: () => GmRouteRoute,
 } as any)
+const CampaignCampaignIdMapRoute = CampaignCampaignIdMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => CampaignCampaignIdRoute,
+} as any)
+const CampaignCampaignIdLoreRoute = CampaignCampaignIdLoreRouteImport.update({
+  id: '/lore',
+  path: '/lore',
+  getParentRoute: () => CampaignCampaignIdRoute,
+} as any)
+const CampaignCampaignIdContentRoute =
+  CampaignCampaignIdContentRouteImport.update({
+    id: '/content',
+    path: '/content',
+    getParentRoute: () => CampaignCampaignIdRoute,
+  } as any)
+const CampaignCampaignIdAiRoute = CampaignCampaignIdAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => CampaignCampaignIdRoute,
+} as any)
+const CampaignCampaignIdAdventureRoute =
+  CampaignCampaignIdAdventureRouteImport.update({
+    id: '/adventure',
+    path: '/adventure',
+    getParentRoute: () => CampaignCampaignIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
+  '/campaign/$campaignId': typeof CampaignCampaignIdRouteWithChildren
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
   '/gm/monsters': typeof GmMonstersRoute
@@ -95,7 +153,14 @@ export interface FileRoutesByFullPath {
   '/gm/tables': typeof GmTablesRoute
   '/player/join': typeof PlayerJoinRoute
   '/player/session': typeof PlayerSessionRoute
+  '/campaign/': typeof CampaignIndexRoute
+  '/campaign/$campaignId/adventure': typeof CampaignCampaignIdAdventureRoute
+  '/campaign/$campaignId/ai': typeof CampaignCampaignIdAiRoute
+  '/campaign/$campaignId/content': typeof CampaignCampaignIdContentRoute
+  '/campaign/$campaignId/lore': typeof CampaignCampaignIdLoreRoute
+  '/campaign/$campaignId/map': typeof CampaignCampaignIdMapRoute
   '/gm/session/$sessionId': typeof GmSessionSessionIdRoute
+  '/campaign/$campaignId/': typeof CampaignCampaignIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,13 +174,22 @@ export interface FileRoutesByTo {
   '/gm/tables': typeof GmTablesRoute
   '/player/join': typeof PlayerJoinRoute
   '/player/session': typeof PlayerSessionRoute
+  '/campaign': typeof CampaignIndexRoute
+  '/campaign/$campaignId/adventure': typeof CampaignCampaignIdAdventureRoute
+  '/campaign/$campaignId/ai': typeof CampaignCampaignIdAiRoute
+  '/campaign/$campaignId/content': typeof CampaignCampaignIdContentRoute
+  '/campaign/$campaignId/lore': typeof CampaignCampaignIdLoreRoute
+  '/campaign/$campaignId/map': typeof CampaignCampaignIdMapRoute
   '/gm/session/$sessionId': typeof GmSessionSessionIdRoute
+  '/campaign/$campaignId': typeof CampaignCampaignIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
+  '/campaign/$campaignId': typeof CampaignCampaignIdRouteWithChildren
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
   '/gm/monsters': typeof GmMonstersRoute
@@ -124,14 +198,23 @@ export interface FileRoutesById {
   '/gm/tables': typeof GmTablesRoute
   '/player/join': typeof PlayerJoinRoute
   '/player/session': typeof PlayerSessionRoute
+  '/campaign/': typeof CampaignIndexRoute
+  '/campaign/$campaignId/adventure': typeof CampaignCampaignIdAdventureRoute
+  '/campaign/$campaignId/ai': typeof CampaignCampaignIdAiRoute
+  '/campaign/$campaignId/content': typeof CampaignCampaignIdContentRoute
+  '/campaign/$campaignId/lore': typeof CampaignCampaignIdLoreRoute
+  '/campaign/$campaignId/map': typeof CampaignCampaignIdMapRoute
   '/gm/session/$sessionId': typeof GmSessionSessionIdRoute
+  '/campaign/$campaignId/': typeof CampaignCampaignIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/campaign'
     | '/gm'
     | '/player'
+    | '/campaign/$campaignId'
     | '/gm/characters'
     | '/gm/create'
     | '/gm/monsters'
@@ -140,7 +223,14 @@ export interface FileRouteTypes {
     | '/gm/tables'
     | '/player/join'
     | '/player/session'
+    | '/campaign/'
+    | '/campaign/$campaignId/adventure'
+    | '/campaign/$campaignId/ai'
+    | '/campaign/$campaignId/content'
+    | '/campaign/$campaignId/lore'
+    | '/campaign/$campaignId/map'
     | '/gm/session/$sessionId'
+    | '/campaign/$campaignId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,12 +244,21 @@ export interface FileRouteTypes {
     | '/gm/tables'
     | '/player/join'
     | '/player/session'
+    | '/campaign'
+    | '/campaign/$campaignId/adventure'
+    | '/campaign/$campaignId/ai'
+    | '/campaign/$campaignId/content'
+    | '/campaign/$campaignId/lore'
+    | '/campaign/$campaignId/map'
     | '/gm/session/$sessionId'
+    | '/campaign/$campaignId'
   id:
     | '__root__'
     | '/'
+    | '/campaign'
     | '/gm'
     | '/player'
+    | '/campaign/$campaignId'
     | '/gm/characters'
     | '/gm/create'
     | '/gm/monsters'
@@ -168,11 +267,19 @@ export interface FileRouteTypes {
     | '/gm/tables'
     | '/player/join'
     | '/player/session'
+    | '/campaign/'
+    | '/campaign/$campaignId/adventure'
+    | '/campaign/$campaignId/ai'
+    | '/campaign/$campaignId/content'
+    | '/campaign/$campaignId/lore'
+    | '/campaign/$campaignId/map'
     | '/gm/session/$sessionId'
+    | '/campaign/$campaignId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CampaignRouteRoute: typeof CampaignRouteRouteWithChildren
   GmRouteRoute: typeof GmRouteRouteWithChildren
   PlayerRouteRoute: typeof PlayerRouteRouteWithChildren
 }
@@ -193,12 +300,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GmRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaign': {
+      id: '/campaign'
+      path: '/campaign'
+      fullPath: '/campaign'
+      preLoaderRoute: typeof CampaignRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/campaign/': {
+      id: '/campaign/'
+      path: '/'
+      fullPath: '/campaign/'
+      preLoaderRoute: typeof CampaignIndexRouteImport
+      parentRoute: typeof CampaignRouteRoute
     }
     '/player/session': {
       id: '/player/session'
@@ -256,6 +377,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GmCharactersRouteImport
       parentRoute: typeof GmRouteRoute
     }
+    '/campaign/$campaignId': {
+      id: '/campaign/$campaignId'
+      path: '/$campaignId'
+      fullPath: '/campaign/$campaignId'
+      preLoaderRoute: typeof CampaignCampaignIdRouteImport
+      parentRoute: typeof CampaignRouteRoute
+    }
+    '/campaign/$campaignId/': {
+      id: '/campaign/$campaignId/'
+      path: '/'
+      fullPath: '/campaign/$campaignId/'
+      preLoaderRoute: typeof CampaignCampaignIdIndexRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
     '/gm/session/$sessionId': {
       id: '/gm/session/$sessionId'
       path: '/session/$sessionId'
@@ -263,8 +398,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GmSessionSessionIdRouteImport
       parentRoute: typeof GmRouteRoute
     }
+    '/campaign/$campaignId/map': {
+      id: '/campaign/$campaignId/map'
+      path: '/map'
+      fullPath: '/campaign/$campaignId/map'
+      preLoaderRoute: typeof CampaignCampaignIdMapRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
+    '/campaign/$campaignId/lore': {
+      id: '/campaign/$campaignId/lore'
+      path: '/lore'
+      fullPath: '/campaign/$campaignId/lore'
+      preLoaderRoute: typeof CampaignCampaignIdLoreRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
+    '/campaign/$campaignId/content': {
+      id: '/campaign/$campaignId/content'
+      path: '/content'
+      fullPath: '/campaign/$campaignId/content'
+      preLoaderRoute: typeof CampaignCampaignIdContentRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
+    '/campaign/$campaignId/ai': {
+      id: '/campaign/$campaignId/ai'
+      path: '/ai'
+      fullPath: '/campaign/$campaignId/ai'
+      preLoaderRoute: typeof CampaignCampaignIdAiRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
+    '/campaign/$campaignId/adventure': {
+      id: '/campaign/$campaignId/adventure'
+      path: '/adventure'
+      fullPath: '/campaign/$campaignId/adventure'
+      preLoaderRoute: typeof CampaignCampaignIdAdventureRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
   }
 }
+
+interface CampaignCampaignIdRouteChildren {
+  CampaignCampaignIdAdventureRoute: typeof CampaignCampaignIdAdventureRoute
+  CampaignCampaignIdAiRoute: typeof CampaignCampaignIdAiRoute
+  CampaignCampaignIdContentRoute: typeof CampaignCampaignIdContentRoute
+  CampaignCampaignIdLoreRoute: typeof CampaignCampaignIdLoreRoute
+  CampaignCampaignIdMapRoute: typeof CampaignCampaignIdMapRoute
+  CampaignCampaignIdIndexRoute: typeof CampaignCampaignIdIndexRoute
+}
+
+const CampaignCampaignIdRouteChildren: CampaignCampaignIdRouteChildren = {
+  CampaignCampaignIdAdventureRoute: CampaignCampaignIdAdventureRoute,
+  CampaignCampaignIdAiRoute: CampaignCampaignIdAiRoute,
+  CampaignCampaignIdContentRoute: CampaignCampaignIdContentRoute,
+  CampaignCampaignIdLoreRoute: CampaignCampaignIdLoreRoute,
+  CampaignCampaignIdMapRoute: CampaignCampaignIdMapRoute,
+  CampaignCampaignIdIndexRoute: CampaignCampaignIdIndexRoute,
+}
+
+const CampaignCampaignIdRouteWithChildren =
+  CampaignCampaignIdRoute._addFileChildren(CampaignCampaignIdRouteChildren)
+
+interface CampaignRouteRouteChildren {
+  CampaignCampaignIdRoute: typeof CampaignCampaignIdRouteWithChildren
+  CampaignIndexRoute: typeof CampaignIndexRoute
+}
+
+const CampaignRouteRouteChildren: CampaignRouteRouteChildren = {
+  CampaignCampaignIdRoute: CampaignCampaignIdRouteWithChildren,
+  CampaignIndexRoute: CampaignIndexRoute,
+}
+
+const CampaignRouteRouteWithChildren = CampaignRouteRoute._addFileChildren(
+  CampaignRouteRouteChildren,
+)
 
 interface GmRouteRouteChildren {
   GmCharactersRoute: typeof GmCharactersRoute
@@ -305,6 +510,7 @@ const PlayerRouteRouteWithChildren = PlayerRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CampaignRouteRoute: CampaignRouteRouteWithChildren,
   GmRouteRoute: GmRouteRouteWithChildren,
   PlayerRouteRoute: PlayerRouteRouteWithChildren,
 }

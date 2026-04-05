@@ -39,6 +39,12 @@ function LandingPage() {
         >
           {t('landing.joinGame')}
         </Link>
+        <Link
+          to="/campaign"
+          className="rounded-lg border border-primary/30 bg-primary/10 px-6 py-3 text-center font-semibold text-primary hover:bg-primary/20 transition"
+        >
+          {t('landing.createCampaign')}
+        </Link>
       </div>
     </main>
   )
