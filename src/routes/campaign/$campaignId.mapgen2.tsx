@@ -180,20 +180,23 @@ function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: numb
     drawDoor(ctx, cx, cy, isH, door.type)
   }
 
-  // ══════ PASS 9: Room numbers (only rooms referenced by notes) ══════
-  // Build a set of note refs to know which numbers to show
-  const noteRefs = new Set(data.notes.map(n => n.ref))
-  // Number rooms sequentially, but only display if a note references it
-  for (let i = 0; i < rooms.length; i++) {
-    const num = String(i + 1)
-    if (!noteRefs.has(num)) continue
-    const r = rooms[i]
-    const cx = ox + (r.x + r.w / 2) * C, cy = oy + (r.y + r.h / 2) * C
-    const fs = Math.min(r.w, r.h) * C * 0.35
+  // ══════ PASS 9: Room numbers (placed in room nearest to each note) ══════
+  for (const note of data.notes) {
+    // Find the large room closest to this note's position
+    let bestRoom: DRect | null = null, bestDist = Infinity
+    for (const r of rooms) {
+      const rcx = r.x + r.w / 2, rcy = r.y + r.h / 2
+      const d = Math.abs(rcx - note.pos.x) + Math.abs(rcy - note.pos.y)
+      if (d < bestDist) { bestDist = d; bestRoom = r }
+    }
+    if (!bestRoom) continue
+    const cx = ox + (bestRoom.x + bestRoom.w / 2) * C
+    const cy = oy + (bestRoom.y + bestRoom.h / 2) * C
+    const fs = Math.min(bestRoom.w, bestRoom.h) * C * 0.35
     ctx.font = `bold ${fs}px 'Georgia','Times New Roman',serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillStyle = INK
-    ctx.fillText(num, cx, cy + 1)
+    ctx.fillText(note.ref, cx, cy + 1)
   }
 
   // ══════ PASS 10: Notes ══════
@@ -213,14 +216,20 @@ function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: numb
     for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], nx, by + C * 0.12 + i * lh)
   }
 
-  // ══════ PASS 11: Title + Story (drawn with paper backdrop to cover hatching) ══════
+  // ══════ PASS 11: Title + Story ══════
+  // Find where dungeon actually starts (topmost floor cell in pixels)
+  let dungeonTopPx = H
+  for (const r of data.rects) {
+    const rpx = oy + r.y * C
+    if (rpx < dungeonTopPx) dungeonTopPx = rpx
+  }
+  // Title area = space between canvas top and dungeon top
   if (data.title || data.story) {
-    // Clear hatching behind title area
-    const titleBlockH = titleCells * C
+    // Clear hatching in title zone
     ctx.fillStyle = PAPER
-    ctx.fillRect(0, 0, W, titleBlockH)
+    ctx.fillRect(0, 0, W, dungeonTopPx - C)
 
-    let curY = C * 1.5
+    let curY = Math.max(C, dungeonTopPx * 0.15)
 
     if (data.title) {
       ctx.font = `bold ${C * 1.4}px 'Georgia','Times New Roman',serif`
