@@ -65,15 +65,29 @@ export function GMHeader() {
   }
 
   return (
-    <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-30">
-      <div className="mx-auto max-w-7xl px-4 py-3">
-        {/* Top row: title + room info */}
-        <div className="mb-3 flex items-center justify-between">
+    <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-30 overflow-x-hidden">
+      <div className="mx-auto max-w-7xl px-3 py-2 sm:px-4 sm:py-3">
+        {/* Top row: on mobile = title only, on sm+ = title + badges inline */}
+        <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 sm:mb-3">
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-xl font-bold">{session.room.name}</h1>
+            <h1 className="truncate text-lg font-bold sm:text-xl">{session.room.name}</h1>
             <p className="text-xs text-muted-foreground">{t('nav.gmDashboard')}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          {/* Mobile: just language + status dot next to title */}
+          <div className="flex shrink-0 items-center gap-2 sm:hidden">
+            <select
+              value={locale}
+              onChange={e => setLocale(e.target.value as typeof locale)}
+              className="rounded-lg border border-border bg-card px-2 py-1 text-xs outline-none"
+            >
+              {availableLocales.map(l => (
+                <option key={l} value={l}>{LOCALE_LABELS[l]}</option>
+              ))}
+            </select>
+            <div className={`h-2.5 w-2.5 rounded-full ${isReady ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
+          </div>
+          {/* Desktop: badges inline with title */}
+          <div className="hidden shrink-0 sm:flex sm:items-center sm:gap-2">
             <CopyBadge label={t('nav.roomCode')} value={roomCode ?? session.room.gmPeerId ?? '...'} className="text-primary" />
             {session.room.password && (
               <CopyBadge label={t('nav.password')} value={session.room.password} className="text-amber-400" />
@@ -95,8 +109,20 @@ export function GMHeader() {
           </div>
         </div>
 
+        {/* Mobile only: room info badges on their own row */}
+        <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:hidden">
+          <CopyBadge label={t('nav.roomCode')} value={roomCode ?? session.room.gmPeerId ?? '...'} className="text-primary" />
+          {session.room.password && (
+            <CopyBadge label={t('nav.password')} value={session.room.password} className="text-amber-400" />
+          )}
+          <div className="rounded-lg border border-border bg-card px-2 py-1 text-center">
+            <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{t('nav.players')}</div>
+            <div className="text-sm font-bold">{connectedCount}</div>
+          </div>
+        </div>
+
         {/* Nav row */}
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+        <div className="-mx-3 flex gap-1 overflow-x-auto px-3 pb-0.5 sm:mx-0 sm:gap-1.5 sm:px-0 scrollbar-hide">
           {NAV_ITEMS.map(item => {
             const href = item.href.includes('$sessionId')
               ? item.href.replace('$sessionId', sessionId)
@@ -107,13 +133,13 @@ export function GMHeader() {
               <Link
                 key={item.key}
                 to={href}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition ${
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition sm:gap-2 sm:px-3 sm:py-2 sm:text-sm ${
                   active
                     ? 'bg-primary/15 text-primary border border-primary/30'
                     : 'border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground'
                 }`}
               >
-                <span>{item.icon}</span>
+                <span className="hidden sm:inline">{item.icon}</span>
                 {t(item.key)}
               </Link>
             )

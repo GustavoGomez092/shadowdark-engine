@@ -64,29 +64,29 @@ function GMMonstersPage() {
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="mx-auto max-w-7xl overflow-x-hidden px-3 py-4 sm:px-4 sm:py-8">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-2 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold">{t('gm.monsters')}</h1>
-          <p className="text-muted-foreground">{t('gm.monstersDescription')}</p>
+          <h1 className="text-2xl font-bold sm:text-3xl">{t('gm.monsters')}</h1>
+          <p className="text-sm text-muted-foreground">{t('gm.monstersDescription')}</p>
         </div>
         <button
           onClick={() => setShowRandomEncounter(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+          className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
         >
           {t('gm.randomEncounter')}
         </button>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-3">
         <input
           type="text"
           placeholder={t('gm.searchMonsters')}
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring sm:w-auto"
         />
-        <div className="flex gap-1 rounded-lg border border-border p-1">
+        <div className="flex gap-1 overflow-x-auto rounded-lg border border-border p-1 scrollbar-hide">
           <button
             onClick={() => setLevelFilter(0)}
             className={`rounded-md px-3 py-1 text-xs font-medium transition ${levelFilter === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
@@ -263,11 +263,11 @@ function RandomEncounterDialog({ onSpawn, onCancel }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-md rounded-xl border border-border bg-card p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-xl border border-border bg-card p-4 sm:p-6">
         <h2 className="text-xl font-bold mb-4">{t('gm.randomEncounter')}</h2>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-4 sm:gap-4">
           <div>
             <label className="mb-1 block text-xs font-semibold text-muted-foreground">{t('gm.minLevel')}</label>
             <input type="number" value={minLevel} min={0} max={maxMonsterLevel}

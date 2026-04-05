@@ -251,14 +251,14 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, 
 
       {/* Roll Mode + Modifier (hidden when locked) */}
       {!compact && !lockedDie && (
-        <div className="px-3 pb-3 flex items-center justify-between gap-3">
+        <div className="px-3 pb-3 flex flex-wrap items-center justify-center gap-2 sm:justify-between sm:gap-3">
           {/* Roll Mode */}
           <div className="flex gap-0.5 rounded-lg border border-border p-0.5">
             {([['advantage', t('dice.advantage')], ['normal', t('dice.normal')], ['disadvantage', t('dice.disadvantage')]] as const).map(([mode, label]) => (
               <button
                 key={mode}
                 onClick={() => setRollMode(mode)}
-                className={`rounded-md px-3 py-1 text-[10px] font-bold uppercase tracking-wider transition ${
+                className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition sm:px-3 ${
                   rollMode === mode
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'

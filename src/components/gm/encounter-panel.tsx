@@ -120,7 +120,7 @@ export function EncounterPanel({
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[200px_1fr_220px]">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-[180px_1fr] lg:grid-cols-[200px_1fr_220px]">
         {/* Left: Spawned Threats */}
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -335,7 +335,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
         <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('combat.attack')}</div><div className="text-xl font-bold">{fmt(definition.attacks[0]?.bonus ?? 0)}</div></div>
         <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('combat.speed')}</div><div className="text-xl font-bold capitalize">{definition.movement.double ? "Dbl " : ""}{definition.movement.normal}</div></div>
       </div>
-      <div className="grid grid-cols-6 gap-1 text-center text-xs">
+      <div className="grid grid-cols-3 gap-1 text-center text-xs sm:grid-cols-6">
         {(["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const).map((stat) => (
           <div key={stat} className="rounded border border-border/50 p-1">
             <div className="text-[9px] text-muted-foreground">{stat}</div>
@@ -416,7 +416,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
       <div className="h-2 w-full rounded-full bg-secondary">
         <div className={`h-2 rounded-full transition-all ${hpPercent > 50 ? "bg-green-500" : hpPercent > 25 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${hpPercent}%` }} />
       </div>
-      <div className="grid grid-cols-4 gap-2 text-center">
+      <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
         <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.ac')}</div><div className="text-xl font-bold">{c.computed.ac}</div></div>
         <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.melee')}</div><div className="text-xl font-bold">{fmt(c.computed.meleeAttackBonus)}</div></div>
         <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">{t('character.ranged')}</div><div className="text-xl font-bold">{fmt(c.computed.rangedAttackBonus)}</div></div>
@@ -424,7 +424,7 @@ function CharacterDetail({ character: c, onHpChange }: { character: Character; o
           <div className="rounded-lg border border-border p-2"><div className="text-[10px] text-muted-foreground">Spell</div><div className="text-xl font-bold">{fmt(c.computed.spellCheckBonus)}</div></div>
         )}
       </div>
-      <div className="grid grid-cols-6 gap-1 text-center text-xs">
+      <div className="grid grid-cols-3 gap-1 text-center text-xs sm:grid-cols-6">
         {(["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const).map((stat) => (
           <div key={stat} className="rounded border border-border/50 p-1">
             <div className="text-[9px] text-muted-foreground">{stat}</div>

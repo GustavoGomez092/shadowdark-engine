@@ -158,7 +158,7 @@ export function AIPanel({ isOpen, onClose }: AIPanelProps) {
 
       {/* Panel */}
       <div
-        className={`fixed right-0 top-0 z-50 flex h-full w-96 flex-col border-l border-border bg-card shadow-xl transition-transform duration-200 ${
+        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-card shadow-xl transition-transform duration-200 sm:w-96 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

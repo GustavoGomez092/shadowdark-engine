@@ -108,7 +108,7 @@ export function CharacterSheet({
       </div>
 
       {/* Stat Block */}
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {ABILITY_KEYS.map(key => {
           const val = c.computed.effectiveStats[key]
           const mod = c.computed.modifiers[key]

@@ -26,16 +26,16 @@ function LandingPage() {
       <p className="mb-8 text-lg text-muted-foreground">
         {t('landing.description')}
       </p>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-3 w-full max-w-xs sm:flex-row sm:w-auto sm:max-w-none sm:gap-4">
         <Link
           to="/gm/create"
-          className="rounded-lg bg-primary px-6 py-3 text-primary-foreground font-semibold hover:opacity-90 transition"
+          className="rounded-lg bg-primary px-6 py-3 text-center text-primary-foreground font-semibold hover:opacity-90 transition"
         >
           {t('landing.createGame')}
         </Link>
         <Link
           to="/player/join"
-          className="rounded-lg border border-border px-6 py-3 font-semibold hover:bg-accent transition"
+          className="rounded-lg border border-border px-6 py-3 text-center font-semibold hover:bg-accent transition"
         >
           {t('landing.joinGame')}
         </Link>

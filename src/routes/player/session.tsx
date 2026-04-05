@@ -195,19 +195,19 @@ function PlayerSessionPage() {
 
   // Have cached state but not connected yet — show cached state with reconnecting banner
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <main className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-8">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{state?.room.name ?? 'Session'}</h1>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-2 sm:mb-6">
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-xl font-bold sm:text-2xl">{state?.room.name ?? 'Session'}</h1>
           <p className="text-sm text-muted-foreground">{ti('player.playingAs', { name: displayName ?? '' })}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5">
             {isConnected ? (
               <>
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                <span className="text-sm text-muted-foreground">{t('player.connected')}</span>
+                <span className="hidden text-sm text-muted-foreground sm:inline">{t('player.connected')}</span>
               </>
             ) : (
               <>
@@ -279,7 +279,7 @@ function PlayerSessionPage() {
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1fr_300px]">
           {/* Main: Character Sheet — full inventory, equip/drop managed by GM via P2P */}
           <div>
             {state.myCharacter ? (<>

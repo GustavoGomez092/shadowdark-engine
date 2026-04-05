@@ -149,6 +149,15 @@ body::before {
   background: #334155;
 }
 
+/* Hide scrollbar but keep scrollability */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Links — only style unclassed anchors */
 a:not([class]) {
   color: var(--primary);

@@ -638,8 +638,8 @@ function GMSessionPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+    <main className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Connected Players + Character Assignment */}
         <div className="rounded-xl border border-border bg-card p-4">
           <h2 className="mb-3 font-semibold shrink-0">{t('gm.connectedPlayers')}</h2>
@@ -877,7 +877,7 @@ function GMSessionPage() {
         </div>
 
         {/* Chat Log */}
-        <div className="rounded-xl border border-border bg-card p-4 flex flex-col h-[480px]">
+        <div className="rounded-xl border border-border bg-card p-3 sm:p-4 flex flex-col h-[240px] sm:h-[320px] lg:h-[480px]">
           <h2 className="mb-3 font-semibold">{t('chat.title')}</h2>
           <AutoScrollContainer className="min-h-0 space-y-1 overflow-y-auto mb-3 flex-1" deps={[session.chatLog.length]}>
             {session.chatLog.length === 0 ? (
