@@ -965,6 +965,11 @@ function drawExportFurniture(ctx: CanvasRenderingContext2D, px: number, py: numb
   ctx.restore()
 }
 
+// ══════════════════════════════════════════════════════════
+// ── POLISHED EXPORT — One-Page Dungeon Style ──
+// Matches the reference: hatched void, white floors, solid walls
+// ══════════════════════════════════════════════════════════
+
 export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
   const canvas = document.createElement('canvas')
   const cs = map.cellSize
@@ -974,102 +979,100 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
   ctx.scale(scale, scale)
 
   const W = map.width * cs, H = map.height * cs
+  const wallThick = map.wallThickness ?? 5
+  const INK = '#221122'
+  const PAPER = '#f5f0e8'
+  const FLOOR = '#ffffff'
 
-  // Background — light parchment
-  ctx.fillStyle = '#f5f0e8'
-  ctx.fillRect(0, 0, W, H)
-
+  // Build cell lookup & set of floor coordinates
   const cells = new Map<string, MapCell>()
+  const floorSet = new Set<string>()
   for (const layer of map.layers) {
     if (!layer.visible) continue
-    for (const cell of layer.cells) cells.set(`${cell.x},${cell.y}`, cell)
-  }
-
-  const wallThick = map.wallThickness ?? 4
-  const wallStyle = map.wallStyle ?? 'double'
-
-  // Helper: fill a terrain type into a region (full cell or clipped triangle)
-  function fillTerrainRegion(terrain: TerrainType, px: number, py: number) {
-    const color = EXPORT_TERRAIN_COLORS[terrain] || '#f5f0e8'
-    ctx.fillStyle = color
-    ctx.fill() // fill the current path (set by caller)
-
-    // Texture overlays (clip is already set by caller)
-    if (terrain === 'stone_wall' || terrain === 'cave_wall') {
-      drawStoneTexture(ctx, px, py, cs, cs)
-    } else if (terrain === 'dirt' || terrain === 'mud' || terrain === 'cave_floor') {
-      drawDirtTexture(ctx, px, py, cs, cs)
-    } else if (terrain === 'sand') {
-      drawSandTexture(ctx, px, py, cs, cs)
-    } else if (terrain === 'water' || terrain === 'deep_water') {
-      drawWaterTexture(ctx, px, py, cs, cs, terrain === 'deep_water')
-    } else if (terrain === 'grass') {
-      drawGrassTexture(ctx, px, py, cs, cs)
-    } else if (terrain === 'lava') {
-      drawLavaTexture(ctx, px, py, cs, cs)
-    } else if (terrain === 'cobblestone') {
-      drawTileTexture(ctx, px, py, cs, cs, true)
-    } else if (terrain === 'tiles' || terrain === 'marble') {
-      drawTileTexture(ctx, px, py, cs, cs, false)
-    } else if (terrain === 'wooden_floor') {
-      ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 0.4
-      for (let i = 0; i < 4; i++) {
-        const ly = py + (i + 0.5) * cs / 4
-        ctx.beginPath(); ctx.moveTo(px, ly); ctx.lineTo(px + cs, ly); ctx.stroke()
-      }
-      ctx.restore()
+    for (const cell of layer.cells) {
+      cells.set(`${cell.x},${cell.y}`, cell)
+      floorSet.add(`${cell.x},${cell.y}`)
     }
   }
 
-  // ── Pass 1: Terrain fills ──
+  // ── Pass 1: Parchment background ──
+  ctx.fillStyle = PAPER
+  ctx.fillRect(0, 0, W, H)
+
+  // ── Pass 2: Hatching on void cells (outside dungeon) ──
+  // Dense crosshatch strokes on every non-floor cell, like the reference
+  const rng = seededRng(42)
+  for (let gy = 0; gy < map.height; gy++) {
+    for (let gx = 0; gx < map.width; gx++) {
+      if (floorSet.has(`${gx},${gy}`)) continue
+      // Check if this void cell is near any floor cell (within 2 cells)
+      let nearFloor = false
+      for (let dy = -2; dy <= 2 && !nearFloor; dy++)
+        for (let dx = -2; dx <= 2 && !nearFloor; dx++)
+          if (floorSet.has(`${gx + dx},${gy + dy}`)) nearFloor = true
+      if (!nearFloor) continue // skip void cells far from dungeon
+
+      const px = gx * cs, py = gy * cs
+      // Dense hatching strokes
+      ctx.strokeStyle = INK
+      ctx.lineWidth = 0.6
+      const density = 12
+      for (let i = 0; i < density; i++) {
+        const sx = px + rng.next() * cs
+        const sy = py + rng.next() * cs
+        const angle = rng.next() * Math.PI
+        const len = 3 + rng.next() * (cs * 0.5)
+        ctx.beginPath()
+        ctx.moveTo(sx, sy)
+        ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
+        ctx.stroke()
+      }
+      // Extra short strokes for density
+      ctx.lineWidth = 0.4
+      for (let i = 0; i < density / 2; i++) {
+        const sx = px + rng.next() * cs
+        const sy = py + rng.next() * cs
+        const angle = rng.next() * Math.PI * 2
+        const len = 1.5 + rng.next() * 3
+        ctx.beginPath()
+        ctx.moveTo(sx, sy)
+        ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
+        ctx.stroke()
+      }
+    }
+  }
+
+  // ── Pass 3: Floor fills ──
   for (const [, cell] of cells) {
     const px = cell.x * cs, py = cell.y * cs
+    const isWater = cell.terrain === 'water' || cell.terrain === 'deep_water'
+    const isSpecial = cell.terrain !== 'stone_floor' && cell.terrain !== 'void'
 
-    if (cell.split && cell.splitTerrain) {
-      // Draw two triangles with separate terrain
-      ctx.save()
-      // Triangle 1
-      ctx.beginPath()
-      if (cell.split === 'TLBR') {
-        ctx.moveTo(px, py); ctx.lineTo(px + cs, py); ctx.lineTo(px, py + cs); ctx.closePath()
-      } else {
-        ctx.moveTo(px, py); ctx.lineTo(px + cs, py); ctx.lineTo(px + cs, py + cs); ctx.closePath()
-      }
-      ctx.save(); ctx.clip()
-      ctx.beginPath(); ctx.rect(px, py, cs, cs)
-      fillTerrainRegion(cell.terrain, px, py)
-      ctx.restore()
+    // White floor
+    ctx.fillStyle = isWater ? '#e8f0f8' : FLOOR
+    ctx.fillRect(px, py, cs, cs)
 
-      // Triangle 2
-      ctx.beginPath()
-      if (cell.split === 'TLBR') {
-        ctx.moveTo(px + cs, py); ctx.lineTo(px + cs, py + cs); ctx.lineTo(px, py + cs); ctx.closePath()
-      } else {
-        ctx.moveTo(px, py); ctx.lineTo(px + cs, py + cs); ctx.lineTo(px, py + cs); ctx.closePath()
-      }
-      ctx.save(); ctx.clip()
-      ctx.beginPath(); ctx.rect(px, py, cs, cs)
-      fillTerrainRegion(cell.splitTerrain, px, py)
-      ctx.restore()
-      ctx.restore()
-    } else {
-      ctx.beginPath(); ctx.rect(px, py, cs, cs)
-      fillTerrainRegion(cell.terrain, px, py)
+    // Subtle grid inside rooms
+    ctx.strokeStyle = 'rgba(0,0,0,0.06)'
+    ctx.lineWidth = 0.3
+    ctx.strokeRect(px, py, cs, cs)
+
+    // Water ripples
+    if (isWater) {
+      drawWaterTexture(ctx, px, py, cs, cs, cell.terrain === 'deep_water')
     }
 
+    // Special terrain textures (non-floor)
+    if (isSpecial && !isWater) {
+      if (cell.terrain === 'dirt' || cell.terrain === 'mud' || cell.terrain === 'cave_floor') {
+        drawSandTexture(ctx, px, py, cs, cs) // light stipple for dirt
+      } else if (cell.terrain === 'grass') {
+        drawGrassTexture(ctx, px, py, cs, cs)
+      }
+    }
   }
 
-  // ── Pass 2: Grid lines (subtle) ──
-  ctx.strokeStyle = 'rgba(0,0,0,0.08)'
-  ctx.lineWidth = 0.3
-  for (let x = 0; x <= map.width; x++) {
-    ctx.beginPath(); ctx.moveTo(x * cs, 0); ctx.lineTo(x * cs, H); ctx.stroke()
-  }
-  for (let y = 0; y <= map.height; y++) {
-    ctx.beginPath(); ctx.moveTo(0, y * cs); ctx.lineTo(W, y * cs); ctx.stroke()
-  }
-
-  // ── Pass 3: Features/furniture ──
+  // ── Pass 4: Features/furniture ──
   for (const [, cell] of cells) {
     const px = cell.x * cs, py = cell.y * cs
     for (const feature of cell.features) {
@@ -1077,29 +1080,15 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
         drawExportFurniture(ctx, px, py, cs, feature.variant)
       } else if (feature.type === 'stairs') {
         ctx.save()
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 0.8
+        ctx.strokeStyle = INK; ctx.lineWidth = 0.8
         for (let i = 0; i < 5; i++) {
           const sy = py + cs * 0.1 + i * cs * 0.16
           ctx.beginPath(); ctx.moveTo(px + cs * 0.15, sy); ctx.lineTo(px + cs * 0.85, sy); ctx.stroke()
         }
-        ctx.fillStyle = '#333'; ctx.font = `bold ${cs * 0.2}px sans-serif`
-        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
-        ctx.fillText(feature.direction === 'up' ? 'UP' : 'DN', px + cs / 2, py + cs - 2)
-        ctx.restore()
-      } else if (feature.type === 'entry' || feature.type === 'exit') {
-        ctx.save()
-        ctx.strokeStyle = feature.type === 'entry' ? '#2a7e3e' : '#a83232'
-        ctx.lineWidth = 2
-        ctx.setLineDash([3, 3])
-        ctx.strokeRect(px + 2, py + 2, cs - 4, cs - 4)
-        ctx.setLineDash([])
-        ctx.fillStyle = ctx.strokeStyle; ctx.font = `bold ${cs * 0.18}px sans-serif`
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-        ctx.fillText(feature.type === 'entry' ? 'IN' : 'OUT', px + cs / 2, py + cs / 2)
         ctx.restore()
       } else if (feature.type === 'trap') {
         ctx.save()
-        ctx.strokeStyle = 'rgba(180,40,40,0.4)'; ctx.lineWidth = 0.8
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.6
         ctx.beginPath(); ctx.moveTo(px + 3, py + 3); ctx.lineTo(px + cs - 3, py + cs - 3); ctx.stroke()
         ctx.beginPath(); ctx.moveTo(px + cs - 3, py + 3); ctx.lineTo(px + 3, py + cs - 3); ctx.stroke()
         ctx.restore()
@@ -1107,183 +1096,131 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
     }
   }
 
-  // ── Pass 4: Walls (thick, stone-like) ──
-  function drawPolishedWall(x1: number, y1: number, x2: number, y2: number, type: WallType) {
+  // ── Pass 5: Walls — solid filled polygons ──
+  function drawWall(x1: number, y1: number, x2: number, y2: number, type: WallType) {
     if (!type || type === 'none') return
 
-    if (type === 'door') {
-      drawExportDoor(ctx, x1, y1, x2, y2, cs)
-      return
-    }
-
-    if (type === 'window') {
-      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
-      const dx = x2 - x1, dy = y2 - y1
-      const len = Math.sqrt(dx * dx + dy * dy) || 1
-      const gap = cs * 0.18
-      const nx = dx / len * gap, ny = dy / len * gap
-      // Wall segments
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 3.5; ctx.setLineDash([])
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(mx - nx, my - ny); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(mx + nx, my + ny); ctx.lineTo(x2, y2); ctx.stroke()
-      // Window pane (double line)
-      ctx.strokeStyle = '#4a80b0'; ctx.lineWidth = 1
-      ctx.beginPath(); ctx.moveTo(mx - nx, my - ny); ctx.lineTo(mx + nx, my + ny); ctx.stroke()
-      ctx.strokeStyle = '#6aa0d0'; ctx.lineWidth = 0.5
-      const perp = 1.5
-      const perpX = -ny / gap * perp, perpY = nx / gap * perp
-      ctx.beginPath(); ctx.moveTo(mx - nx + perpX, my - ny + perpY); ctx.lineTo(mx + nx + perpX, my + ny + perpY); ctx.stroke()
-      return
-    }
-
-    // Standard wall or diagonal — extend past corners so they connect
     const dx = x2 - x1, dy = y2 - y1
     const len = Math.sqrt(dx * dx + dy * dy) || 1
     const ext = wallThick * 0.5
     const ex1 = x1 - (dx / len) * ext, ey1 = y1 - (dy / len) * ext
     const ex2 = x2 + (dx / len) * ext, ey2 = y2 + (dy / len) * ext
+    const nx = -(dy / len) * (wallThick / 2)
+    const ny = (dx / len) * (wallThick / 2)
 
-    ctx.setLineDash(type === 'secret_door' ? [3, 3] : [])
-    ctx.lineCap = 'butt'
-
-    if (wallStyle === 'double' || wallStyle === 'stone' || wallStyle === 'brick') {
-      // Double-line wall: two parallel lines with fill between
-      const nx = -(dy / len) * (wallThick / 2)
-      const ny = (dx / len) * (wallThick / 2)
-
-      // Filled rectangle between lines
-      ctx.fillStyle = wallStyle === 'stone' ? '#4a4a4a' : wallStyle === 'brick' ? '#5a3a2a' : '#2a2a2a'
+    if (type === 'door') {
+      // Door: gap in wall with small door rectangle
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+      const doorGap = cs * 0.3
+      const gx = (dx / len) * doorGap, gy = (dy / len) * doorGap
+      // Wall before door
+      ctx.fillStyle = INK; ctx.beginPath()
+      ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(mx - gx + nx, my - gy + ny)
+      ctx.lineTo(mx - gx - nx, my - gy - ny); ctx.lineTo(ex1 - nx, ey1 - ny)
+      ctx.closePath(); ctx.fill()
+      // Wall after door
       ctx.beginPath()
-      ctx.moveTo(ex1 + nx, ey1 + ny)
-      ctx.lineTo(ex2 + nx, ey2 + ny)
-      ctx.lineTo(ex2 - nx, ey2 - ny)
-      ctx.lineTo(ex1 - nx, ey1 - ny)
-      ctx.closePath()
-      ctx.fill()
-
-      // Outer edges
-      ctx.strokeStyle = '#1a1a1a'
-      ctx.lineWidth = 0.8
-      ctx.beginPath(); ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(ex2 + nx, ey2 + ny); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(ex1 - nx, ey1 - ny); ctx.lineTo(ex2 - nx, ey2 - ny); ctx.stroke()
-
-      // Stone texture — irregular rounded stones with mortar gaps (like Dungeon.js Stonework)
-      if (wallStyle === 'stone') {
-        const rng = seededRng(Math.floor(x1 * 31 + y1 * 17 + x2 * 13))
-        const stoneSize = wallThick * 1.2
-        const nStones = Math.max(2, Math.floor(len / stoneSize))
-        // Mortar lines (perpendicular to wall direction)
-        ctx.strokeStyle = 'rgba(180,170,150,0.6)'
-        ctx.lineWidth = 0.8
-        for (let i = 1; i < nStones; i++) {
-          const t = i / nStones + (rng() - 0.5) * 0.15 / nStones
-          const cx = ex1 + (ex2 - ex1) * t
-          const cy = ey1 + (ey2 - ey1) * t
-          ctx.beginPath()
-          ctx.moveTo(cx + nx * 1.1, cy + ny * 1.1)
-          ctx.lineTo(cx - nx * 1.1, cy - ny * 1.1)
-          ctx.stroke()
-        }
-        // Center mortar line (parallel, splitting wall into two rows)
-        if (wallThick >= 5) {
-          ctx.beginPath()
-          ctx.moveTo(ex1, ey1)
-          ctx.lineTo(ex2, ey2)
-          ctx.stroke()
-        }
-        // Stone highlight dots (rounded stone tops)
-        ctx.fillStyle = 'rgba(255,255,255,0.12)'
-        for (let i = 0; i < nStones; i++) {
-          const t = (i + 0.5) / nStones
-          for (let row = -0.3; row <= 0.3; row += 0.6) {
-            const cx = ex1 + (ex2 - ex1) * t + nx * row * 1.5 + (rng() - 0.5) * 1.5
-            const cy = ey1 + (ey2 - ey1) * t + ny * row * 1.5 + (rng() - 0.5) * 1.5
-            const sr = wallThick * 0.12 + rng() * wallThick * 0.08
-            ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.fill()
-          }
-        }
-        // Dark stipple for stone texture
-        ctx.fillStyle = 'rgba(0,0,0,0.08)'
-        for (let i = 0; i < nStones * 2; i++) {
-          const t = rng()
-          const across = (rng() - 0.5) * 0.8
-          const cx = ex1 + (ex2 - ex1) * t + nx * across * 2
-          const cy = ey1 + (ey2 - ey1) * t + ny * across * 2
-          ctx.beginPath(); ctx.arc(cx, cy, 0.3 + rng() * 0.5, 0, Math.PI * 2); ctx.fill()
-        }
-      } else if (wallStyle === 'brick') {
-        // Brick layers — perpendicular mortar joints, offset between rows
-        const rng = seededRng(Math.floor(x1 * 47 + y1 * 23 + x2 * 11))
-        const brickLen = wallThick * 0.8
-        const nBricks = Math.max(2, Math.floor(len / brickLen))
-        ctx.strokeStyle = 'rgba(200,180,150,0.5)'
-        ctx.lineWidth = 0.6
-        // Perpendicular mortar
-        for (let i = 1; i < nBricks; i++) {
-          const t = i / nBricks
-          const cx = ex1 + (ex2 - ex1) * t
-          const cy = ey1 + (ey2 - ey1) * t
-          ctx.beginPath()
-          ctx.moveTo(cx + nx * 1.1, cy + ny * 1.1)
-          ctx.lineTo(cx - nx * 1.1, cy - ny * 1.1)
-          ctx.stroke()
-        }
-        // Horizontal mortar (center line)
-        if (wallThick >= 4) {
-          ctx.beginPath()
-          ctx.moveTo(ex1 + (rng() - 0.5) * brickLen * 0.3, ey1 + (rng() - 0.5) * 0.5)
-          ctx.lineTo(ex2 + (rng() - 0.5) * brickLen * 0.3, ey2 + (rng() - 0.5) * 0.5)
-          ctx.stroke()
-        }
-      }
-    } else {
-      // Simple line wall
-      ctx.strokeStyle = '#1a1a1a'
-      ctx.lineWidth = wallThick
-      ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
+      ctx.moveTo(mx + gx + nx, my + gy + ny); ctx.lineTo(ex2 + nx, ey2 + ny)
+      ctx.lineTo(ex2 - nx, ey2 - ny); ctx.lineTo(mx + gx - nx, my + gy - ny)
+      ctx.closePath(); ctx.fill()
+      // Door rectangle
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.2
+      const dw = doorGap * 1.6, dh = wallThick * 0.6
+      ctx.strokeRect(mx - dw / 2, my - dh / 2, dw, dh)
+      return
     }
 
-    // Inner highlight for all styles
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)'
-    ctx.lineWidth = 0.5
-    ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
-    ctx.setLineDash([])
+    if (type === 'secret_door') {
+      // Secret door: thin dashed line
+      ctx.strokeStyle = INK; ctx.lineWidth = 1
+      ctx.setLineDash([2, 3])
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+      ctx.setLineDash([])
+      return
+    }
+
+    if (type === 'window') {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+      const gap = cs * 0.15
+      const gx = (dx / len) * gap, gy = (dy / len) * gap
+      // Wall segments
+      ctx.fillStyle = INK
+      ctx.beginPath()
+      ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(mx - gx + nx, my - gy + ny)
+      ctx.lineTo(mx - gx - nx, my - gy - ny); ctx.lineTo(ex1 - nx, ey1 - ny)
+      ctx.closePath(); ctx.fill()
+      ctx.beginPath()
+      ctx.moveTo(mx + gx + nx, my + gy + ny); ctx.lineTo(ex2 + nx, ey2 + ny)
+      ctx.lineTo(ex2 - nx, ey2 - ny); ctx.lineTo(mx + gx - nx, my + gy - ny)
+      ctx.closePath(); ctx.fill()
+      // Window bars
+      ctx.strokeStyle = INK; ctx.lineWidth = 0.8
+      ctx.beginPath(); ctx.moveTo(mx - gx, my - gy); ctx.lineTo(mx + gx, my + gy); ctx.stroke()
+      return
+    }
+
+    if (type === 'arch') {
+      // Arch: gap in wall (no door rectangle)
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+      const archGap = cs * 0.35
+      const gx = (dx / len) * archGap, gy = (dy / len) * archGap
+      ctx.fillStyle = INK
+      ctx.beginPath()
+      ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(mx - gx + nx, my - gy + ny)
+      ctx.lineTo(mx - gx - nx, my - gy - ny); ctx.lineTo(ex1 - nx, ey1 - ny)
+      ctx.closePath(); ctx.fill()
+      ctx.beginPath()
+      ctx.moveTo(mx + gx + nx, my + gy + ny); ctx.lineTo(ex2 + nx, ey2 + ny)
+      ctx.lineTo(ex2 - nx, ey2 - ny); ctx.lineTo(mx + gx - nx, my + gy - ny)
+      ctx.closePath(); ctx.fill()
+      return
+    }
+
+    // Standard wall — solid filled polygon
+    ctx.fillStyle = INK
+    ctx.beginPath()
+    ctx.moveTo(ex1 + nx, ey1 + ny)
+    ctx.lineTo(ex2 + nx, ey2 + ny)
+    ctx.lineTo(ex2 - nx, ey2 - ny)
+    ctx.lineTo(ex1 - nx, ey1 - ny)
+    ctx.closePath()
+    ctx.fill()
   }
 
   for (const [, cell] of cells) {
     const px = cell.x * cs, py = cell.y * cs
-    drawPolishedWall(px, py, px + cs, py, cell.walls.north)
-    drawPolishedWall(px + cs, py, px + cs, py + cs, cell.walls.east)
-    drawPolishedWall(px, py + cs, px + cs, py + cs, cell.walls.south)
-    drawPolishedWall(px, py, px, py + cs, cell.walls.west)
-    if (cell.walls.diagTLBR && cell.walls.diagTLBR !== 'none') drawPolishedWall(px, py, px + cs, py + cs, cell.walls.diagTLBR)
-    if (cell.walls.diagTRBL && cell.walls.diagTRBL !== 'none') drawPolishedWall(px + cs, py, px, py + cs, cell.walls.diagTRBL)
+    drawWall(px, py, px + cs, py, cell.walls.north)
+    drawWall(px + cs, py, px + cs, py + cs, cell.walls.east)
+    drawWall(px, py + cs, px + cs, py + cs, cell.walls.south)
+    drawWall(px, py, px, py + cs, cell.walls.west)
+    if (cell.walls.diagTLBR && cell.walls.diagTLBR !== 'none') drawWall(px, py, px + cs, py + cs, cell.walls.diagTLBR)
+    if (cell.walls.diagTRBL && cell.walls.diagTRBL !== 'none') drawWall(px + cs, py, px, py + cs, cell.walls.diagTRBL)
   }
 
-  // ── Pass 5: Room number markers ──
+  // ── Pass 6: Room number markers (elegant serif style) ──
   for (const marker of map.markers) {
     const mx = marker.x, my = marker.y
     if (marker.type === 'room_number') {
-      // White circle with black border
-      ctx.fillStyle = '#fff'
-      ctx.beginPath(); ctx.arc(mx, my, 13, 0, Math.PI * 2); ctx.fill()
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2
-      ctx.beginPath(); ctx.arc(mx, my, 13, 0, Math.PI * 2); ctx.stroke()
-      ctx.fillStyle = '#1a1a1a'
-      ctx.font = 'bold 12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-      ctx.fillText(marker.label, mx, my + 0.5)
+      const r = cs * 0.35
+      ctx.fillStyle = FLOOR
+      ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 2); ctx.fill()
+      ctx.strokeStyle = INK; ctx.lineWidth = 1.5
+      ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 2); ctx.stroke()
+      ctx.fillStyle = INK
+      ctx.font = `bold ${cs * 0.4}px 'Georgia', 'Times New Roman', serif`
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      ctx.fillText(marker.label, mx, my + 1)
     } else {
-      const colors: Record<string, string> = { monster: '#8b0000', npc: '#4b0082', treasure: '#8b6914', trap: '#8b0000', note: '#00008b' }
-      ctx.fillStyle = colors[marker.type] || '#333'
-      ctx.font = `bold ${9}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      ctx.fillStyle = INK
+      ctx.font = `${cs * 0.2}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
       ctx.fillText(marker.label.slice(0, 4), mx, my)
     }
   }
 
-  // ── Pass 6: Text labels ──
+  // ── Pass 7: Text labels ──
   for (const label of map.labels) {
-    ctx.fillStyle = label.color || '#1a1a1a'
-    ctx.font = `bold ${label.fontSize}px serif`
+    ctx.fillStyle = label.color || INK
+    ctx.font = `bold ${label.fontSize}px 'Georgia', serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillText(label.text, label.x, label.y)
   }
