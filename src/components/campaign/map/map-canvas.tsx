@@ -196,16 +196,35 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
       ctx.beginPath(); ctx.moveTo(mx - nx, my - ny); ctx.lineTo(mx + nx, my + ny); ctx.stroke()
       ctx.lineWidth = prevLW
     } else {
-      // Extend past endpoints so corners connect
+      // Polygon-fill wall (Dungeon.js approach) — filled quad between parallel lines
       const dx = x2 - x1, dy = y2 - y1
       const len = Math.sqrt(dx * dx + dy * dy) || 1
       const ext = 1.5 * zoom
       const ex1 = x1 - (dx / len) * ext, ey1 = y1 - (dy / len) * ext
       const ex2 = x2 + (dx / len) * ext, ey2 = y2 + (dy / len) * ext
+      const thick = Math.max(2, 3 * zoom) / 2
+      const nx = -(dy / len) * thick, ny = (dx / len) * thick
+
+      // Filled wall body
+      ctx.fillStyle = WALL_COLOR
       ctx.beginPath()
-      ctx.moveTo(ex1, ey1)
-      ctx.lineTo(ex2, ey2)
+      ctx.moveTo(ex1 + nx, ey1 + ny)
+      ctx.lineTo(ex2 + nx, ey2 + ny)
+      ctx.lineTo(ex2 - nx, ey2 - ny)
+      ctx.lineTo(ex1 - nx, ey1 - ny)
+      ctx.closePath()
+      ctx.fill()
+
+      // Outline edges
+      ctx.strokeStyle = '#111'
+      ctx.lineWidth = 0.5
+      ctx.setLineDash(type === 'secret_door' ? [4, 4] : [])
+      ctx.beginPath()
+      ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(ex2 + nx, ey2 + ny)
+      ctx.moveTo(ex1 - nx, ey1 - ny); ctx.lineTo(ex2 - nx, ey2 - ny)
       ctx.stroke()
+      ctx.setLineDash([])
+
       if (type === 'door') {
         const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
         ctx.fillStyle = DOOR_COLOR
@@ -1148,37 +1167,73 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
       ctx.beginPath(); ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(ex2 + nx, ey2 + ny); ctx.stroke()
       ctx.beginPath(); ctx.moveTo(ex1 - nx, ey1 - ny); ctx.lineTo(ex2 - nx, ey2 - ny); ctx.stroke()
 
-      // Stone texture between lines
+      // Stone texture — irregular rounded stones with mortar gaps (like Dungeon.js Stonework)
       if (wallStyle === 'stone') {
         const rng = seededRng(Math.floor(x1 * 31 + y1 * 17 + x2 * 13))
-        ctx.fillStyle = 'rgba(255,255,255,0.15)'
-        const segments = Math.floor(len / (wallThick * 1.5)) + 1
-        for (let i = 0; i < segments; i++) {
-          const t = (i + 0.5) / segments
-          const cx = ex1 + (ex2 - ex1) * t + (rng() - 0.5) * 1
-          const cy = ey1 + (ey2 - ey1) * t + (rng() - 0.5) * 1
-          const sr = wallThick * 0.2 + rng() * wallThick * 0.15
-          ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.fill()
-        }
-        // Mortar lines across wall width
-        ctx.strokeStyle = 'rgba(0,0,0,0.15)'
-        ctx.lineWidth = 0.3
-        for (let i = 1; i < segments; i++) {
-          const t = i / segments
+        const stoneSize = wallThick * 1.2
+        const nStones = Math.max(2, Math.floor(len / stoneSize))
+        // Mortar lines (perpendicular to wall direction)
+        ctx.strokeStyle = 'rgba(180,170,150,0.6)'
+        ctx.lineWidth = 0.8
+        for (let i = 1; i < nStones; i++) {
+          const t = i / nStones + (rng() - 0.5) * 0.15 / nStones
           const cx = ex1 + (ex2 - ex1) * t
           const cy = ey1 + (ey2 - ey1) * t
-          ctx.beginPath(); ctx.moveTo(cx + nx, cy + ny); ctx.lineTo(cx - nx, cy - ny); ctx.stroke()
+          ctx.beginPath()
+          ctx.moveTo(cx + nx * 1.1, cy + ny * 1.1)
+          ctx.lineTo(cx - nx * 1.1, cy - ny * 1.1)
+          ctx.stroke()
+        }
+        // Center mortar line (parallel, splitting wall into two rows)
+        if (wallThick >= 5) {
+          ctx.beginPath()
+          ctx.moveTo(ex1, ey1)
+          ctx.lineTo(ex2, ey2)
+          ctx.stroke()
+        }
+        // Stone highlight dots (rounded stone tops)
+        ctx.fillStyle = 'rgba(255,255,255,0.12)'
+        for (let i = 0; i < nStones; i++) {
+          const t = (i + 0.5) / nStones
+          for (let row = -0.3; row <= 0.3; row += 0.6) {
+            const cx = ex1 + (ex2 - ex1) * t + nx * row * 1.5 + (rng() - 0.5) * 1.5
+            const cy = ey1 + (ey2 - ey1) * t + ny * row * 1.5 + (rng() - 0.5) * 1.5
+            const sr = wallThick * 0.12 + rng() * wallThick * 0.08
+            ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.fill()
+          }
+        }
+        // Dark stipple for stone texture
+        ctx.fillStyle = 'rgba(0,0,0,0.08)'
+        for (let i = 0; i < nStones * 2; i++) {
+          const t = rng()
+          const across = (rng() - 0.5) * 0.8
+          const cx = ex1 + (ex2 - ex1) * t + nx * across * 2
+          const cy = ey1 + (ey2 - ey1) * t + ny * across * 2
+          ctx.beginPath(); ctx.arc(cx, cy, 0.3 + rng() * 0.5, 0, Math.PI * 2); ctx.fill()
         }
       } else if (wallStyle === 'brick') {
-        // Horizontal brick lines
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)'
-        ctx.lineWidth = 0.3
-        const segments = Math.floor(len / wallThick) + 1
-        for (let i = 1; i < segments; i++) {
-          const t = i / segments
+        // Brick layers — perpendicular mortar joints, offset between rows
+        const rng = seededRng(Math.floor(x1 * 47 + y1 * 23 + x2 * 11))
+        const brickLen = wallThick * 0.8
+        const nBricks = Math.max(2, Math.floor(len / brickLen))
+        ctx.strokeStyle = 'rgba(200,180,150,0.5)'
+        ctx.lineWidth = 0.6
+        // Perpendicular mortar
+        for (let i = 1; i < nBricks; i++) {
+          const t = i / nBricks
           const cx = ex1 + (ex2 - ex1) * t
           const cy = ey1 + (ey2 - ey1) * t
-          ctx.beginPath(); ctx.moveTo(cx + nx, cy + ny); ctx.lineTo(cx - nx, cy - ny); ctx.stroke()
+          ctx.beginPath()
+          ctx.moveTo(cx + nx * 1.1, cy + ny * 1.1)
+          ctx.lineTo(cx - nx * 1.1, cy - ny * 1.1)
+          ctx.stroke()
+        }
+        // Horizontal mortar (center line)
+        if (wallThick >= 4) {
+          ctx.beginPath()
+          ctx.moveTo(ex1 + (rng() - 0.5) * brickLen * 0.3, ey1 + (rng() - 0.5) * 0.5)
+          ctx.lineTo(ex2 + (rng() - 0.5) * brickLen * 0.3, ey2 + (rng() - 0.5) * 0.5)
+          ctx.stroke()
         }
       }
     } else {
