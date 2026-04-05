@@ -31,6 +31,8 @@ export type TerrainType =
   | 'stone_floor' | 'stone_wall' | 'dirt' | 'water'
   | 'deep_water' | 'cave_floor' | 'cave_wall'
   | 'wooden_floor' | 'grass' | 'void'
+  | 'sand' | 'cobblestone' | 'marble' | 'mud' | 'lava'
+  | 'ice' | 'tiles'
 
 export interface WallConfig {
   north: WallType
@@ -45,8 +47,15 @@ export interface WallConfig {
 
 export type WallType = 'none' | 'wall' | 'door' | 'secret_door' | 'arch' | 'bars' | 'window'
 
+export type FurnitureVariant =
+  | 'table' | 'chair' | 'chest' | 'barrel' | 'crate'
+  | 'column' | 'statue' | 'altar' | 'fireplace' | 'forge'
+  | 'bookshelf' | 'bed' | 'throne' | 'fountain' | 'well'
+  | 'sarcophagus' | 'rubble' | 'pillar' | 'lever' | 'torch_sconce'
+  | 'rug' | 'cauldron' | 'cage' | 'pit'
+
 export type CellFeature =
-  | { type: 'furniture'; variant: string }
+  | { type: 'furniture'; variant: FurnitureVariant | string }
   | { type: 'trap'; trapId: string }
   | { type: 'stairs'; direction: 'up' | 'down' }
   | { type: 'entry' }

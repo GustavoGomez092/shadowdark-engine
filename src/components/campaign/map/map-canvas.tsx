@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import type { CampaignMap, MapCell, TerrainType, WallType, MapLabel, MapMarker } from '@/schemas/map.ts'
 import { generateId } from '@/lib/utils/id.ts'
 
-// ── Terrain Colors ──
+// ── Terrain Colors (editor view) ──
 const TERRAIN_COLORS: Record<TerrainType, string> = {
   stone_floor: '#d4d0c8',
   stone_wall: '#5a5a5a',
@@ -14,6 +14,43 @@ const TERRAIN_COLORS: Record<TerrainType, string> = {
   wooden_floor: '#c4a265',
   grass: '#6b8e4e',
   void: '#1a1a1a',
+  sand: '#d4b87a',
+  cobblestone: '#9a9a8e',
+  marble: '#e8e4df',
+  mud: '#6b5a3e',
+  lava: '#d44400',
+  ice: '#c8e4f0',
+  tiles: '#b8b0a0',
+}
+
+// ── Polished export colors (for print/PNG) ──
+const EXPORT_TERRAIN_COLORS: Record<TerrainType, string> = {
+  stone_floor: '#ffffff',
+  stone_wall: '#3a3a3a',
+  dirt: '#c4a87a',
+  water: '#a8d4f0',
+  deep_water: '#7ab8e0',
+  cave_floor: '#e8ddd0',
+  cave_wall: '#5a5048',
+  wooden_floor: '#dcc8a0',
+  grass: '#c8e0a8',
+  void: '#f5f5f5',
+  sand: '#f0e0b8',
+  cobblestone: '#d0d0c8',
+  marble: '#f0ece8',
+  mud: '#a08868',
+  lava: '#ff6030',
+  ice: '#e0f0f8',
+  tiles: '#e0d8c8',
+}
+
+// ── Furniture icons (for editor) ──
+const FURNITURE_ICONS: Record<string, string> = {
+  table: '🪑', chair: '💺', chest: '📦', barrel: '🛢', crate: '📦',
+  column: '🏛', statue: '🗿', altar: '⛪', fireplace: '🔥', forge: '⚒',
+  bookshelf: '📚', bed: '🛏', throne: '👑', fountain: '⛲', well: '🪣',
+  sarcophagus: '⚰', rubble: '🪨', pillar: '🏛', lever: '🔧', torch_sconce: '🔥',
+  rug: '🟫', cauldron: '🫕', cage: '🔲', pit: '⚫',
 }
 
 const WALL_COLOR = '#2a2a2a'
@@ -22,7 +59,7 @@ const SECRET_DOOR_COLOR = '#6a4c93'
 const WINDOW_COLOR = '#5b9bd5'
 const GRID_COLOR = 'rgba(100, 100, 100, 0.3)'
 
-export type MapTool = 'select' | 'floor' | 'bucket' | 'wall' | 'door' | 'window' | 'diagonal' | 'eraser' | 'label' | 'marker'
+export type MapTool = 'select' | 'floor' | 'bucket' | 'wall' | 'door' | 'window' | 'diagonal' | 'furniture' | 'eraser' | 'label' | 'marker'
 
 interface Props {
   map: CampaignMap
@@ -30,6 +67,7 @@ interface Props {
   activeTool: MapTool
   activeTerrainType: TerrainType
   activeWallType: WallType
+  activeFurniture: string
   showGrid: boolean
   gridDistanceFt: number
 }
@@ -43,7 +81,7 @@ interface Viewport {
 // ── Undo/Redo History ──
 const MAX_HISTORY = 80
 
-export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, activeWallType, showGrid, gridDistanceFt }: Props) {
+export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, activeWallType, activeFurniture, showGrid, gridDistanceFt }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState<Viewport>({ offsetX: 20, offsetY: 20, zoom: 1 })
@@ -215,8 +253,10 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
           ctx.fillStyle = 'rgba(239, 68, 68, 0.3)'
           ctx.fillRect(px, py, cellSize, cellSize)
         } else if (feature.type === 'furniture') {
-          ctx.fillStyle = 'rgba(139, 92, 246, 0.4)'
-          ctx.fillRect(px + cellSize * 0.15, py + cellSize * 0.15, cellSize * 0.7, cellSize * 0.7)
+          const icon = FURNITURE_ICONS[feature.variant] || '?'
+          ctx.font = `${cellSize * 0.55}px sans-serif`
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+          ctx.fillText(icon, px + cellSize / 2, py + cellSize / 2)
         }
       }
     }
@@ -449,6 +489,24 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
         const current = cell.walls[diagKey] ?? 'none'
         cell.walls[diagKey] = current === 'wall' ? 'none' : 'wall'
       })
+    } else if (activeTool === 'furniture') {
+      onMapChange(m => {
+        const layer = m.layers[0]
+        let cell = layer.cells.find(c => c.x === gx && c.y === gy)
+        if (!cell) {
+          cell = { x: gx, y: gy, terrain: 'stone_floor', walls: { north: 'none', east: 'none', south: 'none', west: 'none' }, features: [] }
+          layer.cells.push(cell)
+        }
+        // Toggle — if same furniture exists, remove it; otherwise add
+        const existingIdx = cell.features.findIndex(f => f.type === 'furniture' && f.variant === activeFurniture)
+        if (existingIdx >= 0) {
+          cell.features.splice(existingIdx, 1)
+        } else {
+          // Remove any existing furniture first (one per cell)
+          cell.features = cell.features.filter(f => f.type !== 'furniture')
+          cell.features.push({ type: 'furniture', variant: activeFurniture })
+        }
+      })
     } else if (activeTool === 'marker') {
       onMapChange(m => {
         const cellSize = m.cellSize
@@ -539,17 +597,190 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
   )
 }
 
-// ── Export function ──
+// ══════════════════════════════════════════════════
+// ── Polished Export Renderer ──
+// ══════════════════════════════════════════════════
+
+/** Draw a stone/rock texture pattern on a region */
+function drawStoneTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, density: number = 0.15) {
+  ctx.save()
+  ctx.fillStyle = '#555'
+  ctx.strokeStyle = '#444'
+  ctx.lineWidth = 0.5
+  // Random small irregular shapes to simulate stone blocks
+  const seed = (x * 31 + y * 17) % 1000
+  const rng = (i: number) => ((seed + i * 7 + i * i * 3) % 1000) / 1000
+  const count = Math.floor(w * h * density / 100)
+  for (let i = 0; i < count; i++) {
+    const rx = x + rng(i * 2) * w
+    const ry = y + rng(i * 2 + 1) * h
+    const rw = 2 + rng(i * 3) * 4
+    const rh = 1.5 + rng(i * 3 + 1) * 3
+    ctx.fillStyle = `rgba(0,0,0,${0.05 + rng(i * 5) * 0.1})`
+    ctx.fillRect(rx, ry, rw, rh)
+  }
+  ctx.restore()
+}
+
+/** Draw crosshatch lines for dirt/cave texture */
+function drawDirtTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  ctx.save()
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)'
+  ctx.lineWidth = 0.5
+  const seed = (x * 13 + y * 23) % 500
+  const rng = (i: number) => ((seed + i * 11) % 500) / 500
+  for (let i = 0; i < 8; i++) {
+    const sx = x + rng(i) * w
+    const sy = y + rng(i + 10) * h
+    ctx.beginPath()
+    ctx.moveTo(sx, sy)
+    ctx.lineTo(sx + rng(i + 20) * 6 - 3, sy + rng(i + 30) * 6 - 3)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+/** Draw stipple dots for sand texture */
+function drawSandTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+  ctx.save()
+  const seed = (x * 7 + y * 19) % 400
+  const rng = (i: number) => ((seed + i * 13) % 400) / 400
+  for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${0.06 + rng(i * 3) * 0.06})`
+    ctx.beginPath()
+    ctx.arc(x + rng(i) * w, y + rng(i + 8) * h, 0.5 + rng(i + 16) * 0.8, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+/** Draw water ripple lines */
+function drawWaterTexture(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, deep: boolean) {
+  ctx.save()
+  ctx.strokeStyle = deep ? 'rgba(0,60,120,0.15)' : 'rgba(0,80,160,0.1)'
+  ctx.lineWidth = 0.6
+  const seed = (x * 11 + y * 29) % 300
+  const rng = (i: number) => ((seed + i * 17) % 300) / 300
+  for (let i = 0; i < 3; i++) {
+    const cy = y + h * 0.25 + i * h * 0.25
+    ctx.beginPath()
+    ctx.moveTo(x + 2, cy)
+    ctx.quadraticCurveTo(x + w * 0.3, cy - 2 + rng(i) * 4, x + w * 0.5, cy)
+    ctx.quadraticCurveTo(x + w * 0.7, cy + 2 - rng(i + 5) * 4, x + w - 2, cy)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+/** Draw a polished door symbol (arc + line) */
+function drawExportDoor(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, cellSize: number) {
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+  const isHorizontal = Math.abs(y1 - y2) < 1
+  const doorWidth = cellSize * 0.35
+  ctx.save()
+  // Gap in wall
+  ctx.fillStyle = '#fff'
+  if (isHorizontal) {
+    ctx.fillRect(mx - doorWidth, my - 2, doorWidth * 2, 4)
+  } else {
+    ctx.fillRect(mx - 2, my - doorWidth, 4, doorWidth * 2)
+  }
+  // Door arc
+  ctx.strokeStyle = '#333'
+  ctx.lineWidth = 1.2
+  ctx.beginPath()
+  if (isHorizontal) {
+    ctx.arc(mx - doorWidth, my, doorWidth * 2, -Math.PI * 0.5, 0)
+  } else {
+    ctx.arc(mx, my - doorWidth, doorWidth * 2, 0, Math.PI * 0.5)
+  }
+  ctx.stroke()
+  // Door line
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  if (isHorizontal) {
+    ctx.moveTo(mx - doorWidth, my)
+    ctx.lineTo(mx + doorWidth, my - doorWidth * 0.4)
+  } else {
+    ctx.moveTo(mx, my - doorWidth)
+    ctx.lineTo(mx + doorWidth * 0.4, my + doorWidth)
+  }
+  ctx.stroke()
+  ctx.restore()
+}
+
+/** Draw furniture icon for export (simple geometric shapes) */
+function drawExportFurniture(ctx: CanvasRenderingContext2D, px: number, py: number, cs: number, variant: string) {
+  ctx.save()
+  const cx = px + cs / 2, cy = py + cs / 2
+  const r = cs * 0.3
+  ctx.strokeStyle = '#333'
+  ctx.fillStyle = 'rgba(0,0,0,0.08)'
+  ctx.lineWidth = 1
+
+  switch (variant) {
+    case 'column': case 'pillar':
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); break
+    case 'chest':
+      ctx.fillRect(cx - r * 0.7, cy - r * 0.5, r * 1.4, r); ctx.strokeRect(cx - r * 0.7, cy - r * 0.5, r * 1.4, r); break
+    case 'table':
+      ctx.strokeRect(cx - r, cy - r * 0.6, r * 2, r * 1.2); break
+    case 'chair':
+      ctx.fillRect(cx - r * 0.3, cy - r * 0.3, r * 0.6, r * 0.6); ctx.strokeRect(cx - r * 0.3, cy - r * 0.3, r * 0.6, r * 0.6); break
+    case 'barrel': case 'crate':
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2); ctx.stroke(); break
+    case 'bed':
+      ctx.fillStyle = 'rgba(0,0,0,0.06)'; ctx.fillRect(cx - r, cy - r * 0.4, r * 2, r * 0.8); ctx.strokeRect(cx - r, cy - r * 0.4, r * 2, r * 0.8)
+      ctx.fillRect(cx - r, cy - r * 0.4, r * 0.4, r * 0.8); break
+    case 'statue':
+      ctx.beginPath(); ctx.moveTo(cx, cy - r * 0.7); ctx.lineTo(cx - r * 0.5, cy + r * 0.7); ctx.lineTo(cx + r * 0.5, cy + r * 0.7); ctx.closePath(); ctx.fill(); ctx.stroke(); break
+    case 'altar':
+      ctx.strokeRect(cx - r * 0.8, cy - r * 0.3, r * 1.6, r * 0.6)
+      ctx.beginPath(); ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx - r * 0.2, cy - r * 0.3); ctx.lineTo(cx + r * 0.2, cy - r * 0.3); ctx.closePath(); ctx.stroke(); break
+    case 'fireplace': case 'forge':
+      ctx.strokeRect(cx - r * 0.7, cy - r * 0.5, r * 1.4, r)
+      ctx.fillStyle = 'rgba(200,80,0,0.2)'; ctx.fillRect(cx - r * 0.4, cy - r * 0.2, r * 0.8, r * 0.5); break
+    case 'fountain': case 'well':
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.7, 0, Math.PI * 2); ctx.stroke()
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2); ctx.stroke(); break
+    case 'sarcophagus':
+      ctx.fillStyle = 'rgba(0,0,0,0.06)'
+      ctx.fillRect(cx - r * 0.9, cy - r * 0.4, r * 1.8, r * 0.8); ctx.strokeRect(cx - r * 0.9, cy - r * 0.4, r * 1.8, r * 0.8); break
+    case 'throne':
+      ctx.strokeRect(cx - r * 0.4, cy - r * 0.3, r * 0.8, r * 0.7)
+      ctx.strokeRect(cx - r * 0.5, cy - r * 0.7, r, r * 0.4); break
+    case 'rubble':
+      for (let i = 0; i < 5; i++) {
+        const rx = cx - r + ((i * 37) % 7) / 7 * r * 2
+        const ry = cy - r * 0.5 + ((i * 53) % 7) / 7 * r
+        ctx.fillStyle = `rgba(0,0,0,${0.1 + (i % 3) * 0.05})`
+        ctx.beginPath(); ctx.arc(rx, ry, 1.5 + (i % 3), 0, Math.PI * 2); ctx.fill()
+      }; break
+    case 'stairs':
+      for (let i = 0; i < 4; i++) {
+        const sy = cy - r * 0.6 + i * r * 0.3
+        ctx.strokeStyle = '#555'
+        ctx.beginPath(); ctx.moveTo(cx - r * 0.6, sy); ctx.lineTo(cx + r * 0.6, sy); ctx.stroke()
+      }; break
+    default:
+      ctx.strokeStyle = '#666'; ctx.strokeRect(cx - r * 0.5, cy - r * 0.5, r, r)
+  }
+  ctx.restore()
+}
+
 export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
   const canvas = document.createElement('canvas')
-  const cellSize = map.cellSize
-  canvas.width = map.width * cellSize * scale
-  canvas.height = map.height * cellSize * scale
+  const cs = map.cellSize
+  canvas.width = map.width * cs * scale
+  canvas.height = map.height * cs * scale
   const ctx = canvas.getContext('2d')!
   ctx.scale(scale, scale)
 
-  ctx.fillStyle = '#f5f5f5'
-  ctx.fillRect(0, 0, map.width * cellSize, map.height * cellSize)
+  const W = map.width * cs, H = map.height * cs
+
+  // Background — light parchment
+  ctx.fillStyle = '#f5f0e8'
+  ctx.fillRect(0, 0, W, H)
 
   const cells = new Map<string, MapCell>()
   for (const layer of map.layers) {
@@ -557,83 +788,161 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
     for (const cell of layer.cells) cells.set(`${cell.x},${cell.y}`, cell)
   }
 
-  // Terrain
+  // ── Pass 1: Terrain fills ──
   for (const [, cell] of cells) {
-    ctx.fillStyle = TERRAIN_COLORS[cell.terrain]
-    ctx.fillRect(cell.x * cellSize, cell.y * cellSize, cellSize, cellSize)
+    const px = cell.x * cs, py = cell.y * cs
+    const color = EXPORT_TERRAIN_COLORS[cell.terrain] || '#f5f0e8'
+    ctx.fillStyle = color
+    ctx.fillRect(px, py, cs, cs)
+
+    // Texture overlays
+    if (cell.terrain === 'stone_wall' || cell.terrain === 'cave_wall') {
+      drawStoneTexture(ctx, px, py, cs, cs, 0.2)
+    } else if (cell.terrain === 'dirt' || cell.terrain === 'mud') {
+      drawDirtTexture(ctx, px, py, cs, cs)
+    } else if (cell.terrain === 'sand') {
+      drawSandTexture(ctx, px, py, cs, cs)
+    } else if (cell.terrain === 'water' || cell.terrain === 'deep_water') {
+      drawWaterTexture(ctx, px, py, cs, cs, cell.terrain === 'deep_water')
+    } else if (cell.terrain === 'grass') {
+      drawDirtTexture(ctx, px, py, cs, cs) // reuse with green tint
+    } else if (cell.terrain === 'lava') {
+      drawWaterTexture(ctx, px, py, cs, cs, true)
+    } else if (cell.terrain === 'cobblestone' || cell.terrain === 'tiles') {
+      // Draw subtle grid lines within the cell
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)'
+      ctx.lineWidth = 0.3
+      const half = cs / 2
+      ctx.beginPath(); ctx.moveTo(px + half, py); ctx.lineTo(px + half, py + cs); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(px, py + half); ctx.lineTo(px + cs, py + half); ctx.stroke()
+    }
   }
 
-  // Grid
-  ctx.strokeStyle = 'rgba(0,0,0,0.15)'
-  ctx.lineWidth = 0.5
+  // ── Pass 2: Grid lines (subtle) ──
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)'
+  ctx.lineWidth = 0.3
   for (let x = 0; x <= map.width; x++) {
-    ctx.beginPath(); ctx.moveTo(x * cellSize, 0); ctx.lineTo(x * cellSize, map.height * cellSize); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(x * cs, 0); ctx.lineTo(x * cs, H); ctx.stroke()
   }
   for (let y = 0; y <= map.height; y++) {
-    ctx.beginPath(); ctx.moveTo(0, y * cellSize); ctx.lineTo(map.width * cellSize, y * cellSize); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(0, y * cs); ctx.lineTo(W, y * cs); ctx.stroke()
   }
 
-  // Walls helper for export
-  function drawExportWall(x1: number, y1: number, x2: number, y2: number, type: WallType) {
-    if (!type || type === 'none') return
-    if (type === 'window') {
-      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
-      const dx = x2 - x1, dy = y2 - y1
-      const len = Math.sqrt(dx * dx + dy * dy) || 1
-      const gap = cellSize * 0.2
-      const nx = dx / len * gap, ny = dy / len * gap
-      ctx.strokeStyle = '#000'; ctx.setLineDash([]); ctx.lineWidth = 3
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(mx - nx, my - ny); ctx.stroke()
-      ctx.beginPath(); ctx.moveTo(mx + nx, my + ny); ctx.lineTo(x2, y2); ctx.stroke()
-      ctx.strokeStyle = '#5b9bd5'; ctx.lineWidth = 1.5
-      ctx.beginPath(); ctx.moveTo(mx - nx, my - ny); ctx.lineTo(mx + nx, my + ny); ctx.stroke()
-      ctx.lineWidth = 3
-    } else {
-      ctx.strokeStyle = type === 'door' ? DOOR_COLOR : type === 'secret_door' ? '#999' : '#000'
-      if (type === 'secret_door') ctx.setLineDash([4, 4]); else ctx.setLineDash([])
-      ctx.lineWidth = 3
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
-      if (type === 'door') {
-        ctx.fillStyle = DOOR_COLOR
-        const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
-        ctx.fillRect(mx - 3, my - 3, 6, 6)
+  // ── Pass 3: Features/furniture ──
+  for (const [, cell] of cells) {
+    const px = cell.x * cs, py = cell.y * cs
+    for (const feature of cell.features) {
+      if (feature.type === 'furniture') {
+        drawExportFurniture(ctx, px, py, cs, feature.variant)
+      } else if (feature.type === 'stairs') {
+        ctx.save()
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 0.8
+        for (let i = 0; i < 5; i++) {
+          const sy = py + cs * 0.1 + i * cs * 0.16
+          ctx.beginPath(); ctx.moveTo(px + cs * 0.15, sy); ctx.lineTo(px + cs * 0.85, sy); ctx.stroke()
+        }
+        ctx.fillStyle = '#333'; ctx.font = `bold ${cs * 0.2}px sans-serif`
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
+        ctx.fillText(feature.direction === 'up' ? 'UP' : 'DN', px + cs / 2, py + cs - 2)
+        ctx.restore()
+      } else if (feature.type === 'entry' || feature.type === 'exit') {
+        ctx.save()
+        ctx.strokeStyle = feature.type === 'entry' ? '#2a7e3e' : '#a83232'
+        ctx.lineWidth = 2
+        ctx.setLineDash([3, 3])
+        ctx.strokeRect(px + 2, py + 2, cs - 4, cs - 4)
+        ctx.setLineDash([])
+        ctx.fillStyle = ctx.strokeStyle; ctx.font = `bold ${cs * 0.18}px sans-serif`
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+        ctx.fillText(feature.type === 'entry' ? 'IN' : 'OUT', px + cs / 2, py + cs / 2)
+        ctx.restore()
+      } else if (feature.type === 'trap') {
+        ctx.save()
+        ctx.strokeStyle = 'rgba(180,40,40,0.4)'; ctx.lineWidth = 0.8
+        ctx.beginPath(); ctx.moveTo(px + 3, py + 3); ctx.lineTo(px + cs - 3, py + cs - 3); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(px + cs - 3, py + 3); ctx.lineTo(px + 3, py + cs - 3); ctx.stroke()
+        ctx.restore()
       }
     }
   }
 
-  // Walls
-  ctx.lineWidth = 3
+  // ── Pass 4: Walls (thick, stone-like) ──
+  function drawPolishedWall(x1: number, y1: number, x2: number, y2: number, type: WallType) {
+    if (!type || type === 'none') return
+
+    if (type === 'door') {
+      drawExportDoor(ctx, x1, y1, x2, y2, cs)
+      return
+    }
+
+    if (type === 'window') {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
+      const dx = x2 - x1, dy = y2 - y1
+      const len = Math.sqrt(dx * dx + dy * dy) || 1
+      const gap = cs * 0.18
+      const nx = dx / len * gap, ny = dy / len * gap
+      // Wall segments
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 3.5; ctx.setLineDash([])
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(mx - nx, my - ny); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(mx + nx, my + ny); ctx.lineTo(x2, y2); ctx.stroke()
+      // Window pane (double line)
+      ctx.strokeStyle = '#4a80b0'; ctx.lineWidth = 1
+      ctx.beginPath(); ctx.moveTo(mx - nx, my - ny); ctx.lineTo(mx + nx, my + ny); ctx.stroke()
+      ctx.strokeStyle = '#6aa0d0'; ctx.lineWidth = 0.5
+      const perp = 1.5
+      const perpX = -ny / gap * perp, perpY = nx / gap * perp
+      ctx.beginPath(); ctx.moveTo(mx - nx + perpX, my - ny + perpY); ctx.lineTo(mx + nx + perpX, my + ny + perpY); ctx.stroke()
+      return
+    }
+
+    // Standard wall or diagonal
+    ctx.setLineDash(type === 'secret_door' ? [3, 3] : [])
+    // Thick wall with double-line effect
+    ctx.strokeStyle = '#1a1a1a'
+    ctx.lineWidth = 4
+    ctx.lineCap = 'square'
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+    // Inner highlight
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'
+    ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+    ctx.setLineDash([])
+  }
+
   for (const [, cell] of cells) {
-    const px = cell.x * cellSize, py = cell.y * cellSize
-    drawExportWall(px, py, px + cellSize, py, cell.walls.north)
-    drawExportWall(px + cellSize, py, px + cellSize, py + cellSize, cell.walls.east)
-    drawExportWall(px, py + cellSize, px + cellSize, py + cellSize, cell.walls.south)
-    drawExportWall(px, py, px, py + cellSize, cell.walls.west)
-    // Diagonals
-    if (cell.walls.diagTLBR && cell.walls.diagTLBR !== 'none') {
-      drawExportWall(px, py, px + cellSize, py + cellSize, cell.walls.diagTLBR)
-    }
-    if (cell.walls.diagTRBL && cell.walls.diagTRBL !== 'none') {
-      drawExportWall(px + cellSize, py, px, py + cellSize, cell.walls.diagTRBL)
-    }
+    const px = cell.x * cs, py = cell.y * cs
+    drawPolishedWall(px, py, px + cs, py, cell.walls.north)
+    drawPolishedWall(px + cs, py, px + cs, py + cs, cell.walls.east)
+    drawPolishedWall(px, py + cs, px + cs, py + cs, cell.walls.south)
+    drawPolishedWall(px, py, px, py + cs, cell.walls.west)
+    if (cell.walls.diagTLBR && cell.walls.diagTLBR !== 'none') drawPolishedWall(px, py, px + cs, py + cs, cell.walls.diagTLBR)
+    if (cell.walls.diagTRBL && cell.walls.diagTRBL !== 'none') drawPolishedWall(px + cs, py, px, py + cs, cell.walls.diagTRBL)
   }
-  ctx.setLineDash([])
 
-  // Markers
+  // ── Pass 5: Room number markers ──
   for (const marker of map.markers) {
+    const mx = marker.x, my = marker.y
     if (marker.type === 'room_number') {
-      ctx.fillStyle = 'rgba(0,0,0,0.8)'
-      ctx.beginPath(); ctx.arc(marker.x, marker.y, 12, 0, Math.PI * 2); ctx.fill()
+      // White circle with black border
       ctx.fillStyle = '#fff'
-      ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-      ctx.fillText(marker.label, marker.x, marker.y)
+      ctx.beginPath(); ctx.arc(mx, my, 13, 0, Math.PI * 2); ctx.fill()
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2
+      ctx.beginPath(); ctx.arc(mx, my, 13, 0, Math.PI * 2); ctx.stroke()
+      ctx.fillStyle = '#1a1a1a'
+      ctx.font = 'bold 12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      ctx.fillText(marker.label, mx, my + 0.5)
+    } else {
+      const colors: Record<string, string> = { monster: '#8b0000', npc: '#4b0082', treasure: '#8b6914', trap: '#8b0000', note: '#00008b' }
+      ctx.fillStyle = colors[marker.type] || '#333'
+      ctx.font = `bold ${9}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      ctx.fillText(marker.label.slice(0, 4), mx, my)
     }
   }
 
-  // Labels
+  // ── Pass 6: Text labels ──
   for (const label of map.labels) {
-    ctx.fillStyle = label.color || '#000'
-    ctx.font = `bold ${label.fontSize}px sans-serif`
+    ctx.fillStyle = label.color || '#1a1a1a'
+    ctx.font = `bold ${label.fontSize}px serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillText(label.text, label.x, label.y)
   }

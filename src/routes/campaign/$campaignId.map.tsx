@@ -12,15 +12,45 @@ export const Route = createFileRoute('/campaign/$campaignId/map')({
 })
 
 const TERRAIN_OPTIONS: { type: TerrainType; label: string; color: string }[] = [
-  { type: 'stone_floor', label: 'Stone Floor', color: '#d4d0c8' },
-  { type: 'stone_wall', label: 'Stone Wall', color: '#5a5a5a' },
-  { type: 'cave_floor', label: 'Cave Floor', color: '#a89880' },
-  { type: 'cave_wall', label: 'Cave Wall', color: '#6b5e50' },
+  { type: 'stone_floor', label: 'Stone', color: '#d4d0c8' },
+  { type: 'stone_wall', label: 'Wall', color: '#5a5a5a' },
+  { type: 'cave_floor', label: 'Cave', color: '#a89880' },
+  { type: 'cave_wall', label: 'Rock', color: '#6b5e50' },
   { type: 'dirt', label: 'Dirt', color: '#8b7355' },
-  { type: 'wooden_floor', label: 'Wood Floor', color: '#c4a265' },
+  { type: 'sand', label: 'Sand', color: '#d4b87a' },
+  { type: 'mud', label: 'Mud', color: '#6b5a3e' },
+  { type: 'wooden_floor', label: 'Wood', color: '#c4a265' },
+  { type: 'cobblestone', label: 'Cobble', color: '#9a9a8e' },
+  { type: 'marble', label: 'Marble', color: '#e8e4df' },
+  { type: 'tiles', label: 'Tiles', color: '#b8b0a0' },
   { type: 'grass', label: 'Grass', color: '#6b8e4e' },
   { type: 'water', label: 'Water', color: '#4a90c4' },
-  { type: 'deep_water', label: 'Deep Water', color: '#2c5f8a' },
+  { type: 'deep_water', label: 'Deep', color: '#2c5f8a' },
+  { type: 'lava', label: 'Lava', color: '#d44400' },
+  { type: 'ice', label: 'Ice', color: '#c8e4f0' },
+]
+
+const FURNITURE_OPTIONS: { variant: string; label: string; icon: string }[] = [
+  { variant: 'table', label: 'Table', icon: '🪑' },
+  { variant: 'chair', label: 'Chair', icon: '💺' },
+  { variant: 'chest', label: 'Chest', icon: '📦' },
+  { variant: 'barrel', label: 'Barrel', icon: '🛢' },
+  { variant: 'column', label: 'Column', icon: '🏛' },
+  { variant: 'statue', label: 'Statue', icon: '🗿' },
+  { variant: 'altar', label: 'Altar', icon: '⛪' },
+  { variant: 'fireplace', label: 'Fire', icon: '🔥' },
+  { variant: 'bookshelf', label: 'Books', icon: '📚' },
+  { variant: 'bed', label: 'Bed', icon: '🛏' },
+  { variant: 'throne', label: 'Throne', icon: '👑' },
+  { variant: 'fountain', label: 'Fountain', icon: '⛲' },
+  { variant: 'well', label: 'Well', icon: '🪣' },
+  { variant: 'sarcophagus', label: 'Coffin', icon: '⚰' },
+  { variant: 'rubble', label: 'Rubble', icon: '🪨' },
+  { variant: 'cage', label: 'Cage', icon: '🔲' },
+  { variant: 'cauldron', label: 'Cauldron', icon: '🫕' },
+  { variant: 'lever', label: 'Lever', icon: '🔧' },
+  { variant: 'pit', label: 'Pit', icon: '⚫' },
+  { variant: 'rug', label: 'Rug', icon: '🟫' },
 ]
 
 const TOOL_OPTIONS: { tool: MapTool; label: string; icon: string }[] = [
@@ -31,6 +61,7 @@ const TOOL_OPTIONS: { tool: MapTool; label: string; icon: string }[] = [
   { tool: 'door', label: 'Door', icon: '🚪' },
   { tool: 'window', label: 'Window', icon: '▫' },
   { tool: 'diagonal', label: 'Diagonal', icon: '╲' },
+  { tool: 'furniture', label: 'Objects', icon: '🏛' },
   { tool: 'eraser', label: 'Eraser', icon: '✕' },
   { tool: 'marker', label: 'Room #', icon: '#' },
 ]
@@ -53,6 +84,7 @@ function MapEditorPage() {
   const [activeTool, setActiveTool] = useState<MapTool>('floor')
   const [activeTerrainType, setActiveTerrainType] = useState<TerrainType>('stone_floor')
   const [activeWallType, setActiveWallType] = useState<WallType>('wall')
+  const [activeFurniture, setActiveFurniture] = useState('column')
   const [showGrid, setShowGrid] = useState(true)
   const [gridDistanceFt, setGridDistanceFt] = useState(5)
   const [showNewMapDialog, setShowNewMapDialog] = useState(false)
@@ -173,7 +205,7 @@ function MapEditorPage() {
 
         {/* Terrain selector (when paint or fill tool active) */}
         {(activeTool === 'floor' || activeTool === 'bucket') && (
-          <div className="flex gap-0.5 items-center">
+          <div className="flex gap-0.5 items-center flex-wrap">
             {TERRAIN_OPTIONS.map(t => (
               <button
                 key={t.type}
@@ -182,6 +214,22 @@ function MapEditorPage() {
                 className={`h-6 w-6 rounded transition ${activeTerrainType === t.type ? 'ring-2 ring-primary' : 'ring-1 ring-border'}`}
                 style={{ backgroundColor: t.color }}
               />
+            ))}
+          </div>
+        )}
+
+        {/* Furniture selector (when furniture tool active) */}
+        {activeTool === 'furniture' && (
+          <div className="flex gap-0.5 items-center flex-wrap">
+            {FURNITURE_OPTIONS.map(f => (
+              <button
+                key={f.variant}
+                onClick={() => setActiveFurniture(f.variant)}
+                title={f.label}
+                className={`h-7 w-7 rounded text-sm transition flex items-center justify-center ${activeFurniture === f.variant ? 'ring-2 ring-primary bg-primary/10' : 'ring-1 ring-border hover:bg-accent'}`}
+              >
+                {f.icon}
+              </button>
             ))}
           </div>
         )}
@@ -218,6 +266,7 @@ function MapEditorPage() {
             activeTool={activeTool}
             activeTerrainType={activeTerrainType}
             activeWallType={activeWallType}
+            activeFurniture={activeFurniture}
             showGrid={showGrid}
             gridDistanceFt={gridDistanceFt}
           />
@@ -234,6 +283,7 @@ function MapEditorPage() {
         {activeTool === 'door' && 'Click near a cell edge to place a door. Drag to place doors continuously.'}
         {activeTool === 'window' && 'Click near a cell edge to place a window. Drag to place windows continuously.'}
         {activeTool === 'diagonal' && 'Click to place a diagonal wall (╲ or ╱ based on click position). Drag to place continuously.'}
+        {activeTool === 'furniture' && 'Click to place/remove furniture. Select object type from the palette.'}
         {activeTool === 'eraser' && 'Click/drag to erase cells.'}
         {activeTool === 'marker' && 'Click to place/remove room number markers.'}
         {activeTool === 'select' && 'Click and drag to select. Alt+drag to pan.'}
