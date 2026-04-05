@@ -26,8 +26,11 @@ const TERRAIN_OPTIONS: { type: TerrainType; label: string; color: string }[] = [
 const TOOL_OPTIONS: { tool: MapTool; label: string; icon: string }[] = [
   { tool: 'select', label: 'Select', icon: '↖' },
   { tool: 'floor', label: 'Paint', icon: '🖌' },
+  { tool: 'bucket', label: 'Fill', icon: '🪣' },
   { tool: 'wall', label: 'Walls', icon: '▬' },
   { tool: 'door', label: 'Door', icon: '🚪' },
+  { tool: 'window', label: 'Window', icon: '▫' },
+  { tool: 'diagonal', label: 'Diagonal', icon: '╲' },
   { tool: 'eraser', label: 'Eraser', icon: '✕' },
   { tool: 'marker', label: 'Room #', icon: '#' },
 ]
@@ -128,16 +131,26 @@ function MapEditorPage() {
     <main className="flex flex-col h-[calc(100vh-120px)]">
       {/* Top toolbar */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card/50 px-3 py-2">
-        {/* Map selector */}
-        <select
-          value={selectedMapId ?? ''}
-          onChange={e => setSelectedMapId(e.target.value)}
-          className="rounded-lg border border-input bg-background px-2 py-1 text-sm outline-none"
-        >
-          {campaign.maps.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
+        {/* Map selector + rename */}
+        {campaign.maps.length > 1 ? (
+          <select
+            value={selectedMapId ?? ''}
+            onChange={e => setSelectedMapId(e.target.value)}
+            className="rounded-lg border border-input bg-background px-2 py-1 text-sm outline-none max-w-[120px]"
+          >
+            {campaign.maps.map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+        ) : null}
+        {selectedMap && (
+          <input
+            type="text"
+            value={selectedMap.name}
+            onChange={e => updateMap(selectedMap.id, m => { m.name = e.target.value })}
+            className="rounded-lg border border-input bg-background px-2 py-1 text-sm font-medium outline-none focus:ring-1 focus:ring-ring w-36"
+          />
+        )}
         <button onClick={() => setShowNewMapDialog(true)} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">+ New</button>
 
         <div className="w-px h-6 bg-border mx-1" />
@@ -158,8 +171,8 @@ function MapEditorPage() {
           ))}
         </div>
 
-        {/* Terrain selector (when paint tool active) */}
-        {activeTool === 'floor' && (
+        {/* Terrain selector (when paint or fill tool active) */}
+        {(activeTool === 'floor' || activeTool === 'bucket') && (
           <div className="flex gap-0.5 items-center">
             {TERRAIN_OPTIONS.map(t => (
               <button
@@ -216,11 +229,15 @@ function MapEditorPage() {
       {/* Tip bar */}
       <div className="border-t border-border bg-card/30 px-3 py-1 text-[10px] text-muted-foreground">
         {activeTool === 'floor' && 'Click/drag to paint terrain. Alt+drag or middle-click to pan. Scroll to zoom.'}
-        {activeTool === 'wall' && 'Click a cell to toggle walls. Alt+drag to pan.'}
-        {activeTool === 'door' && 'Click a cell to place doors on all edges.'}
+        {activeTool === 'bucket' && 'Click to flood-fill a region with terrain. Walls act as boundaries.'}
+        {activeTool === 'wall' && 'Click near a cell edge to place walls. Drag to paint walls continuously.'}
+        {activeTool === 'door' && 'Click near a cell edge to place a door. Drag to place doors continuously.'}
+        {activeTool === 'window' && 'Click near a cell edge to place a window. Drag to place windows continuously.'}
+        {activeTool === 'diagonal' && 'Click to place a diagonal wall (╲ or ╱ based on click position). Drag to place continuously.'}
         {activeTool === 'eraser' && 'Click/drag to erase cells.'}
         {activeTool === 'marker' && 'Click to place/remove room number markers.'}
         {activeTool === 'select' && 'Click and drag to select. Alt+drag to pan.'}
+        {' · Undo: Ctrl/Cmd+Z · Redo: Ctrl/Cmd+Shift+Z'}
       </div>
 
       {/* New Map Dialog */}

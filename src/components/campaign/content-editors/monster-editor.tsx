@@ -82,6 +82,36 @@ export function MonsterEditor({ monster: initial, onSave, onCancel }: Props) {
     }))
   }
 
+  function randomizeStats() {
+    const roll3d6 = () => Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 3
+    const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+    const level = Math.floor(Math.random() * 10) + 1
+    const hp = Math.max(1, level * (Math.floor(Math.random() * 4) + 3) + Math.floor(Math.random() * 6))
+    const hpDieSize = level <= 2 ? 6 : level <= 5 ? 8 : level <= 8 ? 10 : 12
+    const hpDieCount = Math.max(1, Math.ceil(hp / (hpDieSize / 2 + 0.5)))
+    const ac = 10 + Math.floor(level / 2) + Math.floor(Math.random() * 4)
+    const atkBonus = Math.floor(level / 2) + 1 + Math.floor(Math.random() * 2)
+    const dmgDie = level <= 2 ? '1d6' : level <= 5 ? '1d8' : level <= 8 ? '2d6' : '2d8'
+    const movement = pick(['close', 'near', 'far'] as const)
+    const alignment = pick(['lawful', 'neutral', 'chaotic'] as const)
+    const atkName = pick(['Bite', 'Claw', 'Slam', 'Strike', 'Slash', 'Sting', 'Lash', 'Gore'])
+    const atkRange = pick(['close', 'near'] as const)
+
+    setM(prev => ({
+      ...prev,
+      level,
+      ac,
+      hp,
+      hpDice: `${hpDieCount}d${hpDieSize}`,
+      movement: { ...prev.movement, normal: movement },
+      alignment,
+      checksMorale: Math.random() > 0.3,
+      stats: { STR: roll3d6(), DEX: roll3d6(), CON: roll3d6(), INT: roll3d6(), WIS: roll3d6(), CHA: roll3d6() },
+      attacks: [{ name: atkName, bonus: atkBonus, damage: dmgDie, range: atkRange }],
+      tags: prev.tags.length > 0 ? prev.tags : [pick(TAGS)],
+    }))
+  }
+
   function handleSave() {
     // Auto-generate ID from name if empty
     const saved = { ...m }
@@ -92,9 +122,17 @@ export function MonsterEditor({ monster: initial, onSave, onCancel }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card p-4 sm:p-6">
-        <h2 className="text-xl font-bold mb-4">
-          {initial.name ? `Edit: ${initial.name}` : 'New Monster'}
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold">
+            {initial.name ? `Edit: ${initial.name}` : 'New Monster'}
+          </h2>
+          <button
+            onClick={randomizeStats}
+            className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition"
+          >
+            Randomize Stats
+          </button>
+        </div>
 
         <div className="space-y-4">
           {/* Basic Info */}

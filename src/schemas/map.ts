@@ -37,9 +37,13 @@ export interface WallConfig {
   east: WallType
   south: WallType
   west: WallType
+  /** Diagonal from top-left to bottom-right */
+  diagTLBR?: WallType
+  /** Diagonal from top-right to bottom-left */
+  diagTRBL?: WallType
 }
 
-export type WallType = 'none' | 'wall' | 'door' | 'secret_door' | 'arch' | 'bars'
+export type WallType = 'none' | 'wall' | 'door' | 'secret_door' | 'arch' | 'bars' | 'window'
 
 export type CellFeature =
   | { type: 'furniture'; variant: string }
