@@ -8,445 +8,307 @@ export const Route = createFileRoute('/campaign/$campaignId/mapgen2')({
 
 // ── Watabou JSON types ──
 interface DungeonData {
-  version?: string
-  title: string
-  story: string
-  rects: DRect[]
-  doors: DDoor[]
-  notes: DNote[]
-  columns: DColumn[]
-  water: DWater[]
+  title: string; story: string
+  rects: DRect[]; doors: DDoor[]; notes: DNote[]
+  columns: DColumn[]; water: DWater[]
 }
-interface DRect { x: number; y: number; w: number; h: number; ending?: boolean; rotunda?: boolean }
+interface DRect { x: number; y: number; w: number; h: number; ending?: boolean }
 interface DDoor { x: number; y: number; dir: { x: number; y: number }; type: number }
 interface DNote { text: string; ref: string; pos: { x: number; y: number } }
 interface DColumn { x: number; y: number }
 interface DWater { x: number; y: number }
 
-// ── Seeded RNG ──
 function makeRng(seed: number) {
   let s = (seed & 0x7fffffff) || 1
   return () => { s = (48271 * s) % 2147483647; return (s & 0x7fffffff) / 2147483647 }
 }
 
-// ── Constants ──
-const CELL = 30
+const C = 30 // cell size
 const INK = '#221122'
 const PAPER = '#f0ece4'
 const FLOOR = '#f5f0e8'
+const WT = 5 // wall thickness (half = 2.5)
 
-// ── Main Renderer ──
-function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: number = 2, rotation: number = 0) {
-  // Bounding box
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: number, rotation: number) {
+  // ── Bounding box ──
+  let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity
   for (const r of data.rects) {
-    minX = Math.min(minX, r.x); minY = Math.min(minY, r.y)
-    maxX = Math.max(maxX, r.x + r.w); maxY = Math.max(maxY, r.y + r.h)
+    bx0 = Math.min(bx0, r.x); by0 = Math.min(by0, r.y)
+    bx1 = Math.max(bx1, r.x + r.w); by1 = Math.max(by1, r.y + r.h)
   }
-  const pad = 5
-  minX -= pad; minY -= pad; maxX += pad; maxY += pad
+  const pad = 4, titleCells = 5
+  bx0 -= pad; by0 -= (pad + titleCells); bx1 += pad; by1 += pad
 
-  // Add space for title at top
-  const titleSpace = 4 // cells
-  minY -= titleSpace
-
-  const gw = maxX - minX, gh = maxY - minY
-  const W = gw * CELL, H = gh * CELL
-
-  canvas.width = W * scale
-  canvas.height = H * scale
-  canvas.style.width = `${W}px`
-  canvas.style.height = `${H}px`
+  const gw = bx1 - bx0, gh = by1 - by0
+  const W = gw * C, H = gh * C
+  canvas.width = W * scale; canvas.height = H * scale
+  canvas.style.width = `${W}px`; canvas.style.height = `${H}px`
   const ctx = canvas.getContext('2d')!
   ctx.scale(scale, scale)
 
-  const ox = -minX * CELL, oy = -minY * CELL
+  if (rotation) { ctx.translate(W / 2, H / 2); ctx.rotate(rotation * Math.PI / 180); ctx.translate(-W / 2, -H / 2) }
 
-  // Build floor set (all cells covered by any rect)
-  const floorCells = new Set<string>()
+  const ox = -bx0 * C, oy = -by0 * C
+
+  // ── Build floor grid ──
+  const floor = new Set<string>()
   for (const r of data.rects)
     for (let y = r.y; y < r.y + r.h; y++)
       for (let x = r.x; x < r.x + r.w; x++)
-        floorCells.add(`${x},${y}`)
+        floor.add(`${x},${y}`)
 
-  // Identify large rooms (not 1x1 corridor connectors)
-  const largeRects = data.rects.filter(r => r.w > 1 || r.h > 1)
+  // Large rooms (for numbering — only rooms w>1 AND h>1)
+  const rooms = data.rects.filter(r => r.w > 1 && r.h > 1)
 
-  // Apply rotation
-  if (rotation !== 0) {
-    ctx.translate(W / 2, H / 2)
-    ctx.rotate(rotation * Math.PI / 180)
-    ctx.translate(-W / 2, -H / 2)
-  }
-
-  // ═══ PASS 1: Paper background ═══
+  // ══════ PASS 1: Paper ══════
   ctx.fillStyle = PAPER
-  ctx.fillRect(-50, -50, W + 100, H + 100)
+  ctx.fillRect(-100, -100, W + 200, H + 200)
 
-  // ═══ PASS 2: Full-canvas crosshatching ═══
-  // Dense hatching covering the ENTIRE canvas, like the reference
+  // ══════ PASS 2: Hatching (everywhere outside floor cells) ══════
   const rng = makeRng(7919)
-  ctx.strokeStyle = INK
-  ctx.lineCap = 'round'
+  // Only hatch cells near the dungeon (within 3 cells of any floor cell)
+  for (let gy = by0; gy < by1; gy++) {
+    for (let gx = bx0; gx < bx1; gx++) {
+      if (floor.has(`${gx},${gy}`)) continue
+      // Proximity check
+      let near = false
+      for (let dy = -3; dy <= 3 && !near; dy++)
+        for (let dx = -3; dx <= 3 && !near; dx++)
+          if (floor.has(`${gx + dx},${gy + dy}`)) near = true
+      if (!near) continue
 
-  // Layer 1: 45° lines
-  ctx.lineWidth = 0.5
-  ctx.globalAlpha = 0.25
-  for (let i = 0; i < (W + H) / 6; i++) {
-    const startX = -H + i * 6 + (rng() - 0.5) * 2
-    ctx.beginPath()
-    ctx.moveTo(startX, 0)
-    ctx.lineTo(startX + H, H)
-    ctx.stroke()
+      const px = ox + gx * C, py = oy + gy * C
+      // Dense directional hatching
+      ctx.strokeStyle = INK
+      ctx.lineCap = 'round'
+      // Main strokes — predominantly diagonal
+      ctx.lineWidth = 0.7
+      ctx.globalAlpha = 0.35
+      for (let i = 0; i < 10; i++) {
+        const sx = px + rng() * C
+        const sy = py + rng() * C
+        // Mostly 45° and 135° with slight variation
+        const baseAngle = rng() < 0.5 ? Math.PI * 0.25 : Math.PI * 0.75
+        const angle = baseAngle + (rng() - 0.5) * 0.6
+        const len = 5 + rng() * 12
+        ctx.beginPath()
+        ctx.moveTo(sx, sy)
+        ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
+        ctx.stroke()
+      }
+      // Extra density near walls (cells directly adjacent to floor)
+      let adjFloor = false
+      for (const [ddx, ddy] of [[0,-1],[0,1],[-1,0],[1,0]])
+        if (floor.has(`${gx+ddx},${gy+ddy}`)) { adjFloor = true; break }
+      if (adjFloor) {
+        ctx.lineWidth = 0.9
+        ctx.globalAlpha = 0.4
+        for (let i = 0; i < 6; i++) {
+          const sx = px + rng() * C, sy = py + rng() * C
+          const angle = rng() * Math.PI
+          const len = 3 + rng() * 8
+          ctx.beginPath(); ctx.moveTo(sx, sy)
+          ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
+          ctx.stroke()
+        }
+      }
+    }
   }
-  // Layer 2: 135° lines
-  for (let i = 0; i < (W + H) / 6; i++) {
-    const startX = i * 6 + (rng() - 0.5) * 2
-    ctx.beginPath()
-    ctx.moveTo(startX, 0)
-    ctx.lineTo(startX - H, H)
-    ctx.stroke()
-  }
-  // Layer 3: Short random strokes for organic feel
-  ctx.lineWidth = 0.6
-  ctx.globalAlpha = 0.2
-  const strokeCount = Math.floor(W * H / 80)
-  for (let i = 0; i < strokeCount; i++) {
-    const sx = rng() * W, sy = rng() * H
-    const angle = (rng() < 0.5 ? 0.25 : 0.75) * Math.PI + (rng() - 0.5) * 0.4
-    const len = 4 + rng() * 10
-    ctx.beginPath()
-    ctx.moveTo(sx, sy)
-    ctx.lineTo(sx + Math.cos(angle) * len, sy + Math.sin(angle) * len)
-    ctx.stroke()
-  }
-  ctx.globalAlpha = 1.0
+  ctx.globalAlpha = 1
 
-  // ═══ PASS 3: Floor fills (white rooms cut through hatching) ═══
+  // ══════ PASS 3: Floor fills ══════
   ctx.fillStyle = FLOOR
-  for (const r of data.rects) {
-    ctx.fillRect(ox + r.x * CELL, oy + r.y * CELL, r.w * CELL, r.h * CELL)
-  }
+  for (const r of data.rects)
+    ctx.fillRect(ox + r.x * C, oy + r.y * C, r.w * C, r.h * C)
 
-  // ═══ PASS 4: Dashed grid inside rooms ═══
-  ctx.strokeStyle = 'rgba(0,0,0,0.12)'
-  ctx.lineWidth = 0.4
-  ctx.setLineDash([3, 5])
-  for (const r of data.rects) {
-    if (r.w <= 1 && r.h <= 1) continue // skip corridor connectors
-    const px = ox + r.x * CELL, py = oy + r.y * CELL
+  // ══════ PASS 4: Floor grid (dashed, only in large rooms) ══════
+  ctx.strokeStyle = 'rgba(0,0,0,0.1)'
+  ctx.lineWidth = 0.3
+  ctx.setLineDash([2, 4])
+  for (const r of rooms) {
+    const px = ox + r.x * C, py = oy + r.y * C
     for (let x = 1; x < r.w; x++) {
-      ctx.beginPath(); ctx.moveTo(px + x * CELL, py); ctx.lineTo(px + x * CELL, py + r.h * CELL); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(px + x * C, py); ctx.lineTo(px + x * C, py + r.h * C); ctx.stroke()
     }
     for (let y = 1; y < r.h; y++) {
-      ctx.beginPath(); ctx.moveTo(px, py + y * CELL); ctx.lineTo(px + r.w * CELL, py + y * CELL); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(px, py + y * C); ctx.lineTo(px + r.w * C, py + y * C); ctx.stroke()
     }
   }
   ctx.setLineDash([])
 
-  // ═══ PASS 5: Water ═══
-  if (data.water?.length > 0) {
-    ctx.fillStyle = 'rgba(100,150,200,0.12)'
-    for (const w of data.water) ctx.fillRect(ox + w.x * CELL, oy + w.y * CELL, CELL, CELL)
+  // ══════ PASS 5: Water ══════
+  if (data.water?.length) {
+    ctx.fillStyle = 'rgba(100,150,200,0.15)'
+    for (const w of data.water) ctx.fillRect(ox + w.x * C, oy + w.y * C, C, C)
   }
 
-  // ═══ PASS 6: Columns ═══
+  // ══════ PASS 6: Columns ══════
   for (const col of data.columns) {
-    const cx = ox + (col.x + 0.5) * CELL, cy = oy + (col.y + 0.5) * CELL
-    ctx.fillStyle = FLOOR
-    ctx.beginPath(); ctx.arc(cx, cy, CELL * 0.18, 0, Math.PI * 2); ctx.fill()
+    const cx = ox + (col.x + 0.5) * C, cy = oy + (col.y + 0.5) * C
+    ctx.fillStyle = FLOOR; ctx.beginPath(); ctx.arc(cx, cy, C * 0.18, 0, Math.PI * 2); ctx.fill()
     ctx.strokeStyle = INK; ctx.lineWidth = 1.2
-    ctx.beginPath(); ctx.arc(cx, cy, CELL * 0.18, 0, Math.PI * 2); ctx.stroke()
+    ctx.beginPath(); ctx.arc(cx, cy, C * 0.18, 0, Math.PI * 2); ctx.stroke()
   }
 
-  // ═══ PASS 7: Walls ═══
-  // Draw walls as solid filled polygon bands on room perimeters
-  const wt = 3 // wall half-thickness
+  // ══════ PASS 7: Walls (cell-based — wall on every floor-void edge) ══════
   ctx.fillStyle = INK
+  const hw = WT / 2
+  for (const key of floor) {
+    const [gxs, gys] = key.split(',')
+    const gx = parseInt(gxs), gy = parseInt(gys)
+    const px = ox + gx * C, py = oy + gy * C
 
-  for (const r of data.rects) {
-    const x1 = ox + r.x * CELL, y1 = oy + r.y * CELL
-    const x2 = x1 + r.w * CELL, y2 = y1 + r.h * CELL
-    const e = wt * 0.6 // extension past corners
-
-    // Only draw wall on edges where there's no adjacent floor cell
-    // North
-    if (!hasAdjacentFloor(r, 'north', data.rects)) {
-      ctx.fillRect(x1 - e, y1 - wt, (x2 - x1) + e * 2, wt * 2)
-    }
-    // South
-    if (!hasAdjacentFloor(r, 'south', data.rects)) {
-      ctx.fillRect(x1 - e, y2 - wt, (x2 - x1) + e * 2, wt * 2)
-    }
-    // West
-    if (!hasAdjacentFloor(r, 'west', data.rects)) {
-      ctx.fillRect(x1 - wt, y1 - e, wt * 2, (y2 - y1) + e * 2)
-    }
-    // East
-    if (!hasAdjacentFloor(r, 'east', data.rects)) {
-      ctx.fillRect(x2 - wt, y1 - e, wt * 2, (y2 - y1) + e * 2)
-    }
-
-    // Inner shadow/border for depth (thin line inside room edges)
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)'
-    ctx.lineWidth = 0.5
-    ctx.strokeRect(x1 + 1, y1 + 1, (x2 - x1) - 2, (y2 - y1) - 2)
+    // North wall
+    if (!floor.has(`${gx},${gy - 1}`)) ctx.fillRect(px - hw, py - hw, C + WT, WT)
+    // South wall
+    if (!floor.has(`${gx},${gy + 1}`)) ctx.fillRect(px - hw, py + C - hw, C + WT, WT)
+    // West wall
+    if (!floor.has(`${gx - 1},${gy}`)) ctx.fillRect(px - hw, py - hw, WT, C + WT)
+    // East wall
+    if (!floor.has(`${gx + 1},${gy}`)) ctx.fillRect(px + C - hw, py - hw, WT, C + WT)
   }
 
-  // ═══ PASS 8: Doors ═══
+  // ══════ PASS 8: Doors ══════
   for (const door of data.doors) {
-    const cx = ox + (door.x + 0.5) * CELL
-    const cy = oy + (door.y + 0.5) * CELL
-    const isHoriz = door.dir.y !== 0
-    renderDoor(ctx, cx, cy, isHoriz, door.type)
+    const cx = ox + (door.x + 0.5) * C, cy = oy + (door.y + 0.5) * C
+    const isH = door.dir.y !== 0
+    drawDoor(ctx, cx, cy, isH, door.type)
   }
 
-  // ═══ PASS 9: Room numbers (only large rooms) ═══
-  let roomIdx = 1
-  for (const r of largeRects) {
-    const cx = ox + (r.x + r.w / 2) * CELL
-    const cy = oy + (r.y + r.h / 2) * CELL
-    const fontSize = Math.min(r.w, r.h) * CELL * 0.35
-    ctx.font = `bold ${fontSize}px 'Georgia', 'Times New Roman', serif`
+  // ══════ PASS 9: Room numbers ══════
+  for (let i = 0; i < rooms.length; i++) {
+    const r = rooms[i]
+    const cx = ox + (r.x + r.w / 2) * C, cy = oy + (r.y + r.h / 2) * C
+    const fs = Math.min(r.w, r.h) * C * 0.35
+    ctx.font = `bold ${fs}px 'Georgia','Times New Roman',serif`
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     ctx.fillStyle = INK
-    ctx.fillText(String(roomIdx), cx, cy + 1)
-    roomIdx++
+    ctx.fillText(String(i + 1), cx, cy + 1)
   }
 
-  // ═══ PASS 10: Notes (text boxes outside dungeon) ═══
-  ctx.font = `italic ${CELL * 0.38}px 'Georgia', 'Times New Roman', serif`
+  // ══════ PASS 10: Notes ══════
+  ctx.font = `italic ${C * 0.36}px 'Georgia','Times New Roman',serif`
   for (const note of data.notes) {
-    const nx = ox + note.pos.x * CELL
-    const ny = oy + note.pos.y * CELL
+    const nx = ox + note.pos.x * C, ny = oy + note.pos.y * C
     const text = `${note.ref}. ${note.text}`
-    const lines = wrapText(ctx, text, CELL * 5)
-    const lineH = CELL * 0.48
-    const boxW = Math.max(...lines.map(l => ctx.measureText(l).width)) + CELL * 0.6
-    const boxH = lines.length * lineH + CELL * 0.3
-    const bx = nx - boxW / 2, by = ny - boxH / 2
+    const lines = wrap(ctx, text, C * 5.5)
+    const lh = C * 0.44
+    const bw = Math.max(...lines.map(l => ctx.measureText(l).width)) + C * 0.5
+    const bh = lines.length * lh + C * 0.25
+    const bx = nx - bw / 2, by = ny - bh / 2
 
-    ctx.fillStyle = FLOOR
-    ctx.fillRect(bx, by, boxW, boxH)
-    ctx.strokeStyle = INK; ctx.lineWidth = 1
-    ctx.strokeRect(bx, by, boxW, boxH)
-
+    ctx.fillStyle = FLOOR; ctx.fillRect(bx, by, bw, bh)
+    ctx.strokeStyle = INK; ctx.lineWidth = 0.8; ctx.strokeRect(bx, by, bw, bh)
     ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    for (let i = 0; i < lines.length; i++) {
-      ctx.fillText(lines[i], nx, by + CELL * 0.15 + i * lineH)
-    }
+    for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], nx, by + C * 0.12 + i * lh)
   }
 
-  // ═══ PASS 11: Title and Story ═══
+  // ══════ PASS 11: Title + Story ══════
+  const titleY = oy + (by0 + pad + 1) * C
   if (data.title) {
-    const titleSize = CELL * 1.3
-    ctx.font = `bold ${titleSize}px 'Georgia', 'Times New Roman', serif`
+    ctx.font = `bold ${C * 1.4}px 'Georgia','Times New Roman',serif`
     ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
-    ctx.fillText(data.title, W / 2, oy + (minY + titleSpace - 2) * CELL)
+    ctx.fillText(data.title, W / 2, titleY)
   }
   if (data.story) {
-    ctx.font = `italic ${CELL * 0.4}px 'Georgia', 'Times New Roman', serif`
+    ctx.font = `italic ${C * 0.4}px 'Georgia','Times New Roman',serif`
     ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    const storyLines = wrapText(ctx, data.story, W * 0.65)
-    const storyY = oy + (minY + titleSpace - 1.5) * CELL
-    for (let i = 0; i < storyLines.length; i++) {
-      ctx.fillText(storyLines[i], W / 2, storyY + i * CELL * 0.5)
-    }
-  }
-
-  // ═══ PASS 12: Random decorative elements inside rooms ═══
-  const decoRng = makeRng(4242)
-  for (const r of largeRects) {
-    const px = ox + r.x * CELL, py = oy + r.y * CELL
-    const area = r.w * r.h
-    // Small dots (room debris)
-    ctx.fillStyle = INK
-    const dotCount = Math.floor(area * 0.04)
-    for (let i = 0; i < dotCount; i++) {
-      const dx = px + (0.3 + decoRng() * 0.4) * r.w * CELL
-      const dy = py + (0.3 + decoRng() * 0.4) * r.h * CELL
-      ctx.beginPath(); ctx.arc(dx, dy, 0.8 + decoRng() * 0.8, 0, Math.PI * 2); ctx.fill()
-    }
+    const sl = wrap(ctx, data.story, W * 0.7)
+    for (let i = 0; i < sl.length; i++) ctx.fillText(sl[i], W / 2, titleY + 4 + i * C * 0.5)
   }
 }
 
-// ── Check if a rect has adjacent floor on a given side ──
-function hasAdjacentFloor(r: DRect, side: 'north' | 'south' | 'east' | 'west', allRects: DRect[]): boolean {
-  for (const other of allRects) {
-    if (other === r) continue
-    if (side === 'north') {
-      // Check if other rect shares the north edge (other.y + other.h == r.y and overlaps horizontally)
-      if (other.y + other.h === r.y && other.x < r.x + r.w && other.x + other.w > r.x) return true
-    } else if (side === 'south') {
-      if (other.y === r.y + r.h && other.x < r.x + r.w && other.x + other.w > r.x) return true
-    } else if (side === 'west') {
-      if (other.x + other.w === r.x && other.y < r.y + r.h && other.y + other.h > r.y) return true
-    } else if (side === 'east') {
-      if (other.x === r.x + r.w && other.y < r.y + r.h && other.y + other.h > r.y) return true
-    }
-  }
-  return false
-}
-
-// ── Door renderer ──
-function renderDoor(ctx: CanvasRenderingContext2D, cx: number, cy: number, isHoriz: boolean, type: number) {
-  const s = CELL * 0.35
-  // Clear wall behind door
+function drawDoor(ctx: CanvasRenderingContext2D, cx: number, cy: number, isH: boolean, type: number) {
+  const s = C * 0.38
+  // Clear wall
   ctx.fillStyle = FLOOR
-  if (isHoriz) ctx.fillRect(cx - s, cy - 4, s * 2, 8)
-  else ctx.fillRect(cx - 4, cy - s, 8, s * 2)
+  if (isH) ctx.fillRect(cx - s, cy - WT, s * 2, WT * 2)
+  else ctx.fillRect(cx - WT, cy - s, WT * 2, s * 2)
 
   ctx.strokeStyle = INK; ctx.fillStyle = INK; ctx.lineWidth = 1.2
 
   if (type === 0 || type === 1 || type === 2) {
-    // Regular door
-    if (isHoriz) ctx.strokeRect(cx - s * 0.6, cy - 2, s * 1.2, 4)
-    else ctx.strokeRect(cx - 2, cy - s * 0.6, 4, s * 1.2)
+    if (isH) ctx.strokeRect(cx - s * 0.55, cy - 2, s * 1.1, 4)
+    else ctx.strokeRect(cx - 2, cy - s * 0.55, 4, s * 1.1)
     if (type === 1) {
-      ctx.lineWidth = 0.8
-      if (isHoriz) {
-        ctx.beginPath(); ctx.moveTo(cx - s * 0.3, cy - 1.5); ctx.lineTo(cx + s * 0.3, cy + 1.5); ctx.stroke()
-        ctx.beginPath(); ctx.moveTo(cx + s * 0.3, cy - 1.5); ctx.lineTo(cx - s * 0.3, cy + 1.5); ctx.stroke()
-      } else {
-        ctx.beginPath(); ctx.moveTo(cx - 1.5, cy - s * 0.3); ctx.lineTo(cx + 1.5, cy + s * 0.3); ctx.stroke()
-        ctx.beginPath(); ctx.moveTo(cx + 1.5, cy - s * 0.3); ctx.lineTo(cx - 1.5, cy + s * 0.3); ctx.stroke()
-      }
+      ctx.lineWidth = 0.7
+      if (isH) { ctx.beginPath(); ctx.moveTo(cx-3,cy-1.5); ctx.lineTo(cx+3,cy+1.5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx+3,cy-1.5); ctx.lineTo(cx-3,cy+1.5); ctx.stroke() }
+      else { ctx.beginPath(); ctx.moveTo(cx-1.5,cy-3); ctx.lineTo(cx+1.5,cy+3); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx+1.5,cy-3); ctx.lineTo(cx-1.5,cy+3); ctx.stroke() }
     }
   } else if (type === 3) {
-    // Stairs
-    ctx.lineWidth = 0.7
+    ctx.lineWidth = 0.6
     for (let i = -2; i <= 2; i++) {
-      if (isHoriz) { ctx.beginPath(); ctx.moveTo(cx - s, cy + i * 2.5); ctx.lineTo(cx + s, cy + i * 2.5); ctx.stroke() }
-      else { ctx.beginPath(); ctx.moveTo(cx + i * 2.5, cy - s); ctx.lineTo(cx + i * 2.5, cy + s); ctx.stroke() }
+      if (isH) { ctx.beginPath(); ctx.moveTo(cx-s,cy+i*2.5); ctx.lineTo(cx+s,cy+i*2.5); ctx.stroke() }
+      else { ctx.beginPath(); ctx.moveTo(cx+i*2.5,cy-s); ctx.lineTo(cx+i*2.5,cy+s); ctx.stroke() }
     }
   } else if (type === 5) {
-    // Gate
     ctx.lineWidth = 1
     for (let i = 0; i < 3; i++) {
-      const t = (i + 0.5) / 3
-      if (isHoriz) { const bx = cx - s + t * s * 2; ctx.beginPath(); ctx.moveTo(bx, cy - 3); ctx.lineTo(bx, cy + 3); ctx.stroke() }
-      else { const by = cy - s + t * s * 2; ctx.beginPath(); ctx.moveTo(cx - 3, by); ctx.lineTo(cx + 3, by); ctx.stroke() }
+      const t = (i+0.5)/3
+      if (isH) { const bx=cx-s+t*s*2; ctx.beginPath(); ctx.moveTo(bx,cy-3); ctx.lineTo(bx,cy+3); ctx.stroke() }
+      else { const by=cy-s+t*s*2; ctx.beginPath(); ctx.moveTo(cx-3,by); ctx.lineTo(cx+3,by); ctx.stroke() }
     }
   } else if (type === 6) {
-    // Secret
-    ctx.lineWidth = 0.8; ctx.setLineDash([2, 2])
-    if (isHoriz) { ctx.beginPath(); ctx.moveTo(cx - s, cy); ctx.lineTo(cx + s, cy); ctx.stroke() }
-    else { ctx.beginPath(); ctx.moveTo(cx, cy - s); ctx.lineTo(cx, cy + s); ctx.stroke() }
+    ctx.lineWidth = 0.8; ctx.setLineDash([2,2])
+    if (isH) { ctx.beginPath(); ctx.moveTo(cx-s,cy); ctx.lineTo(cx+s,cy); ctx.stroke() }
+    else { ctx.beginPath(); ctx.moveTo(cx,cy-s); ctx.lineTo(cx,cy+s); ctx.stroke() }
     ctx.setLineDash([])
   } else {
-    // Open passage — dots
-    if (isHoriz) {
-      ctx.beginPath(); ctx.arc(cx - s, cy, 1.5, 0, Math.PI * 2); ctx.fill()
-      ctx.beginPath(); ctx.arc(cx + s, cy, 1.5, 0, Math.PI * 2); ctx.fill()
-    } else {
-      ctx.beginPath(); ctx.arc(cx, cy - s, 1.5, 0, Math.PI * 2); ctx.fill()
-      ctx.beginPath(); ctx.arc(cx, cy + s, 1.5, 0, Math.PI * 2); ctx.fill()
-    }
+    if (isH) { ctx.beginPath(); ctx.arc(cx-s,cy,1.5,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(cx+s,cy,1.5,0,Math.PI*2); ctx.fill() }
+    else { ctx.beginPath(); ctx.arc(cx,cy-s,1.5,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(cx,cy+s,1.5,0,Math.PI*2); ctx.fill() }
   }
 }
 
-// ── Text wrapping ──
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-  const words = text.split(' ')
-  const lines: string[] = []
-  let line = ''
-  for (const word of words) {
-    const test = line ? `${line} ${word}` : word
-    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = word }
-    else line = test
-  }
-  if (line) lines.push(line)
-  return lines
+function wrap(ctx: CanvasRenderingContext2D, text: string, max: number): string[] {
+  const words = text.split(' '); const lines: string[] = []; let line = ''
+  for (const w of words) { const t = line ? `${line} ${w}` : w; if (ctx.measureText(t).width > max && line) { lines.push(line); line = w } else line = t }
+  if (line) lines.push(line); return lines
 }
 
-// ══════════════════════════════════════════════
-// ── Page Component ──
-// ══════════════════════════════════════════════
-
+// ══════ Page ══════
 function MapGen2Page() {
   const campaign = useCampaignStore(s => s.campaign)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [dungeonData, setDungeonData] = useState<DungeonData | null>(null)
+  const [data, setData] = useState<DungeonData | null>(null)
   const [rotation, setRotation] = useState(0)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (!canvasRef.current || !dungeonData) return
-    renderDungeon(canvasRef.current, dungeonData, 2, rotation)
-  }, [dungeonData, rotation])
+  useEffect(() => { if (canvasRef.current && data) renderDungeon(canvasRef.current, data, 2, rotation) }, [data, rotation])
 
-  function handleImportJSON(file: File) {
-    const reader = new FileReader()
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result as string) as DungeonData
-        if (!data.rects || !data.doors) throw new Error('Invalid dungeon JSON')
-        setDungeonData(data)
-      } catch (e) { console.error('Failed to parse dungeon JSON:', e) }
-    }
-    reader.readAsText(file)
+  function importJSON(file: File) {
+    const r = new FileReader()
+    r.onload = () => { try { const d = JSON.parse(r.result as string); if (d.rects) setData(d) } catch {} }
+    r.readAsText(file)
   }
-
-  function handleExportPNG() {
-    if (!canvasRef.current) return
-    const a = document.createElement('a')
-    a.href = canvasRef.current.toDataURL('image/png')
-    a.download = `${dungeonData?.title?.toLowerCase().replace(/\s+/g, '_') || 'dungeon'}.png`
-    a.click()
-  }
-
-  function handlePrint() {
-    if (!canvasRef.current) return
-    const dataUrl = canvasRef.current.toDataURL('image/png')
-    const win = window.open('', '_blank')
-    if (!win) return
-    win.document.write(`<html><head><title>${dungeonData?.title || 'Dungeon'}</title>
-      <style>@media print{body{margin:0}img{max-width:100%}}body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:white}img{max-width:95vw;max-height:95vh}</style></head>
-      <body><img src="${dataUrl}"/><script>setTimeout(()=>window.print(),500)</script></body></html>`)
-    win.document.close()
-  }
+  function exportPNG() { if (!canvasRef.current) return; const a = document.createElement('a'); a.href = canvasRef.current.toDataURL('image/png'); a.download = `${data?.title?.replace(/\s+/g,'_').toLowerCase()||'dungeon'}.png`; a.click() }
+  function print() { if (!canvasRef.current) return; const w = window.open('','_blank'); if (!w) return; w.document.write(`<html><head><title>${data?.title||'Dungeon'}</title><style>@media print{body{margin:0}img{max-width:100%}}body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:white}img{max-width:95vw;max-height:95vh}</style></head><body><img src="${canvasRef.current.toDataURL('image/png')}"/><script>setTimeout(()=>window.print(),500)</script></body></html>`); w.document.close() }
 
   if (!campaign) return null
-
   return (
     <main className="flex flex-col h-[calc(100vh-120px)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card/50 px-3 py-2">
         <h2 className="text-sm font-semibold mr-2">Map Generator v2</h2>
-        <button onClick={() => fileInputRef.current?.click()}
-          className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition">
-          Import JSON
-        </button>
-        <input ref={fileInputRef} type="file" accept=".json" className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleImportJSON(f); e.target.value = '' }} />
-
-        {dungeonData && (
-          <>
-            <div className="w-px h-5 bg-border" />
-            <div className="flex items-center gap-1 text-xs">
-              <span className="text-muted-foreground">Rotation:</span>
-              <input type="range" value={rotation} onChange={e => setRotation(parseFloat(e.target.value))}
-                min={-15} max={15} step={0.5} className="w-24 accent-primary" />
-              <span className="w-8 text-center font-mono">{rotation}°</span>
-              <button onClick={() => setRotation(0)} className="text-[10px] text-muted-foreground hover:text-foreground">Reset</button>
-            </div>
-            <div className="flex-1" />
-            <button onClick={handleExportPNG} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
-            <button onClick={handlePrint} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">Print</button>
-          </>
-        )}
+        <button onClick={() => fileRef.current?.click()} className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition">Import JSON</button>
+        <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) importJSON(f); e.target.value = '' }} />
+        {data && (<>
+          <div className="w-px h-5 bg-border" />
+          <div className="flex items-center gap-1 text-xs">
+            <span className="text-muted-foreground">Rotate:</span>
+            <input type="range" value={rotation} onChange={e => setRotation(parseFloat(e.target.value))} min={-15} max={15} step={0.5} className="w-20 accent-primary" />
+            <span className="w-8 font-mono text-center">{rotation}°</span>
+            <button onClick={() => setRotation(0)} className="text-[10px] text-muted-foreground hover:text-foreground">Reset</button>
+          </div>
+          <div className="flex-1" />
+          <button onClick={exportPNG} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
+          <button onClick={print} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">Print</button>
+        </>)}
       </div>
-
       <div className="flex-1 overflow-auto bg-[#e8e4dc] flex items-center justify-center p-4">
-        {dungeonData ? (
-          <canvas ref={canvasRef} className="shadow-lg" />
-        ) : (
+        {data ? <canvas ref={canvasRef} className="shadow-lg" /> : (
           <div className="text-center">
             <p className="text-lg font-semibold text-[#221122] mb-2">One-Page Dungeon Renderer</p>
-            <p className="text-sm text-[#221122]/60 mb-4">Import a dungeon JSON from watabou's generator</p>
-            <button onClick={() => fileInputRef.current?.click()}
-              className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
-              Import Dungeon JSON
-            </button>
+            <p className="text-sm text-[#221122]/60 mb-4">Import a dungeon JSON from <a href="https://watabou.github.io/one-page-dungeon/" target="_blank" rel="noopener" className="text-primary underline">watabou's generator</a></p>
+            <button onClick={() => fileRef.current?.click()} className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">Import Dungeon JSON</button>
           </div>
         )}
       </div>
