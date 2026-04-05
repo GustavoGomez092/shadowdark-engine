@@ -6,10 +6,16 @@ export interface CampaignMap {
   width: number
   height: number
   cellSize: number
+  /** Wall thickness in pixels for export (default 4) */
+  wallThickness?: number
+  /** Wall render style for export */
+  wallStyle?: WallStyle
   layers: MapLayer[]
   labels: MapLabel[]
   markers: MapMarker[]
 }
+
+export type WallStyle = 'line' | 'double' | 'stone' | 'brick'
 
 export interface MapLayer {
   id: string
@@ -25,6 +31,16 @@ export interface MapCell {
   terrain: TerrainType
   walls: WallConfig
   features: CellFeature[]
+  /**
+   * Split the cell diagonally into two terrain halves.
+   * 'TLBR' splits from top-left to bottom-right:
+   *   - top-left triangle uses `terrain`, bottom-right uses `splitTerrain`
+   * 'TRBL' splits from top-right to bottom-left:
+   *   - top-right triangle uses `terrain`, bottom-left uses `splitTerrain`
+   */
+  split?: 'TLBR' | 'TRBL'
+  /** Terrain for the second half when split is set */
+  splitTerrain?: TerrainType
 }
 
 export type TerrainType =

@@ -5,7 +5,7 @@ import { useLocale } from '@/hooks/use-locale.ts'
 import { createEmptyMap } from '@/lib/campaign/defaults.ts'
 import { MapCanvas, exportMapAsPNG } from '@/components/campaign/map/map-canvas.tsx'
 import type { MapTool } from '@/components/campaign/map/map-canvas.tsx'
-import type { TerrainType, WallType, CampaignMap } from '@/schemas/map.ts'
+import type { TerrainType, WallType, WallStyle, CampaignMap } from '@/schemas/map.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/map')({
   component: MapEditorPage,
@@ -61,6 +61,7 @@ const TOOL_OPTIONS: { tool: MapTool; label: string; icon: string }[] = [
   { tool: 'door', label: 'Door', icon: '🚪' },
   { tool: 'window', label: 'Window', icon: '▫' },
   { tool: 'diagonal', label: 'Diagonal', icon: '╲' },
+  { tool: 'split', label: 'Split', icon: '◤' },
   { tool: 'furniture', label: 'Objects', icon: '🏛' },
   { tool: 'eraser', label: 'Eraser', icon: '✕' },
   { tool: 'marker', label: 'Room #', icon: '#' },
@@ -204,7 +205,7 @@ function MapEditorPage() {
         </div>
 
         {/* Terrain selector (when paint or fill tool active) */}
-        {(activeTool === 'floor' || activeTool === 'bucket') && (
+        {(activeTool === 'floor' || activeTool === 'bucket' || activeTool === 'split') && (
           <div className="flex gap-1 items-center flex-wrap">
             {TERRAIN_OPTIONS.map(t => (
               <button
@@ -249,6 +250,30 @@ function MapEditorPage() {
           <span className="text-muted-foreground">ft</span>
         </div>
 
+        {/* Wall style for export */}
+        <select
+          value={selectedMap?.wallStyle ?? 'double'}
+          onChange={e => selectedMap && updateMap(selectedMap.id, m => { m.wallStyle = e.target.value as WallStyle })}
+          className="rounded border border-input bg-background px-1 py-0.5 text-[10px] outline-none"
+          title="Wall style (export)"
+        >
+          <option value="line">Thin</option>
+          <option value="double">Double</option>
+          <option value="stone">Stone</option>
+          <option value="brick">Brick</option>
+        </select>
+        <div className="flex items-center gap-0.5 text-[10px]">
+          <span className="text-muted-foreground">W:</span>
+          <input
+            type="number"
+            value={selectedMap?.wallThickness ?? 4}
+            onChange={e => selectedMap && updateMap(selectedMap.id, m => { m.wallThickness = parseInt(e.target.value) || 4 })}
+            min={1} max={12}
+            className="w-8 rounded border border-input bg-background px-0.5 py-0.5 text-[10px] text-center outline-none"
+            title="Wall thickness (export)"
+          />
+        </div>
+
         {/* Export */}
         <button onClick={handleExportPNG} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
         <button onClick={handlePrintMap} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">Print</button>
@@ -284,6 +309,7 @@ function MapEditorPage() {
         {activeTool === 'door' && 'Click near a cell edge to place a door. Drag to place doors continuously.'}
         {activeTool === 'window' && 'Click near a cell edge to place a window. Drag to place windows continuously.'}
         {activeTool === 'diagonal' && 'Click to place a diagonal wall (╲ or ╱ based on click position). Drag to place continuously.'}
+        {activeTool === 'split' && 'Click to split a cell diagonally into two terrains. Select terrain for the second half from the palette.'}
         {activeTool === 'furniture' && 'Click to place/remove furniture. Select object type from the palette.'}
         {activeTool === 'eraser' && 'Click/drag to erase cells.'}
         {activeTool === 'marker' && 'Click to place/remove room number markers.'}

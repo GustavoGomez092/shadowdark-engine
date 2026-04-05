@@ -59,7 +59,7 @@ const SECRET_DOOR_COLOR = '#6a4c93'
 const WINDOW_COLOR = '#5b9bd5'
 const GRID_COLOR = 'rgba(100, 100, 100, 0.3)'
 
-export type MapTool = 'select' | 'floor' | 'bucket' | 'wall' | 'door' | 'window' | 'diagonal' | 'furniture' | 'eraser' | 'label' | 'marker'
+export type MapTool = 'select' | 'floor' | 'bucket' | 'wall' | 'door' | 'window' | 'diagonal' | 'split' | 'furniture' | 'eraser' | 'label' | 'marker'
 
 interface Props {
   map: CampaignMap
@@ -233,14 +233,41 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
     ctx.fillStyle = '#0b0f14'
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height)
 
-    // Draw terrain
+    // Draw terrain (with diagonal split support)
     for (const [, cell] of cellMap.current) {
       const px = offsetX + cell.x * cellSize
       const py = offsetY + cell.y * cellSize
       if (px + cellSize < 0 || py + cellSize < 0 || px > canvasSize.width || py > canvasSize.height) continue
 
-      ctx.fillStyle = TERRAIN_COLORS[cell.terrain] || TERRAIN_COLORS.void
-      ctx.fillRect(px, py, cellSize, cellSize)
+      if (cell.split && cell.splitTerrain) {
+        // Draw two triangles
+        const t1 = TERRAIN_COLORS[cell.terrain] || TERRAIN_COLORS.void
+        const t2 = TERRAIN_COLORS[cell.splitTerrain] || TERRAIN_COLORS.void
+        if (cell.split === 'TLBR') {
+          // Triangle 1: top-left (terrain)
+          ctx.fillStyle = t1; ctx.beginPath()
+          ctx.moveTo(px, py); ctx.lineTo(px + cellSize, py); ctx.lineTo(px, py + cellSize); ctx.closePath(); ctx.fill()
+          // Triangle 2: bottom-right (splitTerrain)
+          ctx.fillStyle = t2; ctx.beginPath()
+          ctx.moveTo(px + cellSize, py); ctx.lineTo(px + cellSize, py + cellSize); ctx.lineTo(px, py + cellSize); ctx.closePath(); ctx.fill()
+        } else {
+          // TRBL: Triangle 1: top-right (terrain)
+          ctx.fillStyle = t1; ctx.beginPath()
+          ctx.moveTo(px, py); ctx.lineTo(px + cellSize, py); ctx.lineTo(px + cellSize, py + cellSize); ctx.closePath(); ctx.fill()
+          // Triangle 2: bottom-left (splitTerrain)
+          ctx.fillStyle = t2; ctx.beginPath()
+          ctx.moveTo(px, py); ctx.lineTo(px + cellSize, py + cellSize); ctx.lineTo(px, py + cellSize); ctx.closePath(); ctx.fill()
+        }
+        // Draw split line
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1
+        ctx.beginPath()
+        if (cell.split === 'TLBR') { ctx.moveTo(px, py + cellSize); ctx.lineTo(px + cellSize, py) }
+        else { ctx.moveTo(px, py); ctx.lineTo(px + cellSize, py + cellSize) }
+        ctx.stroke()
+      } else {
+        ctx.fillStyle = TERRAIN_COLORS[cell.terrain] || TERRAIN_COLORS.void
+        ctx.fillRect(px, py, cellSize, cellSize)
+      }
 
       // Draw features
       for (const feature of cell.features) {
@@ -494,6 +521,36 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
         }
         const current = cell.walls[diagKey] ?? 'none'
         cell.walls[diagKey] = current === 'wall' ? 'none' : 'wall'
+      })
+    } else if (activeTool === 'split') {
+      // Split cell diagonally: click position determines which diagonal, active terrain fills the second half
+      const canvas = canvasRef.current
+      if (!canvas || clientX == null || clientY == null) return
+      const rect = canvas.getBoundingClientRect()
+      const lx = clientX - rect.left
+      const ly = clientY - rect.top
+      const cellSize = map.cellSize * viewport.zoom
+      const relX = (lx - (viewport.offsetX + gx * cellSize)) / cellSize
+      const relY = (ly - (viewport.offsetY + gy * cellSize)) / cellSize
+      const splitType = Math.abs(relY - relX) < Math.abs(relY - (1 - relX)) ? 'TLBR' : 'TRBL'
+
+      onMapChange(m => {
+        const layer = m.layers[0]
+        let cell = layer.cells.find(c => c.x === gx && c.y === gy)
+        if (!cell) {
+          cell = { x: gx, y: gy, terrain: 'void', walls: { north: 'none', east: 'none', south: 'none', west: 'none' }, features: [] }
+          layer.cells.push(cell)
+        }
+        if (cell.split === splitType) {
+          // Toggle off
+          cell.split = undefined
+          cell.splitTerrain = undefined
+        } else {
+          cell.split = splitType as 'TLBR' | 'TRBL'
+          cell.splitTerrain = activeTerrainType
+          // If cell has no terrain yet, default the primary to void
+          if (cell.terrain === activeTerrainType) cell.terrain = 'void'
+        }
       })
     } else if (activeTool === 'furniture') {
       onMapChange(m => {
@@ -909,41 +966,78 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
     for (const cell of layer.cells) cells.set(`${cell.x},${cell.y}`, cell)
   }
 
-  // ── Pass 1: Terrain fills ──
-  for (const [, cell] of cells) {
-    const px = cell.x * cs, py = cell.y * cs
-    const color = EXPORT_TERRAIN_COLORS[cell.terrain] || '#f5f0e8'
-    ctx.fillStyle = color
-    ctx.fillRect(px, py, cs, cs)
+  const wallThick = map.wallThickness ?? 4
+  const wallStyle = map.wallStyle ?? 'double'
 
-    // Texture overlays — detailed patterns per terrain type
-    if (cell.terrain === 'stone_wall' || cell.terrain === 'cave_wall') {
+  // Helper: fill a terrain type into a region (full cell or clipped triangle)
+  function fillTerrainRegion(terrain: TerrainType, px: number, py: number) {
+    const color = EXPORT_TERRAIN_COLORS[terrain] || '#f5f0e8'
+    ctx.fillStyle = color
+    ctx.fill() // fill the current path (set by caller)
+
+    // Texture overlays (clip is already set by caller)
+    if (terrain === 'stone_wall' || terrain === 'cave_wall') {
       drawStoneTexture(ctx, px, py, cs, cs)
-    } else if (cell.terrain === 'dirt' || cell.terrain === 'mud' || cell.terrain === 'cave_floor') {
+    } else if (terrain === 'dirt' || terrain === 'mud' || terrain === 'cave_floor') {
       drawDirtTexture(ctx, px, py, cs, cs)
-    } else if (cell.terrain === 'sand') {
+    } else if (terrain === 'sand') {
       drawSandTexture(ctx, px, py, cs, cs)
-    } else if (cell.terrain === 'water' || cell.terrain === 'deep_water') {
-      drawWaterTexture(ctx, px, py, cs, cs, cell.terrain === 'deep_water')
-    } else if (cell.terrain === 'grass') {
+    } else if (terrain === 'water' || terrain === 'deep_water') {
+      drawWaterTexture(ctx, px, py, cs, cs, terrain === 'deep_water')
+    } else if (terrain === 'grass') {
       drawGrassTexture(ctx, px, py, cs, cs)
-    } else if (cell.terrain === 'lava') {
+    } else if (terrain === 'lava') {
       drawLavaTexture(ctx, px, py, cs, cs)
-    } else if (cell.terrain === 'cobblestone') {
+    } else if (terrain === 'cobblestone') {
       drawTileTexture(ctx, px, py, cs, cs, true)
-    } else if (cell.terrain === 'tiles' || cell.terrain === 'marble') {
+    } else if (terrain === 'tiles' || terrain === 'marble') {
       drawTileTexture(ctx, px, py, cs, cs, false)
-    } else if (cell.terrain === 'wooden_floor') {
-      // Horizontal wood grain lines
-      ctx.save()
-      ctx.strokeStyle = 'rgba(0,0,0,0.06)'
-      ctx.lineWidth = 0.4
+    } else if (terrain === 'wooden_floor') {
+      ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 0.4
       for (let i = 0; i < 4; i++) {
         const ly = py + (i + 0.5) * cs / 4
         ctx.beginPath(); ctx.moveTo(px, ly); ctx.lineTo(px + cs, ly); ctx.stroke()
       }
       ctx.restore()
     }
+  }
+
+  // ── Pass 1: Terrain fills ──
+  for (const [, cell] of cells) {
+    const px = cell.x * cs, py = cell.y * cs
+
+    if (cell.split && cell.splitTerrain) {
+      // Draw two triangles with separate terrain
+      ctx.save()
+      // Triangle 1
+      ctx.beginPath()
+      if (cell.split === 'TLBR') {
+        ctx.moveTo(px, py); ctx.lineTo(px + cs, py); ctx.lineTo(px, py + cs); ctx.closePath()
+      } else {
+        ctx.moveTo(px, py); ctx.lineTo(px + cs, py); ctx.lineTo(px + cs, py + cs); ctx.closePath()
+      }
+      ctx.save(); ctx.clip()
+      ctx.beginPath(); ctx.rect(px, py, cs, cs)
+      fillTerrainRegion(cell.terrain, px, py)
+      ctx.restore()
+
+      // Triangle 2
+      ctx.beginPath()
+      if (cell.split === 'TLBR') {
+        ctx.moveTo(px + cs, py); ctx.lineTo(px + cs, py + cs); ctx.lineTo(px, py + cs); ctx.closePath()
+      } else {
+        ctx.moveTo(px, py); ctx.lineTo(px + cs, py + cs); ctx.lineTo(px, py + cs); ctx.closePath()
+      }
+      ctx.save(); ctx.clip()
+      ctx.beginPath(); ctx.rect(px, py, cs, cs)
+      fillTerrainRegion(cell.splitTerrain, px, py)
+      ctx.restore()
+      ctx.restore()
+    } else {
+      ctx.beginPath(); ctx.rect(px, py, cs, cs)
+      fillTerrainRegion(cell.terrain, px, py)
+    }
+
   }
 
   // ── Pass 2: Grid lines (subtle) ──
@@ -1026,18 +1120,77 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
     // Standard wall or diagonal — extend past corners so they connect
     const dx = x2 - x1, dy = y2 - y1
     const len = Math.sqrt(dx * dx + dy * dy) || 1
-    const ext = 2 // pixels to extend past each endpoint
+    const ext = wallThick * 0.5
     const ex1 = x1 - (dx / len) * ext, ey1 = y1 - (dy / len) * ext
     const ex2 = x2 + (dx / len) * ext, ey2 = y2 + (dy / len) * ext
 
     ctx.setLineDash(type === 'secret_door' ? [3, 3] : [])
-    ctx.strokeStyle = '#1a1a1a'
-    ctx.lineWidth = 4
     ctx.lineCap = 'butt'
-    ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
-    // Inner highlight
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)'
-    ctx.lineWidth = 1
+
+    if (wallStyle === 'double' || wallStyle === 'stone' || wallStyle === 'brick') {
+      // Double-line wall: two parallel lines with fill between
+      const nx = -(dy / len) * (wallThick / 2)
+      const ny = (dx / len) * (wallThick / 2)
+
+      // Filled rectangle between lines
+      ctx.fillStyle = wallStyle === 'stone' ? '#4a4a4a' : wallStyle === 'brick' ? '#5a3a2a' : '#2a2a2a'
+      ctx.beginPath()
+      ctx.moveTo(ex1 + nx, ey1 + ny)
+      ctx.lineTo(ex2 + nx, ey2 + ny)
+      ctx.lineTo(ex2 - nx, ey2 - ny)
+      ctx.lineTo(ex1 - nx, ey1 - ny)
+      ctx.closePath()
+      ctx.fill()
+
+      // Outer edges
+      ctx.strokeStyle = '#1a1a1a'
+      ctx.lineWidth = 0.8
+      ctx.beginPath(); ctx.moveTo(ex1 + nx, ey1 + ny); ctx.lineTo(ex2 + nx, ey2 + ny); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(ex1 - nx, ey1 - ny); ctx.lineTo(ex2 - nx, ey2 - ny); ctx.stroke()
+
+      // Stone texture between lines
+      if (wallStyle === 'stone') {
+        const rng = seededRng(Math.floor(x1 * 31 + y1 * 17 + x2 * 13))
+        ctx.fillStyle = 'rgba(255,255,255,0.15)'
+        const segments = Math.floor(len / (wallThick * 1.5)) + 1
+        for (let i = 0; i < segments; i++) {
+          const t = (i + 0.5) / segments
+          const cx = ex1 + (ex2 - ex1) * t + (rng() - 0.5) * 1
+          const cy = ey1 + (ey2 - ey1) * t + (rng() - 0.5) * 1
+          const sr = wallThick * 0.2 + rng() * wallThick * 0.15
+          ctx.beginPath(); ctx.arc(cx, cy, sr, 0, Math.PI * 2); ctx.fill()
+        }
+        // Mortar lines across wall width
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)'
+        ctx.lineWidth = 0.3
+        for (let i = 1; i < segments; i++) {
+          const t = i / segments
+          const cx = ex1 + (ex2 - ex1) * t
+          const cy = ey1 + (ey2 - ey1) * t
+          ctx.beginPath(); ctx.moveTo(cx + nx, cy + ny); ctx.lineTo(cx - nx, cy - ny); ctx.stroke()
+        }
+      } else if (wallStyle === 'brick') {
+        // Horizontal brick lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)'
+        ctx.lineWidth = 0.3
+        const segments = Math.floor(len / wallThick) + 1
+        for (let i = 1; i < segments; i++) {
+          const t = i / segments
+          const cx = ex1 + (ex2 - ex1) * t
+          const cy = ey1 + (ey2 - ey1) * t
+          ctx.beginPath(); ctx.moveTo(cx + nx, cy + ny); ctx.lineTo(cx - nx, cy - ny); ctx.stroke()
+        }
+      }
+    } else {
+      // Simple line wall
+      ctx.strokeStyle = '#1a1a1a'
+      ctx.lineWidth = wallThick
+      ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
+    }
+
+    // Inner highlight for all styles
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)'
+    ctx.lineWidth = 0.5
     ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
     ctx.setLineDash([])
   }
