@@ -213,18 +213,27 @@ function renderDungeon(canvas: HTMLCanvasElement, data: DungeonData, scale: numb
     for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], nx, by + C * 0.12 + i * lh)
   }
 
-  // ══════ PASS 11: Title + Story ══════
-  const titleY = oy + (by0 + pad + 1) * C
-  if (data.title) {
-    ctx.font = `bold ${C * 1.4}px 'Georgia','Times New Roman',serif`
-    ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
-    ctx.fillText(data.title, W / 2, titleY)
-  }
-  if (data.story) {
-    ctx.font = `italic ${C * 0.4}px 'Georgia','Times New Roman',serif`
-    ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
-    const sl = wrap(ctx, data.story, W * 0.7)
-    for (let i = 0; i < sl.length; i++) ctx.fillText(sl[i], W / 2, titleY + 4 + i * C * 0.5)
+  // ══════ PASS 11: Title + Story (drawn with paper backdrop to cover hatching) ══════
+  if (data.title || data.story) {
+    // Clear hatching behind title area
+    const titleBlockH = titleCells * C
+    ctx.fillStyle = PAPER
+    ctx.fillRect(0, 0, W, titleBlockH)
+
+    let curY = C * 1.5
+
+    if (data.title) {
+      ctx.font = `bold ${C * 1.4}px 'Georgia','Times New Roman',serif`
+      ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
+      ctx.fillText(data.title, W / 2, curY)
+      curY += C * 1.8
+    }
+    if (data.story) {
+      ctx.font = `italic ${C * 0.4}px 'Georgia','Times New Roman',serif`
+      ctx.fillStyle = INK; ctx.textAlign = 'center'; ctx.textBaseline = 'top'
+      const sl = wrap(ctx, data.story, W * 0.7)
+      for (let i = 0; i < sl.length; i++) ctx.fillText(sl[i], W / 2, curY + i * C * 0.5)
+    }
   }
 }
 
