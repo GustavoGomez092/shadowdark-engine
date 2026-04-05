@@ -388,7 +388,7 @@ function MonsterDetail({ instance, definition, onHpChange, onDefeat }: {
 }
 
 function CharacterDetail({ character: c, onHpChange }: { character: Character; onHpChange: (delta: number) => void }) {
-  const { t } = useLocale()
+  const { t, tData } = useLocale()
   const hpPercent = c.maxHp > 0 ? (c.currentHp / c.maxHp) * 100 : 0
   const fmt = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 
