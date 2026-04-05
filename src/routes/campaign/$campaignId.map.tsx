@@ -6,6 +6,8 @@ import { createEmptyMap } from '@/lib/campaign/defaults.ts'
 import { MapCanvas, exportMapAsPNG } from '@/components/campaign/map/map-canvas.tsx'
 import type { MapTool } from '@/components/campaign/map/map-canvas.tsx'
 import type { TerrainType, WallType, WallStyle, CampaignMap } from '@/schemas/map.ts'
+import { generateDungeon, DEFAULT_CONFIG } from '@/lib/campaign/dungeon-generator.ts'
+import type { DungeonConfig } from '@/lib/campaign/dungeon-generator.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/map')({
   component: MapEditorPage,
@@ -89,6 +91,7 @@ function MapEditorPage() {
   const [showGrid, setShowGrid] = useState(true)
   const [gridDistanceFt, setGridDistanceFt] = useState(5)
   const [showNewMapDialog, setShowNewMapDialog] = useState(false)
+  const [showGenerator, setShowGenerator] = useState(false)
   const [newMapName, setNewMapName] = useState('')
   const [newMapWidth, setNewMapWidth] = useState(30)
   const [newMapHeight, setNewMapHeight] = useState(20)
@@ -152,9 +155,14 @@ function MapEditorPage() {
         <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-lg text-muted-foreground">No maps yet</p>
           <p className="mt-1 text-sm text-muted-foreground">Create a dungeon map for your adventure</p>
-          <button onClick={() => setShowNewMapDialog(true)} className="mt-4 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
-            Create First Map
-          </button>
+          <div className="mt-4 flex gap-3">
+            <button onClick={() => setShowNewMapDialog(true)} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
+              Create Empty Map
+            </button>
+            <button onClick={() => setShowGenerator(true)} className="rounded-lg border border-primary/30 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition">
+              Generate Dungeon
+            </button>
+          </div>
         </div>
       </main>
     )
@@ -185,6 +193,7 @@ function MapEditorPage() {
           />
         )}
         <button onClick={() => setShowNewMapDialog(true)} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">+ New</button>
+        <button onClick={() => setShowGenerator(true)} className="rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition">Generate</button>
 
         <div className="w-px h-6 bg-border mx-1" />
 
@@ -359,6 +368,152 @@ function MapEditorPage() {
           </div>
         </div>
       )}
+
+      {/* Dungeon Generator Dialog */}
+      {showGenerator && (
+        <DungeonGeneratorDialog
+          onGenerate={(map) => {
+            addMap(map)
+            setSelectedMapId(map.id)
+            setShowGenerator(false)
+          }}
+          onCancel={() => setShowGenerator(false)}
+        />
+      )}
     </main>
+  )
+}
+
+function DungeonGeneratorDialog({ onGenerate, onCancel }: {
+  onGenerate: (map: CampaignMap) => void
+  onCancel: () => void
+}) {
+  const [config, setConfig] = useState<DungeonConfig>({ ...DEFAULT_CONFIG, seed: Math.floor(Math.random() * 99999999) })
+  const [preview, setPreview] = useState<CampaignMap | null>(null)
+
+  function update<K extends keyof DungeonConfig>(key: K, value: DungeonConfig[K]) {
+    setConfig(prev => ({ ...prev, [key]: value }))
+    setPreview(null)
+  }
+
+  function handleGenerate() {
+    const map = generateDungeon(config)
+    setPreview(map)
+  }
+
+  function handleAccept() {
+    const map = preview ?? generateDungeon(config)
+    onGenerate(map)
+  }
+
+  function handleReroll() {
+    setConfig(prev => ({ ...prev, seed: Math.floor(Math.random() * 99999999) }))
+    setPreview(null)
+  }
+
+  const inputCls = "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-border bg-card p-4 sm:p-6">
+        <h2 className="text-xl font-bold mb-1">Dungeon Generator</h2>
+        <p className="text-xs text-muted-foreground mb-4">Generate a random dungeon layout with rooms and corridors</p>
+
+        <div className="space-y-4">
+          {/* Seed */}
+          <div className="flex gap-2 items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Seed</label>
+              <input type="number" value={config.seed} onChange={e => update('seed', parseInt(e.target.value) || 0)} className={inputCls} />
+            </div>
+            <button onClick={handleReroll} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-accent transition">Reroll</button>
+          </div>
+
+          {/* Map size */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Width (cells)</label>
+              <input type="number" value={config.width} onChange={e => update('width', parseInt(e.target.value) || 30)} min={15} max={80} className={inputCls} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Height (cells)</label>
+              <input type="number" value={config.height} onChange={e => update('height', parseInt(e.target.value) || 20)} min={15} max={60} className={inputCls} />
+            </div>
+          </div>
+
+          {/* Room settings */}
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Rooms</label>
+              <input type="number" value={config.roomCount} onChange={e => update('roomCount', parseInt(e.target.value) || 6)} min={2} max={25} className={inputCls} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Min Size</label>
+              <input type="number" value={config.roomMinSize} onChange={e => update('roomMinSize', parseInt(e.target.value) || 3)} min={2} max={6} className={inputCls} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Max Size</label>
+              <input type="number" value={config.roomMaxSize} onChange={e => update('roomMaxSize', parseInt(e.target.value) || 7)} min={3} max={12} className={inputCls} />
+            </div>
+          </div>
+
+          {/* Density & options */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Density</label>
+              <select value={config.density} onChange={e => update('density', e.target.value as DungeonConfig['density'])} className={inputCls}>
+                <option value="sparse">Sparse</option>
+                <option value="normal">Normal</option>
+                <option value="dense">Dense</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">Corridor Width</label>
+              <select value={config.corridorWidth} onChange={e => update('corridorWidth', parseInt(e.target.value))} className={inputCls}>
+                <option value={1}>1 Cell</option>
+                <option value={2}>2 Cells</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Toggles */}
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={config.addLoops} onChange={e => update('addLoops', e.target.checked)} className="rounded" />
+              Loop corridors
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={config.addSecretRooms} onChange={e => update('addSecretRooms', e.target.checked)} className="rounded" />
+              Secret rooms
+            </label>
+          </div>
+
+          {/* Water */}
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-muted-foreground">Water ({Math.round(config.waterChance * 100)}%)</label>
+            <input type="range" value={config.waterChance} onChange={e => update('waterChance', parseFloat(e.target.value))} min={0} max={0.5} step={0.05}
+              className="w-full accent-primary" />
+          </div>
+
+          {/* Preview info */}
+          {preview && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
+              Generated: {preview.layers[0].cells.length} cells, {preview.markers.length} rooms
+              <span className="ml-2 text-primary font-medium">Ready to add</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <button onClick={onCancel} className="rounded-lg border border-border px-4 py-2 text-sm hover:bg-accent transition">Cancel</button>
+          <button onClick={handleGenerate} className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 transition">
+            {preview ? 'Regenerate' : 'Preview'}
+          </button>
+          <button onClick={handleAccept} className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
+            {preview ? 'Add to Campaign' : 'Generate & Add'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
