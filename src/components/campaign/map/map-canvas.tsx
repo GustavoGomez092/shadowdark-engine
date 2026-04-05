@@ -196,9 +196,15 @@ export function MapCanvas({ map, onMapChange, activeTool, activeTerrainType, act
       ctx.beginPath(); ctx.moveTo(mx - nx, my - ny); ctx.lineTo(mx + nx, my + ny); ctx.stroke()
       ctx.lineWidth = prevLW
     } else {
+      // Extend past endpoints so corners connect
+      const dx = x2 - x1, dy = y2 - y1
+      const len = Math.sqrt(dx * dx + dy * dy) || 1
+      const ext = 1.5 * zoom
+      const ex1 = x1 - (dx / len) * ext, ey1 = y1 - (dy / len) * ext
+      const ex2 = x2 + (dx / len) * ext, ey2 = y2 + (dy / len) * ext
       ctx.beginPath()
-      ctx.moveTo(x1, y1)
-      ctx.lineTo(x2, y2)
+      ctx.moveTo(ex1, ey1)
+      ctx.lineTo(ex2, ey2)
       ctx.stroke()
       if (type === 'door') {
         const mx = (x1 + x2) / 2, my = (y1 + y2) / 2
@@ -895,17 +901,22 @@ export function exportMapAsPNG(map: CampaignMap, scale: number = 2): string {
       return
     }
 
-    // Standard wall or diagonal
+    // Standard wall or diagonal — extend past corners so they connect
+    const dx = x2 - x1, dy = y2 - y1
+    const len = Math.sqrt(dx * dx + dy * dy) || 1
+    const ext = 2 // pixels to extend past each endpoint
+    const ex1 = x1 - (dx / len) * ext, ey1 = y1 - (dy / len) * ext
+    const ex2 = x2 + (dx / len) * ext, ey2 = y2 + (dy / len) * ext
+
     ctx.setLineDash(type === 'secret_door' ? [3, 3] : [])
-    // Thick wall with double-line effect
     ctx.strokeStyle = '#1a1a1a'
     ctx.lineWidth = 4
-    ctx.lineCap = 'square'
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+    ctx.lineCap = 'butt'
+    ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
     // Inner highlight
     ctx.strokeStyle = 'rgba(255,255,255,0.15)'
     ctx.lineWidth = 1
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(ex1, ey1); ctx.lineTo(ex2, ey2); ctx.stroke()
     ctx.setLineDash([])
   }
 
