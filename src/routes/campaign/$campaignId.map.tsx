@@ -24,6 +24,7 @@ function MapEditorPage() {
   const [showProps, setShowProps] = useState(true)
   const [showNotes, setShowNotes] = useState(true)
   const [showConnectors, setShowConnectors] = useState(false)
+  const [showTitle, setShowTitle] = useState(true)
   const [autoRotate, setAutoRotate] = useState(true)
   const [bwMode, setBwMode] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -77,10 +78,16 @@ function MapEditorPage() {
       await initApp()
       return
     }
-    appRef.current.blueprint = new Blueprint(seed, [])
-    appRef.current.generate()
-    setTitle(appRef.current.dungeon?.story?.name || '')
-    setGenerated(true)
+    try {
+      appRef.current._resize()
+      appRef.current.blueprint = new Blueprint(seed, [])
+      appRef.current.renderer.noteOverrides.clear()
+      appRef.current.generate()
+      setTitle(appRef.current.dungeon?.story?.name || '')
+      setGenerated(true)
+    } catch (e) {
+      console.error('Generate failed:', e)
+    }
   }
 
   // Reroll seed and generate
@@ -114,6 +121,7 @@ function MapEditorPage() {
       case 'props': setShowProps(value); style.showProps = value; break
       case 'notes': setShowNotes(value); style.showNotes = value; break
       case 'connectors': setShowConnectors(value); style.showConnectors = value; break
+      case 'title': setShowTitle(value); style.showTitle = value; break
       case 'autoRotate':
         setAutoRotate(value); style.autoRotate = value
         if (!value) style.rotation = 0
@@ -213,6 +221,7 @@ function MapEditorPage() {
           {/* Toggle pills */}
           <div className="flex items-center gap-1">
             {([
+              ['title', showTitle, 'Title'],
               ['grid', showGrid, 'Grid'],
               ['water', showWater, 'Water'],
               ['props', showProps, 'Props'],

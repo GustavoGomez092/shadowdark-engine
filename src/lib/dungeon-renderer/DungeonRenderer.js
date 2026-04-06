@@ -116,8 +116,8 @@ class DungeonRenderer {
 
     ctx.restore();
 
-    // topReserved = story.y + story.height = titleHeight + storyHeight
-    return titleHeight + storyHeight;
+    // topReserved = story.y + story.height + padding below story
+    return titleHeight + storyHeight + 30;
   }
 
   /**
@@ -165,7 +165,7 @@ class DungeonRenderer {
     let availW = canvasW - 2 * padX;
 
     // ── b = topReserved (title + story height + top padding) ──
-    const topReserved = padTop + this._measureTopReserved(dungeon, canvasW);
+    const topReserved = padTop + (style.showTitle ? this._measureTopReserved(dungeon, canvasW) : 20);
 
     // ── c = rHeight - b - padBottom ──
     const availH = canvasH - topReserved - padBottom;
@@ -386,7 +386,7 @@ class DungeonRenderer {
     }
 
     // ═══════ LAYER 9: Title & Story Hook (screen space, horizontal text) ═══════
-    if (dungeon.story && dungeon.story.name) {
+    if (style.showTitle && dungeon.story && dungeon.story.name) {
       ctx.save();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       this._drawTitle(dungeon.story.name, screenBounds, canvasW);

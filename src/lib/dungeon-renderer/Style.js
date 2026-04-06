@@ -101,6 +101,7 @@ class Style {
     this.showNotes = true;
     this.showLegend = true;
     this.showConnectors = true;  // Show connector lines between note boxes and rooms
+    this.showTitle = true;       // Show dungeon title and story hook
     this.rotation = 0;         // Dungeon rotation angle (radians)
     this.autoRotate = true;
 
