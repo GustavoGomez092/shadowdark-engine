@@ -50,8 +50,11 @@ function MapEditorPage() {
   const [editingTitle, setEditingTitle] = useState('')
   const [editingStory, setEditingStory] = useState('')
   const [editorPanel, setEditorPanel] = useState<'none' | 'room' | 'door' | 'dungeon'>('none')
-  const [placingProp, setPlacingProp] = useState<string | null>(null) // prop type being placed
-  const [, forceUpdate] = useState(0) // force re-render without losing references
+  const [placingProp, setPlacingProp] = useState<string | null>(null)
+  const [selectedProp, setSelectedProp] = useState<any>(null)
+  const [propScale, setPropScale] = useState(0.6)
+  const [propRotation, setPropRotation] = useState(0)
+  const [, forceUpdate] = useState(0)
   const refresh = () => forceUpdate(n => n + 1)
 
   // Init app
@@ -133,24 +136,38 @@ function MapEditorPage() {
 
     // Prop placement mode — place at clicked grid position
     if (placingProp && selectedRoom) {
-      app.addRoomProp(selectedRoom, placingProp, grid.gx - selectedRoom.x + 0.5, grid.gy - selectedRoom.y + 0.5)
+      const newProp = app.addRoomProp(selectedRoom, placingProp, grid.gx - selectedRoom.x + 0.5, grid.gy - selectedRoom.y + 0.5, propScale, propRotation)
       setPlacingProp(null)
+      setSelectedProp(newProp)
+      setPropScale(newProp.scale)
+      setPropRotation(newProp.rotation)
       refresh()
       return
     }
 
-    // Check door first (more specific)
+    // If a room is selected, check if clicking a prop within it
+    if (selectedRoom) {
+      const prop = app.findPropAt(selectedRoom, grid.gx + 0.5, grid.gy + 0.5)
+      if (prop) {
+        setSelectedProp(prop)
+        setPropScale(prop.scale)
+        setPropRotation(prop.rotation)
+        return
+      }
+    }
+
+    // Check door first
     const door = app.findDoorAt(grid.gx, grid.gy)
     if (door) {
-      setSelectedDoor(door); setSelectedRoom(null); setEditorPanel('door'); setPlacingProp(null)
+      setSelectedDoor(door); setSelectedRoom(null); setSelectedProp(null); setEditorPanel('door'); setPlacingProp(null)
       return
     }
     const room = app.findRoomAt(grid.gx, grid.gy)
     if (room) {
-      setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room'); setPlacingProp(null)
+      setSelectedRoom(room); setSelectedDoor(null); setSelectedProp(null); setEditorPanel('room'); setPlacingProp(null)
       return
     }
-    setSelectedRoom(null); setSelectedDoor(null); setEditorPanel('none'); setPlacingProp(null)
+    setSelectedRoom(null); setSelectedDoor(null); setSelectedProp(null); setEditorPanel('none'); setPlacingProp(null)
   }
 
   // Save dungeon state to campaign
@@ -343,16 +360,80 @@ function MapEditorPage() {
                     </button>
                   </div>
                 </div>
+                {/* Props management */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[10px] font-semibold text-muted-foreground">Props ({selectedRoom.props?.length || 0})</label>
-                    <button onClick={() => { appRef.current?.clearRoomProps(selectedRoom); refresh() }}
-                      className="text-[10px] text-red-400 hover:underline">Clear</button>
+                    <button onClick={() => { appRef.current?.clearRoomProps(selectedRoom); setSelectedProp(null); refresh() }}
+                      className="text-[10px] text-red-400 hover:underline">Clear All</button>
                   </div>
+
+                  {/* Existing props list */}
+                  {selectedRoom.props?.length > 0 && (
+                    <div className="space-y-1 mb-2 max-h-32 overflow-y-auto">
+                      {selectedRoom.props.map((prop: any, i: number) => (
+                        <div key={i} onClick={() => { setSelectedProp(prop); setPropScale(prop.scale); setPropRotation(prop.rotation) }}
+                          className={`flex items-center justify-between rounded border px-1.5 py-0.5 text-[10px] cursor-pointer transition ${
+                            selectedProp === prop ? 'border-primary bg-primary/10 text-primary' : 'border-border/50 hover:bg-accent'
+                          }`}>
+                          <span className="capitalize font-medium">{prop.type}</span>
+                          <span className="text-muted-foreground">s:{prop.scale.toFixed(1)} r:{Math.round(prop.rotation * 180 / Math.PI)}°</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Selected prop editor */}
+                  {selectedProp && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-2 mb-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold capitalize">{selectedProp.type}</span>
+                        <button onClick={() => { appRef.current?.removeProp(selectedRoom, selectedProp); setSelectedProp(null); refresh() }}
+                          className="text-[9px] text-red-400 hover:underline">Delete</button>
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Scale: {propScale.toFixed(2)}</label>
+                        <input type="range" min={0.1} max={3} step={0.05} value={propScale}
+                          onChange={e => { const v = parseFloat(e.target.value); setPropScale(v); appRef.current?.updateProp(selectedProp, { scale: v }) }}
+                          className="w-full accent-primary h-1" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Rotation: {Math.round(propRotation * 180 / Math.PI)}°</label>
+                        <input type="range" min={0} max={6.28} step={0.1} value={propRotation}
+                          onChange={e => { const v = parseFloat(e.target.value); setPropRotation(v); appRef.current?.updateProp(selectedProp, { rotation: v }) }}
+                          className="w-full accent-primary h-1" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Type</label>
+                        <select value={selectedProp.type} onChange={e => { appRef.current?.updateProp(selectedProp, { type: e.target.value }); refresh() }}
+                          className="w-full rounded border border-input bg-background px-1 py-0.5 text-[10px] outline-none capitalize">
+                          {PROP_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Place new prop */}
                   {placingProp && (
-                    <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 py-1 text-[10px] text-amber-400">
-                      Click on the map to place <span className="font-semibold">{placingProp}</span>
+                    <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 py-1 mb-1 text-[10px] text-amber-400">
+                      Click on the map to place <span className="font-semibold">{placingProp}</span> (scale: {propScale.toFixed(1)})
                       <button onClick={() => setPlacingProp(null)} className="ml-2 text-muted-foreground hover:text-foreground">Cancel</button>
+                    </div>
+                  )}
+                  {!placingProp && (
+                    <div className="mb-1">
+                      <div className="flex gap-2 mb-1">
+                        <div className="flex-1">
+                          <label className="text-[9px] text-muted-foreground">Size: {propScale.toFixed(1)}</label>
+                          <input type="range" min={0.1} max={3} step={0.05} value={propScale} onChange={e => setPropScale(parseFloat(e.target.value))}
+                            className="w-full accent-primary h-1" />
+                        </div>
+                        <div className="flex-1">
+                          <label className="text-[9px] text-muted-foreground">Angle: {Math.round(propRotation * 180 / Math.PI)}°</label>
+                          <input type="range" min={0} max={6.28} step={0.1} value={propRotation} onChange={e => setPropRotation(parseFloat(e.target.value))}
+                            className="w-full accent-primary h-1" />
+                        </div>
+                      </div>
                     </div>
                   )}
                   <div className="flex flex-wrap gap-1">

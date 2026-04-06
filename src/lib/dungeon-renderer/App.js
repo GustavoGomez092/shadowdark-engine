@@ -619,16 +619,52 @@ class App {
   }
 
   /**
-   * Add a prop to a room.
+   * Add a prop to a room. Returns the created prop object.
    */
-  addRoomProp(room, type, relX, relY) {
-    room.props.push({
+  addRoomProp(room, type, relX, relY, scale = 0.6, rotation = 0) {
+    const prop = {
       type,
       pos: { x: room.x + relX, y: room.y + relY },
-      rotation: 0,
-      scale: 0.6,
-    });
+      rotation,
+      scale,
+    };
+    room.props.push(prop);
     this.draw();
+    return prop;
+  }
+
+  /**
+   * Update a prop's properties and re-render.
+   */
+  updateProp(prop, updates) {
+    if (updates.scale !== undefined) prop.scale = updates.scale;
+    if (updates.rotation !== undefined) prop.rotation = updates.rotation;
+    if (updates.type !== undefined) prop.type = updates.type;
+    if (updates.x !== undefined) prop.pos.x = updates.x;
+    if (updates.y !== undefined) prop.pos.y = updates.y;
+    this.draw();
+  }
+
+  /**
+   * Remove a specific prop from its room and re-render.
+   */
+  removeProp(room, prop) {
+    const idx = room.props.indexOf(prop);
+    if (idx !== -1) room.props.splice(idx, 1);
+    this.draw();
+  }
+
+  /**
+   * Find a prop near grid coordinates in a room.
+   */
+  findPropAt(room, gx, gy) {
+    if (!room || !room.props) return null;
+    for (const prop of room.props) {
+      const dx = prop.pos.x - gx;
+      const dy = prop.pos.y - gy;
+      if (Math.abs(dx) < 0.8 && Math.abs(dy) < 0.8) return prop;
+    }
+    return null;
   }
 
   /**
