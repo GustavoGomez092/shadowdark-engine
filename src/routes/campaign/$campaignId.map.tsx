@@ -227,6 +227,19 @@ function MapEditorPage() {
             ))}
           </div>
 
+          {generated && toggles.water && (
+            <div className="flex items-center gap-1 text-[10px]">
+              <span className="text-muted-foreground">Water:</span>
+              <input type="range" min={0} max={1} step={0.1}
+                defaultValue={0}
+                onChange={e => {
+                  const level = parseFloat(e.target.value)
+                  appRef.current?.setWaterLevel(level)
+                }}
+                className="w-16 accent-primary" />
+            </div>
+          )}
+
           <div className="flex-1" />
 
           {generated && (
