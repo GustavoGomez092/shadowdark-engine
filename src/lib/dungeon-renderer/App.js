@@ -446,8 +446,10 @@ class App {
    */
   _resize() {
     const dpr = window.devicePixelRatio || 1;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    // Use parent container dimensions if available, otherwise window
+    const parent = this.canvas.parentElement;
+    const width = parent ? parent.clientWidth : window.innerWidth;
+    const height = parent ? parent.clientHeight : window.innerHeight;
 
     this.canvas.width = width * dpr;
     this.canvas.height = height * dpr;

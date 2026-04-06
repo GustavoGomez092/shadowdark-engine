@@ -250,7 +250,7 @@ function MapEditorPage() {
       </div>
 
       {/* Canvas container */}
-      <div ref={containerRef} className="flex-1 overflow-hidden relative bg-[#F8F8F4]">
+      <div ref={containerRef} className="flex-1 overflow-auto relative bg-[#F8F8F4]">
         <canvas
           ref={canvasRef}
           className="w-full h-full"
