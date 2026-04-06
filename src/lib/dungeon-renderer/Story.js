@@ -5,8 +5,10 @@ import Tags from './Tags.js';
 
 const DEMONS = "Ahazu Akmenos Akra Akta Amnon Anakis Archimonde Ardranax Argaz Arjhan Arkeveron Azarax Azgalor Baelmon Balasar Barakas Bharash Biri Bryseis Criella Daar Damaia Damakos Dimensius Donaar Ekemon Esketra Farideh Ghesh Hakkar Harann Havilar Heskan Iados Jheri Kairon Kallista Kazzak Kava Kethtera Korinn Korvaeth Kylastra Kyronax Lerissa Leucis Magtheridon Makaria Mannoroth Medrash Mehen Melech Mephistrot Mishann Mordai Morthos Nadarr Nala Nemeia Orianna Oryxus Pandjed Patrin Pelaios Perra Phelaia Raiann Rhogar Rieta Sevraxis Shahraz Shamash Shedinn Skamos Sora Supremus Surina Talgath Tarhun Thava Therai Torinn Tyranna Tyraxis Uadjit Vaskari Xavius Voldranai Zalvroxos Zmodlor";
 
-// Grammar data must be loaded before first use
-let grammarData = null;
+import grammarJSON from './grammar.json';
+
+// Grammar data — loaded statically via import
+let grammarData = grammarJSON;
 
 /**
  * Story class - generates dungeon narrative and derives tags.
@@ -17,18 +19,16 @@ class Story {
   static demonic = null;
 
   /**
-   * Load grammar data. Must be called before creating any Story instances.
+   * Load grammar data. With static import, this is a no-op.
    */
   static async loadData() {
-    if (grammarData) return;
-    const resp = await fetch(new URL('./grammar.json', import.meta.url));
-    grammarData = await resp.json();
+    // grammar.json is imported statically, nothing to fetch
   }
 
   constructor(dungeon) {
     // Initialize grammar on first use
     if (!Story.grammar) {
-      if (!grammarData) throw new Error('Story.loadData() must be called first');
+      if (!grammarData) throw new Error('Grammar data not available');
       Story.grammar = new Grammar(grammarData);
       Story.demonic = new Markov(DEMONS.split(' '));
       Story.grammar.addExternal('demonicName', () => Story._demonicName());

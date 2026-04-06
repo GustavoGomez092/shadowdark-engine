@@ -21,7 +21,7 @@ let storyLoaded = false
 export async function ensureStoryLoaded() {
   if (storyLoaded) return
   try {
-    await Story.loadGrammar()
+    await Story.loadData()
     storyLoaded = true
   } catch (e) {
     console.warn('Failed to load story grammar:', e)
