@@ -496,6 +496,189 @@ class App {
     this.blueprint.seed = seed;
     this.generate();
   }
+
+  // ─── EDITOR API ──────────────────────────────────────────────
+
+  /**
+   * Find which room contains grid coordinates (gx, gy).
+   * Returns the room object or null.
+   */
+  findRoomAt(gx, gy) {
+    if (!this.dungeon) return null;
+    for (const room of this.dungeon.rooms) {
+      if (gx >= room.x && gx < room.x + room.w && gy >= room.y && gy < room.y + room.h) {
+        if (room.hidden && !style.showSecrets) continue;
+        return room;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Find which door is at grid coordinates (gx, gy).
+   */
+  findDoorAt(gx, gy) {
+    if (!this.dungeon) return null;
+    for (const door of this.dungeon.doors) {
+      if (door.x === gx && door.y === gy) return door;
+    }
+    return null;
+  }
+
+  /**
+   * Convert CSS pixel coordinates to grid coordinates.
+   * Accounts for DPR, layout transform (translate, scale, rotate).
+   */
+  cssToGrid(cssX, cssY) {
+    if (!this.dungeon) return null;
+    const layout = this.renderer.computeLayout(this.dungeon);
+    const { fitScale, mapX, mapY, rotation } = layout;
+    const cs = this.renderer.cellSize;
+
+    // Reverse: css -> map-space -> rotated-space -> grid
+    const mx = cssX - mapX;
+    const my = cssY - mapY;
+
+    // Reverse scale
+    const sx = mx / fitScale;
+    const sy = my / fitScale;
+
+    // Reverse rotation
+    const cos = Math.cos(-rotation);
+    const sin = Math.sin(-rotation);
+    const rx = sx * cos - sy * sin;
+    const ry = sx * sin + sy * cos;
+
+    return { gx: Math.floor(rx / cs), gy: Math.floor(ry / cs) };
+  }
+
+  /**
+   * Toggle a room property and re-render.
+   */
+  toggleRoom(room, prop) {
+    if (prop === 'round') room.round = !room.round;
+    else if (prop === 'columns') room.columns = !room.columns;
+    else if (prop === 'hidden') {
+      room.hidden = !room.hidden;
+      if (this.dungeon) this.dungeon.populateNotes();
+    }
+    this.draw();
+  }
+
+  /**
+   * Change a door type and re-render.
+   */
+  setDoorType(door, type) {
+    door.type = type;
+    this.draw();
+  }
+
+  /**
+   * Remove a door and re-render.
+   */
+  removeDoor(door) {
+    if (!this.dungeon) return;
+    const idx = this.dungeon.doors.indexOf(door);
+    if (idx !== -1) this.dungeon.doors.splice(idx, 1);
+    this.draw();
+  }
+
+  /**
+   * Set room description and refresh notes.
+   */
+  setRoomDesc(room, text) {
+    room.desc = text;
+    if (this.dungeon) this.dungeon.populateNotes();
+    this.draw();
+  }
+
+  /**
+   * Set the dungeon title.
+   */
+  setTitle(title) {
+    if (!this.dungeon || !this.dungeon.story) return;
+    this.dungeon.story.name = title;
+    this.draw();
+  }
+
+  /**
+   * Set the dungeon story hook.
+   */
+  setStoryHook(hook) {
+    if (!this.dungeon || !this.dungeon.story) return;
+    this.dungeon.story.hook = hook;
+    this.draw();
+  }
+
+  /**
+   * Clear all props from a room and re-render.
+   */
+  clearRoomProps(room) {
+    room.props = [];
+    this.draw();
+  }
+
+  /**
+   * Add a prop to a room.
+   */
+  addRoomProp(room, type, relX, relY) {
+    room.props.push({
+      type,
+      pos: { x: room.x + relX, y: room.y + relY },
+      rotation: 0,
+      scale: 0.6,
+    });
+    this.draw();
+  }
+
+  /**
+   * Set water level (0 to 1).
+   */
+  setWaterLevel(level) {
+    Parameters.waterLevel = level;
+    if (this.flood) {
+      this.flood.setLevel(level);
+    }
+    this.draw();
+  }
+
+  /**
+   * Get all visible rooms (for editor panel listing).
+   */
+  getVisibleRooms() {
+    if (!this.dungeon) return [];
+    return this.dungeon.rooms.filter(r => !r.hidden || style.showSecrets);
+  }
+
+  /**
+   * Get all doors.
+   */
+  getDoors() {
+    return this.dungeon ? this.dungeon.doors : [];
+  }
+
+  /**
+   * Serialize the entire dungeon state for saving.
+   * Includes everything needed to restore: rooms, doors, notes, water, story.
+   */
+  serialize() {
+    if (!this.dungeon) return null;
+    const data = this.dungeon.getData();
+    // Add editor-specific state
+    data.editorState = {
+      noteOverrides: Object.fromEntries(this.renderer.noteOverrides),
+      rotation: style.rotation,
+      palette: style.currentPalette || 'default',
+      showGrid: style.showGrid,
+      showWater: style.showWater,
+      showProps: style.showProps,
+      showNotes: style.showNotes,
+      showSecrets: style.showSecrets,
+      showTitle: style.showTitle,
+      bw: style.bw,
+    };
+    return data;
+  }
 }
 
 export default App;

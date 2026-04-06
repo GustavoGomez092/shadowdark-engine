@@ -10,176 +10,169 @@ export const Route = createFileRoute('/campaign/$campaignId/map')({
   component: MapEditorPage,
 })
 
+const DOOR_TYPES = [
+  { value: 0, label: 'Regular' },
+  { value: 1, label: 'Archway' },
+  { value: 2, label: 'Secret' },
+  { value: 3, label: 'Entrance' },
+  { value: 4, label: 'Locked' },
+  { value: 5, label: 'Boss Gate' },
+  { value: 7, label: 'Barred' },
+  { value: 8, label: 'Stairs Down' },
+  { value: 9, label: 'Steps' },
+]
+
+const PROP_TYPES = ['boulder', 'crate', 'barrel', 'throne', 'well', 'statue', 'sarcophagus', 'altar', 'chest', 'tapestry', 'fountain']
+
 function MapEditorPage() {
   const campaign = useCampaignStore(s => s.campaign)
+  const updateCampaignMeta = useCampaignStore(s => s.updateMeta)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const appRef = useRef<any>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Generation state
   const [seed, setSeed] = useState(Math.floor(Math.random() * 2147483647))
-  const [palette, setPalette] = useState('default')
-  const [showGrid, setShowGrid] = useState(true)
-  const [showSecrets, setShowSecrets] = useState(false)
-  const [showWater, setShowWater] = useState(true)
-  const [showProps, setShowProps] = useState(true)
-  const [showNotes, setShowNotes] = useState(true)
-  const [showConnectors, setShowConnectors] = useState(false)
-  const [showTitle, setShowTitle] = useState(true)
-  const [autoRotate, setAutoRotate] = useState(true)
-  const [bwMode, setBwMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
-  const [title, setTitle] = useState('')
 
-  // Initialize the dungeon app once the canvas is mounted
+  // Visual toggles
+  const [toggles, setToggles] = useState({
+    title: true, grid: true, water: true, props: true,
+    notes: true, secrets: false, connectors: false,
+    autoRotate: true, bw: false,
+  })
+  const [palette, setPalette] = useState('default')
+
+  // Editor state
+  const [selectedRoom, setSelectedRoom] = useState<any>(null)
+  const [selectedDoor, setSelectedDoor] = useState<any>(null)
+  const [editingTitle, setEditingTitle] = useState('')
+  const [editingStory, setEditingStory] = useState('')
+  const [editorPanel, setEditorPanel] = useState<'none' | 'room' | 'door' | 'dungeon'>('none')
+
+  // Init app
   const initApp = useCallback(async () => {
     if (!canvasRef.current || !containerRef.current) return
-    if (appRef.current) return // already initialized
-
+    if (appRef.current) return
     setLoading(true)
-
-    // Size the canvas to fill the container
     const rect = containerRef.current.getBoundingClientRect()
     canvasRef.current.style.width = rect.width + 'px'
     canvasRef.current.style.height = rect.height + 'px'
-
-    // Apply style settings
-    style.setPalette(palette)
-    style.gridMode = showGrid ? 'dashed' : 'hidden'
-    style.showSecrets = showSecrets
-
     const app = new DungeonApp(canvasRef.current, { seed })
     appRef.current = app
-
     try {
       await app.init()
       setGenerated(true)
-      setTitle(app.dungeon?.story?.name || '')
-    } catch (e) {
-      console.error('Dungeon init failed:', e)
-    }
+      setEditingTitle(app.dungeon?.story?.name || '')
+      setEditingStory(app.dungeon?.story?.hook || '')
+    } catch (e) { console.error('Init failed:', e) }
     setLoading(false)
   }, [])
 
-  // Handle window resize
+  // Resize
   useEffect(() => {
-    function handleResize() {
+    const onResize = () => {
       if (!appRef.current || !containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       appRef.current.resize(rect.width, rect.height)
     }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Generate new dungeon
-  async function handleGenerate() {
-    if (!appRef.current) {
-      await initApp()
-      return
-    }
-    try {
-      appRef.current._resize()
-      appRef.current.blueprint = new Blueprint(seed, [])
-      appRef.current.renderer.noteOverrides.clear()
-      appRef.current.generate()
-      setTitle(appRef.current.dungeon?.story?.name || '')
-      setGenerated(true)
-    } catch (e) {
-      console.error('Generate failed:', e)
-    }
-  }
-
-  // Reroll seed and generate
-  async function handleReroll() {
+  // New dungeon
+  async function handleNew() {
     const newSeed = Math.floor(Math.random() * 2147483647)
     setSeed(newSeed)
-    if (!appRef.current) {
-      await initApp()
-      return
-    }
+    if (!appRef.current) { await initApp(); return }
+    appRef.current._resize()
     appRef.current.blueprint = new Blueprint(newSeed, [])
+    appRef.current.renderer.noteOverrides.clear()
     appRef.current.generate()
-    setTitle(appRef.current.dungeon?.story?.name || '')
+    setEditingTitle(appRef.current.dungeon?.story?.name || '')
+    setEditingStory(appRef.current.dungeon?.story?.hook || '')
+    setSelectedRoom(null); setSelectedDoor(null); setEditorPanel('none')
+    setGenerated(true)
   }
 
-  // Update a single visual option and re-render
-  function toggle(key: string, value: any) {
-    const app = appRef.current
-    if (!app) return
+  // Toggle visual option
+  function toggle(key: string) {
+    const app = appRef.current; if (!app) return
+    const newVal = !(toggles as any)[key]
+    setToggles(prev => ({ ...prev, [key]: newVal }))
     switch (key) {
-      case 'palette': setPalette(value); style.setPalette(value); break
-      case 'grid': setShowGrid(value); style.gridMode = value ? 'dashed' : 'hidden'; break
+      case 'title': style.showTitle = newVal; break
+      case 'grid': style.gridMode = newVal ? 'dashed' : 'hidden'; break
+      case 'water': style.showWater = newVal; break
+      case 'props': style.showProps = newVal; break
+      case 'notes': style.showNotes = newVal; break
       case 'secrets':
-        setShowSecrets(value); style.showSecrets = value
-        if (app.planner) {
-          for (const r of app.planner.getSecrets()) r.hidden = !value
-        }
+        style.showSecrets = newVal
+        if (app.planner) for (const r of app.planner.getSecrets()) r.hidden = !newVal
         if (app.dungeon) app.dungeon.populateNotes()
         break
-      case 'water': setShowWater(value); style.showWater = value; break
-      case 'props': setShowProps(value); style.showProps = value; break
-      case 'notes': setShowNotes(value); style.showNotes = value; break
-      case 'connectors': setShowConnectors(value); style.showConnectors = value; break
-      case 'title': setShowTitle(value); style.showTitle = value; break
-      case 'autoRotate':
-        setAutoRotate(value); style.autoRotate = value
-        if (!value) style.rotation = 0
-        break
-      case 'bw': setBwMode(value); style.bw = value; break
+      case 'connectors': style.showConnectors = newVal; break
+      case 'autoRotate': style.autoRotate = newVal; if (!newVal) style.rotation = 0; break
+      case 'bw': style.bw = newVal; break
     }
-    style.save()
-    app.draw()
+    style.save(); app.draw()
   }
 
-  // Export PNG
-  function handleExportPNG() {
+  // Canvas click — select room or door
+  function handleCanvasClick(e: React.MouseEvent) {
+    const app = appRef.current; if (!app) return
+    const rect = canvasRef.current!.getBoundingClientRect()
+    const cssX = e.clientX - rect.left
+    const cssY = e.clientY - rect.top
+    const grid = app.cssToGrid(cssX, cssY)
+    if (!grid) return
+
+    // Check door first (more specific)
+    const door = app.findDoorAt(grid.gx, grid.gy)
+    if (door) {
+      setSelectedDoor(door); setSelectedRoom(null); setEditorPanel('door')
+      return
+    }
+    const room = app.findRoomAt(grid.gx, grid.gy)
+    if (room) {
+      setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room')
+      return
+    }
+    setSelectedRoom(null); setSelectedDoor(null); setEditorPanel('none')
+  }
+
+  // Save dungeon state to campaign
+  function handleSave() {
+    const app = appRef.current; if (!app) return
+    const data = app.serialize()
+    if (!data) return
+    // Store as campaign metadata (for now, save to localStorage with campaign ID)
+    try {
+      const key = `shadowdark:dungeon:${campaign?.id}`
+      localStorage.setItem(key, JSON.stringify(data))
+    } catch {}
+  }
+
+  // Export
+  function exportPNG() {
     if (!canvasRef.current) return
-    const a = document.createElement('a')
-    a.href = canvasRef.current.toDataURL('image/png')
-    a.download = `${(title || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.png`
-    a.click()
+    const a = document.createElement('a'); a.href = canvasRef.current.toDataURL('image/png')
+    a.download = `${(editingTitle || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.png`; a.click()
   }
-
-  // Export JSON
-  function handleExportJSON() {
-    if (!appRef.current?.dungeon) return
-    const data = appRef.current.dungeon.getData()
-    const json = JSON.stringify(data, null, 2)
-    const blob = new Blob([json], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `${(title || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.json`
-    a.click()
-    URL.revokeObjectURL(a.href)
-  }
-
-  // Print
-  function handlePrint() {
-    if (!canvasRef.current) return
-    const dataUrl = canvasRef.current.toDataURL('image/png')
-    const win = window.open('', '_blank')
-    if (!win) return
-    win.document.write(`<html><head><title>${title || 'Dungeon'}</title>
-      <style>@media print{body{margin:0}img{max-width:100%}}body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:white}img{max-width:95vw;max-height:95vh}</style>
-      </head><body><img src="${dataUrl}"/><script>setTimeout(()=>window.print(),500)</script></body></html>`)
-    win.document.close()
+  function exportJSON() {
+    const data = appRef.current?.getData(); if (!data) return
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+    a.download = `${(editingTitle || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.json`; a.click()
   }
 
   // Keyboard shortcuts
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      if (e.key === 'Enter') { handleReroll(); e.preventDefault() }
-      if (e.key === ' ') {
-        // Re-roll notes only (same dungeon structure)
-        if (appRef.current?.dungeon) {
-          appRef.current.dungeon.populateNotes()
-          appRef.current.renderer.noteOverrides.clear()
-          appRef.current.draw()
-        }
-        e.preventDefault()
-      }
+      if (e.key === 'Enter') { handleNew(); e.preventDefault() }
+      if (e.key === 'Escape') { setEditorPanel('none'); setSelectedRoom(null); setSelectedDoor(null) }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -187,26 +180,24 @@ function MapEditorPage() {
 
   if (!campaign) return null
 
+  const inputCls = "w-full rounded-lg border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+
   return (
     <main className="flex flex-col h-[calc(100vh-120px)]">
       {/* Toolbar */}
-      <div className="border-b border-border bg-card/80 backdrop-blur-sm px-4 py-2">
-        <div className="flex items-center gap-3">
-          {/* Generate section */}
-          <div className="flex items-center gap-2">
-            <button onClick={handleReroll} disabled={loading} title="Generate new random dungeon"
-              className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
-              {loading ? 'Generating...' : 'New'}
-            </button>
-            <input type="number" value={seed} onChange={e => setSeed(parseInt(e.target.value) || 0)} title="Seed"
-              className="w-24 rounded-lg border border-input bg-background px-2 py-1.5 text-[11px] text-center outline-none font-mono focus:ring-1 focus:ring-ring" />
-          </div>
+      <div className="border-b border-border bg-card/80 backdrop-blur-sm px-3 py-1.5">
+        <div className="flex items-center gap-2">
+          <button onClick={handleNew} disabled={loading}
+            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
+            {loading ? '...' : 'New'}
+          </button>
+          <input type="number" value={seed} onChange={e => setSeed(parseInt(e.target.value) || 0)}
+            className="w-20 rounded-lg border border-input bg-background px-2 py-1 text-[10px] text-center outline-none font-mono" title="Seed" />
 
-          <div className="w-px h-6 bg-border" />
+          <div className="w-px h-5 bg-border" />
 
-          {/* Style */}
-          <select value={palette} onChange={e => toggle('palette', e.target.value)} title="Color palette"
-            className="rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none">
+          <select value={palette} onChange={e => { setPalette(e.target.value); style.setPalette(e.target.value); style.save(); appRef.current?.draw() }}
+            className="rounded-lg border border-input bg-background px-1.5 py-1 text-xs outline-none">
             <option value="default">Default</option>
             <option value="ancient">Ancient</option>
             <option value="light">Light</option>
@@ -214,69 +205,164 @@ function MapEditorPage() {
             <option value="link">Link</option>
           </select>
 
-          {/* Toggle pills */}
-          <div className="flex items-center gap-1">
-            {([
-              ['title', showTitle, 'Title'],
-              ['grid', showGrid, 'Grid'],
-              ['water', showWater, 'Water'],
-              ['props', showProps, 'Props'],
-              ['notes', showNotes, 'Notes'],
-              ['secrets', showSecrets, 'Secrets'],
-              ['connectors', showConnectors, 'Lines'],
-              ['autoRotate', autoRotate, 'Rotate'],
-              ['bw', bwMode, 'B&W'],
-            ] as [string, boolean, string][]).map(([key, val, label]) => (
-              <button
-                key={key}
-                onClick={() => toggle(key, !val)}
-                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
-                  val
-                    ? 'bg-primary/15 text-primary border border-primary/30'
-                    : 'bg-secondary text-muted-foreground border border-transparent hover:text-foreground'
-                }`}
-              >
-                {label}
+          <div className="flex gap-0.5 flex-wrap">
+            {Object.entries(toggles).map(([key, val]) => (
+              <button key={key} onClick={() => toggle(key)}
+                className={`rounded-full px-2 py-0.5 text-[10px] font-medium transition capitalize ${
+                  val ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-secondary text-muted-foreground border border-transparent hover:text-foreground'
+                }`}>
+                {key === 'autoRotate' ? 'Rotate' : key === 'bw' ? 'B&W' : key}
               </button>
             ))}
           </div>
 
           <div className="flex-1" />
 
-          {/* Export */}
           {generated && (
-            <div className="flex items-center gap-1.5">
-              <button onClick={handleExportPNG} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">PNG</button>
-              <button onClick={handleExportJSON} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">JSON</button>
-              <button onClick={handlePrint} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">Print</button>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setEditorPanel(editorPanel === 'dungeon' ? 'none' : 'dungeon')}
+                className={`rounded-lg px-2 py-1 text-xs font-medium transition ${editorPanel === 'dungeon' ? 'bg-primary/15 text-primary border border-primary/30' : 'border border-border hover:bg-accent'}`}>
+                Edit Info
+              </button>
+              <button onClick={handleSave} className="rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition">Save</button>
+              <button onClick={exportPNG} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
+              <button onClick={exportJSON} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">JSON</button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Canvas container */}
-      <div ref={containerRef} className="flex-1 overflow-auto relative bg-[#F8F8F4]">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-full"
-          onContextMenu={e => e.preventDefault()}
-        />
-        {!generated && !loading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-lg font-semibold text-[#222022] mb-2">Dungeon Map Generator</p>
-              <p className="text-sm text-[#222022]/60 mb-4">Generate a one-page dungeon with rooms, corridors, and notes</p>
-              <button onClick={initApp} disabled={loading}
-                className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
-                Generate Dungeon
-              </button>
-              <p className="mt-3 text-xs text-muted-foreground">Press ENTER for new dungeon · SPACE to re-roll notes · Drag note boxes to reposition</p>
+      <div className="flex flex-1 overflow-hidden">
+        {/* Canvas */}
+        <div ref={containerRef} className="flex-1 overflow-hidden relative bg-[#F8F8F4]">
+          <canvas ref={canvasRef} className="w-full h-full" onContextMenu={e => e.preventDefault()}
+            onClick={handleCanvasClick} />
+          {!generated && !loading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-lg font-semibold text-[#222022] mb-2">Dungeon Map</p>
+                <p className="text-sm text-[#222022]/60 mb-4">Generate and edit a one-page dungeon</p>
+                <button onClick={initApp} className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
+                  Generate
+                </button>
+                <p className="mt-3 text-[10px] text-muted-foreground">Click rooms/doors to edit · Drag note boxes to reposition</p>
+              </div>
             </div>
-          </div>
-        )}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-sm text-muted-foreground animate-pulse">Generating...</p>
+          )}
+        </div>
+
+        {/* Editor Panel (right sidebar) */}
+        {editorPanel !== 'none' && generated && (
+          <div className="w-72 border-l border-border bg-card overflow-y-auto p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">
+                {editorPanel === 'dungeon' ? 'Dungeon Info' : editorPanel === 'room' ? 'Room' : 'Door'}
+              </h3>
+              <button onClick={() => { setEditorPanel('none'); setSelectedRoom(null); setSelectedDoor(null) }}
+                className="text-xs text-muted-foreground hover:text-foreground">&times;</button>
+            </div>
+
+            {/* Dungeon info editor */}
+            {editorPanel === 'dungeon' && (
+              <>
+                <div>
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Title</label>
+                  <input value={editingTitle} onChange={e => { setEditingTitle(e.target.value); appRef.current?.setTitle(e.target.value) }}
+                    className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Story Hook</label>
+                  <textarea value={editingStory} onChange={e => { setEditingStory(e.target.value); appRef.current?.setStoryHook(e.target.value) }}
+                    rows={4} className={inputCls + " resize-y"} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Rooms</label>
+                  <div className="space-y-1 max-h-64 overflow-y-auto">
+                    {appRef.current?.getVisibleRooms()?.map((room: any, i: number) => (
+                      <button key={i} onClick={() => { setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room') }}
+                        className="w-full text-left rounded-lg border border-border/50 px-2 py-1 text-[11px] hover:bg-accent transition">
+                        <span className="font-medium">Room {i + 1}</span>
+                        <span className="text-muted-foreground ml-1">({room.w}×{room.h})</span>
+                        {room.desc && <p className="text-[10px] text-muted-foreground truncate">{room.desc}</p>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Room editor */}
+            {editorPanel === 'room' && selectedRoom && (
+              <>
+                <div className="text-xs text-muted-foreground">
+                  Position: ({selectedRoom.x}, {selectedRoom.y}) · Size: {selectedRoom.w}×{selectedRoom.h}
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Description</label>
+                  <textarea value={selectedRoom.desc || ''} onChange={e => { appRef.current?.setRoomDesc(selectedRoom, e.target.value); setSelectedRoom({ ...selectedRoom }) }}
+                    rows={3} placeholder="Room description..." className={inputCls + " resize-y"} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Shape</label>
+                  <div className="flex gap-1">
+                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'round'); setSelectedRoom({ ...selectedRoom }) }}
+                      className={`rounded-full px-2 py-0.5 text-[10px] transition ${selectedRoom.round ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-secondary text-muted-foreground border border-transparent'}`}>
+                      Round
+                    </button>
+                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'columns'); setSelectedRoom({ ...selectedRoom }) }}
+                      className={`rounded-full px-2 py-0.5 text-[10px] transition ${selectedRoom.columns ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-secondary text-muted-foreground border border-transparent'}`}>
+                      Columns
+                    </button>
+                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'hidden'); setSelectedRoom({ ...selectedRoom }) }}
+                      className={`rounded-full px-2 py-0.5 text-[10px] transition ${selectedRoom.hidden ? 'bg-red-500/15 text-red-400 border border-red-500/30' : 'bg-secondary text-muted-foreground border border-transparent'}`}>
+                      Hidden
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-semibold text-muted-foreground">Props ({selectedRoom.props?.length || 0})</label>
+                    <button onClick={() => { appRef.current?.clearRoomProps(selectedRoom); setSelectedRoom({ ...selectedRoom }) }}
+                      className="text-[10px] text-red-400 hover:underline">Clear</button>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {PROP_TYPES.map(type => (
+                      <button key={type} onClick={() => {
+                        appRef.current?.addRoomProp(selectedRoom, type, selectedRoom.w / 2, selectedRoom.h / 2)
+                        setSelectedRoom({ ...selectedRoom })
+                      }}
+                        className="rounded border border-border px-1.5 py-0.5 text-[9px] hover:bg-accent transition capitalize">
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Door editor */}
+            {editorPanel === 'door' && selectedDoor && (
+              <>
+                <div className="text-xs text-muted-foreground">
+                  Position: ({selectedDoor.x}, {selectedDoor.y})
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Door Type</label>
+                  <select value={selectedDoor.type} onChange={e => {
+                    appRef.current?.setDoorType(selectedDoor, parseInt(e.target.value))
+                    setSelectedDoor({ ...selectedDoor, type: parseInt(e.target.value) })
+                  }} className={inputCls}>
+                    {DOOR_TYPES.map(dt => (
+                      <option key={dt.value} value={dt.value}>{dt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={() => { appRef.current?.removeDoor(selectedDoor); setSelectedDoor(null); setEditorPanel('none') }}
+                  className="w-full rounded-lg border border-red-500/30 py-1.5 text-xs text-red-400 hover:bg-red-500/10 transition">
+                  Remove Door
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
