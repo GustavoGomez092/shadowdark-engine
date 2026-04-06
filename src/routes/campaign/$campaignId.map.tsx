@@ -72,8 +72,11 @@ function MapEditorPage() {
   }, [])
 
   // Generate new dungeon
-  function handleGenerate() {
-    if (!appRef.current) return
+  async function handleGenerate() {
+    if (!appRef.current) {
+      await initApp()
+      return
+    }
     appRef.current.blueprint = new Blueprint(seed, [])
     appRef.current.generate()
     setTitle(appRef.current.dungeon?.story?.name || '')
@@ -81,10 +84,13 @@ function MapEditorPage() {
   }
 
   // Reroll seed and generate
-  function handleReroll() {
+  async function handleReroll() {
     const newSeed = Math.floor(Math.random() * 2147483647)
     setSeed(newSeed)
-    if (!appRef.current) return
+    if (!appRef.current) {
+      await initApp()
+      return
+    }
     appRef.current.blueprint = new Blueprint(newSeed, [])
     appRef.current.generate()
     setTitle(appRef.current.dungeon?.story?.name || '')
@@ -176,71 +182,71 @@ function MapEditorPage() {
   return (
     <main className="flex flex-col h-[calc(100vh-120px)]">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-card/50 px-3 py-1.5 text-xs">
-        {/* Generation */}
-        <div className="flex items-center gap-1">
-          <input type="number" value={seed} onChange={e => setSeed(parseInt(e.target.value) || 0)}
-            className="w-20 rounded border border-input bg-background px-1 py-0.5 text-center outline-none font-mono text-[10px]" />
-          <button onClick={handleGenerate} disabled={loading}
-            className="rounded bg-primary px-2 py-1 font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
-            Generate
-          </button>
-          <button onClick={handleReroll} disabled={loading}
-            className="rounded border border-border px-1.5 py-1 hover:bg-accent transition">
-            New
-          </button>
-        </div>
-
-        <div className="w-px h-4 bg-border" />
-
-        {/* Palette */}
-        <select value={palette} onChange={e => toggle('palette', e.target.value)}
-          className="rounded border border-input bg-background px-1 py-0.5 outline-none text-[10px]">
-          <option value="default">Default</option>
-          <option value="ancient">Ancient</option>
-          <option value="light">Light</option>
-          <option value="modern">Modern</option>
-          <option value="link">Link</option>
-        </select>
-
-        <div className="w-px h-4 bg-border" />
-
-        {/* Toggles */}
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Grid (G)">
-          <input type="checkbox" checked={showGrid} onChange={e => toggle('grid', e.target.checked)} className="rounded h-3 w-3" /><span>Grid</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Water (W)">
-          <input type="checkbox" checked={showWater} onChange={e => toggle('water', e.target.checked)} className="rounded h-3 w-3" /><span>Water</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Props (P)">
-          <input type="checkbox" checked={showProps} onChange={e => toggle('props', e.target.checked)} className="rounded h-3 w-3" /><span>Props</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Notes (N)">
-          <input type="checkbox" checked={showNotes} onChange={e => toggle('notes', e.target.checked)} className="rounded h-3 w-3" /><span>Notes</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Secrets (H)">
-          <input type="checkbox" checked={showSecrets} onChange={e => toggle('secrets', e.target.checked)} className="rounded h-3 w-3" /><span>Secrets</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Connectors (C)">
-          <input type="checkbox" checked={showConnectors} onChange={e => toggle('connectors', e.target.checked)} className="rounded h-3 w-3" /><span>Lines</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="Auto-rotate (R)">
-          <input type="checkbox" checked={autoRotate} onChange={e => toggle('autoRotate', e.target.checked)} className="rounded h-3 w-3" /><span>Rotate</span>
-        </label>
-        <label className="flex items-center gap-0.5 cursor-pointer" title="B&W mode (M)">
-          <input type="checkbox" checked={bwMode} onChange={e => toggle('bw', e.target.checked)} className="rounded h-3 w-3" /><span>B&W</span>
-        </label>
-
-        <div className="flex-1" />
-
-        {/* Export */}
-        {generated && (
-          <div className="flex items-center gap-1">
-            <button onClick={handleExportPNG} className="rounded border border-border px-1.5 py-0.5 hover:bg-accent transition">PNG</button>
-            <button onClick={handleExportJSON} className="rounded border border-border px-1.5 py-0.5 hover:bg-accent transition">JSON</button>
-            <button onClick={handlePrint} className="rounded border border-border px-1.5 py-0.5 hover:bg-accent transition">Print</button>
+      <div className="border-b border-border bg-card/80 backdrop-blur-sm px-4 py-2">
+        <div className="flex items-center gap-3">
+          {/* Generate section */}
+          <div className="flex items-center gap-2">
+            <button onClick={handleGenerate} disabled={loading}
+              className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
+              {loading ? 'Generating...' : generated ? 'Regenerate' : 'Generate'}
+            </button>
+            <button onClick={handleReroll} disabled={loading} title="New random seed"
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">
+              New
+            </button>
+            <input type="number" value={seed} onChange={e => setSeed(parseInt(e.target.value) || 0)} title="Seed"
+              className="w-24 rounded-lg border border-input bg-background px-2 py-1.5 text-[11px] text-center outline-none font-mono focus:ring-1 focus:ring-ring" />
           </div>
-        )}
+
+          <div className="w-px h-6 bg-border" />
+
+          {/* Style */}
+          <select value={palette} onChange={e => toggle('palette', e.target.value)} title="Color palette"
+            className="rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none">
+            <option value="default">Default</option>
+            <option value="ancient">Ancient</option>
+            <option value="light">Light</option>
+            <option value="modern">Modern</option>
+            <option value="link">Link</option>
+          </select>
+
+          {/* Toggle pills */}
+          <div className="flex items-center gap-1">
+            {([
+              ['grid', showGrid, 'Grid'],
+              ['water', showWater, 'Water'],
+              ['props', showProps, 'Props'],
+              ['notes', showNotes, 'Notes'],
+              ['secrets', showSecrets, 'Secrets'],
+              ['connectors', showConnectors, 'Lines'],
+              ['autoRotate', autoRotate, 'Rotate'],
+              ['bw', bwMode, 'B&W'],
+            ] as [string, boolean, string][]).map(([key, val, label]) => (
+              <button
+                key={key}
+                onClick={() => toggle(key, !val)}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
+                  val
+                    ? 'bg-primary/15 text-primary border border-primary/30'
+                    : 'bg-secondary text-muted-foreground border border-transparent hover:text-foreground'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex-1" />
+
+          {/* Export */}
+          {generated && (
+            <div className="flex items-center gap-1.5">
+              <button onClick={handleExportPNG} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">PNG</button>
+              <button onClick={handleExportJSON} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">JSON</button>
+              <button onClick={handlePrint} className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">Print</button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Canvas container */}
