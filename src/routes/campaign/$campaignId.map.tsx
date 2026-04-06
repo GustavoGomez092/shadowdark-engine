@@ -372,12 +372,12 @@ function MapEditorPage() {
                   {selectedRoom.props?.length > 0 && (
                     <div className="space-y-1 mb-2 max-h-32 overflow-y-auto">
                       {selectedRoom.props.map((prop: any, i: number) => (
-                        <div key={i} onClick={() => { setSelectedProp(prop); setPropScale(prop.scale); setPropRotation(prop.rotation) }}
+                        <div key={i} onClick={() => { setSelectedProp(prop); setPropScale(prop.scale ?? 0.6); setPropRotation(prop.rotation ?? 0) }}
                           className={`flex items-center justify-between rounded border px-1.5 py-0.5 text-[10px] cursor-pointer transition ${
                             selectedProp === prop ? 'border-primary bg-primary/10 text-primary' : 'border-border/50 hover:bg-accent'
                           }`}>
                           <span className="capitalize font-medium">{prop.type}</span>
-                          <span className="text-muted-foreground">s:{prop.scale.toFixed(1)} r:{Math.round(prop.rotation * 180 / Math.PI)}°</span>
+                          <span className="text-muted-foreground">s:{(prop.scale ?? 0.6).toFixed(1)} r:{Math.round((prop.rotation ?? 0) * 180 / Math.PI)}°</span>
                         </div>
                       ))}
                     </div>
