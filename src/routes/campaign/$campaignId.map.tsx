@@ -22,7 +22,7 @@ const DOOR_TYPES = [
   { value: 9, label: 'Steps' },
 ]
 
-const PROP_TYPES = ['boulder', 'crate', 'barrel', 'throne', 'well', 'statue', 'sarcophagus', 'altar', 'chest', 'tapestry', 'fountain']
+const PROP_TYPES = ['altar', 'barrel', 'boulder', 'box', 'chest', 'dais', 'smalldais', 'fountain', 'sarcophagus', 'statue', 'tapestry', 'throne', 'well']
 
 function MapEditorPage() {
   const campaign = useCampaignStore(s => s.campaign)
