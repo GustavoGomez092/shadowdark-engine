@@ -194,13 +194,9 @@ function MapEditorPage() {
         <div className="flex items-center gap-3">
           {/* Generate section */}
           <div className="flex items-center gap-2">
-            <button onClick={handleGenerate} disabled={loading}
+            <button onClick={handleReroll} disabled={loading} title="Generate new random dungeon"
               className="rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
-              {loading ? 'Generating...' : generated ? 'Regenerate' : 'Generate'}
-            </button>
-            <button onClick={handleReroll} disabled={loading} title="New random seed"
-              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent transition">
-              New
+              {loading ? 'Generating...' : 'New'}
             </button>
             <input type="number" value={seed} onChange={e => setSeed(parseInt(e.target.value) || 0)} title="Seed"
               className="w-24 rounded-lg border border-input bg-background px-2 py-1.5 text-[11px] text-center outline-none font-mono focus:ring-1 focus:ring-ring" />
