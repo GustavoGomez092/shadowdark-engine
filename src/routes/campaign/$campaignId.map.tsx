@@ -20,6 +20,12 @@ function MapEditorPage() {
   const [palette, setPalette] = useState('default')
   const [showGrid, setShowGrid] = useState(true)
   const [showSecrets, setShowSecrets] = useState(false)
+  const [showWater, setShowWater] = useState(true)
+  const [showProps, setShowProps] = useState(true)
+  const [showNotes, setShowNotes] = useState(true)
+  const [showConnectors, setShowConnectors] = useState(false)
+  const [autoRotate, setAutoRotate] = useState(true)
+  const [bwMode, setBwMode] = useState(false)
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
   const [title, setTitle] = useState('')
@@ -84,27 +90,32 @@ function MapEditorPage() {
     setTitle(appRef.current.dungeon?.story?.name || '')
   }
 
-  // Update visual options (no regeneration, just re-render)
-  function updateStyle(opts: { palette?: string; showGrid?: boolean; showSecrets?: boolean }) {
-    if (opts.palette !== undefined) {
-      setPalette(opts.palette)
-      style.setPalette(opts.palette)
+  // Update a single visual option and re-render
+  function toggle(key: string, value: any) {
+    const app = appRef.current
+    if (!app) return
+    switch (key) {
+      case 'palette': setPalette(value); style.setPalette(value); break
+      case 'grid': setShowGrid(value); style.gridMode = value ? 'dashed' : 'hidden'; break
+      case 'secrets':
+        setShowSecrets(value); style.showSecrets = value
+        if (app.planner) {
+          for (const r of app.planner.getSecrets()) r.hidden = !value
+        }
+        if (app.dungeon) app.dungeon.populateNotes()
+        break
+      case 'water': setShowWater(value); style.showWater = value; break
+      case 'props': setShowProps(value); style.showProps = value; break
+      case 'notes': setShowNotes(value); style.showNotes = value; break
+      case 'connectors': setShowConnectors(value); style.showConnectors = value; break
+      case 'autoRotate':
+        setAutoRotate(value); style.autoRotate = value
+        if (!value) style.rotation = 0
+        break
+      case 'bw': setBwMode(value); style.bw = value; break
     }
-    if (opts.showGrid !== undefined) {
-      setShowGrid(opts.showGrid)
-      style.gridMode = opts.showGrid ? 'dashed' : 'hidden'
-    }
-    if (opts.showSecrets !== undefined) {
-      setShowSecrets(opts.showSecrets)
-      style.showSecrets = opts.showSecrets
-      // Toggle hidden rooms
-      if (appRef.current?.dungeon?.planner) {
-        const secrets = appRef.current.dungeon.planner.getSecrets()
-        for (const room of secrets) room.hidden = !opts.showSecrets
-        appRef.current.dungeon.populateNotes()
-      }
-    }
-    appRef.current?.draw()
+    style.save()
+    app.draw()
   }
 
   // Export PNG
@@ -165,28 +176,26 @@ function MapEditorPage() {
   return (
     <main className="flex flex-col h-[calc(100vh-120px)]">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card/50 px-3 py-2">
-        <h2 className="text-sm font-semibold mr-1">Map</h2>
-
-        <div className="flex items-center gap-1 text-xs">
-          <span className="text-muted-foreground">Seed:</span>
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-card/50 px-3 py-1.5 text-xs">
+        {/* Generation */}
+        <div className="flex items-center gap-1">
           <input type="number" value={seed} onChange={e => setSeed(parseInt(e.target.value) || 0)}
-            className="w-24 rounded border border-input bg-background px-1.5 py-0.5 text-xs text-center outline-none font-mono" />
+            className="w-20 rounded border border-input bg-background px-1 py-0.5 text-center outline-none font-mono text-[10px]" />
+          <button onClick={handleGenerate} disabled={loading}
+            className="rounded bg-primary px-2 py-1 font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
+            Generate
+          </button>
+          <button onClick={handleReroll} disabled={loading}
+            className="rounded border border-border px-1.5 py-1 hover:bg-accent transition">
+            New
+          </button>
         </div>
 
-        <button onClick={handleGenerate} disabled={loading}
-          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
-          Generate
-        </button>
-        <button onClick={handleReroll} disabled={loading}
-          className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">
-          Reroll
-        </button>
+        <div className="w-px h-4 bg-border" />
 
-        <div className="w-px h-5 bg-border" />
-
-        <select value={palette} onChange={e => updateStyle({ palette: e.target.value })}
-          className="rounded border border-input bg-background px-1.5 py-0.5 text-xs outline-none">
+        {/* Palette */}
+        <select value={palette} onChange={e => toggle('palette', e.target.value)}
+          className="rounded border border-input bg-background px-1 py-0.5 outline-none text-[10px]">
           <option value="default">Default</option>
           <option value="ancient">Ancient</option>
           <option value="light">Light</option>
@@ -194,21 +203,43 @@ function MapEditorPage() {
           <option value="link">Link</option>
         </select>
 
-        <label className="flex items-center gap-1 text-xs">
-          <input type="checkbox" checked={showGrid} onChange={e => updateStyle({ showGrid: e.target.checked })} className="rounded" />Grid
+        <div className="w-px h-4 bg-border" />
+
+        {/* Toggles */}
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Grid (G)">
+          <input type="checkbox" checked={showGrid} onChange={e => toggle('grid', e.target.checked)} className="rounded h-3 w-3" /><span>Grid</span>
         </label>
-        <label className="flex items-center gap-1 text-xs">
-          <input type="checkbox" checked={showSecrets} onChange={e => updateStyle({ showSecrets: e.target.checked })} className="rounded" />Secrets
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Water (W)">
+          <input type="checkbox" checked={showWater} onChange={e => toggle('water', e.target.checked)} className="rounded h-3 w-3" /><span>Water</span>
+        </label>
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Props (P)">
+          <input type="checkbox" checked={showProps} onChange={e => toggle('props', e.target.checked)} className="rounded h-3 w-3" /><span>Props</span>
+        </label>
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Notes (N)">
+          <input type="checkbox" checked={showNotes} onChange={e => toggle('notes', e.target.checked)} className="rounded h-3 w-3" /><span>Notes</span>
+        </label>
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Secrets (H)">
+          <input type="checkbox" checked={showSecrets} onChange={e => toggle('secrets', e.target.checked)} className="rounded h-3 w-3" /><span>Secrets</span>
+        </label>
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Connectors (C)">
+          <input type="checkbox" checked={showConnectors} onChange={e => toggle('connectors', e.target.checked)} className="rounded h-3 w-3" /><span>Lines</span>
+        </label>
+        <label className="flex items-center gap-0.5 cursor-pointer" title="Auto-rotate (R)">
+          <input type="checkbox" checked={autoRotate} onChange={e => toggle('autoRotate', e.target.checked)} className="rounded h-3 w-3" /><span>Rotate</span>
+        </label>
+        <label className="flex items-center gap-0.5 cursor-pointer" title="B&W mode (M)">
+          <input type="checkbox" checked={bwMode} onChange={e => toggle('bw', e.target.checked)} className="rounded h-3 w-3" /><span>B&W</span>
         </label>
 
         <div className="flex-1" />
 
+        {/* Export */}
         {generated && (
-          <>
-            <button onClick={handleExportPNG} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
-            <button onClick={handleExportJSON} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">JSON</button>
-            <button onClick={handlePrint} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">Print</button>
-          </>
+          <div className="flex items-center gap-1">
+            <button onClick={handleExportPNG} className="rounded border border-border px-1.5 py-0.5 hover:bg-accent transition">PNG</button>
+            <button onClick={handleExportJSON} className="rounded border border-border px-1.5 py-0.5 hover:bg-accent transition">JSON</button>
+            <button onClick={handlePrint} className="rounded border border-border px-1.5 py-0.5 hover:bg-accent transition">Print</button>
+          </div>
         )}
       </div>
 
@@ -217,6 +248,7 @@ function MapEditorPage() {
         <canvas
           ref={canvasRef}
           className="w-full h-full"
+          onContextMenu={e => e.preventDefault()}
         />
         {!generated && !loading && (
           <div className="absolute inset-0 flex items-center justify-center">
