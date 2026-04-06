@@ -420,22 +420,6 @@ function MapEditorPage() {
                       <button onClick={() => setPlacingProp(null)} className="ml-2 text-muted-foreground hover:text-foreground">Cancel</button>
                     </div>
                   )}
-                  {!placingProp && (
-                    <div className="mb-1">
-                      <div className="flex gap-2 mb-1">
-                        <div className="flex-1">
-                          <label className="text-[9px] text-muted-foreground">Size: {propScale.toFixed(1)}</label>
-                          <input type="range" min={0.1} max={3} step={0.05} value={propScale} onChange={e => setPropScale(parseFloat(e.target.value))}
-                            className="w-full accent-primary h-1" />
-                        </div>
-                        <div className="flex-1">
-                          <label className="text-[9px] text-muted-foreground">Angle: {Math.round(propRotation * 180 / Math.PI)}°</label>
-                          <input type="range" min={0} max={6.28} step={0.1} value={propRotation} onChange={e => setPropRotation(parseFloat(e.target.value))}
-                            className="w-full accent-primary h-1" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   <div className="flex flex-wrap gap-1">
                     {PROP_TYPES.map(type => (
                       <button key={type} onClick={() => setPlacingProp(type)}
