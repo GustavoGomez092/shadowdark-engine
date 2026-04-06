@@ -1670,7 +1670,7 @@ class DungeonRenderer {
           // axis DOWN(0,1)=0°, UP(0,-1)=180°, LEFT(-1,0)=-90°, RIGHT(1,0)=90°
           const angle = Math.atan2(prop.axis.x, prop.axis.y) + Math.PI / 2;
           ctx.rotate(angle);
-        } else if (prop.rotation) {
+        } else if (prop.rotation != null) {
           ctx.rotate(prop.rotation);
         }
         ctx.scale(s, s);

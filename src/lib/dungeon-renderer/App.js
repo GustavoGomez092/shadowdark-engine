@@ -638,7 +638,11 @@ class App {
    */
   updateProp(prop, updates) {
     if (updates.scale !== undefined) prop.scale = updates.scale;
-    if (updates.rotation !== undefined) prop.rotation = updates.rotation;
+    if (updates.rotation !== undefined) {
+      prop.rotation = updates.rotation;
+      // Clear axis so renderer uses rotation directly
+      delete prop.axis;
+    }
     if (updates.type !== undefined) prop.type = updates.type;
     if (updates.x !== undefined) prop.pos.x = updates.x;
     if (updates.y !== undefined) prop.pos.y = updates.y;
