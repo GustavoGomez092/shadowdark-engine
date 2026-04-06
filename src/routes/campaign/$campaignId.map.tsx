@@ -50,6 +50,9 @@ function MapEditorPage() {
   const [editingTitle, setEditingTitle] = useState('')
   const [editingStory, setEditingStory] = useState('')
   const [editorPanel, setEditorPanel] = useState<'none' | 'room' | 'door' | 'dungeon'>('none')
+  const [placingProp, setPlacingProp] = useState<string | null>(null) // prop type being placed
+  const [, forceUpdate] = useState(0) // force re-render without losing references
+  const refresh = () => forceUpdate(n => n + 1)
 
   // Init app
   const initApp = useCallback(async () => {
@@ -119,7 +122,7 @@ function MapEditorPage() {
     style.save(); app.draw()
   }
 
-  // Canvas click — select room or door
+  // Canvas click — place prop or select room/door
   function handleCanvasClick(e: React.MouseEvent) {
     const app = appRef.current; if (!app) return
     const rect = canvasRef.current!.getBoundingClientRect()
@@ -128,18 +131,26 @@ function MapEditorPage() {
     const grid = app.cssToGrid(cssX, cssY)
     if (!grid) return
 
+    // Prop placement mode — place at clicked grid position
+    if (placingProp && selectedRoom) {
+      app.addRoomProp(selectedRoom, placingProp, grid.gx - selectedRoom.x + 0.5, grid.gy - selectedRoom.y + 0.5)
+      setPlacingProp(null)
+      refresh()
+      return
+    }
+
     // Check door first (more specific)
     const door = app.findDoorAt(grid.gx, grid.gy)
     if (door) {
-      setSelectedDoor(door); setSelectedRoom(null); setEditorPanel('door')
+      setSelectedDoor(door); setSelectedRoom(null); setEditorPanel('door'); setPlacingProp(null)
       return
     }
     const room = app.findRoomAt(grid.gx, grid.gy)
     if (room) {
-      setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room')
+      setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room'); setPlacingProp(null)
       return
     }
-    setSelectedRoom(null); setSelectedDoor(null); setEditorPanel('none')
+    setSelectedRoom(null); setSelectedDoor(null); setEditorPanel('none'); setPlacingProp(null)
   }
 
   // Save dungeon state to campaign
@@ -236,7 +247,7 @@ function MapEditorPage() {
         {/* Canvas */}
         <div ref={containerRef} className="flex-1 overflow-hidden relative bg-[#F8F8F4]">
           <canvas ref={canvasRef} className="w-full h-full" onContextMenu={e => e.preventDefault()}
-            onClick={handleCanvasClick} />
+            onClick={handleCanvasClick} style={{ cursor: placingProp ? 'crosshair' : 'default' }} />
           {!generated && !loading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
@@ -299,21 +310,21 @@ function MapEditorPage() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Description</label>
-                  <textarea value={selectedRoom.desc || ''} onChange={e => { appRef.current?.setRoomDesc(selectedRoom, e.target.value); setSelectedRoom({ ...selectedRoom }) }}
+                  <textarea value={selectedRoom.desc || ''} onChange={e => { appRef.current?.setRoomDesc(selectedRoom, e.target.value); refresh() }}
                     rows={3} placeholder="Room description..." className={inputCls + " resize-y"} />
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Shape</label>
                   <div className="flex gap-1">
-                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'round'); setSelectedRoom({ ...selectedRoom }) }}
+                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'round'); refresh() }}
                       className={`rounded-full px-2 py-0.5 text-[10px] transition ${selectedRoom.round ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-secondary text-muted-foreground border border-transparent'}`}>
                       Round
                     </button>
-                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'columns'); setSelectedRoom({ ...selectedRoom }) }}
+                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'columns'); refresh() }}
                       className={`rounded-full px-2 py-0.5 text-[10px] transition ${selectedRoom.columns ? 'bg-primary/15 text-primary border border-primary/30' : 'bg-secondary text-muted-foreground border border-transparent'}`}>
                       Columns
                     </button>
-                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'hidden'); setSelectedRoom({ ...selectedRoom }) }}
+                    <button onClick={() => { appRef.current?.toggleRoom(selectedRoom, 'hidden'); refresh() }}
                       className={`rounded-full px-2 py-0.5 text-[10px] transition ${selectedRoom.hidden ? 'bg-red-500/15 text-red-400 border border-red-500/30' : 'bg-secondary text-muted-foreground border border-transparent'}`}>
                       Hidden
                     </button>
@@ -322,16 +333,21 @@ function MapEditorPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-[10px] font-semibold text-muted-foreground">Props ({selectedRoom.props?.length || 0})</label>
-                    <button onClick={() => { appRef.current?.clearRoomProps(selectedRoom); setSelectedRoom({ ...selectedRoom }) }}
+                    <button onClick={() => { appRef.current?.clearRoomProps(selectedRoom); refresh() }}
                       className="text-[10px] text-red-400 hover:underline">Clear</button>
                   </div>
+                  {placingProp && (
+                    <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 py-1 text-[10px] text-amber-400">
+                      Click on the map to place <span className="font-semibold">{placingProp}</span>
+                      <button onClick={() => setPlacingProp(null)} className="ml-2 text-muted-foreground hover:text-foreground">Cancel</button>
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-1">
                     {PROP_TYPES.map(type => (
-                      <button key={type} onClick={() => {
-                        appRef.current?.addRoomProp(selectedRoom, type, selectedRoom.w / 2, selectedRoom.h / 2)
-                        setSelectedRoom({ ...selectedRoom })
-                      }}
-                        className="rounded border border-border px-1.5 py-0.5 text-[9px] hover:bg-accent transition capitalize">
+                      <button key={type} onClick={() => setPlacingProp(type)}
+                        className={`rounded border px-1.5 py-0.5 text-[9px] transition capitalize ${
+                          placingProp === type ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent'
+                        }`}>
                         {type}
                       </button>
                     ))}
@@ -350,7 +366,7 @@ function MapEditorPage() {
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Door Type</label>
                   <select value={selectedDoor.type} onChange={e => {
                     appRef.current?.setDoorType(selectedDoor, parseInt(e.target.value))
-                    setSelectedDoor({ ...selectedDoor, type: parseInt(e.target.value) })
+                    refresh()
                   }} className={inputCls}>
                     {DOOR_TYPES.map(dt => (
                       <option key={dt.value} value={dt.value}>{dt.label}</option>
