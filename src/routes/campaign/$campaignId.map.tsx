@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
 import { createEmptyMap } from '@/lib/campaign/defaults.ts'
@@ -8,6 +8,8 @@ import type { MapTool } from '@/components/campaign/map/map-canvas.tsx'
 import type { TerrainType, WallType, WallStyle, CampaignMap } from '@/schemas/map.ts'
 import { generateDungeon, DEFAULT_CONFIG } from '@/lib/campaign/dungeon-generator.ts'
 import type { DungeonConfig } from '@/lib/campaign/dungeon-generator.ts'
+import { generateAndRender, rerenderDungeon, exportPNG as exportDungeonPNG } from '@/lib/dungeon-renderer/index.ts'
+import type { GenerateOptions } from '@/lib/dungeon-renderer/index.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/map')({
   component: MapEditorPage,
@@ -83,6 +85,7 @@ function MapEditorPage() {
   const updateMap = useCampaignStore(s => s.updateMap)
   const removeMap = useCampaignStore(s => s.removeMap)
 
+  const [mapMode, setMapMode] = useState<'editor' | 'onepage'>('editor')
   const [selectedMapId, setSelectedMapId] = useState<string | null>(null)
   const [activeTool, setActiveTool] = useState<MapTool>('floor')
   const [activeTerrainType, setActiveTerrainType] = useState<TerrainType>('stone_floor')
@@ -92,6 +95,53 @@ function MapEditorPage() {
   const [gridDistanceFt, setGridDistanceFt] = useState(5)
   const [showNewMapDialog, setShowNewMapDialog] = useState(false)
   const [showGenerator, setShowGenerator] = useState(false)
+
+  // One-page dungeon state
+  const onePageCanvasRef = useRef<HTMLCanvasElement>(null)
+  const [onePageSeed, setOnePageSeed] = useState(Math.floor(Math.random() * 2147483647))
+  const [onePagePalette, setOnePagePalette] = useState<'default' | 'ancient' | 'light' | 'modern' | 'link'>('default')
+  const [onePageRotation, setOnePageRotation] = useState(0)
+  const [onePageShowGrid, setOnePageShowGrid] = useState(true)
+  const [onePageShowSecrets, setOnePageShowSecrets] = useState(false)
+  const [onePageDungeon, setOnePageDungeon] = useState<any>(null)
+  const [onePageRenderer, setOnePageRenderer] = useState<any>(null)
+  const [onePageData, setOnePageData] = useState<any>(null)
+  const [onePageLoading, setOnePageLoading] = useState(false)
+
+  const handleGenerateOnePage = useCallback(async () => {
+    if (!onePageCanvasRef.current) return
+    setOnePageLoading(true)
+    try {
+      const result = await generateAndRender(onePageCanvasRef.current, {
+        seed: onePageSeed,
+        palette: onePagePalette,
+        showGrid: onePageShowGrid,
+        showSecrets: onePageShowSecrets,
+        rotation: onePageRotation,
+      })
+      setOnePageDungeon(result.dungeon)
+      setOnePageRenderer(result.renderer)
+      setOnePageData(result.data)
+    } catch (e) {
+      console.error('Dungeon generation failed:', e)
+    }
+    setOnePageLoading(false)
+  }, [onePageSeed, onePagePalette, onePageShowGrid, onePageShowSecrets, onePageRotation])
+
+  // Re-render when visual options change (without regenerating)
+  useEffect(() => {
+    if (mapMode !== 'onepage' || !onePageDungeon || !onePageRenderer) return
+    try {
+      rerenderDungeon(onePageRenderer, onePageDungeon, {
+        palette: onePagePalette,
+        showGrid: onePageShowGrid,
+        showSecrets: onePageShowSecrets,
+        rotation: onePageRotation,
+      })
+    } catch (e) {
+      console.error('Re-render failed:', e)
+    }
+  }, [mapMode, onePageDungeon, onePageRenderer, onePagePalette, onePageShowGrid, onePageShowSecrets, onePageRotation])
   const [newMapName, setNewMapName] = useState('')
   const [newMapWidth, setNewMapWidth] = useState(30)
   const [newMapHeight, setNewMapHeight] = useState(20)
@@ -147,7 +197,90 @@ function MapEditorPage() {
     printWindow.document.close()
   }
 
-  // No maps state
+  // One-Page Dungeon mode
+  if (mapMode === 'onepage') {
+    return (
+      <main className="flex flex-col h-[calc(100vh-120px)]">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card/50 px-3 py-2">
+          {/* Mode toggle */}
+          <div className="flex gap-0.5 rounded-lg border border-border p-0.5 mr-2">
+            <button onClick={() => setMapMode('editor')} className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">Editor</button>
+            <button className="rounded-md px-2 py-1 text-xs font-medium bg-primary text-primary-foreground">One-Page</button>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs">
+            <span className="text-muted-foreground">Seed:</span>
+            <input type="number" value={onePageSeed} onChange={e => setOnePageSeed(parseInt(e.target.value) || 0)}
+              className="w-24 rounded border border-input bg-background px-1.5 py-0.5 text-xs text-center outline-none font-mono" />
+            <button onClick={() => setOnePageSeed(Math.floor(Math.random() * 2147483647))} className="text-[10px] text-primary hover:underline">Reroll</button>
+          </div>
+
+          <button onClick={handleGenerateOnePage} disabled={onePageLoading}
+            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition disabled:opacity-50">
+            {onePageLoading ? 'Generating...' : 'Generate'}
+          </button>
+
+          <div className="w-px h-5 bg-border" />
+
+          <select value={onePagePalette} onChange={e => setOnePagePalette(e.target.value as any)}
+            className="rounded border border-input bg-background px-1.5 py-0.5 text-xs outline-none">
+            <option value="default">Default</option>
+            <option value="ancient">Ancient</option>
+            <option value="light">Light</option>
+            <option value="modern">Modern</option>
+            <option value="link">Link</option>
+          </select>
+
+          <label className="flex items-center gap-1 text-xs">
+            <input type="checkbox" checked={onePageShowGrid} onChange={e => setOnePageShowGrid(e.target.checked)} className="rounded" />Grid
+          </label>
+          <label className="flex items-center gap-1 text-xs">
+            <input type="checkbox" checked={onePageShowSecrets} onChange={e => setOnePageShowSecrets(e.target.checked)} className="rounded" />Secrets
+          </label>
+
+          <div className="flex items-center gap-1 text-xs">
+            <span className="text-muted-foreground">Rot:</span>
+            <input type="range" value={onePageRotation} onChange={e => setOnePageRotation(parseFloat(e.target.value))}
+              min={-15} max={15} step={0.5} className="w-16 accent-primary" />
+            <span className="w-6 font-mono text-center">{onePageRotation}°</span>
+          </div>
+
+          <div className="flex-1" />
+
+          {onePageData && (
+            <>
+              <button onClick={() => onePageCanvasRef.current && exportDungeonPNG(onePageCanvasRef.current, onePageData?.title)}
+                className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
+              <button onClick={() => {
+                const json = JSON.stringify(onePageData, null, 2)
+                const blob = new Blob([json], { type: 'application/json' })
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+                a.download = `${(onePageData?.title || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.json`; a.click()
+              }} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">JSON</button>
+            </>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-auto bg-[#e8e4dc] flex items-start justify-center p-4">
+          <canvas ref={onePageCanvasRef} className="shadow-lg" style={{ maxWidth: '100%' }} />
+          {!onePageDungeon && !onePageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center pointer-events-auto">
+                <p className="text-lg font-semibold text-[#221122] mb-2">One-Page Dungeon Generator</p>
+                <p className="text-sm text-[#221122]/60 mb-4">Generate a complete dungeon with the Watabou engine</p>
+                <button onClick={handleGenerateOnePage}
+                  className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
+                  Generate Dungeon
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
+    )
+  }
+
+  // No maps state (editor mode)
   if (campaign.maps.length === 0 && !showNewMapDialog) {
     return (
       <main className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-8">
@@ -155,12 +288,15 @@ function MapEditorPage() {
         <div className="rounded-xl border border-dashed border-border py-16 text-center">
           <p className="text-lg text-muted-foreground">No maps yet</p>
           <p className="mt-1 text-sm text-muted-foreground">Create a dungeon map for your adventure</p>
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button onClick={() => setShowNewMapDialog(true)} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
               Create Empty Map
             </button>
             <button onClick={() => setShowGenerator(true)} className="rounded-lg border border-primary/30 bg-primary/10 px-6 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition">
-              Generate Dungeon
+              Quick Generate
+            </button>
+            <button onClick={() => setMapMode('onepage')} className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-6 py-2.5 text-sm font-semibold text-amber-400 hover:bg-amber-500/20 transition">
+              One-Page Dungeon
             </button>
           </div>
         </div>
@@ -172,6 +308,11 @@ function MapEditorPage() {
     <main className="flex flex-col h-[calc(100vh-120px)]">
       {/* Top toolbar */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card/50 px-3 py-2">
+        {/* Mode toggle */}
+        <div className="flex gap-0.5 rounded-lg border border-border p-0.5 mr-1">
+          <button className="rounded-md px-2 py-1 text-xs font-medium bg-primary text-primary-foreground">Editor</button>
+          <button onClick={() => setMapMode('onepage')} className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">One-Page</button>
+        </div>
         {/* Map selector + rename */}
         {campaign.maps.length > 1 ? (
           <select
