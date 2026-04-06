@@ -57,6 +57,12 @@ function MapEditorPage() {
   const [, forceUpdate] = useState(0)
   const refresh = () => forceUpdate(n => n + 1)
 
+  // Zoom & Pan state
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const isPanningRef = useRef(false)
+  const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
+
   // Init app
   const initApp = useCallback(async () => {
     if (!canvasRef.current || !containerRef.current) return
@@ -274,10 +280,48 @@ function MapEditorPage() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Canvas */}
-        <div ref={containerRef} className="flex-1 overflow-hidden relative bg-[#F8F8F4]">
-          <canvas ref={canvasRef} className="w-full h-full" onContextMenu={e => e.preventDefault()}
-            onClick={handleCanvasClick} style={{ cursor: placingProp ? 'crosshair' : 'default' }} />
+        {/* Canvas with zoom/pan */}
+        <div ref={containerRef} className="flex-1 overflow-hidden relative bg-[#F8F8F4]"
+          onWheel={e => {
+            e.preventDefault()
+            const delta = e.deltaY > 0 ? -0.1 : 0.1
+            setZoom(z => Math.max(0.3, Math.min(5, z + delta * z)))
+          }}
+          onMouseDown={e => {
+            if (e.button === 1 || (e.button === 0 && e.altKey)) {
+              isPanningRef.current = true
+              panStartRef.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y }
+              e.preventDefault()
+            }
+          }}
+          onMouseMove={e => {
+            if (isPanningRef.current) {
+              setPan({
+                x: panStartRef.current.panX + (e.clientX - panStartRef.current.x),
+                y: panStartRef.current.panY + (e.clientY - panStartRef.current.y),
+              })
+            }
+          }}
+          onMouseUp={() => { isPanningRef.current = false }}
+          onMouseLeave={() => { isPanningRef.current = false }}
+        >
+          <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: 'center center', width: '100%', height: '100%' }}>
+            <canvas ref={canvasRef} className="w-full h-full" onContextMenu={e => e.preventDefault()}
+              onClick={handleCanvasClick} style={{ cursor: placingProp ? 'crosshair' : isPanningRef.current ? 'grabbing' : 'default' }} />
+          </div>
+
+          {/* Floating zoom/pan controls */}
+          {generated && (
+            <div className="absolute left-3 top-3 flex flex-col gap-1 rounded-xl border border-border bg-card/90 backdrop-blur-sm p-1.5 shadow-lg">
+              <button onClick={() => setZoom(z => Math.min(5, z + 0.25))} title="Zoom in"
+                className="rounded-lg w-8 h-8 flex items-center justify-center text-sm font-bold hover:bg-accent transition">+</button>
+              <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }) }} title="Reset view"
+                className="rounded-lg w-8 h-8 flex items-center justify-center text-[10px] font-medium hover:bg-accent transition">{Math.round(zoom * 100)}%</button>
+              <button onClick={() => setZoom(z => Math.max(0.3, z - 0.25))} title="Zoom out"
+                className="rounded-lg w-8 h-8 flex items-center justify-center text-sm font-bold hover:bg-accent transition">−</button>
+            </div>
+          )}
+
           {!generated && !loading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
@@ -286,7 +330,7 @@ function MapEditorPage() {
                 <button onClick={initApp} className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
                   Generate
                 </button>
-                <p className="mt-3 text-[10px] text-muted-foreground">Click rooms/doors to edit · Drag note boxes to reposition</p>
+                <p className="mt-3 text-[10px] text-muted-foreground">Scroll to zoom · Alt+drag to pan · Click rooms/doors to edit</p>
               </div>
             </div>
           )}
