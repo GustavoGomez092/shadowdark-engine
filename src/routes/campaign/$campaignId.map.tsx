@@ -59,9 +59,9 @@ function MapEditorPage() {
 
   // Zoom & Pan state
   const [zoom, setZoom] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const [panMode, setPanMode] = useState(false)
   const isPanningRef = useRef(false)
-  const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 })
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Init app
   const initApp = useCallback(async () => {
@@ -87,11 +87,25 @@ function MapEditorPage() {
     const onResize = () => {
       if (!appRef.current || !containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      appRef.current.resize(rect.width, rect.height)
+      appRef.current.resize(rect.width * zoom, rect.height * zoom)
     }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
-  }, [])
+  }, [zoom])
+
+  // Re-render at zoom resolution (debounced)
+  useEffect(() => {
+    if (!appRef.current || !containerRef.current || !generated) return
+    const timer = setTimeout(() => {
+      const rect = containerRef.current!.getBoundingClientRect()
+      const canvas = canvasRef.current!
+      canvas.style.width = (rect.width * zoom) + 'px'
+      canvas.style.height = (rect.height * zoom) + 'px'
+      appRef.current!._resize()
+      appRef.current!.draw()
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [zoom, generated])
 
   // New dungeon
   async function handleNew() {
@@ -281,56 +295,61 @@ function MapEditorPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Canvas with zoom/pan */}
-        <div ref={containerRef} className="flex-1 overflow-hidden relative bg-[#F8F8F4]"
-          onWheel={e => {
-            e.preventDefault()
-            const delta = e.deltaY > 0 ? -0.1 : 0.1
-            setZoom(z => Math.max(0.3, Math.min(5, z + delta * z)))
-          }}
-          onMouseDown={e => {
-            if (e.button === 1 || (e.button === 0 && e.altKey)) {
-              isPanningRef.current = true
-              panStartRef.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y }
-              e.preventDefault()
-            }
-          }}
-          onMouseMove={e => {
-            if (isPanningRef.current) {
-              setPan({
-                x: panStartRef.current.panX + (e.clientX - panStartRef.current.x),
-                y: panStartRef.current.panY + (e.clientY - panStartRef.current.y),
-              })
-            }
-          }}
-          onMouseUp={() => { isPanningRef.current = false }}
-          onMouseLeave={() => { isPanningRef.current = false }}
-        >
-          <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: 'center center', width: '100%', height: '100%' }}>
-            <canvas ref={canvasRef} className="w-full h-full" onContextMenu={e => e.preventDefault()}
-              onClick={handleCanvasClick} style={{ cursor: placingProp ? 'crosshair' : isPanningRef.current ? 'grabbing' : 'default' }} />
+        <div ref={containerRef} className="flex-1 relative bg-[#F8F8F4]">
+          <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto"
+            onWheel={e => {
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault()
+                const delta = e.deltaY > 0 ? -0.15 : 0.15
+                setZoom(z => Math.max(0.5, Math.min(5, z + delta * z)))
+              }
+            }}
+            onMouseDown={e => {
+              if (panMode || e.button === 1 || (e.button === 0 && e.altKey)) {
+                isPanningRef.current = true
+                e.preventDefault()
+              }
+            }}
+            onMouseMove={e => {
+              if (isPanningRef.current && scrollContainerRef.current) {
+                scrollContainerRef.current.scrollLeft -= e.movementX
+                scrollContainerRef.current.scrollTop -= e.movementY
+              }
+            }}
+            onMouseUp={() => { isPanningRef.current = false }}
+            onMouseLeave={() => { isPanningRef.current = false }}
+            style={{ cursor: panMode ? (isPanningRef.current ? 'grabbing' : 'grab') : placingProp ? 'crosshair' : 'default' }}
+          >
+            <canvas ref={canvasRef} onContextMenu={e => e.preventDefault()}
+              onClick={e => { if (!panMode) handleCanvasClick(e) }} />
           </div>
 
           {/* Floating zoom/pan controls */}
           {generated && (
-            <div className="absolute left-3 top-3 flex flex-col gap-1 rounded-xl border border-border bg-card/90 backdrop-blur-sm p-1.5 shadow-lg">
-              <button onClick={() => setZoom(z => Math.min(5, z + 0.25))} title="Zoom in"
+            <div className="absolute left-3 top-3 flex flex-col gap-1 rounded-xl border border-border bg-card/90 backdrop-blur-sm p-1.5 shadow-lg z-10">
+              <button onClick={() => setZoom(z => Math.min(5, z + 0.5))} title="Zoom in (Ctrl+Scroll)"
                 className="rounded-lg w-8 h-8 flex items-center justify-center text-sm font-bold hover:bg-accent transition">+</button>
-              <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }) }} title="Reset view"
-                className="rounded-lg w-8 h-8 flex items-center justify-center text-[10px] font-medium hover:bg-accent transition">{Math.round(zoom * 100)}%</button>
-              <button onClick={() => setZoom(z => Math.max(0.3, z - 0.25))} title="Zoom out"
+              <button onClick={() => setZoom(1)} title="Reset zoom"
+                className="rounded-lg w-8 h-8 flex items-center justify-center text-[9px] font-medium hover:bg-accent transition">{Math.round(zoom * 100)}%</button>
+              <button onClick={() => setZoom(z => Math.max(0.5, z - 0.5))} title="Zoom out (Ctrl+Scroll)"
                 className="rounded-lg w-8 h-8 flex items-center justify-center text-sm font-bold hover:bg-accent transition">−</button>
+              <div className="w-full h-px bg-border" />
+              <button onClick={() => setPanMode(!panMode)} title="Pan mode (hold to drag)"
+                className={`rounded-lg w-8 h-8 flex items-center justify-center text-sm transition ${panMode ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}>
+                ✋
+              </button>
             </div>
           )}
 
           {!generated && !loading && (
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="text-center">
                 <p className="text-lg font-semibold text-[#222022] mb-2">Dungeon Map</p>
                 <p className="text-sm text-[#222022]/60 mb-4">Generate and edit a one-page dungeon</p>
                 <button onClick={initApp} className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
                   Generate
                 </button>
-                <p className="mt-3 text-[10px] text-muted-foreground">Scroll to zoom · Alt+drag to pan · Click rooms/doors to edit</p>
+                <p className="mt-3 text-[10px] text-muted-foreground">Ctrl+Scroll to zoom · ✋ button or Alt+drag to pan</p>
               </div>
             </div>
           )}
