@@ -15,6 +15,9 @@ import Story from './Story.js';
 import DungeonRenderer from './DungeonRenderer.js';
 import style from './Style.js';
 import Formats from './Formats.js';
+import Room from './Room.js';
+import Door from './Door.js';
+import Dot from './Dot.js';
 
 class App {
   /**
@@ -46,6 +49,11 @@ class App {
 
     // Drag state for note boxes
     this._dragNote = null;
+
+    // Undo/redo history
+    this._undoStack = [];
+    this._redoStack = [];
+    this._maxHistory = 80;
 
     // Bind all events (keyboard, mouse, resize, note dragging)
     this._bindEvents();
@@ -113,6 +121,9 @@ class App {
     // are excluded, and before rendering so room.note is available)
     this.dungeon.populateNotes();
 
+    // Props with axis vectors are left as-is for correct rendering.
+    // The axis is only converted to rotation when the user edits the prop.
+
     // Layout (including auto-rotation) is computed inside renderer.render()
     // via computeLayout(), exactly matching the original layout() function.
 
@@ -168,9 +179,6 @@ class App {
    * Bind all event listeners (keyboard, mouse, window resize).
    */
   _bindEvents() {
-    // Keyboard shortcuts
-    window.addEventListener('keydown', (e) => this._onKey(e));
-
     // Window resize — recalculate rotation and redraw
     window.addEventListener('resize', () => {
       this._resize();
@@ -180,27 +188,6 @@ class App {
         this._autoRotate();
       }
       this.draw();
-    });
-
-    // Click to regenerate (on canvas), but not when double-clicking a note box
-    this.canvas.addEventListener('dblclick', (e) => {
-      if (style.showNotes && style.noteMode === 'normal') {
-        const placements = this.renderer.notePlacements;
-        if (placements && placements.length > 0) {
-          const cssX = e.offsetX;
-          const cssY = e.offsetY;
-          for (let i = placements.length - 1; i >= 0; i--) {
-            const p = placements[i];
-            const halfW = p.boxW / 2 + p.padding;
-            const halfH = p.boxH / 2 + p.padding;
-            if (cssX >= p.x - halfW && cssX <= p.x + halfW &&
-                cssY >= p.y - halfH && cssY <= p.y + halfH) {
-              return; // double-click on note box — do not regenerate
-            }
-          }
-        }
-      }
-      this.newDungeon();
     });
 
     // ─── Note box dragging ──────────────────────────────────────
@@ -285,159 +272,7 @@ class App {
     });
   }
 
-  /**
-   * Handle keyboard input.
-   * Mirrors the original generator's keyboard shortcuts.
-   */
-  _onKey(e) {
-    const key = e.key.toLowerCase();
-    const shift = e.shiftKey;
-
-    switch (key) {
-      // ─── Generation ───
-      case 'enter':
-        e.preventDefault();
-        this.newDungeon();
-        break;
-
-      case ' ':
-        e.preventDefault();
-        // Re-roll notes (regenerate with same structure)
-        if (this.planner) {
-          this.planner.rollNotes();
-          if (this.dungeon) this.dungeon.populateNotes();
-          this.draw();
-        }
-        break;
-
-      // ─── Palettes (1-5) ───
-      case '1':
-        if (shift) { style.gridScale = 1; }
-        else { style.setPalette('default'); }
-        style.save();
-        this.draw();
-        break;
-      case '2':
-        if (shift) { style.gridScale = 2; }
-        else { style.setPalette('ancient'); }
-        style.save();
-        this.draw();
-        break;
-      case '3':
-        style.setPalette('light');
-        style.save();
-        this.draw();
-        break;
-      case '4':
-        style.setPalette('modern');
-        style.save();
-        this.draw();
-        break;
-      case '5':
-        style.setPalette('link');
-        style.save();
-        this.draw();
-        break;
-
-      // ─── Toggles ───
-      case 'g':
-        if (shift) { style.cycleGrid(); }
-        else { style.showGrid = !style.showGrid; }
-        style.save();
-        this.draw();
-        break;
-
-      case 'w':
-        if (shift) {
-          // Raise water level
-          Parameters.waterLevel = Math.round((Parameters.waterLevel + 0.1) * 10) / 10;
-          if (Parameters.waterLevel > 1) Parameters.waterLevel = 0;
-          if (this.flood) {
-            this.flood.setLevel(Parameters.waterLevel);
-          }
-        } else {
-          style.showWater = !style.showWater;
-        }
-        style.save();
-        this.draw();
-        break;
-
-      case 'p':
-        style.showProps = !style.showProps;
-        style.save();
-        this.draw();
-        break;
-
-      case 'h':
-        style.showSecrets = !style.showSecrets;
-        // Toggle hidden flag on secret rooms (matching original toggleSecrets)
-        if (this.planner) {
-          const secrets = this.planner.getSecrets();
-          for (const room of secrets) {
-            room.hidden = !style.showSecrets;
-          }
-        }
-        // Re-populate notes (hidden rooms are excluded from notes)
-        if (this.dungeon) this.dungeon.populateNotes();
-        style.save();
-        this.draw();
-        break;
-
-      case 'n':
-        style.cycleNotes();
-        style.save();
-        this.draw();
-        break;
-
-      case 'c':
-        style.showConnectors = !style.showConnectors;
-        style.save();
-        this.draw();
-        break;
-
-      case 'l':
-        style.showLegend = !style.showLegend;
-        style.save();
-        this.draw();
-        break;
-
-      case 'm':
-        style.bw = !style.bw;
-        style.save();
-        this.draw();
-        break;
-
-      case 'r':
-        style.autoRotate = !style.autoRotate;
-        if (style.autoRotate) {
-          this._autoRotate();
-        } else {
-          style.rotation = 0;
-        }
-        style.save();
-        this.draw();
-        break;
-
-      // ─── Export ───
-      case 'e':
-        if (shift) {
-          // Export PNG with scale dialog
-          const scale = parseFloat(prompt('Export scale (1-5):', '2')) || 2;
-          Formats.exportPNG(this.dungeon, this.renderer, scale);
-        } else {
-          Formats.exportPNG(this.dungeon, this.renderer, 1);
-        }
-        break;
-
-      case 'j':
-        Formats.exportJSON(this.dungeon);
-        break;
-
-      case 's':
-        Formats.exportSVG(this.dungeon, this.renderer);
-        break;
-    }
-  }
+  // Keyboard shortcuts removed — all features are accessible via the toolbar UI.
 
   /**
    * Resize canvas to fill the window.
@@ -553,9 +388,47 @@ class App {
   }
 
   /**
+   * Convert grid coordinates to CSS pixel coordinates.
+   * Inverse of cssToGrid — used for drawing overlays.
+   */
+  gridToCSS(gx, gy) {
+    if (!this.dungeon) return null;
+    const layout = this.renderer.computeLayout(this.dungeon);
+    const { fitScale, mapX, mapY, rotation } = layout;
+    const cs = this.renderer.cellSize;
+
+    const rx = gx * cs;
+    const ry = gy * cs;
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
+    const sx = rx * cos - ry * sin;
+    const sy = rx * sin + ry * cos;
+    return { cssX: sx * fitScale + mapX, cssY: sy * fitScale + mapY };
+  }
+
+  /**
+   * Get the CSS pixel size of one grid cell (accounts for fitScale).
+   */
+  getGridCellCSS() {
+    if (!this.dungeon) return 0;
+    const layout = this.renderer.computeLayout(this.dungeon);
+    return this.renderer.cellSize * layout.fitScale;
+  }
+
+  /**
+   * Get the current map rotation in radians.
+   */
+  getRotation() {
+    if (!this.dungeon) return 0;
+    const layout = this.renderer.computeLayout(this.dungeon);
+    return layout.rotation;
+  }
+
+  /**
    * Toggle a room property and re-render.
    */
   toggleRoom(room, prop) {
+    this.pushUndo();
     if (prop === 'round') room.round = !room.round;
     else if (prop === 'columns') room.columns = !room.columns;
     else if (prop === 'hidden') {
@@ -569,6 +442,7 @@ class App {
    * Change a door type and re-render.
    */
   setDoorType(door, type) {
+    this.pushUndo();
     door.type = type;
     this.draw();
   }
@@ -578,6 +452,7 @@ class App {
    */
   removeDoor(door) {
     if (!this.dungeon) return;
+    this.pushUndo();
     const idx = this.dungeon.doors.indexOf(door);
     if (idx !== -1) this.dungeon.doors.splice(idx, 1);
     this.draw();
@@ -614,6 +489,7 @@ class App {
    * Clear all props from a room and re-render.
    */
   clearRoomProps(room) {
+    this.pushUndo();
     room.props = [];
     this.draw();
   }
@@ -622,6 +498,7 @@ class App {
    * Add a prop to a room. Returns the created prop object.
    */
   addRoomProp(room, type, relX, relY, scale = 0.6, rotation = 0) {
+    this.pushUndo();
     const prop = {
       type,
       pos: { x: room.x + relX, y: room.y + relY },
@@ -653,6 +530,7 @@ class App {
    * Remove a specific prop from its room and re-render.
    */
   removeProp(room, prop) {
+    this.pushUndo();
     const idx = room.props.indexOf(prop);
     if (idx !== -1) room.props.splice(idx, 1);
     this.draw();
@@ -698,12 +576,347 @@ class App {
   }
 
   /**
+   * Add a new room to the dungeon at the given grid rectangle.
+   * Creates a standalone room (no door connections).
+   * @param {number} gx - Grid X of top-left corner
+   * @param {number} gy - Grid Y of top-left corner
+   * @param {number} w - Width in grid cells (minimum 3)
+   * @param {number} h - Height in grid cells (minimum 3)
+   * @returns {Room|null} The created room, or null if dungeon not ready
+   */
+  addRoom(gx, gy, w, h) {
+    if (!this.dungeon) return null;
+    this.pushUndo();
+    // Add 1-cell wall band on each side so visible floor matches the drawn area
+    const rw = Math.max(3, w + 2);
+    const rh = Math.max(3, h + 2);
+
+    // Create room using DOWN axis, offset by -1 to center wall band around drawn area
+    const origin = new Dot(gx - 1 + Math.floor(rw / 2), gy - 1);
+    const room = new Room(origin, Room.DOWN, rw, rh, 1);
+    room.seed = Date.now();
+    room.props = [];
+    this.dungeon.addRoom(room);
+    this.dungeon.populateNotes();
+    this.draw();
+    return room;
+  }
+
+  /**
+   * Remove a room from the dungeon.
+   * @param {Room} room - Room to remove
+   */
+  removeEditorRoom(room) {
+    if (!this.dungeon) return;
+    this.pushUndo();
+    this.dungeon.removeRoom(room);
+    this.dungeon.populateNotes();
+    this.draw();
+  }
+
+  /**
+   * Create a freeform path from an array of waypoints.
+   * Each pair of consecutive waypoints creates a corridor room.
+   * Non-axis-aligned pairs get an auto-corner (horizontal first, then vertical).
+   * Doors are placed at junctions and at endpoints touching existing rooms.
+   *
+   * @param {{ x: number, y: number }[]} points - Waypoints in grid coords
+   * @param {number} corridorWidth - Corridor width (default 3)
+   */
+  createPath(points, corridorWidth = 3) {
+    if (!this.dungeon || points.length < 2) return;
+    this.pushUndo();
+
+    const hw = Math.floor(corridorWidth / 2);
+
+    // Expand non-axis-aligned pairs into axis-aligned sub-segments with corner points
+    const expanded = [];
+    for (let i = 0; i < points.length; i++) {
+      expanded.push(points[i]);
+      if (i < points.length - 1) {
+        const a = points[i], b = points[i + 1];
+        if (a.x !== b.x && a.y !== b.y) {
+          expanded.push({ x: b.x, y: a.y });
+        }
+      }
+    }
+
+    // For each segment, extend the endpoint by hw cells past each corner
+    // so adjacent perpendicular corridors overlap — no gap at turns.
+    const corridors = [];
+    for (let i = 0; i < expanded.length - 1; i++) {
+      let p1 = expanded[i], p2 = expanded[i + 1];
+      if (p1.x === p2.x && p1.y === p2.y) continue;
+
+      let x1 = p1.x, y1 = p1.y, x2 = p2.x, y2 = p2.y;
+
+      if (y1 === y2) {
+        // Horizontal — extend left/right by hw at internal junctions
+        const left = Math.min(x1, x2);
+        const right = Math.max(x1, x2);
+        const extLeft = (i > 0) ? hw : 0;
+        const extRight = (i < expanded.length - 2) ? hw : 0;
+        x1 = left - extLeft;
+        x2 = right + extRight;
+      } else {
+        // Vertical — extend up/down by hw at internal junctions
+        const top = Math.min(y1, y2);
+        const bottom = Math.max(y1, y2);
+        const extTop = (i > 0) ? hw : 0;
+        const extBot = (i < expanded.length - 2) ? hw : 0;
+        y1 = top - extTop;
+        y2 = bottom + extBot;
+      }
+
+      const room = this._makeCorridorRoom(x1, y1, x2, y2, corridorWidth);
+      if (room) {
+        room.seed = Date.now() + corridors.length;
+        room.props = [];
+        this.dungeon.addRoom(room);
+        corridors.push(room);
+      }
+    }
+
+    // Add doors at start/end if touching existing rooms
+    if (corridors.length > 0) {
+      const startPt = expanded[0];
+      const startRoom = this.findRoomAt(startPt.x, startPt.y);
+      if (startRoom && startRoom !== corridors[0]) {
+        const pos = new Dot(startPt.x, startPt.y);
+        if (!this.dungeon.getDoor(pos)) {
+          const door = new Door(pos, startRoom, corridors[0]);
+          door.type = 0;
+          this.dungeon.addDoor(door);
+        }
+      }
+
+      const endPt = expanded[expanded.length - 1];
+      const endRoom = this.findRoomAt(endPt.x, endPt.y);
+      if (endRoom && endRoom !== corridors[corridors.length - 1]) {
+        const pos = new Dot(endPt.x, endPt.y);
+        if (!this.dungeon.getDoor(pos)) {
+          const door = new Door(pos, corridors[corridors.length - 1], endRoom);
+          door.type = 0;
+          this.dungeon.addDoor(door);
+        }
+      }
+    }
+
+    this.dungeon.populateNotes();
+    this.draw();
+    return corridors;
+  }
+
+  /**
+   * Create a single corridor room between two axis-aligned points.
+   */
+  _makeCorridorRoom(x1, y1, x2, y2, corridorWidth) {
+    if (y1 === y2) {
+      const left = Math.min(x1, x2);
+      const right = Math.max(x1, x2);
+      const depth = right - left + 1;
+      if (depth < 1) return null;
+      const origin = new Dot(left, y1);
+      return new Room(origin, Room.RIGHT, corridorWidth, depth, 1);
+    } else if (x1 === x2) {
+      const top = Math.min(y1, y2);
+      const bottom = Math.max(y1, y2);
+      const depth = bottom - top + 1;
+      if (depth < 1) return null;
+      const origin = new Dot(x1, top);
+      return new Room(origin, Room.DOWN, corridorWidth, depth, 1);
+    }
+    return null;
+  }
+
+  // ─── UNDO / REDO ────────────────────────────────────────────
+
+  /**
+   * Take a snapshot of the current dungeon state for undo.
+   * Call this BEFORE making any mutation.
+   */
+  pushUndo() {
+    if (!this.dungeon) return;
+    const snap = this._snapshot();
+    if (!snap) return;
+    this._undoStack.push(snap);
+    if (this._undoStack.length > this._maxHistory) this._undoStack.shift();
+    this._redoStack = []; // clear redo on new action
+  }
+
+  /**
+   * Undo the last mutation. Returns true if undo was performed.
+   */
+  undo() {
+    if (!this.dungeon || this._undoStack.length === 0) return false;
+    this._redoStack.push(this._snapshot());
+    const snap = this._undoStack.pop();
+    this._restore(snap);
+    this.draw();
+    return true;
+  }
+
+  /**
+   * Redo the last undone mutation. Returns true if redo was performed.
+   */
+  redo() {
+    if (!this.dungeon || this._redoStack.length === 0) return false;
+    this._undoStack.push(this._snapshot());
+    const snap = this._redoStack.pop();
+    this._restore(snap);
+    this.draw();
+    return true;
+  }
+
+  /** Number of available undo steps */
+  get undoCount() { return this._undoStack.length; }
+  /** Number of available redo steps */
+  get redoCount() { return this._redoStack.length; }
+
+  /**
+   * Snapshot rooms, doors, and story into a plain JSON-safe object.
+   */
+  _snapshot() {
+    if (!this.dungeon) return null;
+    const rooms = this.dungeon.rooms.map(r => ({
+      x: r.x, y: r.y, w: r.w, h: r.h,
+      originX: r.origin.x, originY: r.origin.y,
+      axisX: r.axis.x, axisY: r.axis.y,
+      width: r.width, depth: r.depth, mirror: r.mirror,
+      seed: r.seed, round: r.round, columns: r.columns, hidden: r.hidden,
+      symm: r.symm, desc: r.desc,
+      enemy: r.enemy, loot: r.loot, key: r.key, gate: r.gate, event: r.event, enviro: r.enviro,
+      props: r.props.map(p => ({
+        type: p.type,
+        posX: p.pos.x, posY: p.pos.y,
+        scale: p.scale ?? 0.6, rotation: p.rotation ?? 0,
+        axisX: p.axis ? p.axis.x : undefined, axisY: p.axis ? p.axis.y : undefined,
+        width: p.width,
+      })),
+      note: r.note ? { px: r.note.point.x, py: r.note.point.y, symb: r.note.symb, text: r.note.text } : null,
+    }));
+    const doors = this.dungeon.doors.map(d => ({
+      x: d.x, y: d.y, type: d.type,
+      dirX: d.dir ? d.dir.x : null, dirY: d.dir ? d.dir.y : null,
+      fromIdx: d.from ? this.dungeon.rooms.indexOf(d.from) : -1,
+      toIdx: d.to ? this.dungeon.rooms.indexOf(d.to) : -1,
+    }));
+    const story = this.dungeon.story ? {
+      name: this.dungeon.story.name,
+      hook: this.dungeon.story.hook,
+    } : null;
+    return { rooms, doors, story };
+  }
+
+  /**
+   * Restore dungeon state from a snapshot.
+   */
+  _restore(snap) {
+    if (!this.dungeon || !snap) return;
+
+    // Rebuild rooms
+    this.dungeon.rooms = snap.rooms.map(r => {
+      const origin = new Dot(r.originX, r.originY);
+      const axis = new Dot(r.axisX, r.axisY);
+      const room = new Room(origin, axis, r.width, r.depth, r.mirror);
+      room.seed = r.seed;
+      room.round = r.round;
+      room.columns = r.columns;
+      room.hidden = r.hidden;
+      room.symm = r.symm;
+      room.desc = r.desc;
+      room.enemy = r.enemy; room.loot = r.loot; room.key = r.key;
+      room.gate = r.gate; room.event = r.event; room.enviro = r.enviro;
+      room.dungeon = this.dungeon;
+      room.props = r.props.map(p => {
+        const prop = { type: p.type, pos: { x: p.posX, y: p.posY }, scale: p.scale, rotation: p.rotation };
+        if (p.axisX !== undefined) prop.axis = { x: p.axisX, y: p.axisY };
+        if (p.width !== undefined) prop.width = p.width;
+        return prop;
+      });
+      if (r.note) {
+        room.note = { point: { x: r.note.px, y: r.note.py }, symb: r.note.symb, text: r.note.text };
+      }
+      return room;
+    });
+
+    // Rebuild doors with references to rebuilt rooms
+    this.dungeon.doors = snap.doors.map(d => {
+      const from = d.fromIdx >= 0 ? this.dungeon.rooms[d.fromIdx] : null;
+      const to = d.toIdx >= 0 ? this.dungeon.rooms[d.toIdx] : null;
+      const door = new Door(new Dot(d.x, d.y), null, null);
+      door.from = from;
+      door.to = to;
+      door.type = d.type;
+      door.dir = (d.dirX != null) ? new Dot(d.dirX, d.dirY) : null;
+      return door;
+    });
+
+    // Restore story text
+    if (snap.story && this.dungeon.story) {
+      this.dungeon.story.name = snap.story.name;
+      this.dungeon.story.hook = snap.story.hook;
+    }
+  }
+
+  /**
+   * Load a dungeon from serialized save data.
+   * Generates from seed to get planner/flood/story, then restores the snapshot.
+   * @param {Object} saveData - Data from serialize()
+   */
+  loadFromSave(saveData) {
+    if (!saveData) return false;
+
+    // Generate from seed first to get planner, flood, story
+    const seed = saveData.seed || 0;
+    this.blueprint = new Blueprint(seed, []);
+    this.generate();
+
+    if (!this.dungeon) return false;
+
+    // Now restore the snapshot (rooms, doors, story edits) from saved data
+    if (saveData._snapshot) {
+      this._restore(saveData._snapshot);
+    }
+
+    // Restore editor state
+    if (saveData.editorState) {
+      const es = saveData.editorState;
+      if (es.noteOverrides) {
+        this.renderer.noteOverrides.clear();
+        for (const [key, val] of Object.entries(es.noteOverrides)) {
+          this.renderer.noteOverrides.set(key, val);
+        }
+      }
+      if (es.rotation != null) style.rotation = es.rotation;
+      if (es.showGrid != null) style.showGrid = es.showGrid;
+      if (es.showWater != null) style.showWater = es.showWater;
+      if (es.showProps != null) style.showProps = es.showProps;
+      if (es.showNotes != null) style.showNotes = es.showNotes;
+      if (es.showSecrets != null) style.showSecrets = es.showSecrets;
+      if (es.showTitle != null) style.showTitle = es.showTitle;
+      if (es.bw != null) style.bw = es.bw;
+    }
+
+    // Clear undo/redo stacks for a fresh start
+    this._undoStack = [];
+    this._redoStack = [];
+
+    this.draw();
+    return true;
+  }
+
+  /**
    * Serialize the entire dungeon state for saving.
    * Includes everything needed to restore: rooms, doors, notes, water, story.
    */
   serialize() {
     if (!this.dungeon) return null;
     const data = this.dungeon.getData();
+    // Add seed for regeneration on load
+    data.seed = this.dungeon.seed;
+    // Add full room/door snapshot for exact restoration
+    data._snapshot = this._snapshot();
     // Add editor-specific state
     data.editorState = {
       noteOverrides: Object.fromEntries(this.renderer.noteOverrides),

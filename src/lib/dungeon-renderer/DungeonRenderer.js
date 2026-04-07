@@ -241,6 +241,12 @@ class DungeonRenderer {
    * @param {Flood} flood
    */
   render(dungeon, planner, flood) {
+    // Save RNG state and reset to a deterministic render seed so that
+    // hatching, cracks, and other visual randomness is identical across
+    // redraws (e.g. when only the water level changes).
+    const savedSeed = rng.seed;
+    rng.reset(dungeon.seed + 99999);
+
     const ctx = this.ctx;
     const canvas = this.canvas;
     const cs = this.cellSize;
@@ -395,6 +401,9 @@ class DungeonRenderer {
       }
       ctx.restore();
     }
+
+    // Restore RNG state so generation logic isn't affected by render calls
+    rng.reset(savedSeed);
   }
 
   // ─── POLYGON HELPERS ──────────────────────────────────────
@@ -1663,12 +1672,13 @@ class DungeonRenderer {
         // Scale factor: Rc passes 30*scale to drawing, we already have cs=30
         const s = (prop.scale || 1) * cs;
         // Rotation: original uses E(sin,cos) pair via rotateYX.
-        // For axis-oriented props, prop.axis = {x: sinA, y: cosA}
-        // For angle-oriented props (boulders, crates), prop.rotation is raw angle
+        // Original compiled: asRotateYX(pts, axis.y, axis.x)
+        //   new_x = x*axis.x - y*axis.y  →  cos(θ) = axis.x
+        //   new_y = x*axis.y + y*axis.x  →  sin(θ) = axis.y
+        //   angle = atan2(axis.y, axis.x)
         if (prop.axis) {
-          // Convert axis vector to rotation angle
-          // axis DOWN(0,1)=0°, UP(0,-1)=180°, LEFT(-1,0)=-90°, RIGHT(1,0)=90°
-          const angle = Math.atan2(prop.axis.x, prop.axis.y) + Math.PI / 2;
+          // Original: asRotateYX(pts, axis.y, axis.x) → angle = atan2(axis.y, axis.x)
+          const angle = Math.atan2(prop.axis.y, prop.axis.x);
           ctx.rotate(angle);
         } else if (prop.rotation != null) {
           ctx.rotate(prop.rotation);
@@ -2334,7 +2344,7 @@ class DungeonRenderer {
       const lineHeight = style.fontNotes.size * 1.2;
       const textHeight = lines.length * lineHeight;
       const boxW = noteBoxWidth;
-      const boxH = textHeight + 2 * padding;
+      const boxH = textHeight;
       noteMeasurements.push({ note, lines, lineHeight, boxW, boxH });
     }
 

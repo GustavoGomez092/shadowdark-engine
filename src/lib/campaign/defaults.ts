@@ -1,6 +1,6 @@
 import { generateId } from '@/lib/utils/id.ts'
 import type { Campaign, AdventureRoom, AdventureNPC, TrapDefinition, RandomEncounterTable, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
-import type { CampaignMap, MapLayer } from '@/schemas/map.ts'
+import type { CampaignMap } from '@/schemas/map.ts'
 
 export function createEmptyCampaign(name: string, author: string = ''): Campaign {
   return {
@@ -89,22 +89,13 @@ export function createEmptySection(): LoreSection {
   }
 }
 
-export function createEmptyMap(name: string = 'Dungeon Map'): CampaignMap {
-  const layer: MapLayer = {
-    id: generateId(),
-    name: 'Base',
-    visible: true,
-    locked: false,
-    cells: [],
-  }
+export function createEmptyMap(name: string = 'Dungeon Map', seed: number = 0): CampaignMap {
   return {
     id: generateId(),
     name,
-    width: 30,
-    height: 20,
-    cellSize: 40,
-    layers: [layer],
-    labels: [],
-    markers: [],
+    seed,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    dungeonData: null,
   }
 }

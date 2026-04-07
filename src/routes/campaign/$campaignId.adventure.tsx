@@ -2,25 +2,21 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
-import { createEmptyRoom, createEmptyNPC, createEmptyEncounterTable } from '@/lib/campaign/defaults.ts'
-import { RoomEditor } from '@/components/campaign/adventure/room-editor.tsx'
+import { createEmptyNPC, createEmptyEncounterTable } from '@/lib/campaign/defaults.ts'
 import { NPCEditor } from '@/components/campaign/adventure/npc-editor.tsx'
 import { EncounterTableEditor } from '@/components/campaign/adventure/encounter-table-editor.tsx'
-import type { AdventureRoom, AdventureNPC, RandomEncounterTable } from '@/schemas/campaign.ts'
+import type { AdventureNPC, RandomEncounterTable } from '@/schemas/campaign.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/adventure')({
   component: AdventureStructurePage,
 })
 
-type AdventureTab = 'overview' | 'rooms' | 'npcs' | 'encounters'
+type AdventureTab = 'overview' | 'npcs' | 'encounters'
 
 function AdventureStructurePage() {
   const { t } = useLocale()
   const campaign = useCampaignStore(s => s.campaign)
   const updateAdventure = useCampaignStore(s => s.updateAdventure)
-  const addRoom = useCampaignStore(s => s.addRoom)
-  const updateRoom = useCampaignStore(s => s.updateRoom)
-  const removeRoom = useCampaignStore(s => s.removeRoom)
   const addNPC = useCampaignStore(s => s.addNPC)
   const updateNPCStore = useCampaignStore(s => s.updateNPC)
   const removeNPC = useCampaignStore(s => s.removeNPC)
@@ -29,22 +25,13 @@ function AdventureStructurePage() {
   const removeEncounterTable = useCampaignStore(s => s.removeEncounterTable)
 
   const [tab, setTab] = useState<AdventureTab>('overview')
-  const [editingRoom, setEditingRoom] = useState<AdventureRoom | null>(null)
   const [editingNPC, setEditingNPC] = useState<AdventureNPC | null>(null)
   const [editingTable, setEditingTable] = useState<RandomEncounterTable | null>(null)
 
   if (!campaign) return null
 
   const adv = campaign.adventure
-  const monsterNames = (campaign.content.monsters ?? []).map(m => ({ id: m.id, name: m.name }))
   const inputCls = "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-
-  function saveRoom(room: AdventureRoom) {
-    const exists = adv.rooms.find(r => r.id === room.id)
-    if (exists) updateRoom(room.id, () => Object.assign(exists, room))
-    else addRoom(room)
-    setEditingRoom(null)
-  }
 
   function saveNPC(npc: AdventureNPC) {
     const exists = adv.npcs.find(n => n.id === npc.id)
@@ -62,7 +49,6 @@ function AdventureStructurePage() {
 
   const tabs: { key: AdventureTab; label: string }[] = [
     { key: 'overview', label: 'Overview' },
-    { key: 'rooms', label: `Rooms (${adv.rooms.length})` },
     { key: 'npcs', label: `NPCs (${adv.npcs.length})` },
     { key: 'encounters', label: `Encounters (${adv.randomEncounters.length})` },
   ]
@@ -109,43 +95,6 @@ function AdventureStructurePage() {
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Rooms */}
-      {tab === 'rooms' && (
-        <div>
-          <div className="mb-4 flex justify-end">
-            <button onClick={() => setEditingRoom(createEmptyRoom(adv.rooms.length + 1))} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
-              + New Room
-            </button>
-          </div>
-          {adv.rooms.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border py-12 text-center">
-              <p className="text-muted-foreground">No rooms yet</p>
-              <button onClick={() => setEditingRoom(createEmptyRoom(1))} className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">Create First Room</button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {adv.rooms.sort((a, b) => a.number - b.number).map(room => (
-                <div key={room.id} onClick={() => setEditingRoom(room)} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 cursor-pointer hover:border-border/80 transition">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-2">
-                      <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-bold text-primary">#{room.number}</span>
-                      <span className="font-medium truncate">{room.name}</span>
-                    </div>
-                    {room.description && <p className="mt-0.5 text-xs text-muted-foreground truncate">{room.description.slice(0, 80)}</p>}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2 ml-3">
-                    {room.monsterIds.length > 0 && <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] text-red-400">{room.monsterIds.length} foes</span>}
-                    {room.traps.length > 0 && <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400">{room.traps.length} traps</span>}
-                    <button onClick={e => { e.stopPropagation(); removeRoom(room.id) }} className="text-xs text-red-400 hover:text-red-300">Delete</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          {editingRoom && <RoomEditor room={editingRoom} monsterNames={monsterNames} onSave={saveRoom} onCancel={() => setEditingRoom(null)} />}
         </div>
       )}
 
