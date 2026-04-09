@@ -96,6 +96,18 @@ export function createEmptyMap(name: string = 'Dungeon Map', seed: number = 0): 
     seed,
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    width: 40,
+    height: 30,
+    cellSize: 40,
+    layers: [{
+      id: generateId(),
+      name: 'Base',
+      visible: true,
+      locked: false,
+      cells: [],
+    }],
+    labels: [],
+    markers: [],
     dungeonData: null,
   }
 }

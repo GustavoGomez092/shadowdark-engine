@@ -3,6 +3,7 @@ import type { PlayerVisibleState, PublicMonsterInfo, PublicStoreInfo } from './s
 import type { CombatState } from './combat.ts';
 import type { LightState } from './light.ts';
 import type { RangeCategory } from './reference.ts';
+import type { PlayerMapViewState } from './map-viewer.ts';
 
 // ============ Envelope ============
 
@@ -186,7 +187,9 @@ export type GMToPlayerMessage =
   | ForceDisconnectMessage
   | RoomCodeChangedMessage
   | PongMessage
-  | ErrorMessage;
+  | ErrorMessage
+  | MapSyncMessage
+  | TokenMoveMessage;
 
 export interface JoinRoomResponse {
   type: 'join_room_response';
@@ -278,4 +281,18 @@ export interface ErrorMessage {
   code: string;
   message: string;
   inResponseTo?: string;
+}
+
+// ── Map Viewer Messages ──
+
+export interface MapSyncMessage {
+  type: 'map_sync';
+  mapView: PlayerMapViewState | null;
+}
+
+export interface TokenMoveMessage {
+  type: 'token_move';
+  tokenId: string;
+  gridX: number;
+  gridY: number;
 }

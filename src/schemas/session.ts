@@ -9,6 +9,7 @@ import type { RandomEncounter } from './encounters.ts';
 import type { GameStore, StoreItem } from './stores.ts';
 import type { AIConversation } from './ai.ts';
 import type { Alignment } from './reference.ts';
+import type { PlayerMapViewState, MapViewerState } from './map-viewer.ts';
 
 export const SCHEMA_VERSION = 1;
 
@@ -50,6 +51,7 @@ export interface SessionState {
   aiConversations: AIConversation[]; // private, never sent to players
   settings: GameSettings;
   meta: SessionMeta;
+  mapViewer?: MapViewerState;
 }
 
 export interface GameSettings {
@@ -86,6 +88,7 @@ export interface PlayerVisibleState {
   chatLog: ChatMessage[];
   recentRolls: DiceRollResult[];
   activeStore?: PublicStoreInfo;
+  mapView?: PlayerMapViewState;
 }
 
 export type HpStatus = 'healthy' | 'wounded' | 'critical' | 'dying' | 'dead';

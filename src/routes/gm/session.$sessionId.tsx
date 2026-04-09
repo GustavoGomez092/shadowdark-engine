@@ -22,6 +22,10 @@ import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues, levelUpCharacter, canLevelUp } from '@/lib/rules/character.ts'
 import { rollDeathSave } from '@/lib/rules/combat.ts'
+import { GMMapViewer } from '@/components/map-viewer/gm-map-viewer.tsx'
+import { useMapViewerStore } from '@/stores/map-viewer-store.ts'
+import type { CampaignMap } from '@/schemas/map.ts'
+import type { MapViewerState, PlayerMapViewState } from '@/schemas/map-viewer.ts'
 
 export const Route = createFileRoute('/gm/session/$sessionId')({
   component: GMSessionPage,
@@ -536,8 +540,26 @@ function GMSessionPage() {
     }
   }, [updatePlayer, addChatMessage])
 
+  const campaignMapsRef = useRef<CampaignMap[]>([])
   const getPlayerStateForPeer = useCallback((peerId: string): PlayerVisibleState | null => {
-    return getPlayerVisibleStateRef.current(peerId)
+    const state = getPlayerVisibleStateRef.current(peerId)
+    if (!state) return null
+    // Only send map view if this player's character has a token on the map
+    const mvState = mapViewerStateRef.current
+    const playerCharId = state.myCharacter?.id
+    const playerHasToken = playerCharId && mvState.tokens.some(t => t.referenceId === playerCharId)
+    if (mvState.activeMapId && playerHasToken) {
+      const activeMap = campaignMapsRef.current.find(m => m.id === mvState.activeMapId)
+      if (activeMap?.dungeonData) {
+        state.mapView = {
+          mapId: activeMap.id,
+          dungeonData: activeMap.dungeonData,
+          seed: (activeMap.dungeonData as any)?.seed || activeMap.seed || 0,
+          tokens: mvState.tokens.filter(t => t.visible),
+        }
+      }
+    }
+    return state
   }, [])
 
   const { isReady, start, broadcastStateSync, kick } = useGMPeer({
@@ -604,6 +626,63 @@ function GMSessionPage() {
 
   const [rewardsState, setRewardsState] = useState<{ show: boolean; hasTreasure: boolean; encounterType: 'random' | 'story' }>({ show: false, hasTreasure: false, encounterType: 'random' })
 
+  // ── Map Viewer ──
+  const mapViewerState = useMapViewerStore(s => s.state)
+  const setMapViewerState = useMapViewerStore(s => s.setState)
+
+  // Load campaign maps from localStorage for map selection
+  const [campaignMaps, setCampaignMaps] = useState<CampaignMap[]>([])
+  useEffect(() => {
+    try {
+      const indexRaw = localStorage.getItem('shadowdark:campaigns:index')
+      if (!indexRaw) return
+      const index = JSON.parse(indexRaw) as Array<{ id: string }>
+      const maps: CampaignMap[] = []
+      for (const entry of index) {
+        const raw = localStorage.getItem(`shadowdark:campaign:${entry.id}`)
+        if (!raw) continue
+        const campaign = JSON.parse(raw)
+        if (campaign.maps) {
+          for (const m of campaign.maps) {
+            if ((m.layers && m.layers.length > 0) || m.dungeonData) maps.push(m)
+          }
+        }
+      }
+      setCampaignMaps(maps)
+      campaignMapsRef.current = maps
+    } catch { /* ignore */ }
+  }, [])
+
+  // Load map viewer state from session on mount, then save changes back
+  const mapViewerLoaded = useRef(false)
+  useEffect(() => {
+    if (session?.mapViewer) {
+      setMapViewerState(session.mapViewer)
+    }
+    // Mark loaded after a tick so the save effect skips the initial empty state
+    requestAnimationFrame(() => { mapViewerLoaded.current = true })
+  }, []) // Only on mount
+
+  const mapViewerStateRef = useRef(mapViewerState)
+  mapViewerStateRef.current = mapViewerState
+  useEffect(() => {
+    if (!mapViewerLoaded.current) return // Skip saving until initial load completes
+    useSessionStore.setState((state) => {
+      if (state.session) {
+        state.session.mapViewer = mapViewerState
+      }
+    })
+  }, [mapViewerState])
+
+  // Handle map viewer state changes and broadcast
+  const handleMapViewerChange = useCallback((newState: MapViewerState) => {
+    setMapViewerState(newState)
+    setTimeout(() => broadcastStateSyncRef.current(), 100)
+  }, [setMapViewerState])
+
+  const handleTokenMove = useCallback((_tokenId: string, _gridX: number, _gridY: number) => {
+    setTimeout(() => broadcastStateSyncRef.current(), 50)
+  }, [])
 
   // Loading while PeerJS starts
   if (session && !isReady) {
@@ -930,6 +1009,21 @@ function GMSessionPage() {
           }}
         />
       </div>
+
+      {/* Map Viewer */}
+      {campaignMaps.length > 0 && (
+        <div className="mt-6">
+          <GMMapViewer
+            campaignMaps={campaignMaps}
+            characters={session.characters}
+            monsters={session.activeMonsters}
+            lightState={session.light}
+            mapViewerState={mapViewerState}
+            onStateChange={handleMapViewerChange}
+            onTokenMove={handleTokenMove}
+          />
+        </div>
+      )}
 
       {/* Encounter Panel — shows when monsters are active */}
       {activeMonsters.length > 0 && (

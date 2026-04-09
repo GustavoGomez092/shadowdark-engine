@@ -20,6 +20,7 @@ import { getAbilityModifier } from '@/schemas/reference.ts'
 import type { Character } from '@/schemas/character.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import type { GMToPlayerMessage } from '@/schemas/messages.ts'
+import { PlayerMapViewer } from '@/components/map-viewer/player-map-viewer.tsx'
 
 export const Route = createFileRoute('/player/session')({
   component: PlayerSessionPage,
@@ -264,6 +265,17 @@ function PlayerSessionPage() {
           <div className="mb-4 rounded-lg bg-red-500/15 border border-red-500/30 p-3 text-center animate-pulse">
             <span className="text-sm font-bold text-red-400">🌑 {t('light.darknessWarning')}</span>
             <p className="text-xs text-red-400/70 mt-0.5">{t('light.darknessDescription')}</p>
+          </div>
+        )}
+
+        {/* Map Viewer — shown when GM has a map active */}
+        {state.mapView && (
+          <div className="mb-4">
+            <PlayerMapViewer
+              mapView={state.mapView}
+              lightState={state.light}
+              myCharacterId={state.myCharacter?.id}
+            />
           </div>
         )}
 

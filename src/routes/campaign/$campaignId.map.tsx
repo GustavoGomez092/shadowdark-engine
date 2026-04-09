@@ -128,7 +128,7 @@ function MapEditorPage() {
     const maps = campaign.maps
     if (maps.length > 0) {
       // Load the most recently updated map
-      const latest = [...maps].sort((a, b) => b.updatedAt - a.updatedAt)[0]
+      const latest = [...maps].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))[0]
       if (latest.dungeonData) {
         handleLoadMap(latest.id)
         return
@@ -417,7 +417,7 @@ function MapEditorPage() {
     }
     if (!appRef.current) return
 
-    setSeed(map.seed)
+    setSeed(map.seed ?? 0)
     appRef.current.loadFromSave(map.dungeonData)
     setCurrentMapId(map.id)
     setEditingTitle(appRef.current.dungeon?.story?.name || map.name)

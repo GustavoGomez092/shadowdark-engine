@@ -299,6 +299,9 @@ class DungeonRenderer {
     // Store rotation back to style so it persists
     style.rotation = rotation;
 
+    // Store layout for external consumers (token overlay, fog of war)
+    this._layout = layout;
+
     ctx.save();
     // Apply DPR scaling + the transform chain: dpr * translate -> scale -> rotate
     // Original OpenFL: translate(map.x, map.y) -> rotate(angle) -> scale(fitScale)

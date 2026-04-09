@@ -454,6 +454,7 @@ export const useSessionStore = create<SessionStore>()(
           const s = session.stores.find(st => st.isActive)!
           return { id: s.id, name: s.name, description: s.description, items: s.items }
         })() : undefined,
+        // mapView is injected by the GM session route from the map viewer store
       }
     },
 
