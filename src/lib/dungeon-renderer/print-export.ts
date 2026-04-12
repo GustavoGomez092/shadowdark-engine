@@ -41,13 +41,12 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
   // Pixels per grid square at target scale
   const pxPerSquare = gridScale * DPI
 
-  // Dungeon bounds — render at native cellSize, scale later
-  const cellSize = app.renderer.cellSize
-  const scaleFactor = pxPerSquare / cellSize
+  // Dungeon bounds — render at target resolution directly for crisp output
+  const origCellSize = app.renderer.cellSize
   const padding = 2
   const rect = app.dungeon.getRect()
-  const mapW = Math.ceil((rect.w + padding * 2) * cellSize)
-  const mapH = Math.ceil((rect.h + padding * 2) * cellSize)
+  const mapW = Math.ceil((rect.w + padding * 2) * pxPerSquare)
+  const mapH = Math.ceil((rect.h + padding * 2) * pxPerSquare)
 
   // Save style state
   const saved = {
@@ -73,7 +72,7 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
   styleObj.showNotes = false
   styleObj.showConnectors = false
 
-  // Render full map to offscreen canvas
+  // Render full map to offscreen canvas at target resolution
   const offscreen = document.createElement('canvas')
   offscreen.width = mapW
   offscreen.height = mapH
@@ -82,8 +81,12 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
   const origCtx = app.renderer.ctx
   app.renderer.canvas = offscreen
   app.renderer.ctx = offscreen.getContext('2d')!
+  app.renderer.cellSize = pxPerSquare
 
   app.renderer.render(app.dungeon, app.planner, app.flood)
+
+  // Restore renderer cellSize
+  app.renderer.cellSize = origCellSize
 
   // Crop to inked area — scan for non-white pixels
   const cropCtx = offscreen.getContext('2d')!
@@ -138,25 +141,14 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
   // Redraw original canvas
   app.draw()
 
-  // Scale cropped content to target resolution
-  const scaledW = Math.ceil(croppedW * scaleFactor)
-  const scaledH = Math.ceil(croppedH * scaleFactor)
-  const scaled = document.createElement('canvas')
-  scaled.width = scaledW
-  scaled.height = scaledH
-  const sCtx = scaled.getContext('2d')!
-  sCtx.imageSmoothingEnabled = true
-  sCtx.imageSmoothingQuality = 'high'
-  sCtx.drawImage(cropped, 0, 0, croppedW, croppedH, 0, 0, scaledW, scaledH)
-
   // Full page size in pixels (margin is visual, inside each tile)
   const fullPageWpx = Math.floor(paperW * DPI)
   const fullPageHpx = Math.floor(paperH * DPI)
   const marginPx = Math.floor(margin * DPI)
 
-  // Slice scaled map into page tiles
-  const cols = Math.max(1, Math.ceil(scaledW / printWpx))
-  const rows = Math.max(1, Math.ceil(scaledH / printHpx))
+  // Slice cropped map into page tiles (already at target resolution)
+  const cols = Math.max(1, Math.ceil(croppedW / printWpx))
+  const rows = Math.max(1, Math.ceil(croppedH / printHpx))
   const totalPages = cols * rows
 
   const tiles: string[] = []
@@ -164,8 +156,8 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
     for (let col = 0; col < cols; col++) {
       const sx = col * printWpx
       const sy = row * printHpx
-      const sw = Math.min(printWpx, scaledW - sx)
-      const sh = Math.min(printHpx, scaledH - sy)
+      const sw = Math.min(printWpx, croppedW - sx)
+      const sh = Math.min(printHpx, croppedH - sy)
 
       const tile = document.createElement('canvas')
       tile.width = fullPageWpx
@@ -173,8 +165,8 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
       const tCtx = tile.getContext('2d')!
       tCtx.fillStyle = '#FFFFFF'
       tCtx.fillRect(0, 0, fullPageWpx, fullPageHpx)
-      // Draw scaled map content inside margin area
-      tCtx.drawImage(scaled, sx, sy, sw, sh, marginPx, marginPx, sw, sh)
+      // Draw crisp map content inside margin area
+      tCtx.drawImage(cropped, sx, sy, sw, sh, marginPx, marginPx, sw, sh)
 
       // Crop/alignment marks at corners
       drawCropMarks(tCtx, fullPageWpx, fullPageHpx, row, col, rows, cols)
@@ -183,15 +175,15 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
     }
   }
 
-  // Generate assembly preview — small thumbnail of the scaled map
-  const previewScale = 220 / Math.max(scaledW, scaledH)
-  const previewW = Math.ceil(scaledW * previewScale)
-  const previewH = Math.ceil(scaledH * previewScale)
+  // Generate assembly preview — small thumbnail of the cropped map
+  const previewScale = 220 / Math.max(croppedW, croppedH)
+  const previewW = Math.ceil(croppedW * previewScale)
+  const previewH = Math.ceil(croppedH * previewScale)
   const previewCanvas = document.createElement('canvas')
   previewCanvas.width = previewW
   previewCanvas.height = previewH
   const pCtx = previewCanvas.getContext('2d')!
-  pCtx.drawImage(scaled, 0, 0, scaledW, scaledH, 0, 0, previewW, previewH)
+  pCtx.drawImage(cropped, 0, 0, croppedW, croppedH, 0, 0, previewW, previewH)
   const previewSrc = previewCanvas.toDataURL('image/png')
 
   // Page grid dimensions for preview
