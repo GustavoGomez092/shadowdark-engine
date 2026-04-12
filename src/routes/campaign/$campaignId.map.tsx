@@ -1070,11 +1070,11 @@ function MapEditorPage() {
 
             <div>
               <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Scale (inches per square): {printSettings.gridScale}"</label>
-              <input type="range" min={0.125} max={1.5} step={0.125} value={printSettings.gridScale}
+              <input type="range" min={0.125} max={2} step={0.125} value={printSettings.gridScale}
                 onChange={e => setPrintSettings(p => ({ ...p, gridScale: parseFloat(e.target.value) }))}
                 className="w-full accent-primary" />
               <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5">
-                <span>1/8"</span><span>1/4"</span><span>1/2"</span><span>1"</span><span>1.5"</span>
+                <span>1/8"</span><span>1/2"</span><span>1"</span><span>1.5"</span><span>2"</span>
               </div>
             </div>
 
