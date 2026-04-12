@@ -12,12 +12,17 @@
 // Helper: create a dungeon room for the snapshot format
 // ─────────────────────────────────────────────────────
 
+// Room constructor uses origin+axis+width+depth to compute x,y,w,h:
+//   axis DOWN (0,1):  x = originX - floor(width/2), y = originY, w = width, h = depth
+//   axis RIGHT (1,0): x = originX, y = originY - floor(width/2), w = depth, h = width
+// So we must set origin/axis/width/depth so the constructor reproduces our desired x,y,w,h.
+// Using axis DOWN: originX = x + floor(w/2), originY = y, width = w, depth = h.
 function makeRoom(index, x, y, w, h, noteSymb, noteText) {
   return {
     x, y, w, h,
-    originX: x + w / 2, originY: y + h / 2,
+    originX: x + Math.floor(w / 2), originY: y,
     axisX: 0, axisY: 1,
-    width: w, depth: h, mirror: false,
+    width: w, depth: h, mirror: 1,
     seed: index, round: false, columns: false, hidden: false,
     symm: 0, desc: null,
     enemy: null, loot: null, key: null, gate: null, event: null, enviro: null,
@@ -26,13 +31,12 @@ function makeRoom(index, x, y, w, h, noteSymb, noteText) {
   };
 }
 
-// Helper: create a corridor room (no note, no features)
 function makeCorridor(index, x, y, w, h) {
   return {
     x, y, w, h,
-    originX: x + w / 2, originY: y + h / 2,
+    originX: x + Math.floor(w / 2), originY: y,
     axisX: 0, axisY: 1,
-    width: w, depth: h, mirror: false,
+    width: w, depth: h, mirror: 1,
     seed: index, round: false, columns: false, hidden: false,
     symm: 0, desc: null,
     enemy: null, loot: null, key: null, gate: null, event: null, enviro: null,
