@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
-import type { Campaign } from '@/schemas/campaign.ts'
+import { parseCampaignFile } from '@/lib/campaign/import.ts'
 
 export const Route = createFileRoute('/campaign/')({
   component: CampaignListPage,
@@ -35,12 +35,16 @@ function CampaignListPage() {
     const reader = new FileReader()
     reader.onload = () => {
       try {
-        const data = JSON.parse(reader.result as string) as Campaign
-        if (!data.id || !data.name) throw new Error('Invalid campaign file')
-        importCampaign(data)
-        navigate({ to: '/campaign/$campaignId', params: { campaignId: data.id } })
+        const json = JSON.parse(reader.result as string)
+        const result = parseCampaignFile(json)
+        if (result.success) {
+          const id = importCampaign(result.campaign)
+          navigate({ to: '/campaign/$campaignId', params: { campaignId: id } })
+        } else {
+          setImportError(result.errors.join(', '))
+        }
       } catch (err) {
-        setImportError(err instanceof Error ? err.message : 'Failed to import campaign')
+        setImportError(err instanceof Error ? err.message : 'Failed to parse JSON file')
       }
     }
     reader.readAsText(file)
