@@ -36,6 +36,8 @@ function AdventureStructurePage() {
   if (!campaign) return null
 
   const adv = campaign.adventure
+  // Guard for campaigns saved before stores were added
+  if (!adv.stores) adv.stores = []
   const inputCls = "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
 
   function saveNPC(npc: AdventureNPC) {

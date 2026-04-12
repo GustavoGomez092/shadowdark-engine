@@ -117,6 +117,8 @@ export const useCampaignStore = create<CampaignStore>()(
     loadCampaign: (id) => {
       const campaign = loadFromStorage(id)
       if (!campaign) return false
+      // Backfill fields added after initial campaign creation
+      if (!campaign.adventure.stores) campaign.adventure.stores = []
       set(state => { state.campaign = campaign })
       return true
     },
@@ -218,12 +220,16 @@ export const useCampaignStore = create<CampaignStore>()(
     },
 
     addStore: (store) => {
-      set(state => { state.campaign?.adventure.stores.push(store) })
+      set(state => {
+        if (!state.campaign) return
+        if (!state.campaign.adventure.stores) state.campaign.adventure.stores = []
+        state.campaign.adventure.stores.push(store)
+      })
       const c = get().campaign; if (c) debouncedSave(c)
     },
     updateStore: (id, updater) => {
       set(state => {
-        const s = state.campaign?.adventure.stores.find(s => s.id === id)
+        const s = state.campaign?.adventure.stores?.find(s => s.id === id)
         if (s) updater(s)
       })
       const c = get().campaign; if (c) debouncedSave(c)
@@ -231,6 +237,7 @@ export const useCampaignStore = create<CampaignStore>()(
     removeStore: (id) => {
       set(state => {
         if (!state.campaign) return
+        if (!state.campaign.adventure.stores) return
         state.campaign.adventure.stores = state.campaign.adventure.stores.filter(s => s.id !== id)
       })
       const c = get().campaign; if (c) debouncedSave(c)
