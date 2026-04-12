@@ -26,50 +26,69 @@ function makeRoom(index, x, y, w, h, noteSymb, noteText) {
   };
 }
 
-// Helper: create a door between two rooms at a shared edge
+// Helper: create a corridor room (no note, no features)
+function makeCorridor(index, x, y, w, h) {
+  return {
+    x, y, w, h,
+    originX: x + w / 2, originY: y + h / 2,
+    axisX: 0, axisY: 1,
+    width: w, depth: h, mirror: false,
+    seed: index, round: false, columns: false, hidden: false,
+    symm: 0, desc: null,
+    enemy: null, loot: null, key: null, gate: null, event: null, enviro: null,
+    props: [],
+    note: null,
+  };
+}
+
+// Helper: create a door between two rooms at a shared edge.
+// Rooms MUST share exactly one wall (edge-to-edge) and overlap >= 3
+// on the perpendicular axis.
 function makeDoor(fromRoom, toRoom, fromIdx, toIdx, type = 0) {
-  // Find the midpoint of the shared edge between rooms
-  const f = { x1: fromRoom.x, y1: fromRoom.y, x2: fromRoom.x + fromRoom.w, y2: fromRoom.y + fromRoom.h };
-  const t = { x1: toRoom.x, y1: toRoom.y, x2: toRoom.x + toRoom.w, y2: toRoom.y + toRoom.h };
+  const fRight  = fromRoom.x + fromRoom.w;
+  const fBottom = fromRoom.y + fromRoom.h;
+  const tRight  = toRoom.x + toRoom.w;
+  const tBottom = toRoom.y + toRoom.h;
 
-  let doorX, doorY, dirX = null, dirY = null;
+  let doorX, doorY, dirX, dirY;
 
-  // Check if rooms share a vertical edge (left/right adjacency)
-  if (f.x2 <= t.x1 + 1 && f.x2 >= t.x1 - 1) {
-    // fromRoom is left of toRoom
-    doorX = Math.round((f.x2 + t.x1) / 2);
-    const overlapY1 = Math.max(f.y1, t.y1);
-    const overlapY2 = Math.min(f.y2, t.y2);
-    doorY = Math.round((overlapY1 + overlapY2) / 2);
+  if (fRight === toRoom.x) {
+    // fromRoom is left of toRoom  (vertical shared wall at x = fRight)
+    const overlapY1 = Math.max(fromRoom.y, toRoom.y);
+    const overlapY2 = Math.min(fBottom, tBottom);
+    doorX = fRight - 1;
+    doorY = Math.floor((overlapY1 + overlapY2) / 2);
     dirX = 1; dirY = 0;
-  } else if (t.x2 <= f.x1 + 1 && t.x2 >= f.x1 - 1) {
-    // toRoom is left of fromRoom
-    doorX = Math.round((t.x2 + f.x1) / 2);
-    const overlapY1 = Math.max(f.y1, t.y1);
-    const overlapY2 = Math.min(f.y2, t.y2);
-    doorY = Math.round((overlapY1 + overlapY2) / 2);
+  } else if (tRight === fromRoom.x) {
+    // toRoom is left of fromRoom  (vertical shared wall at x = tRight)
+    const overlapY1 = Math.max(fromRoom.y, toRoom.y);
+    const overlapY2 = Math.min(fBottom, tBottom);
+    doorX = tRight - 1;
+    doorY = Math.floor((overlapY1 + overlapY2) / 2);
     dirX = -1; dirY = 0;
-  } else if (f.y2 <= t.y1 + 1 && f.y2 >= t.y1 - 1) {
-    // fromRoom is above toRoom
-    doorY = Math.round((f.y2 + t.y1) / 2);
-    const overlapX1 = Math.max(f.x1, t.x1);
-    const overlapX2 = Math.min(f.x2, t.x2);
-    doorX = Math.round((overlapX1 + overlapX2) / 2);
+  } else if (fBottom === toRoom.y) {
+    // fromRoom is above toRoom  (horizontal shared wall at y = fBottom)
+    const overlapX1 = Math.max(fromRoom.x, toRoom.x);
+    const overlapX2 = Math.min(fRight, tRight);
+    doorX = Math.floor((overlapX1 + overlapX2) / 2);
+    doorY = fBottom - 1;
     dirX = 0; dirY = 1;
-  } else {
-    // toRoom is above fromRoom
-    doorY = Math.round((t.y2 + f.y1) / 2);
-    const overlapX1 = Math.max(f.x1, t.x1);
-    const overlapX2 = Math.min(f.x2, t.x2);
-    doorX = Math.round((overlapX1 + overlapX2) / 2);
+  } else if (tBottom === fromRoom.y) {
+    // toRoom is above fromRoom  (horizontal shared wall at y = tBottom)
+    const overlapX1 = Math.max(fromRoom.x, toRoom.x);
+    const overlapX2 = Math.min(fRight, tRight);
+    doorX = Math.floor((overlapX1 + overlapX2) / 2);
+    doorY = tBottom - 1;
     dirX = 0; dirY = -1;
+  } else {
+    throw new Error(
+      `Rooms ${fromIdx} and ${toIdx} do not share a wall edge. ` +
+      `from=(${fromRoom.x},${fromRoom.y},${fromRoom.w},${fromRoom.h}) ` +
+      `to=(${toRoom.x},${toRoom.y},${toRoom.w},${toRoom.h})`
+    );
   }
 
-  return {
-    x: doorX, y: doorY, type,
-    dirX, dirY,
-    fromIdx, toIdx,
-  };
+  return { x: doorX, y: doorY, type, dirX, dirY, fromIdx, toIdx };
 }
 
 // Helper: wrap rooms/doors/story into a full dungeonData object
@@ -101,31 +120,53 @@ function makeDungeonData(seed, rooms, doors, storyName, storyHook) {
 // ─────────────────────────────────────────────────────
 
 function generateMap1() {
-  // Room layout (grid coordinates):
-  //   Room 1 "Vestíbulo" at top center
-  //   Room 2 "La Nave Llorosa" below Room 1, large
-  //   Room 3 "Los Nichos de Huesos" west of Room 2
-  //   Room 4 "La Sacristía Derrumbada" east of Room 2
-  //   Room 5 "El Pozo de las Voces" below Room 2, large
-  //   Room 6 "El Pozo Sanguíneo" east of Room 5
-  //   Room 7 "El Pozo de Descenso" below Room 5
+  // Layout with corridor rooms bridging gaps between main rooms.
+  // All connected pairs share a wall edge and overlap >= 3 on the perp axis.
+  //
+  //   [0] Room 1 "Vestíbulo"          x:8  y:0  w:5  h:4
+  //        |
+  //   [1] Corridor C1                 x:9  y:4  w:3  h:3
+  //        |
+  //   [2] Room 2 "Nave Llorosa"       x:4  y:7  w:13 h:8
+  //    |              |              |
+  //   [3] Room 3     [5] C3        [4] Room 4
+  //   "Nichos"       south          "Sacristía"
+  //    x:0 y:7       x:9 y:15      x:17 y:7
+  //    w:4 h:8       w:3 h:3       w:6  h:6
+  //                   |
+  //   [6] Room 5 "Pozo Voces"        x:4  y:18 w:13 h:8
+  //    |                          |
+  //   [7] Corridor C4 (east)     [9] Corridor C5 (south)
+  //    x:17 y:21 w:3 h:3         x:9  y:26 w:3  h:3
+  //    |                          |
+  //   [8] Room 6 "Pozo Sangre"   [10] Room 7 "Descenso"
+  //    x:20 y:20 w:5 h:5          x:9  y:29 w:3  h:4
+
   const rooms = [
-    makeRoom(0, 12, 1, 6, 4, '1', 'Vestíbulo de la Puerta'),
-    makeRoom(1, 8, 6, 12, 8, '2', 'La Nave Llorosa'),
-    makeRoom(2, 1, 6, 7, 8, '3', 'Los Nichos de Huesos'),
-    makeRoom(3, 20, 6, 8, 6, '4', 'La Sacristía Derrumbada'),
-    makeRoom(4, 8, 15, 12, 8, '5', 'El Pozo de las Voces'),
-    makeRoom(5, 21, 15, 7, 8, '6', 'El Pozo Sanguíneo'),
-    makeRoom(6, 11, 24, 6, 5, '7', 'El Pozo de Descenso'),
+    /* 0  */ makeRoom(0,   8,  0,  5,  4, '1', 'Vestíbulo de la Puerta'),
+    /* 1  */ makeCorridor(1, 9,  4,  3,  3),
+    /* 2  */ makeRoom(2,   4,  7, 13,  8, '2', 'La Nave Llorosa'),
+    /* 3  */ makeRoom(3,   0,  7,  4,  8, '3', 'Los Nichos de Huesos'),
+    /* 4  */ makeRoom(4,  17,  7,  6,  6, '4', 'La Sacristía Derrumbada'),
+    /* 5  */ makeCorridor(5, 9, 15,  3,  3),
+    /* 6  */ makeRoom(6,   4, 18, 13,  8, '5', 'El Pozo de las Voces'),
+    /* 7  */ makeCorridor(7, 17, 21, 3,  3),
+    /* 8  */ makeRoom(8,  20, 20,  5,  5, '6', 'El Pozo Sanguíneo'),
+    /* 9  */ makeCorridor(9, 9, 26,  3,  3),
+    /* 10 */ makeRoom(10,  9, 29,  3,  4, '7', 'El Pozo de Descenso'),
   ];
 
   const doors = [
-    makeDoor(rooms[0], rooms[1], 0, 1, 0),  // Room 1 → Room 2 (normal)
-    makeDoor(rooms[1], rooms[2], 1, 2, 0),  // Room 2 → Room 3 (normal)
-    makeDoor(rooms[1], rooms[3], 1, 3, 0),  // Room 2 → Room 4 (normal)
-    makeDoor(rooms[1], rooms[4], 1, 4, 0),  // Room 2 → Room 5 (normal)
-    makeDoor(rooms[4], rooms[5], 4, 5, 0),  // Room 5 → Room 6 (normal)
-    makeDoor(rooms[4], rooms[6], 4, 6, 0),  // Room 5 → Room 7 (normal)
+    makeDoor(rooms[0],  rooms[1],   0,  1, 0),  // Room 1 → C1
+    makeDoor(rooms[1],  rooms[2],   1,  2, 0),  // C1 → Room 2
+    makeDoor(rooms[2],  rooms[3],   2,  3, 0),  // Room 2 → Room 3 (west)
+    makeDoor(rooms[2],  rooms[4],   2,  4, 0),  // Room 2 → Room 4 (east)
+    makeDoor(rooms[2],  rooms[5],   2,  5, 0),  // Room 2 → C3 (south)
+    makeDoor(rooms[5],  rooms[6],   5,  6, 0),  // C3 → Room 5
+    makeDoor(rooms[6],  rooms[7],   6,  7, 0),  // Room 5 → C4 (east)
+    makeDoor(rooms[7],  rooms[8],   7,  8, 0),  // C4 → Room 6
+    makeDoor(rooms[6],  rooms[9],   6,  9, 0),  // Room 5 → C5 (south)
+    makeDoor(rooms[9],  rooms[10],  9, 10, 0),  // C5 → Room 7
   ];
 
   const dungeonData = makeDungeonData(
@@ -156,28 +197,50 @@ function generateMap1() {
 // ─────────────────────────────────────────────────────
 
 function generateMap2() {
-  // Room layout:
-  //   Room 8 "La Galería Ahogada" at top (entry from above)
-  //   Room 9 "Las Bóvedas de Médula" below Room 8
-  //   Room 10 "El Hueco del Cirujano" east of Room 9
-  //   Room 11 "El Puente del Osario" below Room 9
-  //   Room 12 "La Antecámara Sellada" east of Room 11
-  //   Room 13 "El Trono de los Ecos" below Room 11, large boss room
+  // Layout with corridor rooms. Room 10 is taller (h:9) so it
+  // shares a wall with Room 12 at y=17.
+  //
+  //   [0] Room 8 "Galería Ahogada"   x:6  y:0  w:9  h:5
+  //        |
+  //   [1] Corridor C6                x:9  y:5  w:3  h:3
+  //        |
+  //   [2] Room 9 "Bóvedas"           x:4  y:8  w:11 h:6
+  //    |              |
+  //   [4] C7 south   [3] Room 10 "Cirujano"  x:15 y:8 w:7 h:9
+  //    x:9 y:14       |
+  //    w:3 h:3        | (secret door south at y=17)
+  //    |              |
+  //   [5] Room 11    [6] Room 12 "Antecámara" x:15 y:17 w:5 h:5
+  //   "Puente"            |
+  //    x:5 y:17      (secret door between 11↔12 at x=15)
+  //    w:10 h:5
+  //        |
+  //   [7] Corridor C8                x:9  y:22 w:3  h:3
+  //        |
+  //   [8] Room 13 "Trono"            x:3  y:25 w:15 h:8
+
   const rooms = [
-    makeRoom(0, 8, 1, 12, 6, '8', 'La Galería Ahogada'),
-    makeRoom(1, 8, 8, 12, 7, '9', 'Las Bóvedas de Médula'),
-    makeRoom(2, 20, 8, 8, 7, '10', 'El Hueco del Cirujano'),
-    makeRoom(3, 8, 16, 12, 7, '11', 'El Puente del Osario'),
-    makeRoom(4, 20, 17, 6, 5, '12', 'La Antecámara Sellada'),
-    makeRoom(5, 6, 24, 16, 8, '13', 'El Trono de los Ecos'),
+    /* 0 */ makeRoom(0,   6,  0,  9,  5, '8', 'La Galería Ahogada'),
+    /* 1 */ makeCorridor(1, 9,  5,  3,  3),
+    /* 2 */ makeRoom(2,   4,  8, 11,  6, '9', 'Las Bóvedas de Médula'),
+    /* 3 */ makeRoom(3,  15,  8,  7,  9, '10', 'El Hueco del Cirujano'),
+    /* 4 */ makeCorridor(4, 9, 14,  3,  3),
+    /* 5 */ makeRoom(5,   5, 17, 10,  5, '11', 'El Puente del Osario'),
+    /* 6 */ makeRoom(6,  15, 17,  5,  5, '12', 'La Antecámara Sellada'),
+    /* 7 */ makeCorridor(7, 9, 22,  3,  3),
+    /* 8 */ makeRoom(8,   3, 25, 15,  8, '13', 'El Trono de los Ecos'),
   ];
 
   const doors = [
-    makeDoor(rooms[0], rooms[1], 0, 1, 0),  // Room 8 → Room 9 (normal)
-    makeDoor(rooms[1], rooms[2], 1, 2, 0),  // Room 9 → Room 10 (normal)
-    makeDoor(rooms[2], rooms[3], 2, 3, 2),  // Room 10 → Room 11 (secret)
-    makeDoor(rooms[3], rooms[4], 3, 4, 2),  // Room 11 → Room 12 (secret)
-    makeDoor(rooms[3], rooms[5], 3, 5, 0),  // Room 11 → Room 13 (normal)
+    makeDoor(rooms[0], rooms[1], 0, 1, 0),  // Room 8 → C6
+    makeDoor(rooms[1], rooms[2], 1, 2, 0),  // C6 → Room 9
+    makeDoor(rooms[2], rooms[3], 2, 3, 0),  // Room 9 → Room 10 (east, normal)
+    makeDoor(rooms[2], rooms[4], 2, 4, 0),  // Room 9 → C7 (south)
+    makeDoor(rooms[4], rooms[5], 4, 5, 0),  // C7 → Room 11
+    makeDoor(rooms[3], rooms[6], 3, 6, 2),  // Room 10 → Room 12 (secret, south)
+    makeDoor(rooms[5], rooms[6], 5, 6, 2),  // Room 11 → Room 12 (secret, east)
+    makeDoor(rooms[5], rooms[7], 5, 7, 0),  // Room 11 → C8 (south)
+    makeDoor(rooms[7], rooms[8], 7, 8, 0),  // C8 → Room 13
   ];
 
   const dungeonData = makeDungeonData(
@@ -194,7 +257,7 @@ function generateMap2() {
     createdAt: Date.now(),
     updatedAt: Date.now(),
     width: 30,
-    height: 32,
+    height: 35,
     cellSize: 32,
     layers: [],
     labels: [],
@@ -208,28 +271,51 @@ function generateMap2() {
 // ─────────────────────────────────────────────────────
 
 function generateMap3() {
-  // Key city locations as rooms:
-  //   B: Sala del Prefecto (NW area)
-  //   C: Mercado Hueco de Quen (NE area)
-  //   D: Posada del Canal Negro (west, near canal)
-  //   E: Puesto de Guardia (east)
-  //   F: Torre de la Campana (center, tall)
-  //   I: Puerta del Belltallow (south, entry to dungeon)
+  // City map — buildings connected by road (corridor) rooms.
+  //
+  //   [0] Room B "Sala Prefecto"      x:5  y:0  w:5  h:4
+  //        |
+  //   [1] Road R1                     x:6  y:4  w:3  h:3
+  //        |
+  //   [2] Room D "Posada"             x:3  y:7  w:7  h:5
+  //    |                       |
+  //   [3] Road R2 (east)      [5] Road R3 (south)
+  //    x:10 y:9 w:3 h:3       x:6  y:12 w:3  h:3
+  //    |                       |
+  //   [4] Room C "Mercado"    [6] Room F "Torre"
+  //    x:13 y:7 w:6 h:5       x:5  y:15 w:5  h:5
+  //    |                       |
+  //   [7] Road R4 (south)     [9] Road R5 (south)
+  //    x:14 y:12 w:3 h:3      x:6  y:20 w:3  h:3
+  //    |                       |
+  //   [8] Room E "Guardia"    [10] Room I "Puerta"
+  //    x:13 y:15 w:6 h:4      x:5  y:23 w:6  h:4
+
   const rooms = [
-    makeRoom(0, 3, 2, 7, 5, 'B', 'Sala del Prefecto'),
-    makeRoom(1, 16, 2, 7, 5, 'C', 'Mercado Hueco de Quen'),
-    makeRoom(2, 2, 10, 6, 5, 'D', 'Posada del Canal Negro'),
-    makeRoom(3, 18, 10, 6, 4, 'E', 'Puesto de Guardia'),
-    makeRoom(4, 10, 8, 6, 6, 'F', 'Torre de la Campana'),
-    makeRoom(5, 9, 18, 8, 5, 'I', 'Puerta del Belltallow'),
+    /* 0  */ makeRoom(0,   5,  0,  5,  4, 'B', 'Sala del Prefecto'),
+    /* 1  */ makeCorridor(1, 6,  4,  3,  3),
+    /* 2  */ makeRoom(2,   3,  7,  7,  5, 'D', 'Posada del Canal Negro'),
+    /* 3  */ makeCorridor(3, 10, 9,  3,  3),
+    /* 4  */ makeRoom(4,  13,  7,  6,  5, 'C', 'Mercado Hueco de Quen'),
+    /* 5  */ makeCorridor(5, 6, 12,  3,  3),
+    /* 6  */ makeRoom(6,   5, 15,  5,  5, 'F', 'Torre de la Campana'),
+    /* 7  */ makeCorridor(7, 14, 12, 3,  3),
+    /* 8  */ makeRoom(8,  13, 15,  6,  4, 'E', 'Puesto de Guardia'),
+    /* 9  */ makeCorridor(9, 6, 20,  3,  3),
+    /* 10 */ makeRoom(10,  5, 23,  6,  4, 'I', 'Puerta del Belltallow'),
   ];
 
   const doors = [
-    makeDoor(rooms[0], rooms[4], 0, 4, 0),  // Prefecto → Torre (normal)
-    makeDoor(rooms[1], rooms[4], 1, 4, 0),  // Mercado → Torre (normal)
-    makeDoor(rooms[2], rooms[4], 2, 4, 0),  // Posada → Torre (normal)
-    makeDoor(rooms[3], rooms[4], 3, 4, 0),  // Guardia → Torre (normal)
-    makeDoor(rooms[4], rooms[5], 4, 5, 0),  // Torre → Puerta Belltallow (normal)
+    makeDoor(rooms[0],  rooms[1],   0,  1, 0),  // Prefecto → R1
+    makeDoor(rooms[1],  rooms[2],   1,  2, 0),  // R1 → Posada
+    makeDoor(rooms[2],  rooms[3],   2,  3, 0),  // Posada → R2 (east)
+    makeDoor(rooms[3],  rooms[4],   3,  4, 0),  // R2 → Mercado
+    makeDoor(rooms[2],  rooms[5],   2,  5, 0),  // Posada → R3 (south)
+    makeDoor(rooms[5],  rooms[6],   5,  6, 0),  // R3 → Torre
+    makeDoor(rooms[4],  rooms[7],   4,  7, 0),  // Mercado → R4 (south)
+    makeDoor(rooms[7],  rooms[8],   7,  8, 0),  // R4 → Guardia
+    makeDoor(rooms[6],  rooms[9],   6,  9, 0),  // Torre → R5 (south)
+    makeDoor(rooms[9],  rooms[10],  9, 10, 0),  // R5 → Puerta
   ];
 
   const dungeonData = makeDungeonData(
@@ -245,8 +331,8 @@ function generateMap3() {
     name: 'Ashenveil — Ciudad',
     createdAt: Date.now(),
     updatedAt: Date.now(),
-    width: 30,
-    height: 25,
+    width: 25,
+    height: 30,
     cellSize: 32,
     layers: [],
     labels: [],
