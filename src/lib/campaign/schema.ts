@@ -71,7 +71,7 @@ export const AdventureNPCSchema = z.object({
   role: z.string().default(''),
   description: z.string().default(''),
   personality: z.string().default(''),
-  stats: z.object({}).passthrough().optional(),
+  stats: monsterDefinitionSchema.partial().optional(),
   portraitPrompt: z.string().optional(),
 }).passthrough()
 
@@ -233,10 +233,10 @@ export const CampaignSchema = z.object({
 
 // ── Adventure Document ──
 
-export const AdventureDocumentSchema = z.object({
+export const AdventureDocumentSchema = CampaignSchema.extend({
   format: z.literal('shadowdark-adventure-v1'),
   exportedAt: z.number(),
-}).passthrough().and(CampaignSchema)
+})
 
 // ── Validation Functions ──
 
