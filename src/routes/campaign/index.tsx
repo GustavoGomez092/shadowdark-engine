@@ -131,12 +131,20 @@ function CampaignListPage() {
         {importError && (
           <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">{importError}</div>
         )}
-        <button
+        <div
           onClick={() => fileInputRef.current?.click()}
-          className="w-full rounded-xl border-2 border-dashed border-border py-8 text-center text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground transition"
+          onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('border-primary/60', 'text-foreground') }}
+          onDragLeave={e => { e.preventDefault(); e.currentTarget.classList.remove('border-primary/60', 'text-foreground') }}
+          onDrop={e => {
+            e.preventDefault()
+            e.currentTarget.classList.remove('border-primary/60', 'text-foreground')
+            const file = e.dataTransfer.files?.[0]
+            if (file) handleImport(file)
+          }}
+          className="w-full cursor-pointer rounded-xl border-2 border-dashed border-border py-8 text-center text-sm text-muted-foreground hover:border-primary/40 hover:text-foreground transition"
         >
           {t('campaign.importDescription')}
-        </button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
