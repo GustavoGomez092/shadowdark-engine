@@ -9,229 +9,132 @@
  */
 
 // ─────────────────────────────────────────────────────
-// Helper: generate map cells from room definitions
+// Helper: create a dungeon room for the snapshot format
 // ─────────────────────────────────────────────────────
 
-function generateCellsFromRooms(rooms, connections, mapWidth, mapHeight, defaultTerrain = 'stone_floor') {
-  // Build a 2D array of cell data
-  const grid = Array.from({ length: mapHeight }, (_, y) =>
-    Array.from({ length: mapWidth }, (_, x) => null)
-  );
+function makeRoom(index, x, y, w, h, noteSymb, noteText) {
+  return {
+    x, y, w, h,
+    originX: x + w / 2, originY: y + h / 2,
+    axisX: 0, axisY: 1,
+    width: w, depth: h, mirror: false,
+    seed: index, round: false, columns: false, hidden: false,
+    symm: 0, desc: null,
+    enemy: null, loot: null, key: null, gate: null, event: null, enviro: null,
+    props: [],
+    note: { px: x + w / 2, py: y + h / 2, symb: noteSymb, text: noteText },
+  };
+}
 
-  // Place rooms
-  for (const room of rooms) {
-    for (let y = room.y1; y <= room.y2; y++) {
-      for (let x = room.x1; x <= room.x2; x++) {
-        const terrain = room.terrainOverride
-          ? (room.terrainOverride(x, y) || defaultTerrain)
-          : defaultTerrain;
+// Helper: create a door between two rooms at a shared edge
+function makeDoor(fromRoom, toRoom, fromIdx, toIdx, type = 0) {
+  // Find the midpoint of the shared edge between rooms
+  const f = { x1: fromRoom.x, y1: fromRoom.y, x2: fromRoom.x + fromRoom.w, y2: fromRoom.y + fromRoom.h };
+  const t = { x1: toRoom.x, y1: toRoom.y, x2: toRoom.x + toRoom.w, y2: toRoom.y + toRoom.h };
 
-        const features = room.features
-          ? room.features.filter(f => f.x === x && f.y === y).map(f => {
-              const feat = { type: f.type };
-              if (f.direction) feat.direction = f.direction;
-              if (f.variant) feat.variant = f.variant;
-              return feat;
-            })
-          : [];
+  let doorX, doorY, dirX = null, dirY = null;
 
-        grid[y][x] = { terrain, features, roomId: room.id };
-      }
-    }
+  // Check if rooms share a vertical edge (left/right adjacency)
+  if (f.x2 <= t.x1 + 1 && f.x2 >= t.x1 - 1) {
+    // fromRoom is left of toRoom
+    doorX = Math.round((f.x2 + t.x1) / 2);
+    const overlapY1 = Math.max(f.y1, t.y1);
+    const overlapY2 = Math.min(f.y2, t.y2);
+    doorY = Math.round((overlapY1 + overlapY2) / 2);
+    dirX = 1; dirY = 0;
+  } else if (t.x2 <= f.x1 + 1 && t.x2 >= f.x1 - 1) {
+    // toRoom is left of fromRoom
+    doorX = Math.round((t.x2 + f.x1) / 2);
+    const overlapY1 = Math.max(f.y1, t.y1);
+    const overlapY2 = Math.min(f.y2, t.y2);
+    doorY = Math.round((overlapY1 + overlapY2) / 2);
+    dirX = -1; dirY = 0;
+  } else if (f.y2 <= t.y1 + 1 && f.y2 >= t.y1 - 1) {
+    // fromRoom is above toRoom
+    doorY = Math.round((f.y2 + t.y1) / 2);
+    const overlapX1 = Math.max(f.x1, t.x1);
+    const overlapX2 = Math.min(f.x2, t.x2);
+    doorX = Math.round((overlapX1 + overlapX2) / 2);
+    dirX = 0; dirY = 1;
+  } else {
+    // toRoom is above fromRoom
+    doorY = Math.round((t.y2 + f.y1) / 2);
+    const overlapX1 = Math.max(f.x1, t.x1);
+    const overlapX2 = Math.min(f.x2, t.x2);
+    doorX = Math.round((overlapX1 + overlapX2) / 2);
+    dirX = 0; dirY = -1;
   }
 
-  // Place corridors (simple rectangular corridors)
-  for (const conn of connections) {
-    for (let y = conn.y1; y <= conn.y2; y++) {
-      for (let x = conn.x1; x <= conn.x2; x++) {
-        if (!grid[y][x]) {
-          const terrain = conn.terrain || defaultTerrain;
-          grid[y][x] = { terrain, features: [], roomId: conn.id || 'corridor' };
-        }
-      }
-    }
-  }
+  return {
+    x: doorX, y: doorY, type,
+    dirX, dirY,
+    fromIdx, toIdx,
+  };
+}
 
-  // Now generate MapCell objects with walls
-  const cells = [];
-  for (let y = 0; y < mapHeight; y++) {
-    for (let x = 0; x < mapWidth; x++) {
-      const cell = grid[y][x];
-      if (!cell) continue;
-
-      // Check neighbors to determine walls
-      const northNeighbor = y > 0 ? grid[y - 1][x] : null;
-      const southNeighbor = y < mapHeight - 1 ? grid[y + 1][x] : null;
-      const eastNeighbor = x < mapWidth - 1 ? grid[y][x + 1] : null;
-      const westNeighbor = x > 0 ? grid[y][x - 1] : null;
-
-      const walls = {
-        north: northNeighbor ? 'none' : 'wall',
-        east: eastNeighbor ? 'none' : 'wall',
-        south: southNeighbor ? 'none' : 'wall',
-        west: westNeighbor ? 'none' : 'wall',
-      };
-
-      cells.push({
-        x,
-        y,
-        terrain: cell.terrain,
-        walls,
-        features: cell.features,
-      });
-    }
-  }
-
-  // Apply door/secret_door overrides from connections
-  for (const conn of connections) {
-    if (conn.doors) {
-      for (const door of conn.doors) {
-        const cell = cells.find(c => c.x === door.x && c.y === door.y);
-        if (cell) {
-          cell.walls[door.side] = door.type;
-        }
-        // Also set the corresponding wall on the neighbor
-        const neighborMap = {
-          north: { dx: 0, dy: -1, opposite: 'south' },
-          south: { dx: 0, dy: 1, opposite: 'north' },
-          east: { dx: 1, dy: 0, opposite: 'west' },
-          west: { dx: -1, dy: 0, opposite: 'east' },
-        };
-        const n = neighborMap[door.side];
-        const neighbor = cells.find(c => c.x === door.x + n.dx && c.y === door.y + n.dy);
-        if (neighbor) {
-          neighbor.walls[n.opposite] = door.type;
-        }
-      }
-    }
-  }
-
-  return cells;
+// Helper: wrap rooms/doors/story into a full dungeonData object
+function makeDungeonData(seed, rooms, doors, storyName, storyHook) {
+  return {
+    seed,
+    _snapshot: {
+      rooms,
+      doors,
+      story: { name: storyName, hook: storyHook },
+    },
+    editorState: {
+      noteOverrides: {},
+      rotation: 0,
+      palette: 'default',
+      showGrid: true,
+      showWater: true,
+      showProps: true,
+      showNotes: true,
+      showSecrets: false,
+      showTitle: true,
+      bw: false,
+    },
+  };
 }
 
 // ─────────────────────────────────────────────────────
-// MAP 1: El Hueco de la Campana (Ruinas Superiores) — 30x35
+// MAP 1: El Hueco de la Campana (Ruinas Superiores)
 // ─────────────────────────────────────────────────────
 
 function generateMap1() {
+  // Room layout (grid coordinates):
+  //   Room 1 "Vestíbulo" at top center
+  //   Room 2 "La Nave Llorosa" below Room 1, large
+  //   Room 3 "Los Nichos de Huesos" west of Room 2
+  //   Room 4 "La Sacristía Derrumbada" east of Room 2
+  //   Room 5 "El Pozo de las Voces" below Room 2, large
+  //   Room 6 "El Pozo Sanguíneo" east of Room 5
+  //   Room 7 "El Pozo de Descenso" below Room 5
   const rooms = [
-    // Room 1: Vestíbulo de la Puerta (x:12-17, y:1-4)
-    {
-      id: 'room-1', x1: 12, y1: 1, x2: 17, y2: 4,
-      features: [
-        { x: 14, y: 1, type: 'entry', variant: 'puerta principal' },
-      ],
-    },
-    // Room 2: La Nave Llorosa (x:8-19, y:6-13)
-    {
-      id: 'room-2', x1: 8, y1: 6, x2: 19, y2: 13,
-      features: [
-        { x: 10, y: 8, type: 'furniture', variant: 'banco de piedra' },
-        { x: 10, y: 10, type: 'furniture', variant: 'banco de piedra' },
-        { x: 10, y: 12, type: 'furniture', variant: 'banco de piedra' },
-        { x: 17, y: 8, type: 'furniture', variant: 'banco de piedra' },
-        { x: 17, y: 10, type: 'furniture', variant: 'banco de piedra' },
-        { x: 17, y: 12, type: 'furniture', variant: 'banco de piedra' },
-      ],
-    },
-    // Room 3: Los Nichos de Huesos (x:1-7, y:6-13)
-    {
-      id: 'room-3', x1: 1, y1: 6, x2: 7, y2: 13,
-      features: [
-        { x: 3, y: 9, type: 'trap', variant: 'baldosa con trampa' },
-        { x: 2, y: 7, type: 'furniture', variant: 'nicho de huesos' },
-        { x: 2, y: 11, type: 'furniture', variant: 'nicho de huesos' },
-        { x: 5, y: 7, type: 'furniture', variant: 'nicho de huesos' },
-        { x: 5, y: 11, type: 'furniture', variant: 'nicho de huesos' },
-      ],
-    },
-    // Room 4: La Sacristía Derrumbada (x:20-27, y:6-11)
-    {
-      id: 'room-4', x1: 20, y1: 6, x2: 27, y2: 11,
-      terrainOverride: (x, _y) => x >= 24 ? 'cave_floor' : 'stone_floor',
-      features: [
-        { x: 22, y: 8, type: 'furniture', variant: 'armario roto' },
-        { x: 25, y: 9, type: 'furniture', variant: 'escombros' },
-      ],
-    },
-    // Room 5: El Pozo de las Voces (x:8-19, y:15-22)
-    {
-      id: 'room-5', x1: 8, y1: 15, x2: 19, y2: 22,
-      terrainOverride: (x, y) => {
-        if (x >= 12 && x <= 15 && y >= 17 && y <= 20) return 'deep_water';
-        return 'stone_floor';
-      },
-      features: [
-        { x: 12, y: 17, type: 'stairs', direction: 'down', variant: 'escaleras al pozo' },
-      ],
-    },
-    // Room 6: El Pozo Sanguíneo (x:21-27, y:15-22)
-    {
-      id: 'room-6', x1: 21, y1: 15, x2: 27, y2: 22,
-      terrainOverride: (x, y) => {
-        if (x >= 23 && x <= 25 && y >= 17 && y <= 19) return 'water';
-        return 'stone_floor';
-      },
-      features: [
-        { x: 24, y: 18, type: 'furniture', variant: 'pozo de sangre' },
-      ],
-    },
-    // Room 7: El Pozo de Descenso (x:11-16, y:24-28)
-    {
-      id: 'room-7', x1: 11, y1: 24, x2: 16, y2: 28,
-      features: [
-        { x: 13, y: 26, type: 'stairs', direction: 'down', variant: 'escaleras al nivel inferior' },
-        { x: 14, y: 26, type: 'stairs', direction: 'down', variant: 'escaleras al nivel inferior' },
-      ],
-    },
+    makeRoom(0, 12, 1, 6, 4, '1', 'Vestíbulo de la Puerta'),
+    makeRoom(1, 8, 6, 12, 8, '2', 'La Nave Llorosa'),
+    makeRoom(2, 1, 6, 7, 8, '3', 'Los Nichos de Huesos'),
+    makeRoom(3, 20, 6, 8, 6, '4', 'La Sacristía Derrumbada'),
+    makeRoom(4, 8, 15, 12, 8, '5', 'El Pozo de las Voces'),
+    makeRoom(5, 21, 15, 7, 8, '6', 'El Pozo Sanguíneo'),
+    makeRoom(6, 11, 24, 6, 5, '7', 'El Pozo de Descenso'),
   ];
 
-  const connections = [
-    // Corridor Room 1 → Room 2
-    { id: 'corr-1-2', x1: 14, y1: 4, x2: 15, y2: 6 },
-    // Corridor Room 2 → Room 3 (west door)
-    {
-      id: 'corr-2-3', x1: 7, y1: 9, x2: 8, y2: 10,
-      doors: [
-        { x: 8, y: 9, side: 'west', type: 'door' },
-        { x: 8, y: 10, side: 'west', type: 'door' },
-      ],
-    },
-    // Corridor Room 2 → Room 4 (east door)
-    {
-      id: 'corr-2-4', x1: 19, y1: 8, x2: 20, y2: 9,
-      doors: [
-        { x: 19, y: 8, side: 'east', type: 'door' },
-        { x: 19, y: 9, side: 'east', type: 'door' },
-      ],
-    },
-    // Corridor Room 2 → Room 5 (south)
-    { id: 'corr-2-5', x1: 13, y1: 13, x2: 14, y2: 15 },
-    // Corridor Room 5 → Room 6 (east)
-    {
-      id: 'corr-5-6', x1: 19, y1: 18, x2: 21, y2: 19,
-    },
-    // Corridor Room 5 → Room 7 (south)
-    { id: 'corr-5-7', x1: 13, y1: 22, x2: 14, y2: 24 },
+  const doors = [
+    makeDoor(rooms[0], rooms[1], 0, 1, 0),  // Room 1 → Room 2 (normal)
+    makeDoor(rooms[1], rooms[2], 1, 2, 0),  // Room 2 → Room 3 (normal)
+    makeDoor(rooms[1], rooms[3], 1, 3, 0),  // Room 2 → Room 4 (normal)
+    makeDoor(rooms[1], rooms[4], 1, 4, 0),  // Room 2 → Room 5 (normal)
+    makeDoor(rooms[4], rooms[5], 4, 5, 0),  // Room 5 → Room 6 (normal)
+    makeDoor(rooms[4], rooms[6], 4, 6, 0),  // Room 5 → Room 7 (normal)
   ];
 
-  const cells = generateCellsFromRooms(rooms, connections, 30, 35);
-
-  // Markers for room numbers
-  const markers = [
-    { id: 'mk-1', x: 14, y: 2, type: 'room_number', label: '1' },
-    { id: 'mk-2', x: 13, y: 9, type: 'room_number', label: '2' },
-    { id: 'mk-3', x: 4, y: 9, type: 'room_number', label: '3' },
-    { id: 'mk-4', x: 23, y: 8, type: 'room_number', label: '4' },
-    { id: 'mk-5', x: 13, y: 18, type: 'room_number', label: '5' },
-    { id: 'mk-6', x: 24, y: 18, type: 'room_number', label: '6' },
-    { id: 'mk-7', x: 13, y: 26, type: 'room_number', label: '7' },
-    { id: 'mk-trap-3', x: 3, y: 9, type: 'trap', label: 'Trampa de baldosa' },
-  ];
-
-  const labels = [
-    { id: 'lbl-map1-title', x: 15, y: 0, text: 'El Hueco de la Campana', fontSize: 14, color: '#cccccc' },
-  ];
+  const dungeonData = makeDungeonData(
+    42001,
+    rooms,
+    doors,
+    'El Hueco de la Campana — Ruinas Superiores',
+    'El nivel superior de las ruinas bajo Ashenveil. Un antiguo monasterio convertido en guarida de aberraciones no-muertas.',
+  );
 
   return {
     id: 'map-1',
@@ -241,142 +144,49 @@ function generateMap1() {
     width: 30,
     height: 35,
     cellSize: 32,
-    layers: [
-      {
-        id: 'layer-map1-main',
-        name: 'Principal',
-        visible: true,
-        locked: false,
-        cells,
-      },
-    ],
-    labels,
-    markers,
+    layers: [],
+    labels: [],
+    markers: [],
+    dungeonData,
   };
 }
 
 // ─────────────────────────────────────────────────────
-// MAP 2: Las Criptas Hundidas (Nivel Inferior) — 30x32
+// MAP 2: Las Criptas Hundidas (Nivel Inferior)
 // ─────────────────────────────────────────────────────
 
 function generateMap2() {
+  // Room layout:
+  //   Room 8 "La Galería Ahogada" at top (entry from above)
+  //   Room 9 "Las Bóvedas de Médula" below Room 8
+  //   Room 10 "El Hueco del Cirujano" east of Room 9
+  //   Room 11 "El Puente del Osario" below Room 9
+  //   Room 12 "La Antecámara Sellada" east of Room 11
+  //   Room 13 "El Trono de los Ecos" below Room 11, large boss room
   const rooms = [
-    // Room 8: La Galería Ahogada (x:8-19, y:1-6) — ALL water
-    {
-      id: 'room-8', x1: 8, y1: 1, x2: 19, y2: 6,
-      terrainOverride: () => 'water',
-      features: [
-        { x: 10, y: 2, type: 'furniture', variant: 'columna sumergida' },
-        { x: 14, y: 2, type: 'furniture', variant: 'columna sumergida' },
-        { x: 17, y: 2, type: 'furniture', variant: 'columna sumergida' },
-        { x: 10, y: 5, type: 'furniture', variant: 'columna sumergida' },
-        { x: 14, y: 5, type: 'furniture', variant: 'columna sumergida' },
-        { x: 17, y: 5, type: 'furniture', variant: 'columna sumergida' },
-        { x: 13, y: 1, type: 'stairs', direction: 'up', variant: 'escaleras al nivel superior' },
-      ],
-    },
-    // Room 9: Las Bóvedas de Médula (x:8-19, y:8-14)
-    {
-      id: 'room-9', x1: 8, y1: 8, x2: 19, y2: 14,
-      features: [
-        { x: 10, y: 10, type: 'furniture', variant: 'sarcófago' },
-        { x: 14, y: 10, type: 'furniture', variant: 'sarcófago' },
-        { x: 17, y: 10, type: 'furniture', variant: 'sarcófago' },
-        { x: 10, y: 12, type: 'furniture', variant: 'sarcófago' },
-        { x: 14, y: 12, type: 'furniture', variant: 'sarcófago' },
-        { x: 17, y: 12, type: 'furniture', variant: 'sarcófago' },
-        { x: 13, y: 14, type: 'trap', variant: 'trampa de glifo' },
-      ],
-    },
-    // Room 10: El Hueco del Cirujano (x:20-27, y:8-14)
-    {
-      id: 'room-10', x1: 20, y1: 8, x2: 27, y2: 14,
-      features: [
-        { x: 23, y: 10, type: 'furniture', variant: 'mesa de operaciones' },
-        { x: 25, y: 9, type: 'furniture', variant: 'estantería de frascos' },
-        { x: 21, y: 12, type: 'furniture', variant: 'jaula' },
-      ],
-    },
-    // Room 11: El Puente del Osario (x:8-19, y:16-22)
-    {
-      id: 'room-11', x1: 8, y1: 16, x2: 19, y2: 22,
-      terrainOverride: (x, y) => {
-        if (y >= 17 && y <= 21) {
-          if (x >= 12 && x <= 15) return 'stone_floor'; // bridge
-          if ((x >= 8 && x <= 11) || (x >= 16 && x <= 19)) return 'void'; // chasm
-        }
-        return 'stone_floor'; // edges at y:16 and y:22
-      },
-    },
-    // Room 12: La Antecámara Sellada (x:20-25, y:17-21)
-    {
-      id: 'room-12', x1: 20, y1: 17, x2: 25, y2: 21,
-      features: [
-        { x: 22, y: 19, type: 'furniture', variant: 'altar sellado' },
-      ],
-    },
-    // Room 13: El Trono de los Ecos (x:6-21, y:24-32) — NOTE: y max is 31 for 0-indexed height 32
-    {
-      id: 'room-13', x1: 6, y1: 24, x2: 21, y2: 31,
-      features: [
-        { x: 13, y: 30, type: 'furniture', variant: 'trono de piedra' },
-        { x: 14, y: 30, type: 'furniture', variant: 'trono de piedra' },
-        { x: 8, y: 29, type: 'furniture', variant: 'sarcófago de Sera' },
-        { x: 9, y: 29, type: 'furniture', variant: 'sarcófago de Sera' },
-        { x: 18, y: 29, type: 'furniture', variant: 'sarcófago antiguo' },
-        { x: 19, y: 29, type: 'furniture', variant: 'sarcófago antiguo' },
-      ],
-    },
+    makeRoom(0, 8, 1, 12, 6, '8', 'La Galería Ahogada'),
+    makeRoom(1, 8, 8, 12, 7, '9', 'Las Bóvedas de Médula'),
+    makeRoom(2, 20, 8, 8, 7, '10', 'El Hueco del Cirujano'),
+    makeRoom(3, 8, 16, 12, 7, '11', 'El Puente del Osario'),
+    makeRoom(4, 20, 17, 6, 5, '12', 'La Antecámara Sellada'),
+    makeRoom(5, 6, 24, 16, 8, '13', 'El Trono de los Ecos'),
   ];
 
-  const connections = [
-    // Corridor Room 8 → Room 9
-    { id: 'corr-8-9', x1: 13, y1: 6, x2: 14, y2: 8 },
-    // Corridor Room 9 → Room 10 (east, door)
-    {
-      id: 'corr-9-10', x1: 19, y1: 10, x2: 20, y2: 11,
-      doors: [
-        { x: 19, y: 10, side: 'east', type: 'door' },
-        { x: 19, y: 11, side: 'east', type: 'door' },
-      ],
-    },
-    // Secret door Room 10 → Room 11 (at x:24, y:14 south)
-    {
-      id: 'corr-10-11-secret', x1: 24, y1: 14, x2: 24, y2: 16,
-      terrain: 'stone_floor',
-      doors: [
-        { x: 24, y: 14, side: 'south', type: 'secret_door' },
-      ],
-    },
-    // Secret door Room 11 → Room 12 (at x:19, y:19 east)
-    {
-      id: 'corr-11-12-secret', x1: 19, y1: 19, x2: 20, y2: 19,
-      doors: [
-        { x: 19, y: 19, side: 'east', type: 'secret_door' },
-      ],
-    },
-    // Corridor Room 11 → Room 13 (south)
-    { id: 'corr-11-13', x1: 13, y1: 22, x2: 14, y2: 24 },
+  const doors = [
+    makeDoor(rooms[0], rooms[1], 0, 1, 0),  // Room 8 → Room 9 (normal)
+    makeDoor(rooms[1], rooms[2], 1, 2, 0),  // Room 9 → Room 10 (normal)
+    makeDoor(rooms[2], rooms[3], 2, 3, 2),  // Room 10 → Room 11 (secret)
+    makeDoor(rooms[3], rooms[4], 3, 4, 2),  // Room 11 → Room 12 (secret)
+    makeDoor(rooms[3], rooms[5], 3, 5, 0),  // Room 11 → Room 13 (normal)
   ];
 
-  const cells = generateCellsFromRooms(rooms, connections, 30, 32);
-
-  const markers = [
-    { id: 'mk-8', x: 13, y: 3, type: 'room_number', label: '8' },
-    { id: 'mk-9', x: 13, y: 11, type: 'room_number', label: '9' },
-    { id: 'mk-10', x: 23, y: 11, type: 'room_number', label: '10' },
-    { id: 'mk-11', x: 13, y: 19, type: 'room_number', label: '11' },
-    { id: 'mk-12', x: 22, y: 19, type: 'room_number', label: '12' },
-    { id: 'mk-13', x: 13, y: 28, type: 'room_number', label: '13' },
-    { id: 'mk-npc-mira', x: 21, y: 12, type: 'npc', label: 'Mira Soln' },
-    { id: 'mk-npc-kaelith', x: 25, y: 12, type: 'npc', label: 'Kaelith' },
-    { id: 'mk-boss', x: 13, y: 30, type: 'monster', label: 'Aldric Voss' },
-    { id: 'mk-trap-9', x: 13, y: 14, type: 'trap', label: 'Glifo de trampa' },
-  ];
-
-  const labels = [
-    { id: 'lbl-map2-title', x: 15, y: 0, text: 'Las Criptas Hundidas', fontSize: 14, color: '#cccccc' },
-  ];
+  const dungeonData = makeDungeonData(
+    42002,
+    rooms,
+    doors,
+    'Las Criptas Hundidas — Nivel Inferior',
+    'El nivel profundo de las criptas. Aquí Aldric Voss realiza sus rituales de Vaciado en busca de devolver la vida a su hija Sera.',
+  );
 
   return {
     id: 'map-2',
@@ -386,104 +196,49 @@ function generateMap2() {
     width: 30,
     height: 32,
     cellSize: 32,
-    layers: [
-      {
-        id: 'layer-map2-main',
-        name: 'Principal',
-        visible: true,
-        locked: false,
-        cells,
-      },
-    ],
-    labels,
-    markers,
+    layers: [],
+    labels: [],
+    markers: [],
+    dungeonData,
   };
 }
 
 // ─────────────────────────────────────────────────────
-// MAP 3: Ashenveil — Ciudad (30x25, outdoor)
+// MAP 3: Ashenveil — Ciudad
 // ─────────────────────────────────────────────────────
 
 function generateMap3() {
-  const cells = [];
-
-  // Fill the whole map with grass as base
-  for (let y = 0; y < 25; y++) {
-    for (let x = 0; x < 30; x++) {
-      let terrain = 'grass';
-
-      // Main streets (cobblestone)
-      // Horizontal main street: y:12-13
-      if (y >= 12 && y <= 13) terrain = 'cobblestone';
-      // Vertical main street: x:14-15
-      if (x >= 14 && x <= 15) terrain = 'cobblestone';
-      // Secondary street: y:6-7
-      if (y >= 6 && y <= 7 && x >= 4 && x <= 25) terrain = 'cobblestone';
-      // Secondary street: y:18-19
-      if (y >= 18 && y <= 19 && x >= 4 && x <= 25) terrain = 'cobblestone';
-      // Side street: x:6-7
-      if (x >= 6 && x <= 7 && y >= 4 && y <= 20) terrain = 'cobblestone';
-      // Side street: x:22-23
-      if (x >= 22 && x <= 23 && y >= 4 && y <= 20) terrain = 'cobblestone';
-
-      // Canal: x:0-3, y:0-24 (water)
-      if (x >= 0 && x <= 3) terrain = 'water';
-
-      // Buildings (stone_floor blocks)
-      // Building B: Taberna La Campana Hueca (x:8-12, y:8-11)
-      if (x >= 8 && x <= 12 && y >= 8 && y <= 11) terrain = 'stone_floor';
-      // Building C: Templo Abandonado (x:16-20, y:8-11)
-      if (x >= 16 && x <= 20 && y >= 8 && y <= 11) terrain = 'stone_floor';
-      // Building D: Mercado de Quen (x:8-12, y:14-17)
-      if (x >= 8 && x <= 12 && y >= 14 && y <= 17) terrain = 'stone_floor';
-      // Building E: Casa del Prefecto (x:16-20, y:14-17)
-      if (x >= 16 && x <= 20 && y >= 14 && y <= 17) terrain = 'stone_floor';
-      // Building F: Entrada a las Ruinas (x:24-27, y:10-13)
-      if (x >= 24 && x <= 27 && y >= 10 && y <= 13) terrain = 'stone_floor';
-      // Building G: Cementerio (x:24-28, y:2-5)
-      if (x >= 24 && x <= 28 && y >= 2 && y <= 5) terrain = 'dirt';
-      // Building H: Cuarteles (x:8-12, y:2-5)
-      if (x >= 8 && x <= 12 && y >= 2 && y <= 5) terrain = 'stone_floor';
-      // Building I: Casas de Vecinos (x:16-20, y:2-5)
-      if (x >= 16 && x <= 20 && y >= 2 && y <= 5) terrain = 'stone_floor';
-      // Building J: Almacén (x:8-12, y:20-23)
-      if (x >= 8 && x <= 12 && y >= 20 && y <= 23) terrain = 'stone_floor';
-      // Building K: Pozo Público (x:14-15, y:18-19)
-      // Already on cobblestone street
-      // Building L: Muelles (x:4-5, y:8-16)
-      if (x >= 4 && x <= 5 && y >= 8 && y <= 16) terrain = 'wooden_floor';
-      // Building M: Biblioteca Ruinosa (x:16-20, y:20-23)
-      if (x >= 16 && x <= 20 && y >= 20 && y <= 23) terrain = 'stone_floor';
-
-      cells.push({
-        x,
-        y,
-        terrain,
-        walls: { north: 'none', east: 'none', south: 'none', west: 'none' },
-        features: [],
-      });
-    }
-  }
-
-  const markers = [
-    { id: 'mk-city-b', x: 10, y: 9, type: 'note', label: 'B: Taberna La Campana Hueca' },
-    { id: 'mk-city-c', x: 18, y: 9, type: 'note', label: 'C: Templo Abandonado' },
-    { id: 'mk-city-d', x: 10, y: 15, type: 'npc', label: 'D: Mercado de Quen' },
-    { id: 'mk-city-e', x: 18, y: 15, type: 'npc', label: 'E: Casa del Prefecto' },
-    { id: 'mk-city-f', x: 25, y: 11, type: 'note', label: 'F: Entrada a las Ruinas' },
-    { id: 'mk-city-g', x: 26, y: 3, type: 'note', label: 'G: Cementerio' },
-    { id: 'mk-city-h', x: 10, y: 3, type: 'note', label: 'H: Cuarteles' },
-    { id: 'mk-city-i', x: 18, y: 3, type: 'note', label: 'I: Casas de Vecinos' },
-    { id: 'mk-city-j', x: 10, y: 21, type: 'note', label: 'J: Almacén' },
-    { id: 'mk-city-k', x: 14, y: 18, type: 'note', label: 'K: Pozo Público' },
-    { id: 'mk-city-l', x: 4, y: 12, type: 'note', label: 'L: Muelles' },
-    { id: 'mk-city-m', x: 18, y: 21, type: 'note', label: 'M: Biblioteca Ruinosa' },
+  // Key city locations as rooms:
+  //   B: Sala del Prefecto (NW area)
+  //   C: Mercado Hueco de Quen (NE area)
+  //   D: Posada del Canal Negro (west, near canal)
+  //   E: Puesto de Guardia (east)
+  //   F: Torre de la Campana (center, tall)
+  //   I: Puerta del Belltallow (south, entry to dungeon)
+  const rooms = [
+    makeRoom(0, 3, 2, 7, 5, 'B', 'Sala del Prefecto'),
+    makeRoom(1, 16, 2, 7, 5, 'C', 'Mercado Hueco de Quen'),
+    makeRoom(2, 2, 10, 6, 5, 'D', 'Posada del Canal Negro'),
+    makeRoom(3, 18, 10, 6, 4, 'E', 'Puesto de Guardia'),
+    makeRoom(4, 10, 8, 6, 6, 'F', 'Torre de la Campana'),
+    makeRoom(5, 9, 18, 8, 5, 'I', 'Puerta del Belltallow'),
   ];
 
-  const labels = [
-    { id: 'lbl-map3-title', x: 15, y: 0, text: 'Ashenveil', fontSize: 16, color: '#ffffff' },
-    { id: 'lbl-canal', x: 1, y: 12, text: 'Canal', fontSize: 10, color: '#4488ff' },
+  const doors = [
+    makeDoor(rooms[0], rooms[4], 0, 4, 0),  // Prefecto → Torre (normal)
+    makeDoor(rooms[1], rooms[4], 1, 4, 0),  // Mercado → Torre (normal)
+    makeDoor(rooms[2], rooms[4], 2, 4, 0),  // Posada → Torre (normal)
+    makeDoor(rooms[3], rooms[4], 3, 4, 0),  // Guardia → Torre (normal)
+    makeDoor(rooms[4], rooms[5], 4, 5, 0),  // Torre → Puerta Belltallow (normal)
   ];
+
+  const dungeonData = makeDungeonData(
+    42003,
+    rooms,
+    doors,
+    'Ashenveil — Ciudad',
+    'La pequeña ciudad amurallada de Ashenveil, construida sobre las ruinas del monasterio de Belltallow. Un canal de aguas oscuras la atraviesa.',
+  );
 
   return {
     id: 'map-3',
@@ -493,17 +248,10 @@ function generateMap3() {
     width: 30,
     height: 25,
     cellSize: 32,
-    layers: [
-      {
-        id: 'layer-map3-main',
-        name: 'Principal',
-        visible: true,
-        locked: false,
-        cells,
-      },
-    ],
-    labels,
-    markers,
+    layers: [],
+    labels: [],
+    markers: [],
+    dungeonData,
   };
 }
 
