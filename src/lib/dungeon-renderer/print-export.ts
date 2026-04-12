@@ -453,20 +453,25 @@ export function openGMPrint(app: any, styleObj: any, title: string, options?: Pa
   const contentW = cRight - cLeft + 1
   const contentH = cBot - cTop + 1
 
-  // Scale to fit page
+  // Full page dimensions in pixels (margin is visual, inside the page)
+  const fullPageWpx = Math.floor(pageW * DPI)
+  const fullPageHpx = Math.floor(pageH * DPI)
+  const marginPx = Math.floor(margin * DPI)
+
+  // Scale to fit within margin area
   const scale = Math.min(printWpx / contentW, printHpx / contentH)
   const finalW = Math.round(contentW * scale)
   const finalH = Math.round(contentH * scale)
 
   const final = document.createElement('canvas')
-  final.width = printWpx
-  final.height = printHpx
+  final.width = fullPageWpx
+  final.height = fullPageHpx
   const fCtx = final.getContext('2d')!
   fCtx.fillStyle = '#FFFFFF'
-  fCtx.fillRect(0, 0, printWpx, printHpx)
-  // Center on page
-  const ox = Math.round((printWpx - finalW) / 2)
-  const oy = Math.round((printHpx - finalH) / 2)
+  fCtx.fillRect(0, 0, fullPageWpx, fullPageHpx)
+  // Center map within margin area
+  const ox = marginPx + Math.round((printWpx - finalW) / 2)
+  const oy = marginPx + Math.round((printHpx - finalH) / 2)
   fCtx.drawImage(offscreen, cLeft, cTop, contentW, contentH, ox, oy, finalW, finalH)
 
   const imgSrc = final.toDataURL('image/png')
@@ -481,11 +486,11 @@ export function openGMPrint(app: any, styleObj: any, title: string, options?: Pa
 <head>
 <title>GM Print: ${esc(title)}</title>
 <style>
-  @page { size: ${paperCSS}; margin: ${margin}in; }
+  @page { size: ${paperCSS}; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8e8e8; color: #222; }
   .page {
-    width: ${printWpx}px; height: ${printHpx}px;
+    width: ${fullPageWpx}px; height: ${fullPageHpx}px;
     background: white; margin: 30px auto;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     overflow: hidden;
