@@ -1,11 +1,9 @@
 import type { Campaign } from '@/schemas/campaign.ts'
 import { validateCampaign, validateAdventureDocument } from './schema.ts'
 
-export interface ParseResult {
-  success: boolean
-  campaign?: Campaign
-  errors?: string[]
-}
+export type ParseResult =
+  | { success: true; campaign: Campaign }
+  | { success: false; errors: string[] }
 
 /**
  * Parse and validate a campaign JSON file.
