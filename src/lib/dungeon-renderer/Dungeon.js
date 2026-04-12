@@ -933,20 +933,20 @@ class Dungeon {
    * and after hiding secrets, but before rendering.
    */
   populateNotes() {
-    // Clear existing notes
-    for (const room of this.rooms) {
-      room.note = null;
-    }
-
-    const noteRooms = this.rooms.filter(r => !r.hidden && r.desc != null);
+    // Only generate notes for rooms that don't already have a custom note
+    // (custom notes come from _restore after loadFromSave)
+    const noteRooms = this.rooms.filter(r => !r.hidden && r.desc != null && !r.note);
     this.sortRooms(noteRooms);
+
+    // Count existing notes to continue numbering
+    const existingCount = this.rooms.filter(r => r.note).length;
 
     for (let i = 0; i < noteRooms.length; i++) {
       const room = noteRooms[i];
       const c = room.center();
       room.note = {
         point: { x: c.x, y: c.y },
-        symb: String(i + 1),
+        symb: String(existingCount + i + 1),
         text: room.desc,
         room: room,
       };
