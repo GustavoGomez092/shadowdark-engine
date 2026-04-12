@@ -25,7 +25,7 @@ function LoreWriterPage() {
 
   if (!campaign) return null
 
-  const chapters = campaign.lore.chapters.sort((a, b) => a.sortOrder - b.sortOrder)
+  const chapters = [...campaign.lore.chapters].sort((a, b) => a.sortOrder - b.sortOrder)
   const selectedChapter = chapters.find(ch => ch.id === selectedChapterId) ?? null
   const selectedSection = selectedChapter?.sections.find(s => s.id === selectedSectionId) ?? null
 
@@ -97,7 +97,7 @@ function LoreWriterPage() {
                   </div>
                 </div>
                 {/* Sections */}
-                {ch.sections.sort((a, b) => a.sortOrder - b.sortOrder).map(sec => (
+                {[...ch.sections].sort((a, b) => a.sortOrder - b.sortOrder).map(sec => (
                   <div
                     key={sec.id}
                     onClick={() => { setSelectedChapterId(ch.id); setSelectedSectionId(sec.id) }}
