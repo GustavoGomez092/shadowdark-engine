@@ -409,7 +409,14 @@ function MapEditorPage() {
   // Load a saved map
   async function handleLoadMap(mapId: string) {
     const map = campaign?.maps.find(m => m.id === mapId)
-    if (!map || !map.dungeonData) return
+    if (!map) return
+    if (!map.dungeonData) {
+      // Grid-based map — can't be loaded in the dungeon renderer
+      setCurrentMapId(map.id)
+      setEditingTitle(map.name)
+      setGenerated(false)
+      return
+    }
 
     // Initialize app if not yet created
     if (!appRef.current) {
@@ -978,12 +985,12 @@ function MapEditorPage() {
                           {m.id === currentMapId && <span className="text-[9px] text-primary font-semibold ml-1">CURRENT</span>}
                         </div>
                         <div className="text-[9px] text-muted-foreground mb-1.5">
-                          Seed: {m.seed} · {new Date(m.updatedAt).toLocaleDateString()}
+                          {m.dungeonData ? `Seed: ${m.seed} · ` : 'Grid map · '}{m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : ''}
                         </div>
                         <div className="flex gap-1">
                           <button onClick={() => handleLoadMap(m.id)}
                             className="flex-1 rounded border border-border py-1 text-[10px] font-medium hover:bg-accent transition">
-                            Load
+                            {m.dungeonData ? 'Load' : 'Select'}
                           </button>
                           <button onClick={() => handleDeleteMap(m.id)}
                             className="rounded border border-red-500/30 px-2 py-1 text-[10px] text-red-400 hover:bg-red-500/10 transition">
