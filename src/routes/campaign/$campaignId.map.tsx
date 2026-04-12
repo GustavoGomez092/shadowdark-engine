@@ -66,7 +66,7 @@ function MapEditorPage() {
   const [editingStory, setEditingStory] = useState('')
   const [editorPanel, setEditorPanel] = useState<'none' | 'room' | 'door' | 'dungeon' | 'maps'>('none')
   const [placingProp, setPlacingProp] = useState<string | null>(null)
-  const [repositioningProp, setRepositioningProp] = useState(false)
+  const repositioningProp = false // kept for cursor logic
   const [selectedProp, setSelectedProp] = useState<any>(null)
   const [propScale, setPropScale] = useState(0.6)
   const [propRotation, setPropRotation] = useState(0)
@@ -278,8 +278,7 @@ function MapEditorPage() {
     // Reposition mode — move selected prop to clicked position
     if (repositioningProp && selectedProp && selectedRoom) {
       app.updateProp(selectedProp, { x: grid.gx + 0.5, y: grid.gy + 0.5 })
-      setRepositioningProp(false)
-      refresh()
+           refresh()
       return
     }
 
@@ -297,15 +296,15 @@ function MapEditorPage() {
     // Check door first
     const door = app.findDoorAt(grid.gx, grid.gy)
     if (door) {
-      setSelectedDoor(door); setSelectedRoom(null); setSelectedProp(null); setEditorPanel('door'); setPlacingProp(null); setRepositioningProp(false)
+      setSelectedDoor(door); setSelectedRoom(null); setSelectedProp(null); setEditorPanel('door'); setPlacingProp(null);
       return
     }
     const room = app.findRoomAt(grid.gx, grid.gy)
     if (room) {
-      setSelectedRoom(room); setSelectedDoor(null); setSelectedProp(null); setEditorPanel('room'); setPlacingProp(null); setRepositioningProp(false)
+      setSelectedRoom(room); setSelectedDoor(null); setSelectedProp(null); setEditorPanel('room'); setPlacingProp(null);
       return
     }
-    clearSelection(); setPlacingProp(null); setRepositioningProp(false)
+    clearSelection(); setPlacingProp(null);
   }
 
   // Compute draw preview rectangle in CSS coordinates
@@ -844,7 +843,7 @@ function MapEditorPage() {
                   {selectedRoom.props?.length > 0 && (
                     <div className="space-y-1 mb-2 max-h-32 overflow-y-auto">
                       {selectedRoom.props.map((prop: any, i: number) => (
-                        <div key={i} onClick={() => { setSelectedProp(prop); setPropScale(prop.scale ?? 0.6); setPropRotation(prop.axis ? Math.atan2(prop.axis.y, prop.axis.x) : (prop.rotation ?? 0)); setRepositioningProp(false) }}
+                        <div key={i} onClick={() => { setSelectedProp(prop); setPropScale(prop.scale ?? 0.6); setPropRotation(prop.axis ? Math.atan2(prop.axis.y, prop.axis.x) : (prop.rotation ?? 0)); }}
                           className={`flex items-center justify-between rounded border px-1.5 py-0.5 text-[10px] cursor-pointer transition ${
                             selectedProp === prop ? 'border-primary bg-primary/10 text-primary' : 'border-border/50 hover:bg-accent'
                           }`}>
@@ -860,17 +859,26 @@ function MapEditorPage() {
                     <div className="rounded-lg border border-primary/20 bg-primary/5 p-2 mb-2 space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-semibold capitalize">{selectedProp.type}</span>
-                        <button onClick={() => { appRef.current?.removeProp(selectedRoom, selectedProp); setSelectedProp(null); setRepositioningProp(false); refresh() }}
+                        <button onClick={() => { appRef.current?.removeProp(selectedRoom, selectedProp); setSelectedProp(null);; refresh() }}
                           className="text-[9px] text-red-400 hover:underline">Delete</button>
                       </div>
-                      <button onClick={() => setRepositioningProp(!repositioningProp)}
-                        className={`w-full rounded-lg py-1 text-[10px] font-medium transition ${
-                          repositioningProp
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                            : 'border border-border hover:bg-accent'
-                        }`}>
-                        {repositioningProp ? 'Click map to reposition...' : 'Reposition'}
-                      </button>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Position</label>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] text-muted-foreground">X</span>
+                          <input type="number" step={0.5}
+                            value={parseFloat((selectedProp.pos?.x ?? 0).toFixed(1))}
+                            onFocus={() => appRef.current?.pushUndo()}
+                            onChange={e => { const v = parseFloat(e.target.value) || 0; appRef.current?.updateProp(selectedProp, { x: v }); refresh() }}
+                            className="w-14 rounded border border-input bg-background px-1.5 py-0.5 text-[10px] text-center outline-none focus:ring-1 focus:ring-ring" />
+                          <span className="text-[9px] text-muted-foreground">Y</span>
+                          <input type="number" step={0.5}
+                            value={parseFloat((selectedProp.pos?.y ?? 0).toFixed(1))}
+                            onFocus={() => appRef.current?.pushUndo()}
+                            onChange={e => { const v = parseFloat(e.target.value) || 0; appRef.current?.updateProp(selectedProp, { y: v }); refresh() }}
+                            className="w-14 rounded border border-input bg-background px-1.5 py-0.5 text-[10px] text-center outline-none focus:ring-1 focus:ring-ring" />
+                        </div>
+                      </div>
                       <div>
                         <label className="text-[9px] text-muted-foreground">Scale: {propScale.toFixed(2)}</label>
                         <input type="range" min={0.1} max={3} step={0.05} value={propScale}
