@@ -17,7 +17,7 @@
 //   axis RIGHT (1,0): x = originX, y = originY - floor(width/2), w = depth, h = width
 // So we must set origin/axis/width/depth so the constructor reproduces our desired x,y,w,h.
 // Using axis DOWN: originX = x + floor(w/2), originY = y, width = w, depth = h.
-function makeRoom(index, x, y, w, h, noteSymb, noteText) {
+function makeRoom(index, x, y, w, h, noteSymb, noteText, props = []) {
   return {
     x, y, w, h,
     originX: x + Math.floor(w / 2), originY: y,
@@ -26,7 +26,7 @@ function makeRoom(index, x, y, w, h, noteSymb, noteText) {
     seed: index, round: false, columns: false, hidden: false,
     symm: 0, desc: null,
     enemy: null, loot: null, key: null, gate: null, event: null, enviro: null,
-    props: [],
+    props,
     note: { px: x + w / 2, py: y + h / 2, symb: noteSymb, text: noteText },
   };
 }
@@ -133,17 +133,66 @@ function generateMap1() {
   // Room 7 (Descenso):      x:8  y:31 w:5  h:4
 
   const rooms = [
-    /* 0  */ makeRoom(0,   8,  0,  5,  5, '1', 'Vestíbulo de la Puerta'),
-    /* 1  */ makeCorridor(1, 9,  4,  3,  5),
-    /* 2  */ makeRoom(2,   3,  8, 15,  9, '2', 'La Nave Llorosa'),
-    /* 3  */ makeRoom(3,   0,  8,  4,  9, '3', 'Los Nichos de Huesos'),
-    /* 4  */ makeRoom(4,  17,  8,  6,  6, '4', 'La Sacristía Derrumbada'),
-    /* 5  */ makeCorridor(5, 9, 16,  3,  5),
-    /* 6  */ makeRoom(6,   3, 20, 15,  9, '5', 'El Pozo de las Voces'),
-    /* 7  */ makeCorridor(7, 17, 23, 5,  3),
-    /* 8  */ makeRoom(8,  21, 21,  6,  6, '6', 'El Pozo Sanguíneo'),
-    /* 9  */ makeCorridor(9, 9, 28,  3,  4),
-    /* 10 */ makeRoom(10,  8, 31,  5,  4, '7', 'El Pozo de Descenso'),
+    /* 0  Room 1: Vestíbulo — iron gate, moonlight columns, torch sconces */
+    makeRoom(0, 8, 0, 5, 5, '1', 'Vestíbulo de la Puerta', [
+      { type: 'statue', posX: 9.5, posY: 1.5, scale: 0.5, rotation: 0 },
+      { type: 'statue', posX: 11.5, posY: 1.5, scale: 0.5, rotation: 0 },
+      { type: 'boulder', posX: 11.5, posY: 3.5, scale: 0.3, rotation: 1.2 },
+    ]),
+    /* 1  Corridor C1 */
+    makeCorridor(1, 9, 4, 3, 5),
+    /* 2  Room 2: Nave Llorosa — overturned stone benches, shattered idol, dripping altar */
+    makeRoom(2, 3, 8, 15, 9, '2', 'La Nave Llorosa', [
+      { type: 'altar', posX: 10.5, posY: 15.5, scale: 1.0, rotation: 0 },
+      { type: 'crate', posX: 5.5, posY: 10.5, scale: 0.5, rotation: 0.3 },
+      { type: 'crate', posX: 6.5, posY: 11.5, scale: 0.5, rotation: 0.8 },
+      { type: 'crate', posX: 5.5, posY: 12.5, scale: 0.5, rotation: 0.1 },
+      { type: 'crate', posX: 8.5, posY: 10.5, scale: 0.5, rotation: 0.6 },
+      { type: 'crate', posX: 9.5, posY: 11.5, scale: 0.5, rotation: 1.2 },
+      { type: 'crate', posX: 8.5, posY: 12.5, scale: 0.5, rotation: 0.4 },
+      { type: 'boulder', posX: 14.5, posY: 9.5, scale: 0.3, rotation: 2.1 },
+      { type: 'boulder', posX: 16.5, posY: 14.5, scale: 0.25, rotation: 0.7 },
+    ]),
+    /* 3  Room 3: Nichos de Huesos — six alcoves with bone piles */
+    makeRoom(3, 0, 8, 4, 9, '3', 'Los Nichos de Huesos', [
+      { type: 'sarcophagus', posX: 1.5, posY: 9.5, scale: 0.5, rotation: 0 },
+      { type: 'sarcophagus', posX: 1.5, posY: 11.5, scale: 0.5, rotation: 0 },
+      { type: 'sarcophagus', posX: 1.5, posY: 13.5, scale: 0.5, rotation: 0 },
+      { type: 'boulder', posX: 2.5, posY: 15.0, scale: 0.2, rotation: 1.5 },
+    ]),
+    /* 4  Room 4: Sacristía Derrumbada — broken furniture, cracked mirror, rubble */
+    makeRoom(4, 17, 8, 6, 6, '4', 'La Sacristía Derrumbada', [
+      { type: 'box', posX: 18.5, posY: 9.5, scale: 0.5, rotation: 0.2 },
+      { type: 'crate', posX: 19.5, posY: 10.5, scale: 0.4, rotation: 0.5 },
+      { type: 'boulder', posX: 21.5, posY: 10.5, scale: 0.5, rotation: 0.8 },
+      { type: 'boulder', posX: 21.0, posY: 12.0, scale: 0.6, rotation: 2.0 },
+      { type: 'boulder', posX: 22.0, posY: 11.5, scale: 0.4, rotation: 1.3 },
+      { type: 'tapestry', posX: 18.5, posY: 12.5, scale: 0.6, rotation: 0, axisX: 0, axisY: 1, width: 2 },
+    ]),
+    /* 5  Corridor C3 */
+    makeCorridor(5, 9, 16, 3, 5),
+    /* 6  Room 5: Pozo de las Voces — wide circular chamber, central pit, sleeping masses */
+    makeRoom(6, 3, 20, 15, 9, '5', 'El Pozo de las Voces', [
+      { type: 'well', posX: 10.5, posY: 24.5, scale: 1.3, rotation: 0 },
+      { type: 'boulder', posX: 5.5, posY: 22.5, scale: 0.35, rotation: 0.5 },
+      { type: 'boulder', posX: 15.5, posY: 26.5, scale: 0.3, rotation: 1.8 },
+      { type: 'boulder', posX: 6.5, posY: 27.0, scale: 0.25, rotation: 2.5 },
+    ]),
+    /* 7  Corridor C4 (east to Room 6) */
+    makeCorridor(7, 17, 23, 5, 3),
+    /* 8  Room 6: Pozo Sanguíneo — stone well with red water, ritual plaques */
+    makeRoom(8, 21, 21, 6, 6, '6', 'El Pozo Sanguíneo', [
+      { type: 'well', posX: 24.0, posY: 24.0, scale: 1.0, rotation: 0 },
+      { type: 'tapestry', posX: 22.5, posY: 22.5, scale: 0.5, rotation: 0, axisX: 1, axisY: 0, width: 1.5 },
+      { type: 'tapestry', posX: 25.5, posY: 22.5, scale: 0.5, rotation: 0, axisX: 1, axisY: 0, width: 1.5 },
+    ]),
+    /* 9  Corridor C5 (south to Room 7) */
+    makeCorridor(9, 9, 28, 3, 4),
+    /* 10 Room 7: Pozo de Descenso — iron ladder, shaft down */
+    makeRoom(10, 8, 31, 5, 4, '7', 'El Pozo de Descenso', [
+      { type: 'smalldais', posX: 10.5, posY: 33.0, scale: 0.8, rotation: 0 },
+      { type: 'boulder', posX: 9.5, posY: 32.0, scale: 0.2, rotation: 0.9 },
+    ]),
   ];
 
   const doors = [
@@ -200,15 +249,58 @@ function generateMap2() {
   // Room 13 (Trono):     x:2  y:27 w:16 h:9
 
   const rooms = [
-    /* 0 */ makeRoom(0,   5,  0, 10,  6, '8', 'La Galería Ahogada'),
-    /* 1 */ makeCorridor(1, 9,  5,  3,  5),
-    /* 2 */ makeRoom(2,   3,  9, 12,  7, '9', 'Las Bóvedas de Médula'),
-    /* 3 */ makeRoom(3,  14,  9,  7, 10, '10', 'El Hueco del Cirujano'),
-    /* 4 */ makeCorridor(4, 9, 15,  3,  5),
-    /* 5 */ makeRoom(5,   4, 19, 11,  6, '11', 'El Puente del Osario'),
-    /* 6 */ makeRoom(6,  14, 18,  5,  6, '12', 'La Antecámara Sellada'),
-    /* 7 */ makeCorridor(7, 9, 24,  3,  4),
-    /* 8 */ makeRoom(8,   2, 27, 16,  9, '13', 'El Trono de los Ecos'),
+    /* 0  Room 8: Galería Ahogada — flooded, columns, bell-face statues */
+    makeRoom(0, 5, 0, 10, 6, '8', 'La Galería Ahogada', [
+      { type: 'statue', posX: 7.5, posY: 2.5, scale: 0.6, rotation: 0 },
+      { type: 'statue', posX: 12.5, posY: 2.5, scale: 0.6, rotation: 0 },
+      { type: 'statue', posX: 7.5, posY: 4.5, scale: 0.6, rotation: 0 },
+      { type: 'statue', posX: 12.5, posY: 4.5, scale: 0.6, rotation: 0 },
+    ]),
+    /* 1  Corridor C6 */
+    makeCorridor(1, 9, 5, 3, 5),
+    /* 2  Room 9: Bóvedas de Médula — six stone sarcophagi in two rows */
+    makeRoom(2, 3, 9, 12, 7, '9', 'Las Bóvedas de Médula', [
+      { type: 'sarcophagus', posX: 6.5, posY: 11.5, scale: 0.7, rotation: 0 },
+      { type: 'sarcophagus', posX: 6.5, posY: 13.5, scale: 0.7, rotation: 0 },
+      { type: 'sarcophagus', posX: 9.5, posY: 11.5, scale: 0.7, rotation: 0 },
+      { type: 'sarcophagus', posX: 9.5, posY: 13.5, scale: 0.7, rotation: 0 },
+      { type: 'sarcophagus', posX: 12.5, posY: 11.5, scale: 0.7, rotation: 0 },
+      { type: 'sarcophagus', posX: 12.5, posY: 13.5, scale: 0.7, rotation: 0 },
+    ]),
+    /* 3  Room 10: Hueco del Cirujano — surgery table, tool shelves, prisoners */
+    makeRoom(3, 14, 9, 7, 10, '10', 'El Hueco del Cirujano', [
+      { type: 'altar', posX: 17.5, posY: 13.5, scale: 1.0, rotation: 0 },
+      { type: 'barrel', posX: 15.5, posY: 10.5, scale: 0.5, rotation: 0 },
+      { type: 'barrel', posX: 16.5, posY: 10.5, scale: 0.5, rotation: 0 },
+      { type: 'box', posX: 19.5, posY: 11.0, scale: 0.4, rotation: 0 },
+      { type: 'box', posX: 19.5, posY: 12.0, scale: 0.4, rotation: 0.3 },
+      { type: 'chest', posX: 15.5, posY: 17.0, scale: 0.5, rotation: 0 },
+    ]),
+    /* 4  Corridor C7 */
+    makeCorridor(4, 9, 15, 3, 5),
+    /* 5  Room 11: Puente del Osario — narrow bridge, bone walls, chasm */
+    makeRoom(5, 4, 19, 11, 6, '11', 'El Puente del Osario', [
+      { type: 'boulder', posX: 5.5, posY: 20.5, scale: 0.3, rotation: 1.2 },
+      { type: 'boulder', posX: 13.0, posY: 20.5, scale: 0.35, rotation: 2.1 },
+      { type: 'boulder', posX: 5.5, posY: 23.5, scale: 0.25, rotation: 0.5 },
+      { type: 'boulder', posX: 13.0, posY: 23.5, scale: 0.3, rotation: 1.8 },
+    ]),
+    /* 6  Room 12: Antecámara Sellada — small sealed room, Aldric's writings */
+    makeRoom(6, 14, 18, 5, 6, '12', 'La Antecámara Sellada', [
+      { type: 'chest', posX: 16.5, posY: 20.5, scale: 0.6, rotation: 0 },
+      { type: 'tapestry', posX: 15.5, posY: 19.5, scale: 0.5, rotation: 0, axisX: 0, axisY: 1, width: 2 },
+    ]),
+    /* 7  Corridor C8 */
+    makeCorridor(7, 9, 24, 3, 4),
+    /* 8  Room 13: Trono de los Ecos — vast boss room, throne, sarcophagi, mosaic floor */
+    makeRoom(8, 2, 27, 16, 9, '13', 'El Trono de los Ecos', [
+      { type: 'throne', posX: 10.0, posY: 33.5, scale: 1.2, rotation: 0, axisX: 0, axisY: -1 },
+      { type: 'dais', posX: 10.0, posY: 32.5, scale: 1.5, rotation: 0, axisX: 0, axisY: -1 },
+      { type: 'sarcophagus', posX: 5.5, posY: 33.0, scale: 0.8, rotation: 0 },
+      { type: 'sarcophagus', posX: 14.5, posY: 33.0, scale: 0.8, rotation: 0 },
+      { type: 'statue', posX: 4.5, posY: 29.5, scale: 0.6, rotation: 0 },
+      { type: 'statue', posX: 15.5, posY: 29.5, scale: 0.6, rotation: 0 },
+    ]),
   ];
 
   const doors = [
@@ -286,17 +378,57 @@ function generateMap3() {
   // Room I (Puerta):    x:4  y:25 w:7  h:5
 
   const rooms = [
-    /* 0  */ makeRoom(0,   5,  0,  6,  5, 'B', 'Sala del Prefecto'),
-    /* 1  */ makeCorridor(1, 7,  4,  3,  5),
-    /* 2  */ makeRoom(2,   3,  8,  8,  6, 'D', 'Posada del Canal Negro'),
-    /* 3  */ makeCorridor(3, 10, 10, 5,  3),
-    /* 4  */ makeRoom(4,  14,  8,  7,  6, 'C', 'Mercado Hueco de Quen'),
-    /* 5  */ makeCorridor(5, 6, 13,  3,  5),
-    /* 6  */ makeRoom(6,   4, 17,  6,  6, 'F', 'Torre de la Campana'),
-    /* 7  */ makeCorridor(7, 15, 13, 3,  5),
-    /* 8  */ makeRoom(8,  13, 17,  7,  5, 'E', 'Puesto de Guardia'),
-    /* 9  */ makeCorridor(9, 6, 22,  3,  4),
-    /* 10 */ makeRoom(10,  4, 25,  7,  5, 'I', 'Puerta del Belltallow'),
+    /* 0  B: Sala del Prefecto — formal hall, desk, tapestries */
+    makeRoom(0, 5, 0, 6, 5, 'B', 'Sala del Prefecto', [
+      { type: 'throne', posX: 8.0, posY: 1.5, scale: 0.7, rotation: 0, axisX: 0, axisY: -1 },
+      { type: 'tapestry', posX: 6.5, posY: 1.5, scale: 0.4, rotation: 0, axisX: 0, axisY: 1, width: 1.5 },
+    ]),
+    /* 1  Road R1 */
+    makeCorridor(1, 7, 4, 3, 5),
+    /* 2  D: Posada del Canal Negro — tables, barrels, fireplace */
+    makeRoom(2, 3, 8, 8, 6, 'D', 'Posada del Canal Negro', [
+      { type: 'barrel', posX: 4.5, posY: 9.5, scale: 0.5, rotation: 0 },
+      { type: 'barrel', posX: 5.5, posY: 9.5, scale: 0.5, rotation: 0 },
+      { type: 'crate', posX: 4.5, posY: 12.0, scale: 0.5, rotation: 0 },
+      { type: 'crate', posX: 6.5, posY: 11.5, scale: 0.5, rotation: 0.4 },
+      { type: 'crate', posX: 8.5, posY: 11.5, scale: 0.5, rotation: 0.1 },
+    ]),
+    /* 3  Road R2 (east) */
+    makeCorridor(3, 10, 10, 5, 3),
+    /* 4  C: Mercado Hueco de Quen — shelves, goods, counter */
+    makeRoom(4, 14, 8, 7, 6, 'C', 'Mercado Hueco de Quen', [
+      { type: 'box', posX: 15.5, posY: 9.5, scale: 0.5, rotation: 0 },
+      { type: 'box', posX: 15.5, posY: 10.5, scale: 0.5, rotation: 0 },
+      { type: 'box', posX: 15.5, posY: 11.5, scale: 0.5, rotation: 0 },
+      { type: 'chest', posX: 19.0, posY: 10.5, scale: 0.5, rotation: 0 },
+      { type: 'barrel', posX: 19.0, posY: 12.0, scale: 0.5, rotation: 0 },
+    ]),
+    /* 5  Road R3 (south) */
+    makeCorridor(5, 6, 13, 3, 5),
+    /* 6  F: Torre de la Campana — tall tower, silent bell */
+    makeRoom(6, 4, 17, 6, 6, 'F', 'Torre de la Campana', [
+      { type: 'smalldais', posX: 7.0, posY: 20.0, scale: 1.0, rotation: 0 },
+      { type: 'statue', posX: 5.5, posY: 18.5, scale: 0.5, rotation: 0 },
+      { type: 'statue', posX: 8.5, posY: 18.5, scale: 0.5, rotation: 0 },
+    ]),
+    /* 7  Road R4 (south from C) */
+    makeCorridor(7, 15, 13, 3, 5),
+    /* 8  E: Puesto de Guardia — weapon racks, barrels */
+    makeRoom(8, 13, 17, 7, 5, 'E', 'Puesto de Guardia', [
+      { type: 'barrel', posX: 14.5, posY: 18.5, scale: 0.5, rotation: 0 },
+      { type: 'barrel', posX: 18.5, posY: 18.5, scale: 0.5, rotation: 0 },
+      { type: 'crate', posX: 14.5, posY: 20.0, scale: 0.4, rotation: 0 },
+      { type: 'box', posX: 18.5, posY: 20.0, scale: 0.4, rotation: 0 },
+    ]),
+    /* 9  Road R5 (south from F) */
+    makeCorridor(9, 6, 22, 3, 4),
+    /* 10 I: Puerta del Belltallow — sealed gate to the dungeon */
+    makeRoom(10, 4, 25, 7, 5, 'I', 'Puerta del Belltallow', [
+      { type: 'statue', posX: 5.5, posY: 26.5, scale: 0.6, rotation: 0 },
+      { type: 'statue', posX: 9.5, posY: 26.5, scale: 0.6, rotation: 0 },
+      { type: 'boulder', posX: 6.5, posY: 28.5, scale: 0.3, rotation: 1.5 },
+      { type: 'boulder', posX: 8.5, posY: 28.5, scale: 0.25, rotation: 0.8 },
+    ]),
   ];
 
   const doors = [
