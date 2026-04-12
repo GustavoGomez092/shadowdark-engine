@@ -4,7 +4,7 @@ import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { createEmptyMap } from '@/lib/campaign/defaults.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { openPrintExport, openGMPrint, PAPER_SIZES } from '@/lib/dungeon-renderer/print-export.ts'
-import type { PrintOptions } from '@/lib/dungeon-renderer/print-export.ts'
+import type { PrintOptions, GMPrintOptions } from '@/lib/dungeon-renderer/print-export.ts'
 // @ts-nocheck
 import DungeonApp from '@/lib/dungeon-renderer/App.js'
 import style from '@/lib/dungeon-renderer/Style.js'
@@ -80,6 +80,11 @@ function MapEditorPage() {
 
   // Print settings
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [showGMPrintDialog, setShowGMPrintDialog] = useState(false)
+  const [gmPrintSettings, setGMPrintSettings] = useState<GMPrintOptions>({
+    paperSize: 'letter', orientation: 'landscape', margin: 0.5,
+    showConnectors: true, showSecrets: true, bw: false,
+  })
   const [printSettings, setPrintSettings] = useState<PrintOptions>({
     paperSize: 'letter', orientation: 'portrait', gridScale: 0.5, margin: 0.5, title: '',
   })
@@ -604,7 +609,7 @@ function MapEditorPage() {
                 <button onClick={exportJSON} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">JSON</button>
                 <button onClick={() => { setPrintSettings(p => ({ ...p, title: editingTitle || 'Dungeon Map' })); setShowPrintDialog(true) }}
                   className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">Print</button>
-                <button onClick={() => openGMPrint(appRef.current, style, editingTitle || 'Dungeon Map')}
+                <button onClick={() => setShowGMPrintDialog(true)}
                   className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">GM Print</button>
               </>
             )}
@@ -1103,6 +1108,67 @@ function MapEditorPage() {
                 className="flex-1 rounded-lg border border-border py-2 text-xs font-medium hover:bg-accent transition">Cancel</button>
               <button onClick={() => { setShowPrintDialog(false); openPrintExport(appRef.current, style, printSettings) }}
                 className="flex-1 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition">Open Print View</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GM Print Settings Dialog */}
+      {showGMPrintDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowGMPrintDialog(false)}>
+          <div className="w-80 rounded-xl border border-border bg-card p-5 shadow-2xl space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-sm font-bold">GM Print</h3>
+
+            <div>
+              <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Paper Size</label>
+              <select value={gmPrintSettings.paperSize} onChange={e => setGMPrintSettings(p => ({ ...p, paperSize: e.target.value as GMPrintOptions['paperSize'] }))}
+                className={inputCls}>
+                {Object.entries(PAPER_SIZES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Orientation</label>
+              <div className="flex gap-2">
+                {(['portrait', 'landscape'] as const).map(o => (
+                  <button key={o} onClick={() => setGMPrintSettings(p => ({ ...p, orientation: o }))}
+                    className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition capitalize ${
+                      gmPrintSettings.orientation === o ? 'bg-primary/15 text-primary border border-primary/30' : 'border border-border hover:bg-accent'
+                    }`}>{o}</button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Margin: {gmPrintSettings.margin}"</label>
+              <input type="range" min={0.25} max={1} step={0.25} value={gmPrintSettings.margin}
+                onChange={e => setGMPrintSettings(p => ({ ...p, margin: parseFloat(e.target.value) }))}
+                className="w-full accent-primary" />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-semibold text-muted-foreground mb-2">Options</label>
+              <div className="space-y-2">
+                {([
+                  { key: 'showSecrets' as const, label: 'Show Secret Rooms' },
+                  { key: 'showConnectors' as const, label: 'Show Connectors' },
+                  { key: 'bw' as const, label: 'Black & White' },
+                ]).map(opt => (
+                  <label key={opt.key} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={gmPrintSettings[opt.key]}
+                      onChange={e => setGMPrintSettings(p => ({ ...p, [opt.key]: e.target.checked }))}
+                      className="accent-primary" />
+                    <span className="text-xs">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => setShowGMPrintDialog(false)}
+                className="flex-1 rounded-lg border border-border py-2 text-xs font-medium hover:bg-accent transition">Cancel</button>
+              <button onClick={() => { setShowGMPrintDialog(false); openGMPrint(appRef.current, style, editingTitle || 'Dungeon Map', gmPrintSettings) }}
+                className="flex-1 rounded-lg bg-primary py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 transition">Open GM Print</button>
             </div>
           </div>
         </div>

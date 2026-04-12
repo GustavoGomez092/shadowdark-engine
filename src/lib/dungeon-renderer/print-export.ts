@@ -334,16 +334,38 @@ function drawCropMarks(ctx: CanvasRenderingContext2D, w: number, h: number, row:
 }
 
 /**
- * GM print — full map with title, story, notes, secrets, room cards
- * scaled to fit a single landscape US Letter page.
+ * GM print options
  */
-export function openGMPrint(app: any, styleObj: any, title: string) {
+export interface GMPrintOptions {
+  paperSize: 'letter' | 'a4' | 'a3' | 'legal'
+  orientation: 'portrait' | 'landscape'
+  margin: number
+  showConnectors: boolean
+  showSecrets: boolean
+  bw: boolean
+}
+
+/**
+ * GM print — full map with title, story, notes, secrets, room cards
+ * scaled to fit a single page with configurable options.
+ */
+export function openGMPrint(app: any, styleObj: any, title: string, options?: Partial<GMPrintOptions>) {
   if (!app?.dungeon) return
 
+  const opts: GMPrintOptions = {
+    paperSize: options?.paperSize ?? 'letter',
+    orientation: options?.orientation ?? 'landscape',
+    margin: options?.margin ?? 0.5,
+    showConnectors: options?.showConnectors ?? true,
+    showSecrets: options?.showSecrets ?? true,
+    bw: options?.bw ?? false,
+  }
+
   const DPI = 96
-  const margin = 0.5
-  const pageW = 11 // landscape letter
-  const pageH = 8.5
+  const margin = opts.margin
+  const paper = PAPER_SIZES[opts.paperSize] || PAPER_SIZES.letter
+  const pageW = opts.orientation === 'landscape' ? paper.h : paper.w
+  const pageH = opts.orientation === 'landscape' ? paper.w : paper.h
   const printWpx = Math.floor((pageW - margin * 2) * DPI)
   const printHpx = Math.floor((pageH - margin * 2) * DPI)
 
@@ -363,17 +385,17 @@ export function openGMPrint(app: any, styleObj: any, title: string) {
     rotation: styleObj.rotation,
   }
 
-  // GM view: B&W + blue water, show everything
+  // GM view: configurable B&W/color, show notes always, connectors/secrets configurable
   styleObj.bw = false
   styleObj.ink = '#000000'
   styleObj.paper = '#FFFFFF'
   styleObj.floor = '#FFFFFF'
-  styleObj.water = '#A8D8EA'
-  styleObj.shading = '#CCCCCC'
+  styleObj.water = opts.bw ? '#D0D0D0' : '#A8D8EA'
+  styleObj.shading = opts.bw ? '#E0E0E0' : '#CCCCCC'
   styleObj.showTitle = true
   styleObj.showNotes = true
-  styleObj.showSecrets = true
-  styleObj.showConnectors = true
+  styleObj.showSecrets = opts.showSecrets
+  styleObj.showConnectors = opts.showConnectors
   styleObj.autoRotate = false
   styleObj.rotation = 0
 
@@ -453,12 +475,13 @@ export function openGMPrint(app: any, styleObj: any, title: string) {
   const pw = window.open('', '_blank')
   if (!pw) return
 
+  const paperCSS = `${pageW}in ${pageH}in`
   pw.document.write(`<!DOCTYPE html>
 <html>
 <head>
 <title>GM Print: ${esc(title)}</title>
 <style>
-  @page { size: 11in 8.5in; margin: ${margin}in; }
+  @page { size: ${paperCSS}; margin: ${margin}in; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8e8e8; color: #222; }
   .page {
@@ -495,7 +518,7 @@ export function openGMPrint(app: any, styleObj: any, title: string) {
 <body>
 <div class="toolbar">
   <h2>GM Reference: ${esc(title)}</h2>
-  <span style="font-size:11px;color:#888;">Landscape Letter · Includes secrets, notes, room cards</span>
+  <span style="font-size:11px;color:#888;">${opts.orientation === 'landscape' ? 'Landscape' : 'Portrait'} ${paper.label}${opts.bw ? ' · B&amp;W' : ''}${opts.showSecrets ? ' · Secrets' : ''}${opts.showConnectors ? ' · Connectors' : ''}</span>
   <button class="btn-print" onclick="window.print()">Print (Ctrl+P)</button>
   <button class="btn-close" onclick="window.close()">Close</button>
 </div>
