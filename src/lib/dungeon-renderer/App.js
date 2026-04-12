@@ -922,11 +922,13 @@ class App {
    */
   serialize() {
     if (!this.dungeon) return null;
+    // Capture snapshot BEFORE getData() — getData calls populateNotes()
+    // which clears custom room notes. Snapshot preserves them.
+    const snapshot = this._snapshot();
     const data = this.dungeon.getData();
     // Add seed for regeneration on load
     data.seed = this.dungeon.seed;
-    // Add full room/door snapshot for exact restoration
-    data._snapshot = this._snapshot();
+    data._snapshot = snapshot;
     // Add editor-specific state
     data.editorState = {
       noteOverrides: Object.fromEntries(this.renderer.noteOverrides),
