@@ -527,6 +527,16 @@ class App {
   }
 
   /**
+   * Reorder props within a room. Props later in the array render on top.
+   */
+  reorderProps(room, fromIndex, toIndex) {
+    this.pushUndo();
+    const [moved] = room.props.splice(fromIndex, 1);
+    room.props.splice(toIndex, 0, moved);
+    this.draw();
+  }
+
+  /**
    * Remove a specific prop from its room and re-render.
    */
   removeProp(room, prop) {

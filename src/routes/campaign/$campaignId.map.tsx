@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { createEmptyMap } from '@/lib/campaign/defaults.ts'
 import { generateId } from '@/lib/utils/id.ts'
@@ -27,6 +30,50 @@ const DOOR_TYPES = [
 ]
 
 const PROP_TYPES = ['altar', 'barrel', 'boulder', 'box', 'chest', 'dais', 'smalldais', 'fountain', 'sarcophagus', 'statue', 'throne', 'well']
+
+// ── Sortable Props List ──
+
+function SortablePropItem({ prop, index, isSelected, onSelect }: { prop: any; index: number; isSelected: boolean; onSelect: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: index })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
+  return (
+    <div ref={setNodeRef} style={style}
+      onClick={onSelect}
+      className={`flex items-center justify-between rounded border px-1.5 py-0.5 text-[10px] cursor-pointer transition ${
+        isSelected ? 'border-primary bg-primary/10 text-primary' : 'border-border/50 hover:bg-accent'
+      }`}>
+      <div className="flex items-center gap-1">
+        <span {...attributes} {...listeners} className="cursor-grab text-muted-foreground/50 hover:text-muted-foreground select-none">⠿</span>
+        <span className="capitalize font-medium">{prop.type}</span>
+      </div>
+      <span className="text-muted-foreground">s:{(prop.scale ?? 0.6).toFixed(1)} r:{Math.round((prop.rotation ?? 0) * 180 / Math.PI)}°</span>
+    </div>
+  )
+}
+
+function SortablePropsList({ props, selectedProp, onSelect, onReorder }: { props: any[]; selectedProp: any; onSelect: (p: any) => void; onReorder: (from: number, to: number) => void }) {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+  const items = useMemo(() => props.map((_: any, i: number) => i), [props.length])
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      onReorder(active.id as number, over.id as number)
+    }
+  }
+
+  return (
+    <div className="space-y-1 mb-2 max-h-32 overflow-y-auto">
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          {props.map((prop: any, i: number) => (
+            <SortablePropItem key={i} prop={prop} index={i} isSelected={selectedProp === prop} onSelect={() => onSelect(prop)} />
+          ))}
+        </SortableContext>
+      </DndContext>
+    </div>
+  )
+}
 
 function MapEditorPage() {
   const campaign = useCampaignStore(s => s.campaign)
@@ -839,19 +886,14 @@ function MapEditorPage() {
                       className="text-[10px] text-red-400 hover:underline">Clear All</button>
                   </div>
 
-                  {/* Existing props list */}
+                  {/* Sortable props list — drag to reorder, order = z-index */}
                   {selectedRoom.props?.length > 0 && (
-                    <div className="space-y-1 mb-2 max-h-32 overflow-y-auto">
-                      {selectedRoom.props.map((prop: any, i: number) => (
-                        <div key={i} onClick={() => { setSelectedProp(prop); setPropScale(prop.scale ?? 0.6); setPropRotation(prop.axis ? Math.atan2(prop.axis.y, prop.axis.x) : (prop.rotation ?? 0)); }}
-                          className={`flex items-center justify-between rounded border px-1.5 py-0.5 text-[10px] cursor-pointer transition ${
-                            selectedProp === prop ? 'border-primary bg-primary/10 text-primary' : 'border-border/50 hover:bg-accent'
-                          }`}>
-                          <span className="capitalize font-medium">{prop.type}</span>
-                          <span className="text-muted-foreground">s:{(prop.scale ?? 0.6).toFixed(1)} r:{Math.round((prop.rotation ?? 0) * 180 / Math.PI)}°</span>
-                        </div>
-                      ))}
-                    </div>
+                    <SortablePropsList
+                      props={selectedRoom.props}
+                      selectedProp={selectedProp}
+                      onSelect={(prop: any) => { setSelectedProp(prop); setPropScale(prop.scale ?? 0.6); setPropRotation(prop.axis ? Math.atan2(prop.axis.y, prop.axis.x) : (prop.rotation ?? 0)); }}
+                      onReorder={(from: number, to: number) => { appRef.current?.reorderProps(selectedRoom, from, to); refresh(); }}
+                    />
                   )}
 
                   {/* Selected prop editor */}
