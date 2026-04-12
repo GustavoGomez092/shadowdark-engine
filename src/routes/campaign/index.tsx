@@ -19,9 +19,15 @@ function CampaignListPage() {
   const [name, setName] = useState('')
   const [author, setAuthor] = useState('')
   const [importError, setImportError] = useState<string | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const savedCampaigns = getSavedCampaigns().sort((a, b) => b.updatedAt - a.updatedAt)
+
+  function handleDelete(id: string) {
+    deleteCampaign(id)
+    setRefreshKey(k => k + 1)
+  }
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -107,7 +113,7 @@ function CampaignListPage() {
                     {t('campaign.open')}
                   </button>
                   <button
-                    onClick={() => deleteCampaign(c.id)}
+                    onClick={() => handleDelete(c.id)}
                     className="rounded-lg border border-red-500/30 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 transition"
                   >
                     {t('common.delete')}
