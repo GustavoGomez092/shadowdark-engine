@@ -2,16 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
-import { createEmptyNPC, createEmptyEncounterTable } from '@/lib/campaign/defaults.ts'
+import { createEmptyNPC, createEmptyEncounterTable, createEmptyStore } from '@/lib/campaign/defaults.ts'
 import { NPCEditor } from '@/components/campaign/adventure/npc-editor.tsx'
 import { EncounterTableEditor } from '@/components/campaign/adventure/encounter-table-editor.tsx'
-import type { AdventureNPC, RandomEncounterTable } from '@/schemas/campaign.ts'
+import { StoreEditor } from '@/components/campaign/adventure/store-editor.tsx'
+import type { AdventureNPC, RandomEncounterTable, AdventureStore } from '@/schemas/campaign.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/adventure')({
   component: AdventureStructurePage,
 })
 
-type AdventureTab = 'overview' | 'npcs' | 'encounters'
+type AdventureTab = 'overview' | 'npcs' | 'encounters' | 'shops'
 
 function AdventureStructurePage() {
   const { t } = useLocale()
@@ -23,10 +24,14 @@ function AdventureStructurePage() {
   const addEncounterTable = useCampaignStore(s => s.addEncounterTable)
   const updateEncounterTable = useCampaignStore(s => s.updateEncounterTable)
   const removeEncounterTable = useCampaignStore(s => s.removeEncounterTable)
+  const addStore = useCampaignStore(s => s.addStore)
+  const updateStoreStore = useCampaignStore(s => s.updateStore)
+  const removeStore = useCampaignStore(s => s.removeStore)
 
   const [tab, setTab] = useState<AdventureTab>('overview')
   const [editingNPC, setEditingNPC] = useState<AdventureNPC | null>(null)
   const [editingTable, setEditingTable] = useState<RandomEncounterTable | null>(null)
+  const [editingStore, setEditingStore] = useState<AdventureStore | null>(null)
 
   if (!campaign) return null
 
@@ -47,10 +52,18 @@ function AdventureStructurePage() {
     setEditingTable(null)
   }
 
+  function saveStore(store: AdventureStore) {
+    const exists = adv.stores.find(s => s.id === store.id)
+    if (exists) updateStoreStore(store.id, () => Object.assign(exists, store))
+    else addStore(store)
+    setEditingStore(null)
+  }
+
   const tabs: { key: AdventureTab; label: string }[] = [
     { key: 'overview', label: 'Overview' },
     { key: 'npcs', label: `NPCs (${adv.npcs.length})` },
     { key: 'encounters', label: `Encounters (${adv.randomEncounters.length})` },
+    { key: 'shops', label: `Shops (${adv.stores.length})` },
   ]
 
   return (
@@ -151,6 +164,41 @@ function AdventureStructurePage() {
             </div>
           )}
           {editingTable && <EncounterTableEditor table={editingTable} onSave={saveEncounterTable} onCancel={() => setEditingTable(null)} />}
+        </div>
+      )}
+
+      {/* Shops */}
+      {tab === 'shops' && (
+        <div>
+          <div className="mb-4 flex justify-end">
+            <button onClick={() => setEditingStore(createEmptyStore())} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">+ New Shop</button>
+          </div>
+          {adv.stores.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border py-12 text-center">
+              <p className="text-muted-foreground">No shops yet</p>
+              <button onClick={() => setEditingStore(createEmptyStore())} className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">Create First Shop</button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {adv.stores.map(store => (
+                <div key={store.id} onClick={() => setEditingStore(store)} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 cursor-pointer hover:border-border/80 transition">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium">{store.name || 'Unnamed Shop'}</span>
+                    <p className="text-xs text-muted-foreground">
+                      {[
+                        store.storeType.charAt(0).toUpperCase() + store.storeType.slice(1),
+                        `${store.items.length} items`,
+                        store.keeperName ? `Keeper: ${store.keeperName}` : null,
+                        store.roomId ? `Room: ${adv.rooms.find(r => r.id === store.roomId)?.name ?? 'Unknown'}` : null,
+                      ].filter(Boolean).join(' · ')}
+                    </p>
+                  </div>
+                  <button onClick={e => { e.stopPropagation(); removeStore(store.id) }} className="shrink-0 text-xs text-red-400 hover:text-red-300 ml-3">Delete</button>
+                </div>
+              ))}
+            </div>
+          )}
+          {editingStore && <StoreEditor store={editingStore} rooms={adv.rooms} npcs={adv.npcs} onSave={saveStore} onCancel={() => setEditingStore(null)} />}
         </div>
       )}
     </main>
