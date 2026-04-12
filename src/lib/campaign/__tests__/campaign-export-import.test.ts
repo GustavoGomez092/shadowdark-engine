@@ -139,6 +139,40 @@ function makeFullCampaign(): Campaign {
           portraitPrompt: 'A ghostly miner with hollow eyes',
         },
       ],
+      stores: [{
+        id: 'store-1',
+        name: 'Village Smithy',
+        description: 'A forge near the town square.',
+        keeperName: 'Durin',
+        keeperAncestry: 'dwarf',
+        storeType: 'weapons' as const,
+        items: [
+          {
+            id: 'si-1',
+            itemDefinitionId: 'shortsword',
+            name: 'Shortsword',
+            description: '',
+            price: 7,
+            quantity: -1,
+            category: 'weapon' as const,
+            slots: 1,
+            isCustom: false,
+          },
+          {
+            id: 'si-2',
+            itemDefinitionId: '',
+            name: 'Custom Blade',
+            description: 'A unique blade.',
+            price: 50,
+            quantity: 1,
+            category: 'weapon' as const,
+            slots: 1,
+            isCustom: true,
+          },
+        ],
+        roomId: 'room-1',
+        npcId: 'npc-1',
+      }],
     },
     lore: {
       chapters: [
@@ -376,6 +410,7 @@ describe('parseCampaignFile', () => {
           rooms: [],
           randomEncounters: [],
           npcs: [],
+          stores: [],
         },
         lore: { chapters: [] },
         maps: [],
@@ -439,6 +474,9 @@ describe('parseCampaignFile', () => {
       expect(imported.adventure.npcs[0].name).toBe('Greta Ironhand')
       expect(imported.adventure.npcs[1].portraitPrompt).toBe('A ghostly miner with hollow eyes')
 
+      // Stores
+      expect(imported.adventure.stores).toHaveLength(1)
+
       // Lore
       expect(imported.lore.chapters).toHaveLength(1)
       expect(imported.lore.chapters[0].title).toBe('The History of Khaz-Doral')
@@ -473,9 +511,47 @@ describe('parseCampaignFile', () => {
         rooms: [],
         randomEncounters: [],
         npcs: [],
+        stores: [],
       })
       expect(result.campaign!.lore).toEqual({ chapters: [] })
       expect(result.campaign!.maps).toEqual([])
+    })
+  })
+
+  describe('round-trip: adventure stores', () => {
+    it('round-trips adventure stores through export/import', () => {
+      const original = makeFullCampaign()
+      const doc = exportAdventureDocument(original)
+      const result = parseCampaignFile(doc)
+      expect(result.success).toBe(true)
+      if (!result.success) return
+      expect(result.campaign.adventure.stores).toHaveLength(1)
+      const store = result.campaign.adventure.stores[0]
+      expect(store.name).toBe('Village Smithy')
+      expect(store.storeType).toBe('weapons')
+      expect(store.items).toHaveLength(2)
+      expect(store.items[0].isCustom).toBe(false)
+      expect(store.items[1].isCustom).toBe(true)
+      expect(store.roomId).toBe('room-1')
+      expect(store.npcId).toBe('npc-1')
+    })
+
+    it('imports old campaign JSON without stores field (backward compat)', () => {
+      const result = parseCampaignFile({
+        id: 'old-campaign',
+        name: 'Old Campaign',
+        adventure: {
+          hook: 'Old hook',
+          overview: '',
+          targetLevel: [1, 3],
+          rooms: [],
+          randomEncounters: [],
+          npcs: [],
+        },
+      })
+      expect(result.success).toBe(true)
+      if (!result.success) return
+      expect(result.campaign.adventure.stores).toEqual([])
     })
   })
 

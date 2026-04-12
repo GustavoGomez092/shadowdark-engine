@@ -6,6 +6,8 @@ import {
   TrapDefinitionSchema,
   AdventureNPCSchema,
   RandomEncounterTableSchema,
+  AdventureStoreSchema,
+  StoreItemSchema,
   LoreDocumentSchema,
   CampaignMapSchema,
   DataPackContentSchema,
@@ -55,6 +57,7 @@ describe('validateCampaign', () => {
         rooms: [],
         randomEncounters: [],
         npcs: [],
+        stores: [],
       })
       expect(result.data?.lore).toEqual({ chapters: [] })
       expect(result.data?.maps).toEqual([])
@@ -583,6 +586,125 @@ describe('DataPackContentSchema', () => {
       }],
     })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('AdventureStoreSchema', () => {
+  it('accepts a valid store with all fields', () => {
+    const result = AdventureStoreSchema.safeParse({
+      id: 'store-1',
+      name: 'Village Smithy',
+      description: 'A forge near the town square.',
+      keeperName: 'Durin',
+      keeperAncestry: 'dwarf',
+      storeType: 'weapons',
+      items: [
+        {
+          id: 'si-1',
+          itemDefinitionId: 'shortsword',
+          name: 'Shortsword',
+          description: '',
+          price: 7,
+          quantity: -1,
+          category: 'weapon',
+          slots: 1,
+          isCustom: false,
+        },
+        {
+          id: 'si-2',
+          itemDefinitionId: '',
+          name: 'Custom Blade',
+          description: 'A unique blade.',
+          price: 50,
+          quantity: 1,
+          category: 'weapon',
+          slots: 1,
+          isCustom: true,
+        },
+      ],
+      roomId: 'room-1',
+      npcId: 'npc-1',
+    })
+    expect(result.success).toBe(true)
+    expect(result.data!.name).toBe('Village Smithy')
+    expect(result.data!.storeType).toBe('weapons')
+    expect(result.data!.items).toHaveLength(2)
+    expect(result.data!.items[0].isCustom).toBe(false)
+    expect(result.data!.items[1].isCustom).toBe(true)
+    expect(result.data!.roomId).toBe('room-1')
+    expect(result.data!.npcId).toBe('npc-1')
+  })
+
+  it('fills defaults for missing fields', () => {
+    const result = AdventureStoreSchema.safeParse({ id: 'store-2' })
+    expect(result.success).toBe(true)
+    expect(result.data!.name).toBe('')
+    expect(result.data!.description).toBe('')
+    expect(result.data!.storeType).toBe('custom')
+    expect(result.data!.items).toEqual([])
+    expect(result.data!.keeperName).toBeUndefined()
+    expect(result.data!.keeperAncestry).toBeUndefined()
+    expect(result.data!.roomId).toBeUndefined()
+    expect(result.data!.npcId).toBeUndefined()
+  })
+
+  it('accepts all 8 store types', () => {
+    const types = ['general', 'weapons', 'armor', 'magic', 'potions', 'tavern', 'temple', 'custom'] as const
+    for (const storeType of types) {
+      const result = AdventureStoreSchema.safeParse({ id: `store-${storeType}`, storeType })
+      expect(result.success).toBe(true)
+      expect(result.data!.storeType).toBe(storeType)
+    }
+  })
+
+  it('campaign without stores gets empty array (backward compat)', () => {
+    const result = validateCampaign({
+      id: 'old-camp',
+      name: 'Old Campaign',
+      adventure: {
+        hook: '',
+        overview: '',
+        targetLevel: [1, 3],
+        rooms: [],
+        randomEncounters: [],
+        npcs: [],
+      },
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.adventure.stores).toEqual([])
+  })
+})
+
+describe('StoreItemSchema', () => {
+  it('fills defaults for missing fields', () => {
+    const result = StoreItemSchema.safeParse({ id: 'item-1' })
+    expect(result.success).toBe(true)
+    expect(result.data!.itemDefinitionId).toBe('')
+    expect(result.data!.name).toBe('')
+    expect(result.data!.description).toBe('')
+    expect(result.data!.price).toBe(0)
+    expect(result.data!.quantity).toBe(-1)
+    expect(result.data!.category).toBe('gear')
+    expect(result.data!.slots).toBe(1)
+    expect(result.data!.isCustom).toBe(false)
+  })
+
+  it('accepts a fully specified store item', () => {
+    const result = StoreItemSchema.safeParse({
+      id: 'item-2',
+      itemDefinitionId: 'longsword',
+      name: 'Longsword',
+      description: 'A fine blade.',
+      price: 15,
+      quantity: 3,
+      category: 'weapon',
+      slots: 2,
+      isCustom: false,
+    })
+    expect(result.success).toBe(true)
+    expect(result.data!.name).toBe('Longsword')
+    expect(result.data!.price).toBe(15)
+    expect(result.data!.quantity).toBe(3)
   })
 })
 

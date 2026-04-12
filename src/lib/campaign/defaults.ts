@@ -1,5 +1,6 @@
 import { generateId } from '@/lib/utils/id.ts'
-import type { Campaign, AdventureRoom, AdventureNPC, TrapDefinition, RandomEncounterTable, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
+import type { Campaign, AdventureRoom, AdventureNPC, TrapDefinition, RandomEncounterTable, AdventureStore, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
+import type { StoreItem } from '@/schemas/stores.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 
 export function createEmptyCampaign(name: string, author: string = ''): Campaign {
@@ -19,6 +20,7 @@ export function createEmptyCampaign(name: string, author: string = ''): Campaign
       rooms: [],
       randomEncounters: [],
       npcs: [],
+      stores: [],
     },
     lore: { chapters: [] },
     maps: [],
@@ -68,6 +70,30 @@ export function createEmptyEncounterTable(): RandomEncounterTable {
     name: 'Random Encounters',
     diceExpression: '1d6',
     entries: [],
+  }
+}
+
+export function createEmptyStore(): AdventureStore {
+  return {
+    id: generateId(),
+    name: '',
+    description: '',
+    storeType: 'custom',
+    items: [],
+  }
+}
+
+export function createEmptyStoreItem(): StoreItem {
+  return {
+    id: generateId(),
+    itemDefinitionId: '',
+    name: '',
+    description: '',
+    price: 0,
+    quantity: -1,
+    category: 'gear',
+    slots: 1,
+    isCustom: true,
   }
 }
 

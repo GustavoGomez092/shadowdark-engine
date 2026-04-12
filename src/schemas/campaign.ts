@@ -1,6 +1,7 @@
 import type { DataPackContent } from '@/lib/data/types.ts'
 import type { MonsterDefinition } from '@/schemas/monsters.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
+import type { StoreItem } from './stores.ts'
 
 // ── Campaign ──
 
@@ -27,6 +28,7 @@ export interface AdventureModule {
   rooms: AdventureRoom[]
   randomEncounters: RandomEncounterTable[]
   npcs: AdventureNPC[]
+  stores: AdventureStore[]
 }
 
 export interface AdventureRoom {
@@ -76,6 +78,22 @@ export interface RandomEncounterEntry {
   description: string
   monsterIds?: string[]
   quantity?: string
+}
+
+// ── Adventure Stores ──
+
+export type AdventureStoreType = 'general' | 'weapons' | 'armor' | 'magic' | 'potions' | 'tavern' | 'temple' | 'custom'
+
+export interface AdventureStore {
+  id: string
+  name: string
+  description: string
+  keeperName?: string
+  keeperAncestry?: string
+  storeType: AdventureStoreType
+  items: StoreItem[]
+  roomId?: string
+  npcId?: string
 }
 
 // ── Lore Document ──

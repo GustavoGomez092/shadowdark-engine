@@ -93,6 +93,34 @@ export const RandomEncounterTableSchema = z.object({
   entries: z.array(RandomEncounterEntrySchema).default([]),
 }).passthrough()
 
+// ── Store Item ──
+
+export const StoreItemSchema = z.object({
+  id: z.string(),
+  itemDefinitionId: z.string().default(''),
+  name: z.string().default(''),
+  description: z.string().default(''),
+  price: z.number().default(0),
+  quantity: z.number().default(-1),
+  category: z.string().default('gear'),
+  slots: z.number().default(1),
+  isCustom: z.boolean().default(false),
+}).passthrough()
+
+// ── Adventure Store ──
+
+export const AdventureStoreSchema = z.object({
+  id: z.string(),
+  name: z.string().default(''),
+  description: z.string().default(''),
+  keeperName: z.string().optional(),
+  keeperAncestry: z.string().optional(),
+  storeType: z.enum(['general', 'weapons', 'armor', 'magic', 'potions', 'tavern', 'temple', 'custom']).default('custom'),
+  items: z.array(StoreItemSchema).default([]),
+  roomId: z.string().optional(),
+  npcId: z.string().optional(),
+}).passthrough()
+
 // ── Adventure Module ──
 
 export const AdventureModuleSchema = z.object({
@@ -102,6 +130,7 @@ export const AdventureModuleSchema = z.object({
   rooms: z.array(AdventureRoomSchema).default([]),
   randomEncounters: z.array(RandomEncounterTableSchema).default([]),
   npcs: z.array(AdventureNPCSchema).default([]),
+  stores: z.array(AdventureStoreSchema).default([]),
 }).passthrough()
 
 // ── Lore ──
@@ -226,6 +255,7 @@ export const CampaignSchema = z.object({
     rooms: [],
     randomEncounters: [],
     npcs: [],
+    stores: [],
   }),
   lore: LoreDocumentSchema.default({ chapters: [] }),
   maps: z.array(CampaignMapSchema).default([]),

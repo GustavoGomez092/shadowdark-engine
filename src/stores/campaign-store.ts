@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { Campaign, CampaignIndexEntry, AdventureRoom, AdventureNPC, RandomEncounterTable, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
+import type { Campaign, CampaignIndexEntry, AdventureRoom, AdventureNPC, RandomEncounterTable, AdventureStore, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 import type { DataPackContent } from '@/lib/data/types.ts'
 import { createEmptyCampaign } from '@/lib/campaign/defaults.ts'
@@ -35,6 +35,9 @@ interface CampaignStore {
   addEncounterTable: (table: RandomEncounterTable) => void
   updateEncounterTable: (id: string, updater: (t: RandomEncounterTable) => void) => void
   removeEncounterTable: (id: string) => void
+  addStore: (store: AdventureStore) => void
+  updateStore: (id: string, updater: (s: AdventureStore) => void) => void
+  removeStore: (id: string) => void
 
   // Lore
   addChapter: (chapter: LoreChapter) => void
@@ -210,6 +213,25 @@ export const useCampaignStore = create<CampaignStore>()(
       set(state => {
         if (!state.campaign) return
         state.campaign.adventure.randomEncounters = state.campaign.adventure.randomEncounters.filter(t => t.id !== id)
+      })
+      const c = get().campaign; if (c) debouncedSave(c)
+    },
+
+    addStore: (store) => {
+      set(state => { state.campaign?.adventure.stores.push(store) })
+      const c = get().campaign; if (c) debouncedSave(c)
+    },
+    updateStore: (id, updater) => {
+      set(state => {
+        const s = state.campaign?.adventure.stores.find(s => s.id === id)
+        if (s) updater(s)
+      })
+      const c = get().campaign; if (c) debouncedSave(c)
+    },
+    removeStore: (id) => {
+      set(state => {
+        if (!state.campaign) return
+        state.campaign.adventure.stores = state.campaign.adventure.stores.filter(s => s.id !== id)
       })
       const c = get().campaign; if (c) debouncedSave(c)
     },
