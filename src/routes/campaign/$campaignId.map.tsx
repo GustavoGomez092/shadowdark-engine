@@ -5,6 +5,8 @@ import { createEmptyMap } from '@/lib/campaign/defaults.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { openPrintExport, openGMPrint, PAPER_SIZES } from '@/lib/dungeon-renderer/print-export.ts'
 import type { PrintOptions } from '@/lib/dungeon-renderer/print-export.ts'
+import { MapCanvas, type MapTool } from '@/components/campaign/map/map-canvas.tsx'
+import type { TerrainType, WallType } from '@/schemas/map.ts'
 // @ts-nocheck
 import DungeonApp from '@/lib/dungeon-renderer/App.js'
 import style from '@/lib/dungeon-renderer/Style.js'
@@ -65,6 +67,12 @@ function MapEditorPage() {
   const [editingTitle, setEditingTitle] = useState('')
   const [editingStory, setEditingStory] = useState('')
   const [editorPanel, setEditorPanel] = useState<'none' | 'room' | 'door' | 'dungeon' | 'maps'>('none')
+  const [viewingGridMap, setViewingGridMap] = useState(false)
+  const [gridMapTool, setGridMapTool] = useState<MapTool>('select')
+  const [gridTerrainType, setGridTerrainType] = useState<TerrainType>('stone_floor')
+  const [gridWallType, setGridWallType] = useState<WallType>('wall')
+  const [gridFurniture, setGridFurniture] = useState<string>('table')
+  const [gridShowGrid, setGridShowGrid] = useState(true)
   const [placingProp, setPlacingProp] = useState<string | null>(null)
   const [repositioningProp, setRepositioningProp] = useState(false)
   const [selectedProp, setSelectedProp] = useState<any>(null)
@@ -119,23 +127,21 @@ function MapEditorPage() {
     setLoading(false)
   }, [])
 
-  // Auto-load latest saved map or generate random on mount
+  // Auto-load latest saved dungeon map on mount (skip grid-only maps)
   const autoLoaded = useRef(false)
   useEffect(() => {
     if (autoLoaded.current || !campaign) return
     autoLoaded.current = true
 
-    const maps = campaign.maps
-    if (maps.length > 0) {
-      // Load the most recently updated map
-      const latest = [...maps].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))[0]
-      if (latest.dungeonData) {
-        handleLoadMap(latest.id)
-        return
-      }
+    const dungeonMaps = campaign.maps.filter(m => m.dungeonData)
+    if (dungeonMaps.length > 0) {
+      const latest = [...dungeonMaps].sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))[0]
+      handleLoadMap(latest.id)
+    } else if (campaign.maps.length > 0) {
+      // Has grid maps but no dungeon maps — show maps panel
+      setEditorPanel('maps')
     }
-    // No saved maps — generate a random one
-    initApp()
+    // No maps at all — show empty state with Generate button
   }, [campaign])
 
   // Resize
@@ -411,14 +417,16 @@ function MapEditorPage() {
     const map = campaign?.maps.find(m => m.id === mapId)
     if (!map) return
     if (!map.dungeonData) {
-      // Grid-based map — can't be loaded in the dungeon renderer
+      // Grid-based map — show in grid renderer
       setCurrentMapId(map.id)
       setEditingTitle(map.name)
+      setViewingGridMap(true)
       setGenerated(false)
       return
     }
 
-    // Initialize app if not yet created
+    // Dungeon map — load in dungeon renderer
+    setViewingGridMap(false)
     if (!appRef.current) {
       await initApp()
     }
@@ -586,7 +594,24 @@ function MapEditorPage() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Canvas with zoom/pan */}
+        {/* Canvas area — grid map viewer OR dungeon canvas */}
+        {viewingGridMap && currentMapId && campaign?.maps.find(m => m.id === currentMapId) ? (
+          <div className="flex-1 relative">
+            <MapCanvas
+              map={campaign.maps.find(m => m.id === currentMapId)!}
+              onMapChange={updater => {
+                const mapId = currentMapId
+                if (mapId) updateMap(mapId, updater)
+              }}
+              activeTool={gridMapTool}
+              activeTerrainType={gridTerrainType}
+              activeWallType={gridWallType}
+              activeFurniture={gridFurniture}
+              showGrid={gridShowGrid}
+              gridDistanceFt={5}
+            />
+          </div>
+        ) : (
         <div ref={containerRef} className="flex-1 relative bg-[#F8F8F4]">
           <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto"
             onMouseDown={e => {
@@ -744,9 +769,10 @@ function MapEditorPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Editor Panel (right sidebar) */}
-        {editorPanel !== 'none' && (generated || editorPanel === 'maps') && (
+        {editorPanel !== 'none' && (generated || viewingGridMap || editorPanel === 'maps') && (
           <div className="w-72 border-l border-border bg-card overflow-y-auto p-3 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold">
