@@ -137,6 +137,11 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
   // Redraw original canvas
   app.draw()
 
+  // Full page size in pixels (margin is visual, inside each tile)
+  const fullPageWpx = Math.floor(paperW * DPI)
+  const fullPageHpx = Math.floor(paperH * DPI)
+  const marginPx = Math.floor(margin * DPI)
+
   // Slice cropped map into page tiles
   const cols = Math.max(1, Math.ceil(croppedW / printWpx))
   const rows = Math.max(1, Math.ceil(croppedH / printHpx))
@@ -151,15 +156,16 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
       const sh = Math.min(printHpx, croppedH - sy)
 
       const tile = document.createElement('canvas')
-      tile.width = printWpx
-      tile.height = printHpx
+      tile.width = fullPageWpx
+      tile.height = fullPageHpx
       const tCtx = tile.getContext('2d')!
       tCtx.fillStyle = '#FFFFFF'
-      tCtx.fillRect(0, 0, printWpx, printHpx)
-      tCtx.drawImage(cropped, sx, sy, sw, sh, 0, 0, sw, sh)
+      tCtx.fillRect(0, 0, fullPageWpx, fullPageHpx)
+      // Draw map content inside margin area
+      tCtx.drawImage(cropped, sx, sy, sw, sh, marginPx, marginPx, sw, sh)
 
-      // Crop/alignment marks at corners
-      drawCropMarks(tCtx, printWpx, printHpx, row, col, rows, cols)
+      // Crop/alignment marks at corners (inside margin)
+      drawCropMarks(tCtx, fullPageWpx, fullPageHpx, row, col, rows, cols)
 
       tiles.push(tile.toDataURL('image/png'))
     }
@@ -213,11 +219,11 @@ export function openPrintExport(app: any, styleObj: any, options: PrintOptions) 
 <head>
 <title>Print: ${esc(title)}</title>
 <style>
-  @page { size: ${paperCSS}; margin: ${margin}in; }
+  @page { size: ${paperCSS}; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e8e8e8; color: #222; }
   .page {
-    width: ${printWpx}px; height: ${printHpx}px;
+    width: ${fullPageWpx}px; height: ${fullPageHpx}px;
     background: white; margin: 20px auto;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     overflow: hidden; position: relative;
