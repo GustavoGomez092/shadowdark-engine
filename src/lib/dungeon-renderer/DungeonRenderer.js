@@ -26,8 +26,8 @@ import { chaikinSmooth } from './Geometry.js';
 const HATCHING = {
   mode: 'Default',
   nStrokes: 3,                  // parallel lines per cluster
-  clusterSize: 30 * 0.333,     // ~10px between cluster centers
-  distance: 30 * 0.5,          // 15px wall-band expansion
+  clusterRatio: 0.333,          // clusterSize = cellSize * clusterRatio
+  distanceRatio: 0.5,           // distance = cellSize * distanceRatio
 };
 
 class DungeonRenderer {
@@ -642,7 +642,10 @@ class DungeonRenderer {
    */
   _drawShading(dungeon) {
     const ctx = this.ctx;
-    const dist = HATCHING.distance;
+    // Scale hatching parameters with cellSize
+    const cs = this.cellSize;
+    const dist = cs * HATCHING.distanceRatio;
+    const clusterSize = cs * HATCHING.clusterRatio;
 
     // Collect hatching areas for rooms
     const areas = [];
@@ -651,35 +654,30 @@ class DungeonRenderer {
     }
     // Also add hatching areas for doors
     for (const door of dungeon.doors) {
-      const cs = this.cellSize;
       areas.push({ type: 'rect', x: cs * door.x, y: cs * door.y, w: cs, h: cs });
     }
 
-    // Clone and inflate each area by `distance` (original: c.inflate(jb.distance))
+    // Clone and inflate each area by `distance`
     const inflated = areas.map(a => this._inflateArea(a, dist));
 
     // ── doShading: semi-transparent fill on inflated areas ──
     if (!style.bw && style.getShading() !== style.getPaper()) {
-      this._doShading(inflated);
+      this._doShading(inflated, dist);
     }
 
     // ── doHatching: draw short parallel lines in the wall band ──
-    // Original computes inner exclusion from the INFLATED areas (not the base areas).
-    // inner = inflated.clone().inflate(-(distance + 2*clusterSize/3))
-    // This is critical for small rooms (3x3) where the base area is only 30x30 -
-    // computing from base would yield negative dimensions, losing the exclusion zone entirely.
-    const innerShrink = dist + 2 * HATCHING.clusterSize / 3;
+    const innerShrink = dist + 2 * clusterSize / 3;
     const inner = inflated.map(a => this._inflateArea(a, -innerShrink));
-    this._doHatching(inflated, inner);
+    this._doHatching(inflated, inner, clusterSize);
   }
 
   /**
    * Original doShading: draws semi-transparent rounded-rect fills on inflated areas.
    * lineStyle(H.thick, H.shading, 0.4) + beginFill(H.shading) + drawRoundRect
    */
-  _doShading(inflatedAreas) {
+  _doShading(inflatedAreas, dist) {
     const ctx = this.ctx;
-    const cornerRadius = 2 * HATCHING.distance;
+    const cornerRadius = 2 * dist;
 
     ctx.save();
     ctx.globalAlpha = 0.4;
@@ -717,9 +715,8 @@ class DungeonRenderer {
    *  4. nStrokes (default 3) short parallel lines are drawn at each cluster,
    *     with length limited by proximity to neighboring clusters' lines.
    */
-  _doHatching(outerAreas, innerAreas) {
+  _doHatching(outerAreas, innerAreas, clusterSize) {
     const ctx = this.ctx;
-    const clusterSize = HATCHING.clusterSize;
     const nStrokes = HATCHING.nStrokes;
 
     // ── Step 1: Poisson disk sampling across the union of all outer areas ──
