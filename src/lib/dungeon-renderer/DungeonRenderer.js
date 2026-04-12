@@ -748,7 +748,7 @@ class DungeonRenderer {
     // ── Step 3: For each valid point, compute angle and draw strokes ──
     ctx.save();
     ctx.strokeStyle = style.getInk();
-    ctx.lineWidth = style.stroke;
+    ctx.lineWidth = style.stroke * (this.cellSize / 30);
 
     // Map from point index to its drawn line segments (for neighbor clipping)
     const drawnLines = new Map();
