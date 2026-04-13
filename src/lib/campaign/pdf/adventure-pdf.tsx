@@ -3,10 +3,10 @@ import type { Campaign, AdventureRoom, AdventureNPC, AdventureStore, RandomEncou
 import type { MonsterDefinition } from '@/schemas/monsters.ts'
 import { styles, COLORS } from './pdf-styles.ts'
 
-// Register Old English font from CDN for title
+// Register UnifrakturCook (Old English / Blackletter) for title
 Font.register({
-  family: 'OldEnglish',
-  src: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/unhinted/otf/NotoSerifDisplay/NotoSerifDisplay-Black.otf',
+  family: 'UnifrakturCook',
+  src: 'https://fonts.gstatic.com/s/unifrakturcook/v23/IurA6Yli8YOdcoky-0PTTdOm_9IQ1CH4.ttf',
 })
 
 // Spanish section labels
@@ -126,7 +126,7 @@ function CoverPage({ campaign }: { campaign: Campaign }) {
     <Page size="LETTER" style={styles.coverPage}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 72 }}>
         <View style={{ marginBottom: 40, alignItems: 'center' }}>
-          <Text style={{ fontFamily: 'OldEnglish', fontSize: 42, textAlign: 'center', color: COLORS.black, marginBottom: 12 }}>
+          <Text style={{ fontFamily: 'UnifrakturCook', fontSize: 42, textAlign: 'center', color: COLORS.black, marginBottom: 12 }}>
             {campaign.name}
           </Text>
           <View style={{ borderBottomWidth: 2, borderBottomColor: COLORS.black, marginBottom: 16, width: 200 }} />
