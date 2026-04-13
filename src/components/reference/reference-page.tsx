@@ -985,14 +985,17 @@ function CharacterCreationRef() {
         </h3>
         <p className="text-xs text-muted-foreground mb-3">
           {locale === 'es'
-            ? `Tira 2d6 o elige un trasfondo de la lista (${BACKGROUNDS.length} disponibles). Tu trasfondo te da ventaja en chequeos relevantes.`
-            : `Roll 2d6 or choose a background from the list (${BACKGROUNDS.length} available). Your background gives you advantage on relevant checks.`}
+            ? `Tira 1d${BACKGROUNDS.length} o elige un trasfondo de la lista. Tu trasfondo te da ventaja en chequeos relevantes.`
+            : `Roll 1d${BACKGROUNDS.length} or choose a background from the list. Your background gives you advantage on relevant checks.`}
         </p>
         <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-          {BACKGROUNDS.map((b) => (
-            <div key={b.id} className="rounded-lg bg-secondary/30 px-2.5 py-1.5 text-xs">
-              <span className="font-semibold">{tData('backgrounds', b.id, 'name', b.name)}</span>
-              <span className="text-muted-foreground"> -- {tData('backgrounds', b.id, 'description', b.description)}</span>
+          {BACKGROUNDS.map((b, i) => (
+            <div key={b.id} className="rounded-lg bg-secondary/30 px-2.5 py-1.5 text-xs flex gap-2">
+              <span className="font-mono text-muted-foreground shrink-0 w-5 text-right">{i + 1}.</span>
+              <div>
+                <span className="font-semibold">{tData('backgrounds', b.id, 'name', b.name)}</span>
+                <span className="text-muted-foreground"> -- {tData('backgrounds', b.id, 'description', b.description)}</span>
+              </div>
             </div>
           ))}
         </div>
