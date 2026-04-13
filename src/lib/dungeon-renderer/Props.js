@@ -538,6 +538,80 @@ function drawWell(ctx, x, y, scale, rotation, style) {
 }
 
 /**
+ * Stairs - parallel lines indicating a staircase with direction arrow.
+ */
+function drawStairs(ctx, x, y, scale, rotation, style) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  const w = 0.5 * scale;
+  const h = 0.7 * scale;
+  const steps = 5;
+  ctx.strokeStyle = style.getInk();
+  ctx.lineWidth = style.normal;
+  ctx.strokeRect(-w, -h, w * 2, h * 2);
+  for (let i = 1; i < steps; i++) {
+    const sy = -h + (i * (h * 2)) / steps;
+    ctx.beginPath();
+    ctx.moveTo(-w, sy);
+    ctx.lineTo(w, sy);
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.moveTo(0, -h * 0.6);
+  ctx.lineTo(0, h * 0.6);
+  ctx.moveTo(-w * 0.3, h * 0.3);
+  ctx.lineTo(0, h * 0.6);
+  ctx.lineTo(w * 0.3, h * 0.3);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/**
+ * Door - rectangular door shape with handle dot.
+ */
+function drawDoor(ctx, x, y, scale, rotation, style) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  const w = 0.35 * scale;
+  const h = 0.5 * scale;
+  ctx.fillStyle = style.getFloor();
+  ctx.fillRect(-w, -h, w * 2, h * 2);
+  ctx.strokeStyle = style.getInk();
+  ctx.lineWidth = style.normal;
+  ctx.strokeRect(-w, -h, w * 2, h * 2);
+  ctx.beginPath();
+  ctx.arc(w * 0.5, 0, scale * 0.06, 0, Math.PI * 2);
+  ctx.fillStyle = style.getInk();
+  ctx.fill();
+  ctx.restore();
+}
+
+/**
+ * Window - double-frame rectangle with cross bars.
+ */
+function drawWindow(ctx, x, y, scale, rotation, style) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  const w = 0.4 * scale;
+  const h = 0.25 * scale;
+  ctx.strokeStyle = style.getInk();
+  ctx.lineWidth = style.normal;
+  ctx.strokeRect(-w, -h, w * 2, h * 2);
+  const inset = scale * 0.06;
+  ctx.strokeRect(-w + inset, -h + inset, (w - inset) * 2, (h - inset) * 2);
+  ctx.beginPath();
+  ctx.moveTo(0, -h);
+  ctx.lineTo(0, h);
+  ctx.moveTo(-w, 0);
+  ctx.lineTo(w, 0);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/**
  * Master dispatcher function that routes to the correct prop drawing function.
  *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D rendering context
@@ -564,6 +638,9 @@ function drawProp(ctx, type, x, y, scale, rotation, style) {
     'tapestry': drawTapestry,
     'throne': drawThrone,
     'well': drawWell,
+    'stairs': drawStairs,
+    'door': drawDoor,
+    'window': drawWindow,
   };
 
   const fn = drawFunctions[type.toLowerCase()];
@@ -592,6 +669,9 @@ const PROP_TYPES = [
   'tapestry',
   'throne',
   'well',
+  'stairs',
+  'door',
+  'window',
 ];
 
 export {
