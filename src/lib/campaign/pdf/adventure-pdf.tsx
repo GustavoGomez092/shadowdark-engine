@@ -289,19 +289,12 @@ function MapPage({ image, campaign, mapIndex }: { image: { mapId: string; dataUr
   const map = campaign.maps.find(m => m.id === image.mapId)
   const mapName = map?.name || `Map ${mapIndex + 1}`
 
-  // Find random encounters (show all encounter tables on first map page, or distribute)
-  const encounters = mapIndex === 0 ? campaign.adventure.randomEncounters : []
-
   return (
     <Page size="LETTER" style={styles.page}>
       <Text style={styles.sectionHeader}>{mapName}</Text>
       <View style={styles.rule} />
 
-      <Image src={image.dataUrl} style={{ ...styles.mapImage, maxHeight: encounters.length > 0 ? 340 : 580 }} />
-
-      {encounters.map(table => (
-        <EncounterTable key={table.id} table={table} />
-      ))}
+      <Image src={image.dataUrl} style={styles.mapImage} />
 
       <PageNumber />
     </Page>
