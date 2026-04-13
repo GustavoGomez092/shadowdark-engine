@@ -461,6 +461,57 @@ function RulesCheatSheet() {
         </div>
       </div>
 
+      {/* Torch Tracking & Mishaps */}
+      <div className="rounded-xl border border-orange-500/20 bg-card p-4 sm:col-span-2">
+        <h3 className="mb-3 font-bold text-orange-400">
+          {locale === 'es' ? 'Antorchas y Fuentes de Luz' : 'Torches & Light Sources'}
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <h4 className="text-xs font-bold text-orange-300 mb-2">
+              {locale === 'es' ? 'Seguimiento en Tiempo Real' : 'Real-Time Tracking'}
+            </h4>
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p>{locale === 'es'
+                ? 'En Shadowdark, la luz se mide en TIEMPO REAL. Cuando enciendes una antorcha, inicia un temporizador de 1 hora real. Cuando se acaba, la antorcha se apaga.'
+                : 'In Shadowdark, light is tracked in REAL TIME. When you light a torch, start a real 1-hour timer. When it runs out, the torch goes out.'}</p>
+              <div className="rounded-lg bg-secondary/30 p-2 mt-2 space-y-1">
+                <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Antorcha' : 'Torch'}</span><span>1 {locale === 'es' ? 'hora real' : 'real hour'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
+                <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Linterna' : 'Lantern'}</span><span>4 {locale === 'es' ? 'horas reales' : 'real hours'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
+                <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Hechizo Luz' : 'Light spell'}</span><span>1 {locale === 'es' ? 'hora real (concentración)' : 'real hour (focus)'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-orange-300 mb-2">
+              {locale === 'es' ? 'Tabla de Percances de Antorcha (1d6)' : 'Torch Mishap Table (1d6)'}
+            </h4>
+            <p className="text-[10px] text-muted-foreground mb-2">
+              {locale === 'es'
+                ? 'Cada vez que un PJ recibe daño, cae al suelo, o entra en contacto con agua, tira 1d6 por cada antorcha encendida que lleve:'
+                : 'Each time a PC takes damage, falls prone, or contacts water, roll 1d6 for each lit torch they carry:'}
+            </p>
+            <div className="space-y-0.5">
+              {[
+                { roll: '1', en: 'The torch goes out immediately.', es: 'La antorcha se apaga inmediatamente.' },
+                { roll: '2', en: 'The torch sputters — it goes out at the end of this round unless sheltered.', es: 'La antorcha chisporrotea — se apaga al final de esta ronda a menos que se proteja.' },
+                { roll: '3-6', en: 'The torch stays lit.', es: 'La antorcha sigue encendida.' },
+              ].map(m => (
+                <div key={m.roll} className={`flex gap-2 rounded px-2 py-1 text-xs ${m.roll === '2' ? 'bg-secondary/20' : ''}`}>
+                  <span className="font-mono font-bold text-orange-400 w-6 shrink-0 text-right">{m.roll}</span>
+                  <span className="text-muted-foreground">{locale === 'es' ? m.es : m.en}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2 italic">
+              {locale === 'es'
+                ? 'Consejo: Usa el temporizador integrado del motor ShadowDark para rastrear las antorchas automáticamente.'
+                : 'Tip: Use the ShadowDark Engine\'s built-in timer to track torches automatically.'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="mb-3 font-bold text-primary">{t('reference.rules.spellcasting')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
