@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useLocale } from "@/hooks/use-locale.ts"
 import { useDataRegistry } from "@/hooks/use-data-registry.ts"
 import {
@@ -13,7 +13,7 @@ import { getRandomTrap } from "@/data/tables/traps.ts"
 import { rollDice } from "@/lib/dice/roller.ts"
 import { getAbilityModifier } from "@/schemas/reference.ts"
 
-type Tab = "rules" | "spells" | "items" | "monsters" | "world" | "generators" | "classes" | "charCreation"
+type Tab = "rules" | "spells" | "items" | "monsters" | "world" | "generators" | "classes" | "charCreation" | "tools"
 
 // ========== SPANISH CLASS TRANSLATIONS ==========
 const CLASS_ES: Record<string, {
@@ -316,6 +316,7 @@ export function ReferencePage() {
             ["world", t('reference.tabs.world')],
             ["classes", t('reference.tabs.classes')],
             ["charCreation", t('reference.tabs.charCreation')],
+            ["tools", locale === 'es' ? 'Herramientas' : 'Tools'],
             ["generators", t('reference.tabs.generators')],
           ] as const
         ).map(([key, label]) => (
@@ -353,6 +354,7 @@ export function ReferencePage() {
       {tab === "world" && <WorldRef />}
       {tab === "classes" && <ClassesRef search={search} />}
       {tab === "charCreation" && <CharacterCreationRef />}
+      {tab === "tools" && <ToolsTab />}
       {tab === "generators" && <Generators />}
     </main>
   )
@@ -1741,6 +1743,148 @@ function CharacterCreationRef() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ========== TOOLS ==========
+
+interface LightTimer {
+  id: string
+  label: string
+  totalSeconds: number
+  remainingSeconds: number
+  active: boolean
+}
+
+function ToolsTab() {
+  const { locale } = useLocale()
+  const [timers, setTimers] = useState<LightTimer[]>([])
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Tick all active timers every second
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setTimers(prev => prev.map(t => {
+        if (!t.active || t.remainingSeconds <= 0) return t
+        const next = t.remainingSeconds - 1
+        return { ...t, remainingSeconds: next, active: next > 0 }
+      }))
+    }, 1000)
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+  }, [])
+
+  function addTimer(label: string, minutes: number) {
+    setTimers(prev => [...prev, {
+      id: `${Date.now()}-${Math.random()}`,
+      label,
+      totalSeconds: minutes * 60,
+      remainingSeconds: minutes * 60,
+      active: true,
+    }])
+  }
+
+  function toggleTimer(id: string) {
+    setTimers(prev => prev.map(t => t.id === id ? { ...t, active: !t.active } : t))
+  }
+
+  function resetTimer(id: string) {
+    setTimers(prev => prev.map(t => t.id === id ? { ...t, remainingSeconds: t.totalSeconds, active: false } : t))
+  }
+
+  function removeTimer(id: string) {
+    setTimers(prev => prev.filter(t => t.id !== id))
+  }
+
+  function formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+
+  const presets = [
+    { label: locale === 'es' ? 'Antorcha' : 'Torch', minutes: 60, icon: '🔥', color: 'orange' },
+    { label: locale === 'es' ? 'Linterna' : 'Lantern', minutes: 240, icon: '🏮', color: 'yellow' },
+    { label: locale === 'es' ? 'Fogata' : 'Campfire', minutes: 480, icon: '🪵', color: 'red' },
+    { label: locale === 'es' ? 'Hechizo Luz' : 'Light Spell', minutes: 60, icon: '✨', color: 'blue' },
+    { label: locale === 'es' ? 'Personalizado (10 min)' : 'Custom (10 min)', minutes: 10, icon: '⏱', color: 'gray' },
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* Light Source Tracker */}
+      <div className="rounded-xl border border-orange-500/20 bg-card p-4">
+        <h3 className="mb-1 text-lg font-bold text-orange-400">
+          {locale === 'es' ? 'Rastreador de Fuentes de Luz' : 'Light Source Tracker'}
+        </h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          {locale === 'es'
+            ? 'Shadowdark usa tiempo REAL para las fuentes de luz. Haz clic en un botón para iniciar un temporizador.'
+            : 'Shadowdark uses REAL TIME for light sources. Click a button to start a timer.'}
+        </p>
+
+        {/* Preset buttons */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {presets.map(p => (
+            <button key={p.label} onClick={() => addTimer(p.label, p.minutes)}
+              className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-sm font-medium hover:bg-secondary/60 transition flex items-center gap-2">
+              <span>{p.icon}</span>
+              <span>{p.label}</span>
+              <span className="text-xs text-muted-foreground">({p.minutes >= 60 ? `${p.minutes / 60}h` : `${p.minutes}m`})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Active timers */}
+        {timers.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
+            {locale === 'es' ? 'No hay temporizadores activos. Haz clic arriba para añadir uno.' : 'No active timers. Click above to add one.'}
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {timers.map(timer => {
+              const pct = timer.totalSeconds > 0 ? (timer.remainingSeconds / timer.totalSeconds) * 100 : 0
+              const isLow = pct < 20 && pct > 0
+              const isDead = timer.remainingSeconds <= 0
+              return (
+                <div key={timer.id} className={`rounded-xl border p-3 transition ${
+                  isDead ? 'border-red-500/40 bg-red-500/5' : isLow ? 'border-orange-500/40 bg-orange-500/5' : 'border-border bg-secondary/20'
+                }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-sm">{timer.label}</span>
+                    <button onClick={() => removeTimer(timer.id)} className="text-xs text-red-400 hover:text-red-300">✕</button>
+                  </div>
+                  {/* Progress bar */}
+                  <div className="h-2 rounded-full bg-secondary/40 mb-2 overflow-hidden">
+                    <div className={`h-full rounded-full transition-all duration-1000 ${
+                      isDead ? 'bg-red-500' : isLow ? 'bg-orange-500' : 'bg-primary'
+                    }`} style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-mono text-xl font-bold ${isDead ? 'text-red-400' : isLow ? 'text-orange-400' : 'text-foreground'}`}>
+                      {isDead ? (locale === 'es' ? 'APAGADA' : 'OUT') : formatTime(timer.remainingSeconds)}
+                    </span>
+                    <div className="flex gap-1">
+                      {!isDead && (
+                        <button onClick={() => toggleTimer(timer.id)}
+                          className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
+                            timer.active ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'border border-border hover:bg-accent'
+                          }`}>
+                          {timer.active ? (locale === 'es' ? 'Pausar' : 'Pause') : (locale === 'es' ? 'Reanudar' : 'Resume')}
+                        </button>
+                      )}
+                      <button onClick={() => resetTimer(timer.id)}
+                        className="rounded-lg border border-border px-3 py-1 text-xs font-medium hover:bg-accent transition">
+                        {locale === 'es' ? 'Reiniciar' : 'Reset'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
