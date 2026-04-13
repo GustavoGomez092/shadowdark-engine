@@ -198,19 +198,23 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, 
               isNat1 ? 'text-red-400' :
               'text-primary'
             }`}>
-              {displayNumbers[0]}
+              {phase === 'result' && lastRoll ? lastRoll.total : displayNumbers[0]}
             </span>
           </div>
         )}
 
-        {/* Die type + special labels */}
+        {/* Die type + breakdown */}
         <div className="mt-1 flex items-center justify-center gap-2 relative">
           <DieIcon type={selectedDie} size={14} className="text-primary" />
-          <span className="text-xs text-muted-foreground">{isMulti ? `${count}${selectedDie}` : selectedDie}</span>
-          {phase === 'result' && modifier !== 0 && lastRoll && (
-            <span className="text-xs text-muted-foreground">· {lastRoll.total - modifier} {modifier > 0 ? '+' : ''}{modifier}</span>
-          )}
-          {phase !== 'result' && modifier !== 0 && <span className="text-xs text-muted-foreground">{modifier > 0 ? '+' : ''}{modifier}</span>}
+          <span className="text-xs text-muted-foreground">
+            {isMulti ? `${count}${selectedDie}` : selectedDie}
+            {phase === 'result' && lastRoll && modifier !== 0
+              ? ` · ${lastRoll.total - modifier} ${modifier > 0 ? '+' : ''}${modifier}`
+              : phase !== 'result' && modifier !== 0
+                ? ` ${modifier > 0 ? '+' : ''}${modifier}`
+                : ''
+            }
+          </span>
           {rollMode !== 'normal' && <span className="text-[10px] uppercase text-amber-400">{rollMode === 'advantage' ? t('dice.advantage') : t('dice.disadvantage')}</span>}
         </div>
 
