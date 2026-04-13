@@ -130,11 +130,11 @@ function CoverPage({ campaign }: { campaign: Campaign }) {
             {campaign.name}
           </Text>
           <View style={{ borderBottomWidth: 2, borderBottomColor: COLORS.black, marginBottom: 16, width: 200 }} />
-          <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 14, textAlign: 'center', color: COLORS.darkGray, marginBottom: 8 }}>
+          <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 14, textAlign: 'center', color: COLORS.darkGray, marginBottom: 8, width: 400 }}>
             {levelText}
           </Text>
           {campaign.author ? (
-            <Text style={{ fontFamily: 'Helvetica-Oblique', fontSize: 11, textAlign: 'center', color: COLORS.mediumGray, marginBottom: 24 }}>
+            <Text style={{ fontFamily: 'Helvetica-Oblique', fontSize: 11, textAlign: 'center', color: COLORS.mediumGray, marginBottom: 24, width: 400 }}>
               {L.by} {campaign.author}
             </Text>
           ) : null}
