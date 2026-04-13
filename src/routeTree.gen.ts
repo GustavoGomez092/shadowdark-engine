@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReferenceRouteImport } from './routes/reference'
 import { Route as PlayerRouteRouteImport } from './routes/player/route'
 import { Route as GmRouteRouteImport } from './routes/gm/route'
 import { Route as CampaignRouteRouteImport } from './routes/campaign/route'
@@ -31,6 +32,11 @@ import { Route as CampaignCampaignIdContentRouteImport } from './routes/campaign
 import { Route as CampaignCampaignIdAiRouteImport } from './routes/campaign/$campaignId.ai'
 import { Route as CampaignCampaignIdAdventureRouteImport } from './routes/campaign/$campaignId.adventure'
 
+const ReferenceRoute = ReferenceRouteImport.update({
+  id: '/reference',
+  path: '/reference',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayerRouteRoute = PlayerRouteRouteImport.update({
   id: '/player',
   path: '/player',
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/campaign': typeof CampaignRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
+  '/reference': typeof ReferenceRoute
   '/campaign/$campaignId': typeof CampaignCampaignIdRouteWithChildren
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
+  '/reference': typeof ReferenceRoute
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
   '/gm/monsters': typeof GmMonstersRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/campaign': typeof CampaignRouteRouteWithChildren
   '/gm': typeof GmRouteRouteWithChildren
   '/player': typeof PlayerRouteRouteWithChildren
+  '/reference': typeof ReferenceRoute
   '/campaign/$campaignId': typeof CampaignCampaignIdRouteWithChildren
   '/gm/characters': typeof GmCharactersRoute
   '/gm/create': typeof GmCreateRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/campaign'
     | '/gm'
     | '/player'
+    | '/reference'
     | '/campaign/$campaignId'
     | '/gm/characters'
     | '/gm/create'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/'
     | '/gm'
     | '/player'
+    | '/reference'
     | '/gm/characters'
     | '/gm/create'
     | '/gm/monsters'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/campaign'
     | '/gm'
     | '/player'
+    | '/reference'
     | '/campaign/$campaignId'
     | '/gm/characters'
     | '/gm/create'
@@ -282,10 +294,18 @@ export interface RootRouteChildren {
   CampaignRouteRoute: typeof CampaignRouteRouteWithChildren
   GmRouteRoute: typeof GmRouteRouteWithChildren
   PlayerRouteRoute: typeof PlayerRouteRouteWithChildren
+  ReferenceRoute: typeof ReferenceRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reference': {
+      id: '/reference'
+      path: '/reference'
+      fullPath: '/reference'
+      preLoaderRoute: typeof ReferenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/player': {
       id: '/player'
       path: '/player'
@@ -513,6 +533,7 @@ const rootRouteChildren: RootRouteChildren = {
   CampaignRouteRoute: CampaignRouteRouteWithChildren,
   GmRouteRoute: GmRouteRouteWithChildren,
   PlayerRouteRoute: PlayerRouteRouteWithChildren,
+  ReferenceRoute: ReferenceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

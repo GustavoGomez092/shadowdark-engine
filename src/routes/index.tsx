@@ -45,6 +45,12 @@ function LandingPage() {
         >
           {t('landing.createCampaign')}
         </Link>
+        <Link
+          to="/reference"
+          className="rounded-lg border border-border px-6 py-3 text-center font-semibold hover:bg-accent transition"
+        >
+          {t('landing.reference')}
+        </Link>
       </div>
     </main>
   )

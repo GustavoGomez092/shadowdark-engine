@@ -507,6 +507,8 @@
   "reference.tabs.monsters": "Monstruos",
   "reference.tabs.world": "Mundo",
   "reference.tabs.generators": "Generadores",
+  "reference.tabs.classes": "Clases",
+  "reference.tabs.charCreation": "Creacion de Personaje",
   "reference.searchPlaceholder": "Buscar...",
 
   "reference.rules.difficultyClasses": "Clases de Dificultad",
@@ -622,6 +624,8 @@
   "reference.world.deities": "Deidades",
   "reference.world.backgrounds": "Trasfondos",
 
+  "reference.classes.hitDie": "Dado de Golpe",
+
   "reference.generators.adventureName": "Nombre de Aventura",
   "reference.generators.randomTrap": "Trampa Aleatoria",
   "reference.generators.randomHazard": "Peligro Aleatorio",
@@ -637,6 +641,7 @@
   "reference.generators.name": "Nombre {{ancestry}}",
 
   "landing.createCampaign": "Crear Campaña",
+  "landing.reference": "Referencia / Reference",
 
   "campaign.title": "Creador de Campañas",
   "campaign.subtitle": "Constructor de Aventuras",

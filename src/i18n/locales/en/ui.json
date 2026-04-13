@@ -507,6 +507,8 @@
   "reference.tabs.monsters": "Monsters",
   "reference.tabs.world": "World",
   "reference.tabs.generators": "Generators",
+  "reference.tabs.classes": "Classes",
+  "reference.tabs.charCreation": "Character Creation",
   "reference.searchPlaceholder": "Search...",
 
   "reference.rules.difficultyClasses": "Difficulty Classes",
@@ -622,6 +624,8 @@
   "reference.world.deities": "Deities",
   "reference.world.backgrounds": "Backgrounds",
 
+  "reference.classes.hitDie": "Hit Die",
+
   "reference.generators.adventureName": "Adventure Name",
   "reference.generators.randomTrap": "Random Trap",
   "reference.generators.randomHazard": "Random Hazard",
@@ -637,6 +641,7 @@
   "reference.generators.name": "{{ancestry}} Name",
 
   "landing.createCampaign": "Create Campaign",
+  "landing.reference": "Reference / Referencia",
 
   "campaign.title": "Campaign Creator",
   "campaign.subtitle": "Adventure Builder",
