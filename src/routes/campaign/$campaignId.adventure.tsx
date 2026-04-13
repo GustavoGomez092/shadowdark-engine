@@ -115,7 +115,7 @@ function AdventureStructurePage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {[...adv.rooms].sort((a, b) => a.number - b.number).map(room => (
+              {[...adv.rooms].sort((a, b) => String(a.number).localeCompare(String(b.number), undefined, { numeric: true })).map(room => (
                 <div key={room.id} onClick={() => setEditingRoom(room)} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 cursor-pointer hover:border-border/80 transition">
                   <div className="min-w-0 flex-1">
                     <span className="font-medium">#{room.number} {room.name || 'Unnamed Room'}</span>

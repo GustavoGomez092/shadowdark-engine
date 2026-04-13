@@ -33,7 +33,7 @@ export interface AdventureModule {
 
 export interface AdventureRoom {
   id: string
-  number: number
+  number: number | string
   name: string
   description: string
   gmNotes: string

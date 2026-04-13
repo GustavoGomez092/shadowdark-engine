@@ -51,7 +51,7 @@ export const TrapDefinitionSchema = z.object({
 
 export const AdventureRoomSchema = z.object({
   id: z.string(),
-  number: z.number(),
+  number: z.union([z.number(), z.string()]),
   name: z.string().default(''),
   description: z.string().default(''),
   gmNotes: z.string().default(''),
