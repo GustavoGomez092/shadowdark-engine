@@ -1,7 +1,52 @@
-import { Document, Page, View, Text, Image } from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image, Font } from '@react-pdf/renderer'
 import type { Campaign, AdventureRoom, AdventureNPC, AdventureStore, RandomEncounterTable, LoreChapter } from '@/schemas/campaign.ts'
 import type { MonsterDefinition } from '@/schemas/monsters.ts'
 import { styles, COLORS } from './pdf-styles.ts'
+
+// Register Old English font from CDN for title
+Font.register({
+  family: 'OldEnglish',
+  src: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/unhinted/otf/NotoSerifDisplay/NotoSerifDisplay-Black.otf',
+})
+
+// Spanish section labels
+const L = {
+  contents: 'Contenido',
+  overview: 'Resumen',
+  adventureHook: 'Gancho de Aventura',
+  gmOverview: 'Resumen del DJ',
+  targetLevel: 'Nivel Sugerido',
+  keyNPCs: 'PNJs Clave',
+  randomEncounters: 'Encuentros Aleatorios',
+  rooms: 'Habitaciones',
+  npcs: 'Personajes No Jugadores',
+  shops: 'Tiendas',
+  creatureStats: 'Estadísticas de Criaturas',
+  lore: 'Trasfondo',
+  creatures: 'Criaturas',
+  treasure: 'Tesoro',
+  traps: 'Trampas',
+  exits: 'Salidas',
+  roll: 'Tirada',
+  encounter: 'Encuentro',
+  item: 'Objeto',
+  price: 'Precio',
+  qty: 'Cant.',
+  keeper: 'Encargado',
+  storeType: 'Tipo',
+  designedFor: 'Diseñado para uso con Shadowdark RPG',
+  levelAdventure: 'Una aventura de nivel',
+  by: 'por',
+  description: 'Descripción',
+  personality: 'Personalidad',
+  role: 'Rol',
+  ancestry: 'Ascendencia',
+  detection: 'Detección',
+  disarm: 'Desarmar',
+  trigger: 'Activador',
+  effect: 'Efecto',
+  damage: 'Daño',
+}
 
 // ── Props ──
 
@@ -74,23 +119,23 @@ function PageNumber() {
 function CoverPage({ campaign }: { campaign: Campaign }) {
   const [minLevel, maxLevel] = campaign.adventure.targetLevel
   const levelText = minLevel === maxLevel
-    ? `A level ${minLevel} adventure`
-    : `A level ${minLevel}-${maxLevel} adventure`
+    ? `${L.levelAdventure} ${minLevel}`
+    : `${L.levelAdventure} ${minLevel}-${maxLevel}`
 
   return (
     <Page size="LETTER" style={styles.coverPage}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 72 }}>
-        <View style={{ marginBottom: 40 }}>
-          <Text style={{ fontFamily: 'Times-Roman', fontSize: 36, textAlign: 'center', color: COLORS.black, marginBottom: 12 }}>
+        <View style={{ marginBottom: 40, alignItems: 'center' }}>
+          <Text style={{ fontFamily: 'OldEnglish', fontSize: 42, textAlign: 'center', color: COLORS.black, marginBottom: 12 }}>
             {campaign.name}
           </Text>
-          <View style={{ borderBottomWidth: 2, borderBottomColor: COLORS.black, marginBottom: 12, width: 200, alignSelf: 'center' }} />
-          <Text style={{ fontFamily: 'Helvetica', fontSize: 13, textAlign: 'center', color: COLORS.darkGray, marginBottom: 8 }}>
+          <View style={{ borderBottomWidth: 2, borderBottomColor: COLORS.black, marginBottom: 16, width: 200 }} />
+          <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 14, textAlign: 'center', color: COLORS.darkGray, marginBottom: 8 }}>
             {levelText}
           </Text>
           {campaign.author ? (
             <Text style={{ fontFamily: 'Helvetica-Oblique', fontSize: 11, textAlign: 'center', color: COLORS.mediumGray, marginBottom: 24 }}>
-              by {campaign.author}
+              {L.by} {campaign.author}
             </Text>
           ) : null}
         </View>
@@ -106,7 +151,7 @@ function CoverPage({ campaign }: { campaign: Campaign }) {
 
       <View style={{ position: 'absolute', bottom: 54, left: 0, right: 0, alignItems: 'center' }}>
         <Text style={{ fontFamily: 'Helvetica', fontSize: 9, color: COLORS.lightGray }}>
-          Designed for use with Shadowdark RPG
+          {L.designedFor}
         </Text>
       </View>
     </Page>
@@ -123,34 +168,34 @@ interface TOCEntry {
 function ContentsPage({ campaign }: { campaign: Campaign }) {
   const entries: TOCEntry[] = []
 
-  entries.push({ title: 'Overview', pageHint: '' })
+  entries.push({ title: L.overview, pageHint: '' })
 
   if (campaign.maps.filter(m => m.dungeonData).length > 0) {
-    entries.push({ title: 'Maps', pageHint: '' })
+    entries.push({ title: 'Mapas', pageHint: '' })
   }
 
   if (campaign.adventure.rooms.length > 0) {
-    entries.push({ title: 'Rooms', pageHint: '' })
+    entries.push({ title: L.rooms, pageHint: '' })
     for (const room of campaign.adventure.rooms) {
       entries.push({ title: `   ${room.number}. ${room.name}`, pageHint: '' })
     }
   }
 
   if (campaign.adventure.npcs.length > 0) {
-    entries.push({ title: 'NPCs', pageHint: '' })
+    entries.push({ title: L.npcs, pageHint: '' })
   }
 
   if (campaign.adventure.stores.length > 0) {
-    entries.push({ title: 'Shops', pageHint: '' })
+    entries.push({ title: L.shops, pageHint: '' })
   }
 
   const monsterIds = collectAllMonsterIds(campaign)
   if (monsterIds.length > 0) {
-    entries.push({ title: 'Creature Statistics', pageHint: '' })
+    entries.push({ title: L.creatureStats, pageHint: '' })
   }
 
   if (campaign.lore.chapters.length > 0) {
-    entries.push({ title: 'Lore', pageHint: '' })
+    entries.push({ title: L.lore, pageHint: '' })
     for (const chapter of campaign.lore.chapters) {
       entries.push({ title: `   ${chapter.title}`, pageHint: '' })
     }
@@ -158,7 +203,7 @@ function ContentsPage({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page}>
-      <Text style={styles.sectionHeader}>Contents</Text>
+      <Text style={styles.sectionHeader}>{L.contents}</Text>
       <View style={styles.ruleThick} />
       {entries.map((entry, i) => (
         <View key={i} style={{ flexDirection: 'row', marginBottom: 3 }}>
@@ -178,7 +223,7 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page}>
-      <Text style={styles.sectionHeader}>Overview</Text>
+      <Text style={styles.sectionHeader}>{L.overview}</Text>
       <View style={styles.ruleThick} />
 
       <View style={styles.twoColumn}>
@@ -186,7 +231,7 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
         <View style={styles.column}>
           {campaign.adventure.hook ? (
             <View>
-              <Text style={styles.subsectionHeader}>Adventure Hook</Text>
+              <Text style={styles.subsectionHeader}>{L.adventureHook}</Text>
               <View style={styles.calloutBox}>
                 <Text style={styles.calloutText}>{campaign.adventure.hook}</Text>
               </View>
@@ -195,7 +240,7 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
 
           {campaign.adventure.overview ? (
             <View>
-              <Text style={styles.subsectionHeader}>GM Overview</Text>
+              <Text style={styles.subsectionHeader}>{L.gmOverview}</Text>
               <Text style={styles.bodyText}>{campaign.adventure.overview}</Text>
             </View>
           ) : null}
@@ -203,14 +248,14 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
 
         {/* Right column: Level info + Key NPCs */}
         <View style={styles.column}>
-          <Text style={styles.subsectionHeader}>Target Level</Text>
+          <Text style={styles.subsectionHeader}>{L.targetLevel}</Text>
           <Text style={styles.bodyText}>
-            {minLevel === maxLevel ? `Level ${minLevel}` : `Levels ${minLevel}-${maxLevel}`}
+            {minLevel === maxLevel ? `Nivel ${minLevel}` : `Niveles ${minLevel}-${maxLevel}`}
           </Text>
 
           {npcs.length > 0 ? (
             <View>
-              <Text style={styles.subsectionHeader}>Key NPCs</Text>
+              <Text style={styles.subsectionHeader}>{L.keyNPCs}</Text>
               {npcs.map(npc => (
                 <View key={npc.id} style={styles.bulletRow}>
                   <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
@@ -225,10 +270,10 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
 
           {campaign.adventure.randomEncounters.length > 0 ? (
             <View>
-              <Text style={styles.subsectionHeader}>Random Encounters</Text>
-              <Text style={styles.bodyText}>
-                {campaign.adventure.randomEncounters.length} encounter table{campaign.adventure.randomEncounters.length !== 1 ? 's' : ''} defined.
-              </Text>
+              <Text style={styles.subsectionHeader}>{L.randomEncounters}</Text>
+              {campaign.adventure.randomEncounters.map(table => (
+                <EncounterTable key={table.id} table={table} />
+              ))}
             </View>
           ) : null}
         </View>
@@ -270,8 +315,8 @@ function EncounterTable({ table }: { table: RandomEncounterTable }) {
       <View style={styles.rule} />
 
       <View style={styles.tableHeader}>
-        <Text style={styles.tableCellHeaderSmall}>Roll</Text>
-        <Text style={styles.tableCellHeaderFlex}>Encounter</Text>
+        <Text style={styles.tableCellHeaderSmall}>{L.roll}</Text>
+        <Text style={styles.tableCellHeaderFlex}>{L.encounter}</Text>
       </View>
 
       {table.entries.map((entry, i) => (
@@ -295,7 +340,7 @@ function RoomPages({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page} wrap>
-      <Text style={styles.sectionHeader}>Rooms</Text>
+      <Text style={styles.sectionHeader}>{L.rooms}</Text>
       <View style={styles.ruleThick} />
 
       {rooms.map(room => (
@@ -333,7 +378,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
         <View style={styles.bulletRow}>
           <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.bodyTextBold}>Creatures: </Text>
+            <Text style={styles.bodyTextBold}>Criaturas:</Text>
             {monsters.map(m => m.name).join(', ')}
           </Text>
         </View>
@@ -344,7 +389,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
         <View style={styles.bulletRow}>
           <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.bodyTextBold}>Treasure: </Text>
+            <Text style={styles.bodyTextBold}>Tesoro:</Text>
             {room.treasure}
           </Text>
         </View>
@@ -358,21 +403,21 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
               <View style={styles.bulletRow}>
                 <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
                 <Text style={styles.bulletText}>
-                  <Text style={styles.bodyTextBold}>Trap — {trap.name}: </Text>
+                  <Text style={styles.bodyTextBold}>Trampa — {trap.name}: </Text>
                   {trap.description}
                 </Text>
               </View>
               <View style={{ ...styles.bulletRow, paddingLeft: 16 }}>
                 <Text style={styles.bulletMarker}>{'\u25B7'} </Text>
                 <Text style={styles.bulletText}>
-                  Trigger: {trap.trigger}. Detection DC {trap.detectionDC}, Disarm DC {trap.disarmDC}
-                  {trap.damage ? `. Damage: ${trap.damage}` : ''}
+                  {L.trigger}: {trap.trigger}. {L.detection} CD {trap.detectionDC}, {L.disarm} CD {trap.disarmDC}
+                  {trap.damage ? `. ${L.damage}: ${trap.damage}` : ''}
                 </Text>
               </View>
               {trap.effect ? (
                 <View style={{ ...styles.bulletRow, paddingLeft: 16 }}>
                   <Text style={styles.bulletMarker}>{'\u25B7'} </Text>
-                  <Text style={styles.bulletText}>Effect: {trap.effect}</Text>
+                  <Text style={styles.bulletText}>{L.effect}: {trap.effect}</Text>
                 </View>
               ) : null}
             </View>
@@ -385,7 +430,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
         <View style={styles.bulletRow}>
           <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.bodyTextBold}>Exits: </Text>
+            <Text style={styles.bodyTextBold}>Salidas:</Text>
             {room.connections.join(', ')}
           </Text>
         </View>
@@ -402,7 +447,7 @@ function NPCPages({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page} wrap>
-      <Text style={styles.sectionHeader}>NPCs</Text>
+      <Text style={styles.sectionHeader}>{L.npcs}</Text>
       <View style={styles.ruleThick} />
 
       {npcs.map(npc => (
@@ -433,7 +478,7 @@ function NPCBlock({ npc }: { npc: AdventureNPC }) {
         <View style={styles.bulletRow}>
           <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
           <Text style={styles.bulletText}>
-            <Text style={styles.bodyTextBold}>Personality: </Text>
+            <Text style={styles.bodyTextBold}>Personalidad:</Text>
             {npc.personality}
           </Text>
         </View>
@@ -460,7 +505,7 @@ function ShopPages({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page} wrap>
-      <Text style={styles.sectionHeader}>Shops</Text>
+      <Text style={styles.sectionHeader}>{L.shops}</Text>
       <View style={styles.ruleThick} />
 
       {stores.map(store => (
@@ -479,7 +524,7 @@ function ShopBlock({ store }: { store: AdventureStore }) {
 
       <Text style={styles.italicText}>
         {store.storeType !== 'custom' ? store.storeType.charAt(0).toUpperCase() + store.storeType.slice(1) : ''}
-        {store.keeperName ? ` — Keeper: ${store.keeperName}` : ''}
+        {store.keeperName ? ` — ${L.keeper}: ${store.keeperName}` : ''}
         {store.keeperAncestry ? ` (${store.keeperAncestry})` : ''}
       </Text>
 
@@ -492,8 +537,8 @@ function ShopBlock({ store }: { store: AdventureStore }) {
           <View style={styles.tableHeader}>
             <Text style={styles.tableCellHeaderFlex}>Item</Text>
             <Text style={styles.tableCellHeaderMedium}>Category</Text>
-            <Text style={styles.tableCellHeaderSmall}>Price</Text>
-            <Text style={styles.tableCellHeaderSmall}>Qty</Text>
+            <Text style={styles.tableCellHeaderSmall}>{L.price}</Text>
+            <Text style={styles.tableCellHeaderSmall}>{L.qty}</Text>
           </View>
           {store.items.map((item, i) => (
             <View key={item.id} style={i % 2 === 1 ? styles.tableRowAlt : styles.tableRow}>
@@ -528,7 +573,7 @@ function CreatureStatsPages({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page} wrap>
-      <Text style={styles.sectionHeader}>Creature Statistics</Text>
+      <Text style={styles.sectionHeader}>{L.creatureStats}</Text>
       <View style={styles.ruleThick} />
 
       <View style={styles.twoColumn}>
@@ -603,7 +648,7 @@ function LorePages({ campaign }: { campaign: Campaign }) {
 
   return (
     <Page size="LETTER" style={styles.page} wrap>
-      <Text style={styles.sectionHeader}>Lore</Text>
+      <Text style={styles.sectionHeader}>{L.lore}</Text>
       <View style={styles.ruleThick} />
 
       {chapters.map(chapter => (
