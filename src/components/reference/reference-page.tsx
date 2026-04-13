@@ -360,7 +360,7 @@ export function ReferencePage() {
 
 // ========== RULES ==========
 function RulesCheatSheet() {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-xl border border-border bg-card p-4">
