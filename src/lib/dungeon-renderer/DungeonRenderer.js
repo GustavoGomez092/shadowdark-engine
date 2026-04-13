@@ -1795,6 +1795,7 @@ class DungeonRenderer {
             ctx.stroke();
             break;
           }
+          case 'smalldais':
           case 'smallDais': {
             // Original Hf: 2 concentric circles (r=1.25 filled, r=1.0 outlined)
             this._drawCircle(ctx, 0, 0, 1.25, true, true);
@@ -1854,6 +1855,40 @@ class DungeonRenderer {
             ctx.moveTo(-0.3, -0.15); ctx.lineTo(0.3, -0.15);
             ctx.moveTo(-0.3, 0.15); ctx.lineTo(0.3, 0.15);
             ctx.moveTo(-0.3, 0.25); ctx.lineTo(0.3, 0.25);
+            ctx.stroke();
+            break;
+          }
+          case 'stairs': {
+            // Rectangle with step lines and direction arrow
+            ctx.fillRect(-0.5, -0.7, 1.0, 1.4);
+            ctx.strokeRect(-0.5, -0.7, 1.0, 1.4);
+            ctx.beginPath();
+            for (let i = 1; i < 5; i++) {
+              const sy = -0.7 + (i * 1.4) / 5;
+              ctx.moveTo(-0.5, sy); ctx.lineTo(0.5, sy);
+            }
+            ctx.moveTo(0, -0.4); ctx.lineTo(0, 0.4);
+            ctx.moveTo(-0.15, 0.2); ctx.lineTo(0, 0.4); ctx.lineTo(0.15, 0.2);
+            ctx.stroke();
+            break;
+          }
+          case 'door': {
+            // Door rectangle with handle
+            ctx.fillRect(-0.35, -0.5, 0.7, 1.0);
+            ctx.strokeRect(-0.35, -0.5, 0.7, 1.0);
+            ctx.beginPath();
+            ctx.arc(0.18, 0, 0.06, 0, Math.PI * 2);
+            ctx.fillStyle = style.getInk();
+            ctx.fill();
+            break;
+          }
+          case 'window': {
+            // Double frame with cross bars
+            ctx.strokeRect(-0.4, -0.25, 0.8, 0.5);
+            ctx.strokeRect(-0.34, -0.19, 0.68, 0.38);
+            ctx.beginPath();
+            ctx.moveTo(0, -0.25); ctx.lineTo(0, 0.25);
+            ctx.moveTo(-0.4, 0); ctx.lineTo(0.4, 0);
             ctx.stroke();
             break;
           }
