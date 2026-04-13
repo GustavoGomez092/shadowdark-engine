@@ -827,7 +827,7 @@ function MapEditorPage() {
                 <div>
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Rooms</label>
                   <div className="space-y-1 max-h-64 overflow-y-auto">
-                    {appRef.current?.getVisibleRooms()?.map((room: any, i: number) => (
+                    {appRef.current?.getVisibleRooms()?.filter((room: any) => room.note || room.desc || (room.w > 3 && room.h > 3)).map((room: any, i: number) => (
                       <button key={i} onClick={() => { setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room') }}
                         className="w-full text-left rounded-lg border border-border/50 px-2 py-1 text-[11px] hover:bg-accent transition">
                         <span className="font-medium">{room.note?.symb ? `Room ${room.note.symb}` : `Room ${i + 1}`}</span>
