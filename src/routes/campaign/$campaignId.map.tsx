@@ -848,8 +848,8 @@ function MapEditorPage() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Description</label>
-                  <textarea value={selectedRoom.desc || ''} onFocus={() => appRef.current?.pushUndo()}
-                    onChange={e => { appRef.current?.setRoomDesc(selectedRoom, e.target.value); refresh() }}
+                  <textarea value={selectedRoom.desc || selectedRoom.note?.text || ''} onFocus={() => appRef.current?.pushUndo()}
+                    onChange={e => { appRef.current?.setRoomDesc(selectedRoom, e.target.value); if (selectedRoom.note) selectedRoom.note.text = e.target.value; refresh() }}
                     rows={3} placeholder="Room description..." className={inputCls + " resize-y"} />
                 </div>
                 <div>
