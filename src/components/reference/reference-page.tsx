@@ -436,27 +436,23 @@ function RulesCheatSheet() {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.lightDarkness')}</h3>
+        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.resting')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">{t('reference.rules.torchLabel')}</span>{" "}
-            {t('reference.rules.torchDesc')}
+            <span className="text-foreground font-medium">{t('reference.rules.restLabel')}</span>{" "}
+            {t('reference.rules.restDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">{t('reference.rules.lanternLabel')}</span>{" "}
-            {t('reference.rules.lanternDesc')}
+            <span className="text-foreground font-medium">{t('reference.rules.restoresLabel')}</span>{" "}
+            {t('reference.rules.restoresDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">{t('reference.rules.campfireLabel')}</span>{" "}
-            {t('reference.rules.campfireDesc')}
+            <span className="text-foreground font-medium">{t('reference.rules.interruptionLabel')}</span>{" "}
+            {t('reference.rules.interruptionDesc')}
           </p>
           <p>
-            <span className="text-foreground font-medium">{t('reference.rules.darknessLabel')}</span>{" "}
-            {t('reference.rules.darknessDesc')}
-          </p>
-          <p>
-            <span className="text-foreground font-medium">{t('reference.rules.rideAlongLabel')}</span>{" "}
-            {t('reference.rules.rideAlongDesc')}
+            <span className="text-foreground font-medium">{t('reference.rules.encounterChecksLabel')}</span>{" "}
+            {t('reference.rules.encounterChecksDesc')}
           </p>
         </div>
       </div>
@@ -478,7 +474,12 @@ function RulesCheatSheet() {
               <div className="rounded-lg bg-secondary/30 p-2 mt-2 space-y-1">
                 <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Antorcha' : 'Torch'}</span><span>1 {locale === 'es' ? 'hora real' : 'real hour'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
                 <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Linterna' : 'Lantern'}</span><span>4 {locale === 'es' ? 'horas reales' : 'real hours'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
-                <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Hechizo Luz' : 'Light spell'}</span><span>1 {locale === 'es' ? 'hora real (concentración)' : 'real hour (focus)'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
+                <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Fogata' : 'Campfire'}</span><span>8 {locale === 'es' ? 'horas' : 'hours'} · {locale === 'es' ? 'doble cercano' : 'double near'}</span></div>
+                <div className="flex justify-between"><span className="font-medium text-foreground">{locale === 'es' ? 'Hechizo Luz' : 'Light spell'}</span><span>1 {locale === 'es' ? 'hora (concentración)' : 'hour (focus)'} · {locale === 'es' ? 'cercano' : 'near'}</span></div>
+              </div>
+              <div className="mt-2 space-y-1 text-[10px] text-muted-foreground">
+                <p><span className="text-foreground font-medium">{locale === 'es' ? 'Oscuridad:' : 'Darkness:'}</span> {locale === 'es' ? 'Desventaja en la mayoría de tareas. Chequeo de encuentro cada ronda.' : 'Disadvantage on most tasks. Encounter check every round.'}</p>
+                <p><span className="text-foreground font-medium">{locale === 'es' ? 'Acompañar:' : 'Ride Along:'}</span> {locale === 'es' ? 'Una nueva luz reinicia el temporizador al máximo.' : 'A new light source resets the timer to maximum.'}</p>
               </div>
             </div>
           </div>
@@ -625,30 +626,6 @@ function RulesCheatSheet() {
           <p>
             <span className="text-foreground font-medium">{t('reference.rules.talentsLabel')}</span>{" "}
             {t('reference.rules.talentsDesc')}
-          </p>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="mb-3 font-bold text-primary">{t('reference.rules.resting')}</h3>
-        <div className="space-y-1 text-xs text-muted-foreground">
-          <p>
-            <span className="text-foreground font-medium">{t('reference.rules.restLabel')}</span>{" "}
-            {t('reference.rules.restDesc')}
-          </p>
-          <p>
-            <span className="text-foreground font-medium">{t('reference.rules.restoresLabel')}</span>{" "}
-            {t('reference.rules.restoresDesc')}
-          </p>
-          <p>
-            <span className="text-foreground font-medium">{t('reference.rules.interruptionLabel')}</span>{" "}
-            {t('reference.rules.interruptionDesc')}
-          </p>
-          <p>
-            <span className="text-foreground font-medium">
-              {t('reference.rules.encounterChecksLabel')}
-            </span>{" "}
-            {t('reference.rules.encounterChecksDesc')}
           </p>
         </div>
       </div>
