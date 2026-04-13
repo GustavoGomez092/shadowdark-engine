@@ -6,7 +6,7 @@ import { styles, COLORS } from './pdf-styles.ts'
 // Register UnifrakturCook (Old English / Blackletter) for title
 Font.register({
   family: 'UnifrakturCook',
-  src: 'https://fonts.gstatic.com/s/unifrakturcook/v23/IurA6Yli8YOdcoky-0PTTdOm_9IQ1CH4.ttf',
+  src: 'https://fonts.gstatic.com/s/unifrakturcook/v25/IurA6Yli8YOdcoky-0PTTdkm56n05Uw1.ttf',
 })
 
 // Spanish section labels
