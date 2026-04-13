@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import { DiceRoller } from "@/components/dice/dice-roller.tsx"
 import { useLocale } from "@/hooks/use-locale.ts"
 import { useDataRegistry } from "@/hooks/use-data-registry.ts"
 import {
@@ -1885,6 +1886,14 @@ function ToolsTab() {
             })}
           </div>
         )}
+      </div>
+
+      {/* Dice Roller */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <h3 className="mb-3 text-lg font-bold text-primary">
+          {locale === 'es' ? 'Tirador de Dados' : 'Dice Roller'}
+        </h3>
+        <DiceRoller characterName={locale === 'es' ? 'Mesa' : 'Table'} />
       </div>
     </div>
   )
