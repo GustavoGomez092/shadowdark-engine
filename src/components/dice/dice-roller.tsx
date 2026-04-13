@@ -25,7 +25,7 @@ type RollMode = 'advantage' | 'normal' | 'disadvantage'
 type Phase = 'idle' | 'rolling' | 'result'
 
 export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, diceCount = 1 }: Props) {
-  const { t, ti } = useLocale()
+  const { t, ti, locale } = useLocale()
   const count = Math.max(1, diceCount)
   const [selectedDie, setSelectedDie] = useState<DieType>(lockedDie ?? 'd20')
   const [modifier, setModifier] = useState(0)
@@ -125,12 +125,6 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, 
         }
 
         onRoll?.(result)
-
-        const t = setTimeout(() => {
-          setResultClass('')
-          setPhase('idle')
-        }, 3000)
-        rollTimeoutsRef.current.push(t)
         return
       }
 
@@ -149,6 +143,14 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, 
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Result Display */}
       <div className="relative px-4 pt-5 pb-4 text-center">
+        {/* Reset button */}
+        {phase === 'result' && (
+          <button onClick={() => { setResultClass(''); setPhase('idle') }}
+            className="absolute top-2 right-2 z-10 rounded-lg border border-border px-2 py-1 text-[10px] text-muted-foreground hover:bg-accent hover:text-foreground transition"
+            title={locale === 'es' ? 'Reiniciar' : 'Reset'}>
+            ↺
+          </button>
+        )}
         {/* Subtle background glow */}
         <div className={`absolute inset-0 opacity-20 transition-all duration-500 ${
           phase === 'result' && isNat20 ? 'bg-gradient-to-b from-green-500/30 to-transparent' :
