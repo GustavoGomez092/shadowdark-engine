@@ -857,7 +857,7 @@ function CharacterCreationRef() {
                       <span className="text-[10px] text-muted-foreground italic">{tData('classes', c.id, 'description', c.description)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-muted-foreground">{c.hitDie}</span>
+                      <span className="font-mono text-xs text-muted-foreground" title={locale === 'es' ? 'Dado de golpe (para calcular PG)' : 'Hit die (for calculating HP)'}>HP: {c.hitDie}</span>
                       <span className="text-xs text-muted-foreground">{isExpanded ? '\u25B2' : '\u25BC'}</span>
                     </div>
                   </div>
