@@ -42,21 +42,21 @@ function AdventureStructurePage() {
 
   function saveNPC(npc: AdventureNPC) {
     const exists = adv.npcs.find(n => n.id === npc.id)
-    if (exists) updateNPCStore(npc.id, () => Object.assign(exists, npc))
+    if (exists) updateNPCStore(npc.id, n => Object.assign(n, npc))
     else addNPC(npc)
     setEditingNPC(null)
   }
 
   function saveEncounterTable(table: RandomEncounterTable) {
     const exists = adv.randomEncounters.find(t => t.id === table.id)
-    if (exists) updateEncounterTable(table.id, () => Object.assign(exists, table))
+    if (exists) updateEncounterTable(table.id, t => Object.assign(t, table))
     else addEncounterTable(table)
     setEditingTable(null)
   }
 
   function saveStore(store: AdventureStore) {
     const exists = adv.stores.find(s => s.id === store.id)
-    if (exists) updateStoreStore(store.id, () => Object.assign(exists, store))
+    if (exists) updateStoreStore(store.id, s => Object.assign(s, store))
     else addStore(store)
     setEditingStore(null)
   }
