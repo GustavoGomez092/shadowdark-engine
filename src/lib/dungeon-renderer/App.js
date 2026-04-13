@@ -463,7 +463,10 @@ class App {
    */
   setRoomDesc(room, text) {
     room.desc = text;
-    if (this.dungeon) this.dungeon.populateNotes();
+    // Update the room's note text if it has one (preserves custom notes)
+    if (room.note) {
+      room.note.text = text;
+    }
     this.draw();
   }
 

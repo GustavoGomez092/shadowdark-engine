@@ -849,7 +849,15 @@ function MapEditorPage() {
                 <div>
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Description</label>
                   <textarea value={selectedRoom.desc || selectedRoom.note?.text || ''} onFocus={() => appRef.current?.pushUndo()}
-                    onChange={e => { appRef.current?.setRoomDesc(selectedRoom, e.target.value); if (selectedRoom.note) selectedRoom.note.text = e.target.value; refresh() }}
+                    onChange={e => {
+                      const val = e.target.value
+                      selectedRoom.desc = val
+                      if (selectedRoom.note) selectedRoom.note.text = val
+                      appRef.current?.draw()
+                      refresh()
+                      // Auto-save to campaign store
+                      if (currentMapId) handleSave()
+                    }}
                     rows={3} placeholder="Room description..." className={inputCls + " resize-y"} />
                 </div>
                 <div>
