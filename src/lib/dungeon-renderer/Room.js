@@ -393,8 +393,6 @@ export default class Room extends Rect {
       descProp = { type: 'chest', pos: this.aisle() };
     } else if (this.checkDesc('crate,box,trunk') && !this.columns) {
       descProp = this._addCrate();
-    } else if (this.checkDesc('tapestry') && !this.round) {
-      // Tapestry disabled — skip adding but keep desc match
     }
 
     if (this.checkDesc('pool,puddle') && this.dungeon && this.dungeon.flood) {
@@ -446,7 +444,7 @@ export default class Room extends Rect {
             }
           }
 
-          // Tapestry check — disabled but RNG call preserved for sequence consistency
+          // RNG call preserved for sequence consistency
           if (!this.round) {
             const backDoorPos = this.xy(0, this.depth - 1);
             const backDoor = this.dungeon ? this.dungeon.getDoor(backDoorPos) : null;
@@ -492,9 +490,4 @@ export default class Room extends Rect {
     return { type: 'crate', pos, rotation, scale: size };
   }
 
-  /** Add a tapestry prop (no RNG consumed) */
-  _addTapestry() {
-    const pos = this.aisle();
-    return { type: 'tapestry', pos, width: this.width - 2, axis: this.axis };
-  }
 }

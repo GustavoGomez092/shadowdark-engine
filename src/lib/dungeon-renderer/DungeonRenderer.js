@@ -1753,20 +1753,6 @@ class DungeonRenderer {
             ctx.stroke();
             break;
           }
-          case 'tapestry': {
-            // Original me: wavy scalloped polyline
-            const tw = prop.width || 2;
-            ctx.beginPath();
-            for (let d = 0; d < tw; d++) {
-              const ox = d - tw / 2;
-              ctx.moveTo(ox, -0.4);
-              ctx.quadraticCurveTo(ox + 0.15, -0.15, ox + 0.3, -0.4);
-              ctx.moveTo(ox + 0.5, -0.4);
-              ctx.quadraticCurveTo(ox + 0.65, -0.15, ox + 0.8, -0.4);
-            }
-            ctx.stroke();
-            break;
-          }
           case 'dais': {
             // Original hf: 2 semicircular arcs
             // Arcs from PI*(1+h/16) for h=-8..8, offset +0.5 in X
@@ -1890,6 +1876,47 @@ class DungeonRenderer {
             ctx.moveTo(0, -0.25); ctx.lineTo(0, 0.25);
             ctx.moveTo(-0.4, 0); ctx.lineTo(0.4, 0);
             ctx.stroke();
+            break;
+          }
+          case 'portcullis': {
+            // Barred gate: rectangle frame with vertical bars and crossbar
+            ctx.strokeRect(-0.35, -0.5, 0.7, 1.0);
+            ctx.fillRect(-0.35, -0.5, 0.7, 1.0);
+            ctx.strokeStyle = style.getInk();
+            ctx.lineWidth = style.normal / s;
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+              const bx = -0.25 + i * 0.125;
+              ctx.moveTo(bx, -0.5); ctx.lineTo(bx, 0.5);
+            }
+            ctx.moveTo(-0.35, -0.1); ctx.lineTo(0.35, -0.1);
+            ctx.moveTo(-0.35, 0.15); ctx.lineTo(0.35, 0.15);
+            ctx.stroke();
+            break;
+          }
+          case 'stairway': {
+            // Wide stairway with step lines (like door-type stairs)
+            ctx.fillRect(-0.45, -0.35, 0.9, 0.7);
+            ctx.strokeRect(-0.45, -0.35, 0.9, 0.7);
+            ctx.beginPath();
+            for (let i = 1; i < 6; i++) {
+              const hw = 0.45 * (6 - i) / 6;
+              const oy = -0.35 + (i * 0.7) / 6;
+              ctx.moveTo(-hw, oy); ctx.lineTo(hw, oy);
+            }
+            ctx.stroke();
+            break;
+          }
+          case 'locked_door': {
+            // Door with lock dots
+            ctx.fillRect(-0.35, -0.5, 0.7, 1.0);
+            ctx.strokeRect(-0.35, -0.5, 0.7, 1.0);
+            ctx.fillStyle = style.getInk();
+            for (let i = -1; i <= 1; i++) {
+              ctx.beginPath();
+              ctx.arc(0, i * 0.2, 0.05, 0, Math.PI * 2);
+              ctx.fill();
+            }
             break;
           }
         }

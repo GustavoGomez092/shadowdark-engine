@@ -26,7 +26,7 @@ const DOOR_TYPES = [
   { value: 9, label: 'Steps' },
 ]
 
-const PROP_TYPES = ['altar', 'barrel', 'boulder', 'box', 'chest', 'dais', 'door', 'fountain', 'sarcophagus', 'smalldais', 'stairs', 'statue', 'tapestry', 'throne', 'well', 'window']
+const PROP_TYPES = ['altar', 'barrel', 'boulder', 'box', 'chest', 'dais', 'door', 'fountain', 'locked_door', 'portcullis', 'sarcophagus', 'smalldais', 'stairs', 'stairway', 'statue', 'throne', 'well', 'window']
 
 // ── Drag-to-reorder Props List (native HTML5 drag) ──
 

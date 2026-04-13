@@ -424,53 +424,6 @@ function drawStatue(ctx, x, y, scale, rotation, style) {
 }
 
 /**
- * Draw a Tapestry prop - wall hanging with scalloped pattern.
- * Width-dependent design with Chaikin curve smoothing applied to edges.
- *
- * @param {CanvasRenderingContext2D} ctx - Canvas 2D rendering context
- * @param {number} x - Center x coordinate in pixels
- * @param {number} y - Center y coordinate in pixels
- * @param {number} scale - Size multiplier (typically 10-30 pixels)
- * @param {number} rotation - Rotation angle in radians
- * @param {Object} style - Style configuration object
- */
-function drawTapestry(ctx, x, y, scale, rotation, style) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(rotation);
-
-  const width = 0.6 * scale;
-  const height = 0.8 * scale;
-  const scallops = 6;
-
-  // Create scalloped path using quadratic curves
-  ctx.beginPath();
-  ctx.moveTo(-width / 2, -height / 2);
-
-  // Top scalloped edge
-  const scallop = width / scallops;
-  for (let i = 0; i < scallops; i++) {
-    const x1 = -width / 2 + i * scallop + scallop / 2;
-    const y1 = -height / 2 - scallop / 4;
-    const x2 = -width / 2 + (i + 1) * scallop;
-    const y2 = -height / 2;
-    ctx.quadraticCurveTo(x1, y1, x2, y2);
-  }
-
-  // Right edge
-  ctx.lineTo(width / 2, height / 2);
-
-  // Bottom edge (straight)
-  ctx.lineTo(-width / 2, height / 2);
-  ctx.closePath();
-
-  ctx.fillStyle = style.getInk();
-  ctx.fill();
-
-  ctx.restore();
-}
-
-/**
  * Draw a Throne prop - ceremonial seat with high back.
  * Seat: 0.4x0.5 rectangle, back: 0.3x0.3 rectangle offset upward.
  *
@@ -612,6 +565,78 @@ function drawWindow(ctx, x, y, scale, rotation, style) {
 }
 
 /**
+ * Draw a Portcullis prop - barred gate with vertical bars and crossbars.
+ */
+function drawPortcullis(ctx, x, y, scale, rotation, style) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  const w = 0.35 * scale;
+  const h = 0.5 * scale;
+  ctx.fillStyle = style.getFloor();
+  ctx.fillRect(-w, -h, w * 2, h * 2);
+  ctx.strokeStyle = style.getInk();
+  ctx.lineWidth = style.normal;
+  ctx.strokeRect(-w, -h, w * 2, h * 2);
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const bx = -w * 0.7 + i * (w * 1.4 / 4);
+    ctx.moveTo(bx, -h); ctx.lineTo(bx, h);
+  }
+  ctx.moveTo(-w, -h * 0.2); ctx.lineTo(w, -h * 0.2);
+  ctx.moveTo(-w, h * 0.3); ctx.lineTo(w, h * 0.3);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/**
+ * Draw a Stairway prop - wide stairs with tapered step lines.
+ */
+function drawStairway(ctx, x, y, scale, rotation, style) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  const w = 0.45 * scale;
+  const h = 0.35 * scale;
+  ctx.fillStyle = style.getFloor();
+  ctx.fillRect(-w, -h, w * 2, h * 2);
+  ctx.strokeStyle = style.getInk();
+  ctx.lineWidth = style.normal;
+  ctx.strokeRect(-w, -h, w * 2, h * 2);
+  ctx.beginPath();
+  for (let i = 1; i < 6; i++) {
+    const hw = w * (6 - i) / 6;
+    const oy = -h + (i * h * 2) / 6;
+    ctx.moveTo(-hw, oy); ctx.lineTo(hw, oy);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+/**
+ * Draw a Locked Door prop - door rectangle with three lock dots.
+ */
+function drawLockedDoor(ctx, x, y, scale, rotation, style) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  const w = 0.35 * scale;
+  const h = 0.5 * scale;
+  ctx.fillStyle = style.getFloor();
+  ctx.fillRect(-w, -h, w * 2, h * 2);
+  ctx.strokeStyle = style.getInk();
+  ctx.lineWidth = style.normal;
+  ctx.strokeRect(-w, -h, w * 2, h * 2);
+  ctx.fillStyle = style.getInk();
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.arc(0, i * h * 0.4, scale * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/**
  * Master dispatcher function that routes to the correct prop drawing function.
  *
  * @param {CanvasRenderingContext2D} ctx - Canvas 2D rendering context
@@ -635,12 +660,14 @@ function drawProp(ctx, type, x, y, scale, rotation, style) {
     'fountain': drawFountain,
     'sarcophagus': drawSarcophagus,
     'statue': drawStatue,
-    'tapestry': drawTapestry,
     'throne': drawThrone,
     'well': drawWell,
     'stairs': drawStairs,
     'door': drawDoor,
     'window': drawWindow,
+    'portcullis': drawPortcullis,
+    'stairway': drawStairway,
+    'locked_door': drawLockedDoor,
   };
 
   const fn = drawFunctions[type.toLowerCase()];
@@ -666,12 +693,14 @@ const PROP_TYPES = [
   'fountain',
   'sarcophagus',
   'statue',
-  'tapestry',
   'throne',
   'well',
   'stairs',
   'door',
   'window',
+  'portcullis',
+  'stairway',
+  'locked_door',
 ];
 
 export {
@@ -685,9 +714,11 @@ export {
   drawFountain,
   drawSarcophagus,
   drawStatue,
-  drawTapestry,
   drawThrone,
   drawWell,
+  drawPortcullis,
+  drawStairway,
+  drawLockedDoor,
   drawProp,
   PROP_TYPES,
   regularPolygonPath,

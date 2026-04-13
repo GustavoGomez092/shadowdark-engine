@@ -77,7 +77,7 @@ async function renderMapToImage(map: CampaignMap): Promise<string | null> {
   style.showTitle = true
   style.showNotes = true
   style.showSecrets = false
-  style.showConnectors = false
+  style.showConnectors = true
   style.autoRotate = false
   style.rotation = 0
 

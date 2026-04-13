@@ -74,13 +74,6 @@ class Parameters {
   static wellChance = 0.02;
 
   /**
-   * Chance (0.0 to 1.0) that tapestries will appear on walls.
-   * @type {number}
-   * @static
-   */
-  static tapestryChance = 0.333;
-
-  /**
    * Chance (0.0 to 1.0) that floor cracks will appear.
    * @type {number}
    * @static
@@ -100,7 +93,7 @@ class Parameters {
    * Each tag category influences specific parameters to create themed dungeons.
    *
    * Tag influences:
-   * - 'crumbling': Increases column shattering and cracks, reduces tapestries
+   * - 'crumbling': Increases column shattering and cracks
    * - 'flat': No stairs between levels
    * - 'deep': Frequent stairs between levels
    * - 'round': Increased rotundas (circular rooms)
@@ -110,7 +103,7 @@ class Parameters {
    * - 'flooded': 60% water level
    * - 'wet': 30% water level
    * - 'tomb': Rare fountains (2%)
-   * - 'dwelling': Common wells (20%) and tapestries (100%)
+   * - 'dwelling': Common wells (20%)
    *
    * @static
    * @param {string[]} tags - Array of dungeon generation tags
@@ -164,18 +157,9 @@ class Parameters {
       Parameters.waterLevel = Math.round(Math.max(6 * avg3w - 2, 0)) / 10;
     }
 
-    // Decorative features: fountains, wells, tapestries
+    // Decorative features: fountains, wells
     Parameters.fountainChance = tags.includes('tomb') ? 0.02 : 0.1;
     Parameters.wellChance = tags.includes('dwelling') ? 0.2 : 0.02;
-    Parameters.tapestryChance = tags.includes('dwelling') ? 1 : 1/3;
-
-    // Reduce decorations in deteriorated environments
-    if (tags.includes('crumbling')) {
-      Parameters.tapestryChance /= 3;
-    }
-    if (tags.includes('flooded')) {
-      Parameters.tapestryChance /= 3;
-    }
 
     // Floor cracks increase significantly in crumbling dungeons
     Parameters.crackChance = tags.includes('crumbling') ? 1/3 : 0.125;
