@@ -1,13 +1,13 @@
 {
   "format": "shadowdark-adventure-v1",
-  "exportedAt": 1776030870281,
+  "exportedAt": 1776046892798,
   "id": "adventure-el-hueco-de-aldric",
   "name": "El Hueco de Aldric",
   "author": "ShadowDark Engine — Aventura de Ejemplo",
   "version": "1.0",
   "description": "Una aventura one-shot de exploración de mazmorras para niveles 1-3. Los aventureros investigan unas ruinas bajo la ciudad de Ashenveil, donde un nigromante enloquecido por el dolor intenta devolver la vida a su hija muerta mediante un ritual terrible conocido como el Vaciado.",
-  "createdAt": 1776030870281,
-  "updatedAt": 1776030870281,
+  "createdAt": 1776046892798,
+  "updatedAt": 1776046892798,
   "content": {
     "monsters": [
       {
@@ -40,7 +40,7 @@
         "abilities": [
           {
             "name": "Estallido Resonante",
-            "description": "Cuando la Masa muere, emite un grito que obliga a todas las criaturas en rango cercano a tirar SAB CD 11 o quedar aturdidas 1 ronda."
+            "description": "Cuando la Masa muere, emite un grito que obliga a todas las criaturas en rango cercano a tirar WIS DC 11 o quedar aturdidas 1 ronda."
           },
           {
             "name": "Relleno de Musgo",
@@ -85,7 +85,7 @@
         "abilities": [
           {
             "name": "Ataque desde Arriba",
-            "description": "Si la Araña de Huesos ataca desde el techo, el objetivo debe tirar DES CD 12 o queda derribado."
+            "description": "Si la Araña de Huesos ataca desde el techo, el objetivo debe tirar DEX DC 12 o queda derribado."
           },
           {
             "name": "Muchas Articulaciones",
@@ -111,7 +111,7 @@
             "bonus": 4,
             "damage": "1d8",
             "range": "close",
-            "specialEffect": "En impacto: el objetivo queda agarrado (FUE CD 14 para liberarse)."
+            "specialEffect": "En impacto: el objetivo queda agarrado (STR DC 14 para liberarse)."
           }
         ],
         "movement": {
@@ -129,7 +129,7 @@
         "abilities": [
           {
             "name": "Frascos de Vidrio",
-            "description": "Cuando el Guardián recibe daño cortante o perforante, un frasco se rompe y libera gas tóxico en rango cercano. Todos en el área tiran CON CD 12 o sufren 1d4 de daño de veneno."
+            "description": "Cuando el Guardián recibe daño cortante o perforante, un frasco se rompe y libera gas tóxico en rango cercano. Todos en el área tiran CON DC 12 o sufren 1d4 de daño de veneno."
           },
           {
             "name": "Agarrado",
@@ -161,7 +161,7 @@
             "bonus": 4,
             "damage": "1d6",
             "range": "near",
-            "specialEffect": "Daño psíquico. SAB CD 13 o el objetivo queda paralizado hasta el final de su siguiente turno."
+            "specialEffect": "Daño psíquico. WIS DC 13 o el objetivo queda paralizado hasta el final de su siguiente turno."
           }
         ],
         "movement": {
@@ -180,7 +180,7 @@
         "abilities": [
           {
             "name": "Elegía",
-            "description": "El Eco toca una melodía fantasmal. Todos los enemigos en rango cercano deben tirar SAB CD 13 o quedan paralizados hasta el final de su siguiente turno. Usa esta habilidad en lugar de atacar."
+            "description": "El Eco toca una melodía fantasmal. Todos los enemigos en rango cercano deben tirar WIS DC 13 o quedan paralizados hasta el final de su siguiente turno. Usa esta habilidad en lugar de atacar."
           },
           {
             "name": "No Es Él",
@@ -213,7 +213,7 @@
             "bonus": 5,
             "damage": "2d6",
             "range": "far",
-            "specialEffect": "Daño psíquico en área. Todos los enemigos en rango lejano tiran SAB CD 14 o sufren el daño."
+            "specialEffect": "Daño psíquico en área. Todos los enemigos en rango lejano tiran WIS DC 14 o sufren el daño."
           }
         ],
         "movement": {
@@ -231,7 +231,7 @@
         "abilities": [
           {
             "name": "Acorde Ritual",
-            "description": "Aldric toca su flauta de hueso. Todos los enemigos en la sala deben tirar SAB CD 14 o sufren 2d6 de daño psíquico. Usa esta habilidad cada 2 rondas."
+            "description": "Aldric toca su flauta de hueso. Todos los enemigos en la sala deben tirar WIS DC 14 o sufren 2d6 de daño psíquico. Usa esta habilidad cada 2 rondas."
           },
           {
             "name": "Voz Cristalina",
@@ -321,7 +321,7 @@
         "category": "gear",
         "cost": 80,
         "slots": 1,
-        "description": "Un libro encuadernado en piel gris con páginas escritas en tinta de sangre. Contiene los rituales de Aldric Voss. Un lanzador de conjuros puede estudiarlo durante un descanso largo para aprender el conjuro \"Hablar con los Muertos\" como un conjuro de nivel 2. Si el lector falla una tirada de INT CD 14 al estudiar, sufre 1d6 de daño psíquico."
+        "description": "Un libro encuadernado en piel gris con páginas escritas en tinta de sangre. Contiene los rituales de Aldric Voss. Un lanzador de conjuros puede estudiarlo durante un descanso largo para aprender el conjuro \"Hablar con los Muertos\" como un conjuro de nivel 2. Si el lector falla una tirada de INT DC 14 al estudiar, sufre 1d6 de daño psíquico."
       }
     ]
   },
@@ -338,7 +338,7 @@
         "number": 1,
         "name": "Vestíbulo de la Puerta",
         "description": "Una sala rectangular con un techo abovedado de piedra ennegrecida. La puerta norte está cubierta de raíces secas. El aire huele a tierra mojada y algo más dulce: carne podrida. Dos antorchas apagadas flanquean una puerta doble al sur que conduce a un corredor oscuro.",
-        "gmNotes": "Esta sala es la entrada principal a las ruinas. La puerta norte está trabada (FUE CD 10 para abrir). En las raíces secas hay un nido de 2 Masas Balbucientes que atacan si se molestan las raíces. Un registro cuidadoso (INT CD 12) revela un grabado en la pared: \"Aquí yace el campanario de los que lloran\".",
+        "gmNotes": "Esta sala es la entrada principal a las ruinas. La puerta norte está trabada (STR DC 10 para abrir). En las raíces secas hay un nido de 2 Masas Balbucientes que atacan si se molestan las raíces. Un registro cuidadoso (INT DC 12) revela un grabado en la pared: \"Aquí yace el campanario de los que lloran\".",
         "monsterIds": [
           "monster-masa-balbuciente"
         ],
@@ -354,7 +354,7 @@
         "number": 2,
         "name": "La Nave Llorosa",
         "description": "Una nave amplia de techo alto, con bancos de piedra a ambos lados. El suelo está cubierto de polvo y fragmentos de vitrales rotos. Al fondo, un altar vacío preside la sala. De las paredes cuelgan estandartes podridos con el símbolo de una campana. Se escucha un goteo constante y, de vez en cuando, lo que parece un sollozo lejano.",
-        "gmNotes": "La nave era la capilla principal del antiguo campanario. Los sollozos provienen del Pozo de las Voces (Sala 5). El altar tiene una cavidad oculta (INT CD 13) que contiene el Colgante de Piedra Sangre. Hay puertas al oeste (Sala 3), al este (Sala 4) y un corredor al sur (Sala 5). 1d4 Arañas de Huesos acechan en el techo y atacan al grupo que pase por debajo.",
+        "gmNotes": "La nave era la capilla principal del antiguo campanario. Los sollozos provienen del Pozo de las Voces (Sala 5). El altar tiene una cavidad oculta (INT DC 13) que contiene el Colgante de Piedra Sangre. Hay puertas al oeste (Sala 3), al este (Sala 4) y un corredor al sur (Sala 5). 1d4 Arañas de Huesos acechan en el techo y atacan al grupo que pase por debajo.",
         "monsterIds": [
           "monster-arana-huesos"
         ],
@@ -373,7 +373,7 @@
         "number": 3,
         "name": "Los Nichos de Huesos",
         "description": "Las paredes están cubiertas de nichos funerarios abiertos, cada uno con un esqueleto envuelto en tela amarillenta. Algunos nichos están vacíos, con marcas de garras en la piedra. El suelo tiene una baldosa central ligeramente hundida.",
-        "gmNotes": "Hay 24 nichos, de los cuales 6 están vacíos (sus ocupantes se convirtieron en Masas Balbucientes). La baldosa hundida en x:3,y:9 es una trampa de foso: el suelo se abre a un pozo de 3 metros con estacas. Uno de los nichos (INT CD 14) contiene un compartimento secreto con el Anillo del Mortífero y 30 mo.",
+        "gmNotes": "Hay 24 nichos, de los cuales 6 están vacíos (sus ocupantes se convirtieron en Masas Balbucientes). La baldosa hundida en x:3,y:9 es una trampa de foso: el suelo se abre a un pozo de 3 metros con estacas. Uno de los nichos (INT DC 14) contiene un compartimento secreto con el Anillo del Mortífero y 30 mo.",
         "monsterIds": [],
         "treasure": "Nicho secreto: Anillo del Mortífero, 30 mo.",
         "traps": [
@@ -398,7 +398,7 @@
         "number": 4,
         "name": "La Sacristía Derrumbada",
         "description": "La mitad oriental de esta sala se ha derrumbado, dejando expuesta una pared de roca natural cubierta de un musgo fosforescente verde. Armarios rotos y telas desgarradas cubren el suelo. Un olor agrio a productos químicos antiguos impregna el aire.",
-        "gmNotes": "La sacristía era donde el clérigo guardaba sus implementos rituales. La mayoría está destruida, pero un registro (INT CD 12) revela 2 Velas Huecas intactas y un frasco de Aceite de Médula Ósea. El musgo fosforescente proporciona luz tenue. Un pasaje parcialmente bloqueado (FUE CD 13) lleva a un pequeño espacio donde hay un cofre con 45 mo y un pergamino ilegible.",
+        "gmNotes": "La sacristía era donde el clérigo guardaba sus implementos rituales. La mayoría está destruida, pero un registro (INT DC 12) revela 2 Velas Huecas intactas y un frasco de Aceite de Médula Ósea. El musgo fosforescente proporciona luz tenue. Un pasaje parcialmente bloqueado (STR DC 13) lleva a un pequeño espacio donde hay un cofre con 45 mo y un pergamino ilegible.",
         "monsterIds": [],
         "treasure": "2 Velas Huecas, Aceite de Médula Ósea, cofre con 45 mo.",
         "traps": [],
@@ -412,7 +412,7 @@
         "number": 5,
         "name": "El Pozo de las Voces",
         "description": "Una cámara vasta con un pozo circular de agua negra en el centro. El agua burbujea suavemente y de ella surgen susurros incoherentes — fragmentos de oraciones, nombres, llantos de niños. La oscuridad del pozo parece infinita. Escaleras de piedra húmeda descienden junto al borde del pozo hacia las profundidades.",
-        "gmNotes": "El pozo conecta con el nivel inferior (Sala 8, La Galería Ahogada). Las voces son residuos psíquicos de los rituales de Aldric. Cualquiera que escuche las voces durante más de 1 minuto debe tirar SAB CD 12 o sufrir 1d4 de daño psíquico. Las escaleras están resbaladizas (DES CD 10 o caer al agua). El agua tiene 5 metros de profundidad y está helada. Un Guardián Hueco patrulla el borde del pozo.",
+        "gmNotes": "El pozo conecta con el nivel inferior (Sala 8, La Galería Ahogada). Las voces son residuos psíquicos de los rituales de Aldric. Cualquiera que escuche las voces durante más de 1 minuto debe tirar WIS DC 12 o sufrir 1d4 de daño psíquico. Las escaleras están resbaladizas (DEX DC 10 o caer al agua). El agua tiene 5 metros de profundidad y está helada. Un Guardián Hueco patrulla el borde del pozo.",
         "monsterIds": [
           "monster-guardian-hueco"
         ],
@@ -431,7 +431,7 @@
         "number": 6,
         "name": "El Pozo Sanguíneo",
         "description": "Una sala lateral con un pozo más pequeño en el centro. El agua de este pozo es de un rojo oscuro y viscoso. Marcas de dedos ensangrentados cubren el borde de piedra. El aire es cálido y húmedo, con un olor metálico intenso.",
-        "gmNotes": "El agua del pozo es una mezcla de sangre antigua y agua subterránea. No es venenosa, pero beber de ella causa náuseas (CON CD 11 o desventaja en tiradas durante 10 minutos). En el fondo del pozo (sumergirse, CON CD 13 para aguantar la respiración) hay un cofre de hierro sellado con 80 mo, 3 gemas de rubí (20 mo cada una) y un Testigo de Duelo.",
+        "gmNotes": "El agua del pozo es una mezcla de sangre antigua y agua subterránea. No es venenosa, pero beber de ella causa náuseas (CON DC 11 o desventaja en tiradas durante 10 minutos). En el fondo del pozo (sumergirse, CON DC 13 para aguantar la respiración) hay un cofre de hierro sellado con 80 mo, 3 gemas de rubí (20 mo cada una) y un Testigo de Duelo.",
         "monsterIds": [],
         "treasure": "Fondo del pozo: 80 mo, 3 rubíes (20 mo c/u), Testigo de Duelo.",
         "traps": [],
@@ -445,7 +445,7 @@
         "number": 7,
         "name": "El Pozo de Descenso",
         "description": "Una sala pequeña dominada por un agujero cuadrado en el centro. Escaleras de caracol talladas en la roca descienden en espiral hacia la oscuridad. Un viento frío y húmedo asciende desde abajo, trayendo consigo el sonido distante de agua corriente.",
-        "gmNotes": "Las escaleras descienden 15 metros hasta el nivel inferior. La bajada toma 2 turnos de exploración. A mitad de camino hay un rellano donde 2 Arañas de Huesos han tendido una emboscada (las telarañas son de hilo óseo, DES CD 12 para no quedar atrapado). Este es un camino alternativo al nivel inferior que evita la galería inundada.",
+        "gmNotes": "Las escaleras descienden 15 metros hasta el nivel inferior. La bajada toma 2 turnos de exploración. A mitad de camino hay un rellano donde 2 Arañas de Huesos han tendido una emboscada (las telarañas son de hilo óseo, DEX DC 12 para no quedar atrapado). Este es un camino alternativo al nivel inferior que evita la galería inundada.",
         "monsterIds": [
           "monster-arana-huesos"
         ],
@@ -479,7 +479,7 @@
         "number": 9,
         "name": "Las Bóvedas de Médula",
         "description": "Una cripta amplia con seis sarcófagos de piedra dispuestos en dos filas. Las tapas están parcialmente abiertas, revelando huesos amarillentos cubiertos de una sustancia aceitosa y brillante. El aire apesta a grasa rancia. Glifos luminosos parpadean en el umbral de la puerta sur.",
-        "gmNotes": "Los sarcófagos contienen los restos de los primeros sujetos del Vaciado de Aldric. La sustancia aceitosa es Médula procesada — se puede recolectar 2 dosis de Aceite de Médula Ósea (INT CD 12 para extraer sin contaminar). La puerta sur tiene un glifo trampa que se activa al cruzar el umbral. Puerta al este hacia Sala 10.",
+        "gmNotes": "Los sarcófagos contienen los restos de los primeros sujetos del Vaciado de Aldric. La sustancia aceitosa es Médula procesada — se puede recolectar 2 dosis de Aceite de Médula Ósea (INT DC 12 para extraer sin contaminar). La puerta sur tiene un glifo trampa que se activa al cruzar el umbral. Puerta al este hacia Sala 10.",
         "monsterIds": [],
         "treasure": "2 dosis de Aceite de Médula Ósea (si se extraen). Sarcófago 3: collar de plata (15 mo). Sarcófago 5: daga ceremonial (1d4, +1 contra no-muertos).",
         "traps": [
@@ -506,11 +506,11 @@
         "number": 10,
         "name": "El Hueco del Cirujano",
         "description": "Una sala que hiede a formaldehído y carne podrida. Una mesa de operaciones de piedra ocupa el centro, cubierta de instrumentos quirúrgicos oxidados. Estanterías repletas de frascos con órganos conservados en líquido turbio cubren las paredes. En una jaula de hierro al fondo, una mujer herida suplica en voz baja. Cerca de ella, una figura pálida de ojos hundidos permanece inmóvil.",
-        "gmNotes": "Esta era la sala de trabajo de Aldric. La mujer en la jaula es Mira Soln, una curandera capturada. La figura inmóvil es Kaelith, un no-muerto \"voluntario\" que sirve a Aldric pero mantiene parte de su consciencia. Kaelith no atacará a menos que el grupo amenace el trabajo de Aldric. Si se le convence (CAR CD 13), revelará la ubicación de la puerta secreta al sur (x:24, y:14) que lleva a la Sala 11. 2 Guardianes Huecos protegen la sala.",
+        "gmNotes": "Esta era la sala de trabajo de Aldric. La mujer en la jaula es Mira Soln, una curandera capturada. La figura inmóvil es Kaelith, un no-muerto \"voluntario\" que sirve a Aldric pero mantiene parte de su consciencia. Kaelith no atacará a menos que el grupo amenace el trabajo de Aldric. Si se le convence (CHA DC 13), revelará la ubicación de la puerta secreta al sur (x:24, y:14) que lleva a la Sala 11. 2 Guardianes Huecos protegen la sala.",
         "monsterIds": [
           "monster-guardian-hueco"
         ],
-        "treasure": "Mesa: instrumental quirúrgico (15 mo como lote). Estantería: 3 pociones de curación (1d6 PG). Frasco especial: Tomo del Vaciado (dentro de un compartimento oculto en la estantería, INT CD 14).",
+        "treasure": "Mesa: instrumental quirúrgico (15 mo como lote). Estantería: 3 pociones de curación (1d6 PG). Frasco especial: Tomo del Vaciado (dentro de un compartimento oculto en la estantería, INT DC 14).",
         "traps": [],
         "connections": [
           "room-9",
@@ -523,7 +523,7 @@
         "number": 11,
         "name": "El Puente del Osario",
         "description": "Un puente de piedra estrecho cruza un abismo sin fondo. A ambos lados, la oscuridad se extiende hacia abajo hasta donde alcanza la vista. Los huesos de cientos de cuerpos han sido incrustados en las paredes del abismo, formando un mosaico macabro de calaveras que parecen observar a los que cruzan. El viento asciende desde las profundidades con un gemido constante.",
-        "gmNotes": "El puente tiene 2 metros de ancho (1 casilla) y 5 metros de largo. Pasar sin problemas requiere DES CD 10. Si hay combate en el puente, los ataques fallidos por 5 o más hacen que el atacante deba tirar DES CD 12 o caer. Caer al abismo es muerte instantánea. Un Eco de Aldric aparece a mitad del puente y bloquea el paso. Hay una puerta secreta (INT CD 15) en la pared este a mitad del puente que lleva a la Antecámara Sellada (Sala 12).",
+        "gmNotes": "El puente tiene 2 metros de ancho (1 casilla) y 5 metros de largo. Pasar sin problemas requiere DEX DC 10. Si hay combate en el puente, los ataques fallidos por 5 o más hacen que el atacante deba tirar DEX DC 12 o caer. Caer al abismo es muerte instantánea. Un Eco de Aldric aparece a mitad del puente y bloquea el paso. Hay una puerta secreta (INT DC 15) en la pared este a mitad del puente que lleva a la Antecámara Sellada (Sala 12).",
         "monsterIds": [
           "monster-eco-aldric"
         ],
@@ -555,7 +555,7 @@
         "number": 13,
         "name": "El Trono de los Ecos",
         "description": "Una cámara inmensa con un techo de catedral perdido en la penumbra. En el centro, un trono de huesos fusionados se alza sobre un estrado de tres escalones. Sentado en él, un hombre cadavérico de ojos verdes sostiene una flauta de hueso humano contra sus labios agrietados. A sus flancos, dos sarcófagos abiertos emanan un resplandor enfermizo. El aire vibra con una melodía baja y discordante que parece provenir de las paredes mismas.",
-        "gmNotes": "Esta es la sala del jefe final. Aldric Voss está sentado en su trono. Los dos sarcófagos contienen: el izquierdo, el cuerpo preservado de Sera (su hija); el derecho, un sarcófago vacío preparado para un nuevo ritual. Al inicio del combate, Aldric invoca 1d4 Masas Balbucientes de grietas en las paredes. Aldric no ataca de inmediato — primero habla, explicando que \"ya casi termina\" y que Sera \"volverá pronto\". Si el grupo muestra el Colgante de Piedra Sangre, Aldric pierde su primer turno llorando. Si destruyen el sarcófago de Sera (CA 10, 15 PG), Aldric entra en furia (+2 a ataques, -2 a CA). Hay tres posibles finales: 1) Matar a Aldric, 2) Convencerle de parar (CAR CD 16, con ventaja si leyeron las confesiones), 3) Completar el ritual (consecuencias terribles). Victoria: el temblor cesa, los no-muertos caen.",
+        "gmNotes": "Esta es la sala del jefe final. Aldric Voss está sentado en su trono. Los dos sarcófagos contienen: el izquierdo, el cuerpo preservado de Sera (su hija); el derecho, un sarcófago vacío preparado para un nuevo ritual. Al inicio del combate, Aldric invoca 1d4 Masas Balbucientes de grietas en las paredes. Aldric no ataca de inmediato — primero habla, explicando que \"ya casi termina\" y que Sera \"volverá pronto\". Si el grupo muestra el Colgante de Piedra Sangre, Aldric pierde su primer turno llorando. Si destruyen el sarcófago de Sera (CA 10, 15 PG), Aldric entra en furia (+2 a ataques, -2 a CA). Hay tres posibles finales: 1) Matar a Aldric, 2) Convencerle de parar (CHA DC 16, con ventaja si leyeron las confesiones), 3) Completar el ritual (consecuencias terribles). Victoria: el temblor cesa, los no-muertos caen.",
         "monsterIds": [
           "monster-aldric-voss",
           "monster-masa-balbuciente"
@@ -576,7 +576,7 @@
         "entries": [
           {
             "roll": 2,
-            "description": "Un temblor sacude la sala. Todos tiran DES CD 12 o caen al suelo. Los objetos sueltos se caen de los estantes."
+            "description": "Un temblor sacude la sala. Todos tiran DEX DC 12 o caen al suelo. Los objetos sueltos se caen de los estantes."
           },
           {
             "roll": 3,
@@ -588,7 +588,7 @@
           },
           {
             "roll": 4,
-            "description": "Una Araña de Huesos desciende del techo en silencio. Tiro de percepción (SAB CD 13) o sorprende al grupo.",
+            "description": "Una Araña de Huesos desciende del techo en silencio. Tiro de percepción (WIS DC 13) o sorprende al grupo.",
             "monsterIds": [
               "monster-arana-huesos"
             ],
@@ -599,7 +599,7 @@
               5,
               6
             ],
-            "description": "Se escucha una melodía de flauta lejana y melancólica. Todos deben tirar SAB CD 11 o sentirse compelidos a avanzar hacia el sonido durante 1 ronda."
+            "description": "Se escucha una melodía de flauta lejana y melancólica. Todos deben tirar WIS DC 11 o sentirse compelidos a avanzar hacia el sonido durante 1 ronda."
           },
           {
             "roll": [
@@ -610,7 +610,7 @@
           },
           {
             "roll": 9,
-            "description": "Un Guardián Hueco pasa patrullando. Si el grupo se esconde (DES CD 12), no los detecta. Si los detecta, ataca.",
+            "description": "Un Guardián Hueco pasa patrullando. Si el grupo se esconde (DEX DC 12), no los detecta. Si los detecta, ataca.",
             "monsterIds": [
               "monster-guardian-hueco"
             ],
@@ -622,7 +622,7 @@
           },
           {
             "roll": 11,
-            "description": "Las velas y antorchas parpadean y casi se apagan. SAB CD 12 o cada personaje experimenta una alucinación de su peor miedo durante 1 ronda (desventaja en todo)."
+            "description": "Las velas y antorchas parpadean y casi se apagan. WIS DC 12 o cada personaje experimenta una alucinación de su peor miedo durante 1 ronda (desventaja en todo)."
           },
           {
             "roll": 12,
@@ -651,7 +651,7 @@
         "ancestry": "halfling",
         "role": "Mercader del Mercado Hueco",
         "description": "Un halfling regordete con una sonrisa permanente que no llega a sus ojos. Lleva un delantal lleno de bolsillos y un sombrero de ala ancha. Su tienda improvisada está repleta de objetos dispares: desde velas hasta dagas, pasando por frascos de dudosa procedencia.",
-        "personality": "Jovial y charlatán, pero astuto como un zorro. Cobra precios justos a los locales pero intenta sacar más a los forasteros. Tiene información sobre las ruinas que compartirá si se le compra suficiente mercancía o se le convence (CAR CD 11). Conoce el rumor de que Aldric era un músico antes de volverse loco.",
+        "personality": "Jovial y charlatán, pero astuto como un zorro. Cobra precios justos a los locales pero intenta sacar más a los forasteros. Tiene información sobre las ruinas que compartirá si se le compra suficiente mercancía o se le convence (CHA DC 11). Conoce el rumor de que Aldric era un músico antes de volverse loco.",
         "portraitPrompt": "Halfling male, plump, wide-brimmed hat, apron with pockets, shrewd smile, market stall background, fantasy RPG portrait"
       },
       {
@@ -714,7 +714,7 @@
           "abilities": [
             {
               "name": "Acorde Ritual",
-              "description": "Toca su flauta. Todos en la sala: SAB CD 14 o 2d6 psíquico."
+              "description": "Toca su flauta. Todos en la sala: WIS DC 14 o 2d6 psíquico."
             },
             {
               "name": "Voz Cristalina",
@@ -981,7 +981,7 @@
           {
             "id": "lore-final-2",
             "title": "Final 2: La Palabra que Sana",
-            "content": "Si los aventureros convencen a Aldric de detenerse (CAR CD 16, con ventaja si leyeron las confesiones en la Antecámara), Aldric deja de tocar y llora abrazando el sarcófago de Sera. Tras un largo silencio, acepta que Sera no volverá. El ritual se deshace lentamente: los temblores cesan, los no-muertos caen, pero el proceso toma días en lugar de ser instantáneo.\n\nAldric se entrega voluntariamente. Su destino queda en manos de la prefecta: puede ser ejecutado, encarcelado, o exiliado. Si los aventureros abogan por clemencia, Orvana puede aceptar el exilio (CAR CD 13 adicional). Aldric se marcha al amanecer, solo, sin la flauta, que deja sobre la tumba de Sera.\n\nLa recompensa se paga. Ashenveil tarda en sanar, pero sana. Y la flauta, dejada sobre la tumba, nunca vuelve a sonar.",
+            "content": "Si los aventureros convencen a Aldric de detenerse (CHA DC 16, con ventaja si leyeron las confesiones en la Antecámara), Aldric deja de tocar y llora abrazando el sarcófago de Sera. Tras un largo silencio, acepta que Sera no volverá. El ritual se deshace lentamente: los temblores cesan, los no-muertos caen, pero el proceso toma días en lugar de ser instantáneo.\n\nAldric se entrega voluntariamente. Su destino queda en manos de la prefecta: puede ser ejecutado, encarcelado, o exiliado. Si los aventureros abogan por clemencia, Orvana puede aceptar el exilio (CHA DC 13 adicional). Aldric se marcha al amanecer, solo, sin la flauta, que deja sobre la tumba de Sera.\n\nLa recompensa se paga. Ashenveil tarda en sanar, pero sana. Y la flauta, dejada sobre la tumba, nunca vuelve a sonar.",
             "sortOrder": 2
           },
           {
@@ -998,8 +998,8 @@
     {
       "id": "map-1",
       "name": "El Hueco de la Campana — Ruinas Superiores",
-      "createdAt": 1776030870281,
-      "updatedAt": 1776030870281,
+      "createdAt": 1776046892798,
+      "updatedAt": 1776046892798,
       "width": 30,
       "height": 35,
       "cellSize": 32,
@@ -1690,8 +1690,8 @@
     {
       "id": "map-2",
       "name": "Las Criptas Hundidas — Nivel Inferior",
-      "createdAt": 1776030870281,
-      "updatedAt": 1776030870281,
+      "createdAt": 1776046892798,
+      "updatedAt": 1776046892798,
       "width": 30,
       "height": 35,
       "cellSize": 32,
@@ -2290,8 +2290,8 @@
     {
       "id": "map-3",
       "name": "Ashenveil — Ciudad",
-      "createdAt": 1776030870281,
-      "updatedAt": 1776030870281,
+      "createdAt": 1776046892798,
+      "updatedAt": 1776046892798,
       "width": 25,
       "height": 30,
       "cellSize": 32,
