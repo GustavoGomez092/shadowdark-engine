@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
 import { exportAsDataPack, exportAdventureDocument, downloadJson } from '@/lib/campaign/export.ts'
+import { generateAdventurePDF } from '@/lib/campaign/pdf/generate-pdf.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/')({
   component: CampaignOverviewPage,
@@ -11,6 +13,8 @@ function CampaignOverviewPage() {
   const { t } = useLocale()
   const campaign = useCampaignStore(s => s.campaign)
   const updateMeta = useCampaignStore(s => s.updateMeta)
+  const [pdfExporting, setPdfExporting] = useState(false)
+  const [pdfStatus, setPdfStatus] = useState('')
 
   if (!campaign) return null
 
@@ -115,6 +119,23 @@ function CampaignOverviewPage() {
             className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition"
           >
             {t('campaign.exportAdventure')}
+          </button>
+          <button
+            disabled={pdfExporting}
+            onClick={async () => {
+              setPdfExporting(true)
+              setPdfStatus('')
+              try {
+                await generateAdventurePDF(campaign, (step) => setPdfStatus(step))
+              } catch {
+                setPdfStatus(t('campaign.exportPDFError'))
+              } finally {
+                setPdfExporting(false)
+              }
+            }}
+            className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {pdfExporting ? pdfStatus || t('campaign.exportPDFGenerating') : t('campaign.exportPDF')}
           </button>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">{t('campaign.exportHint')}</p>
