@@ -830,9 +830,9 @@ function MapEditorPage() {
                     {appRef.current?.getVisibleRooms()?.map((room: any, i: number) => (
                       <button key={i} onClick={() => { setSelectedRoom(room); setSelectedDoor(null); setEditorPanel('room') }}
                         className="w-full text-left rounded-lg border border-border/50 px-2 py-1 text-[11px] hover:bg-accent transition">
-                        <span className="font-medium">Room {i + 1}</span>
+                        <span className="font-medium">{room.note?.symb ? `Room ${room.note.symb}` : `Room ${i + 1}`}</span>
                         <span className="text-muted-foreground ml-1">({room.w}×{room.h})</span>
-                        {room.desc && <p className="text-[10px] text-muted-foreground truncate">{room.desc}</p>}
+                        {(room.desc || room.note?.text) && <p className="text-[10px] text-muted-foreground truncate">{room.desc || room.note?.text}</p>}
                       </button>
                     ))}
                   </div>
