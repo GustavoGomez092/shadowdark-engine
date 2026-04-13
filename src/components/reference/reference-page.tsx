@@ -296,16 +296,27 @@ const PROF_ES: Record<string, string> = {
 
 export function ReferencePage() {
   useDataRegistry()
-  const { t, locale } = useLocale()
+  const { t, locale, setLocale, availableLocales } = useLocale()
   const [tab, setTab] = useState<Tab>("rules")
   const [search, setSearch] = useState("")
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-2 text-3xl font-bold">{t('reference.title')}</h1>
-      <p className="mb-6 text-muted-foreground">
-        {t('reference.description')}
-      </p>
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <h1 className="text-3xl font-bold">{t('reference.title')}</h1>
+          <p className="mt-1 text-muted-foreground">{t('reference.description')}</p>
+        </div>
+        <select
+          value={locale}
+          onChange={e => setLocale(e.target.value as any)}
+          className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm outline-none shrink-0"
+        >
+          {availableLocales.map(l => (
+            <option key={l} value={l}>{l === 'es' ? 'Español' : 'English'}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="mb-6 flex flex-wrap gap-1 rounded-lg border border-border p-1 w-fit">
         {(
