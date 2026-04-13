@@ -491,6 +491,61 @@ function RulesCheatSheet() {
         </div>
       </div>
 
+      {/* Wizard Mishap Table */}
+      <div className="rounded-xl border border-red-500/20 bg-card p-4">
+        <h3 className="mb-3 font-bold text-red-400">
+          {locale === 'es' ? 'Tabla de Percances del Mago (1d12)' : 'Wizard Mishap Table (1d12)'}
+        </h3>
+        <p className="text-xs text-muted-foreground mb-2">
+          {locale === 'es'
+            ? 'Cuando un mago saca un 1 natural al lanzar un hechizo, tira 1d12:'
+            : 'When a wizard rolls a natural 1 on a spell check, roll 1d12:'}
+        </p>
+        <div className="space-y-0.5">
+          {[
+            { roll: 1, en: 'Devastation! Roll twice and combine both effects (reroll further 1s).', es: '¡Devastación! Tira dos veces y combina ambos efectos (vuelve a tirar si sale 1).' },
+            { roll: 2, en: 'Explosion! Take 1d8 damage.', es: '¡Explosión! Sufres 1d8 de daño.' },
+            { roll: 3, en: 'Refraction! Target yourself with the spell.', es: '¡Refracción! El hechizo te afecta a ti mismo.' },
+            { roll: 4, en: 'Your hand slipped! Target a random ally.', es: '¡Se te escapó! El hechizo afecta a un aliado aleatorio.' },
+            { roll: 5, en: "Mind wound! Can't cast this spell for a week.", es: '¡Herida mental! No puedes lanzar este hechizo durante una semana.' },
+            { roll: 6, en: 'Discorporation! One random piece of gear vanishes forever.', es: '¡Descorporeización! Una pieza de equipo desaparece para siempre.' },
+            { roll: 7, en: 'Spell worm! Lose a random spell each turn until DC 12 CON; regain after rest.', es: '¡Gusano de hechizo! Pierdes un hechizo cada turno hasta superar CON DC 12; recuperas al descansar.' },
+            { roll: 8, en: 'Harmonic failure! Lose a random spell until rest.', es: '¡Fallo armónico! Pierdes un hechizo aleatorio hasta descansar.' },
+            { roll: 9, en: 'Poof! All light within near range suppressed for 10 rounds.', es: '¡Puf! Toda la luz en rango cercano se suprime 10 rondas.' },
+            { roll: 10, en: 'The horror! Scream uncontrollably for 3 rounds.', es: '¡El horror! Gritas incontrolablemente 3 rondas.' },
+            { roll: 11, en: 'Energy surge! Glow purple 10 rounds. Enemies have advantage vs you.', es: '¡Oleada de energía! Brillas púrpura 10 rondas. Enemigos tienen ventaja contra ti.' },
+            { roll: 12, en: 'Unstable conduit! Disadvantage on same-tier spells for 10 rounds.', es: '¡Conducto inestable! Desventaja en hechizos del mismo tier 10 rondas.' },
+          ].map(m => (
+            <div key={m.roll} className={`flex gap-2 rounded px-2 py-1 text-xs ${m.roll % 2 === 0 ? 'bg-secondary/20' : ''}`}>
+              <span className="font-mono font-bold text-red-400 w-5 shrink-0 text-right">{m.roll}</span>
+              <span className="text-muted-foreground">{locale === 'es' ? m.es : m.en}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Priest Penance Costs */}
+      <div className="rounded-xl border border-yellow-500/20 bg-card p-4">
+        <h3 className="mb-3 font-bold text-yellow-400">
+          {locale === 'es' ? 'Penitencia del Sacerdote' : 'Priest Penance'}
+        </h3>
+        <p className="text-xs text-muted-foreground mb-2">
+          {locale === 'es'
+            ? 'Cuando un sacerdote pierde un hechizo, debe sacrificar oro en un templo para recuperarlo:'
+            : 'When a priest loses a spell, they must sacrifice gold at a temple to recover it:'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { tier: 1, gp: 5 }, { tier: 2, gp: 20 }, { tier: 3, gp: 40 }, { tier: 4, gp: 90 }, { tier: 5, gp: 150 },
+          ].map(p => (
+            <div key={p.tier} className="rounded-lg bg-secondary/30 px-4 py-2 text-center">
+              <div className="font-bold text-sm text-yellow-400">Tier {p.tier}</div>
+              <div className="text-xs text-muted-foreground">{p.gp} gp</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="mb-3 font-bold text-primary">{t('reference.rules.xpLevelUp')}</h3>
         <div className="space-y-1 text-xs text-muted-foreground">
@@ -1531,61 +1586,6 @@ function CharacterCreationRef() {
                 ? 'Marcados con *, los hechizos de concentracion duran mientras mantengas la concentracion. Solo puedes concentrarte en un hechizo a la vez. Recibir dano o realizar otra accion puede romper la concentracion.'
                 : 'Marked with *, focus spells last as long as you concentrate. You can only focus on one spell at a time. Taking damage or performing another action can break focus.'}
             </p>
-          </div>
-        </div>
-
-        {/* Wizard Mishap Table (1d12) */}
-        <div className="rounded-lg bg-red-500/5 border border-red-500/20 p-3 mb-4">
-          <h4 className="text-xs font-bold text-red-400 mb-2">
-            {locale === 'es' ? 'Tabla de Percances del Mago (1d12)' : 'Wizard Mishap Table (1d12)'}
-          </h4>
-          <p className="text-[10px] text-muted-foreground mb-2">
-            {locale === 'es'
-              ? 'Cuando un mago saca un 1 natural al lanzar un hechizo, tira 1d12 en esta tabla:'
-              : 'When a wizard rolls a natural 1 on a spell check, roll 1d12 on this table:'}
-          </p>
-          <div className="space-y-0.5">
-            {[
-              { roll: 1, en: 'Devastation! Roll twice and combine both effects (reroll further 1s).', es: '¡Devastación! Tira dos veces y combina ambos efectos (vuelve a tirar si sale 1).' },
-              { roll: 2, en: 'Explosion! Take 1d8 damage.', es: '¡Explosión! Sufres 1d8 de daño.' },
-              { roll: 3, en: 'Refraction! Target yourself with the spell.', es: '¡Refracción! El hechizo te afecta a ti mismo.' },
-              { roll: 4, en: 'Your hand slipped! Target a random ally with the spell.', es: '¡Se te escapó! El hechizo afecta a un aliado aleatorio.' },
-              { roll: 5, en: "Mind wound! Can't cast this spell again for a week.", es: '¡Herida mental! No puedes lanzar este hechizo durante una semana.' },
-              { roll: 6, en: 'Discorporation! One random piece of gear disappears forever.', es: '¡Descorporeización! Una pieza de equipo aleatoria desaparece para siempre.' },
-              { roll: 7, en: 'Spell worm! Lose a random spell each turn until DC 12 CON check; regain after rest.', es: '¡Gusano de hechizo! Pierdes un hechizo aleatorio cada turno hasta superar CON DC 12; recuperas al descansar.' },
-              { roll: 8, en: 'Harmonic failure! Lose ability to cast a random spell until rest.', es: '¡Fallo armónico! Pierdes un hechizo aleatorio hasta descansar.' },
-              { roll: 9, en: 'Poof! All light within near range is suppressed for 10 rounds.', es: '¡Puf! Toda la luz en rango cercano se suprime durante 10 rondas.' },
-              { roll: 10, en: 'The horror! Scream uncontrollably for 3 rounds, drawing attention.', es: '¡El horror! Gritas incontrolablemente durante 3 rondas, atrayendo atención.' },
-              { roll: 11, en: 'Energy surge! Glow purple for 10 rounds. Enemies have advantage on attacks against you.', es: '¡Oleada de energía! Brillas púrpura durante 10 rondas. Enemigos tienen ventaja en ataques contra ti.' },
-              { roll: 12, en: 'Unstable conduit! Disadvantage on spells of the same tier for 10 rounds.', es: '¡Conducto inestable! Desventaja en hechizos del mismo tier durante 10 rondas.' },
-            ].map(m => (
-              <div key={m.roll} className={`flex gap-2 rounded px-2 py-1 text-[10px] ${m.roll % 2 === 0 ? 'bg-secondary/20' : ''}`}>
-                <span className="font-mono font-bold text-red-400 w-5 shrink-0 text-right">{m.roll}</span>
-                <span className="text-muted-foreground">{locale === 'es' ? m.es : m.en}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Priest Penance Costs */}
-        <div className="rounded-lg bg-yellow-500/5 border border-yellow-500/20 p-3 mb-4">
-          <h4 className="text-xs font-bold text-yellow-400 mb-2">
-            {locale === 'es' ? 'Costes de Penitencia del Sacerdote' : 'Priest Penance Costs'}
-          </h4>
-          <p className="text-[10px] text-muted-foreground mb-2">
-            {locale === 'es'
-              ? 'Cuando un sacerdote pierde un hechizo, debe hacer penitencia sacrificando oro en un templo para recuperarlo:'
-              : 'When a priest loses a spell, they must do penance by sacrificing gold at a temple to recover it:'}
-          </p>
-          <div className="flex gap-3 text-[10px]">
-            {[
-              { tier: 1, gp: 5 }, { tier: 2, gp: 20 }, { tier: 3, gp: 40 }, { tier: 4, gp: 90 }, { tier: 5, gp: 150 },
-            ].map(p => (
-              <div key={p.tier} className="rounded-lg bg-secondary/30 px-3 py-1.5 text-center">
-                <div className="font-bold text-yellow-400">Tier {p.tier}</div>
-                <div className="text-muted-foreground">{p.gp} gp</div>
-              </div>
-            ))}
           </div>
         </div>
 
