@@ -76,11 +76,11 @@ function AdventureStructurePage() {
   const monsterNames = (campaign.content.monsters ?? []).map(m => ({ id: m.id, name: m.name }))
 
   const tabs: { key: AdventureTab; label: string }[] = [
-    { key: 'rooms', label: `Rooms (${adv.rooms.length})` },
-    { key: 'overview', label: 'Overview' },
-    { key: 'npcs', label: `NPCs (${adv.npcs.length})` },
-    { key: 'encounters', label: `Encounters (${adv.randomEncounters.length})` },
-    { key: 'shops', label: `Shops (${adv.stores.length})` },
+    { key: 'rooms', label: `${t('campaign.adventure.rooms')} (${adv.rooms.length})` },
+    { key: 'overview', label: t('campaign.adventure.overview') },
+    { key: 'npcs', label: `${t('campaign.adventure.npcs')} (${adv.npcs.length})` },
+    { key: 'encounters', label: `${t('campaign.adventure.encounters')} (${adv.randomEncounters.length})` },
+    { key: 'shops', label: `${t('campaign.adventure.shops')} (${adv.stores.length})` },
   ]
 
   return (
