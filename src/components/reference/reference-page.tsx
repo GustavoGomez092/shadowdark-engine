@@ -3,7 +3,7 @@ import { useLocale } from "@/hooks/use-locale.ts"
 import { useDataRegistry } from "@/hooks/use-data-registry.ts"
 import {
   ANCESTRIES, ARMOR, BACKGROUNDS, CLASSES, COMMON_LANGUAGES, DEITIES,
-  GEAR, MONSTERS, RARE_LANGUAGES, SPELLS, WEAPONS,
+  GEAR, MONSTERS, RARE_LANGUAGES, SPELLS, TITLES, WEAPONS,
   getSpellsByClassAndTier,
 } from "@/data/index.ts"
 import { generateAdventureName } from "@/data/tables/adventure-names.ts"
@@ -760,6 +760,14 @@ function ClassesRef({ search }: { search: string }) {
 // ========== CHARACTER CREATION ==========
 function CharacterCreationRef() {
   const { locale, t, tData } = useLocale()
+  const [expandedClass, setExpandedClass] = useState<string | null>(null)
+  const [expandedSpellClass, setExpandedSpellClass] = useState<string | null>(null)
+
+  const formatProf = (p: string) => {
+    if (p === 'all' || p === 'all_melee') return locale === 'es' ? (p === 'all' ? 'Todas' : 'Todas cuerpo a cuerpo') : (p === 'all' ? 'All' : 'All melee')
+    if (p === 'none') return locale === 'es' ? 'Ninguna' : 'None'
+    return p.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  }
 
   return (
     <div className="space-y-4">
@@ -831,23 +839,142 @@ function CharacterCreationRef() {
         </h3>
         <p className="text-xs text-muted-foreground mb-3">
           {locale === 'es'
-            ? 'Elige una clase. Esto determina tus dados de golpe, competencias y habilidades.'
-            : 'Choose a class. This determines your hit die, proficiencies, and abilities.'}
+            ? 'Elige una clase. Esto determina tus dados de golpe, competencias y habilidades. Haz clic en una clase para ver sus detalles completos.'
+            : 'Choose a class. This determines your hit die, proficiencies, and abilities. Click a class to see full details.'}
         </p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {CLASSES.map((c) => (
-            <div key={c.id} className="rounded-lg bg-secondary/30 p-2.5">
-              <div className="flex items-baseline justify-between mb-0.5">
-                <span className="font-semibold text-sm">{tData('classes', c.id, 'name', c.name)}</span>
-                <span className="font-mono text-xs text-muted-foreground">{c.hitDie}</span>
+        <div className="space-y-2">
+          {CLASSES.map((c) => {
+            const isExpanded = expandedClass === c.id
+            return (
+              <div key={c.id} className="rounded-lg bg-secondary/30 overflow-hidden">
+                <button
+                  onClick={() => setExpandedClass(isExpanded ? null : c.id)}
+                  className="w-full p-2.5 text-left hover:bg-secondary/50 transition"
+                >
+                  <div className="flex items-baseline justify-between mb-0.5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-semibold text-sm">{tData('classes', c.id, 'name', c.name)}</span>
+                      <span className="text-[10px] text-muted-foreground italic">{tData('classes', c.id, 'description', c.description)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">{c.hitDie}</span>
+                      <span className="text-xs text-muted-foreground">{isExpanded ? '\u25B2' : '\u25BC'}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {c.features.slice(0, 3).map(f => (
+                      <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{f.name}</span>
+                    ))}
+                    {c.spellcasting && (
+                      <span className="rounded-full bg-purple-500/15 px-2 py-0.5 text-[9px] font-medium text-purple-400">
+                        {locale === 'es' ? 'Lanzador' : 'Spellcaster'} ({c.spellcasting.stat})
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                {isExpanded && (
+                  <div className="border-t border-border/30 p-3 space-y-3">
+                    {/* Proficiencies */}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <h5 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">
+                          {locale === 'es' ? 'Competencia con Armas' : 'Weapon Proficiencies'}
+                        </h5>
+                        <div className="flex flex-wrap gap-1">
+                          {c.weaponProficiencies.map(w => (
+                            <span key={w} className="rounded-full bg-secondary px-2 py-0.5 text-[10px]">{formatProf(w)}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <h5 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">
+                          {locale === 'es' ? 'Competencia con Armadura' : 'Armor Proficiencies'}
+                        </h5>
+                        <div className="flex flex-wrap gap-1">
+                          {c.armorProficiencies.map(a => (
+                            <span key={a} className="rounded-full bg-secondary px-2 py-0.5 text-[10px]">{formatProf(a)}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Features */}
+                    <div>
+                      <h5 className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">
+                        {locale === 'es' ? 'Rasgos de Clase' : 'Class Features'}
+                      </h5>
+                      <div className="space-y-1.5">
+                        {c.features.map(f => (
+                          <div key={f.name} className="rounded-lg bg-card/50 border border-border/30 p-2">
+                            <div className="flex items-baseline gap-2 mb-0.5">
+                              <span className="text-xs font-semibold">{f.name}</span>
+                              {f.level > 1 && (
+                                <span className="text-[9px] text-muted-foreground">
+                                  ({locale === 'es' ? `Nivel ${f.level}` : `Level ${f.level}`})
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-relaxed">{f.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Spellcasting info (if applicable) */}
+                    {c.spellcasting && c.spellsKnownByLevel && (
+                      <div>
+                        <h5 className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">
+                          {locale === 'es' ? 'Lanzamiento de Hechizos' : 'Spellcasting'}
+                        </h5>
+                        <div className="rounded-lg bg-purple-500/5 border border-purple-500/20 p-2.5 space-y-2">
+                          <p className="text-[11px] text-muted-foreground">
+                            <span className="font-semibold text-foreground">
+                              {locale === 'es' ? 'Estadistica de lanzamiento: ' : 'Casting stat: '}
+                            </span>
+                            {c.spellcasting.stat}
+                            <span className="mx-2">|</span>
+                            <span className="font-semibold text-foreground">
+                              {locale === 'es' ? 'Lista de hechizos: ' : 'Spell list: '}
+                            </span>
+                            {c.spellcasting.spellList.charAt(0).toUpperCase() + c.spellcasting.spellList.slice(1)}
+                          </p>
+
+                          {/* Spells Known Table */}
+                          <div className="rounded-lg border border-border/50 overflow-hidden">
+                            <table className="w-full text-[10px]">
+                              <thead>
+                                <tr className="bg-secondary/50">
+                                  <th className="px-2 py-1 text-left font-semibold">{locale === 'es' ? 'Niv.' : 'Lv.'}</th>
+                                  <th className="px-2 py-1 text-center font-semibold">T1</th>
+                                  <th className="px-2 py-1 text-center font-semibold">T2</th>
+                                  <th className="px-2 py-1 text-center font-semibold">T3</th>
+                                  <th className="px-2 py-1 text-center font-semibold">T4</th>
+                                  <th className="px-2 py-1 text-center font-semibold">T5</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {c.spellsKnownByLevel.map((row, lvl) => (
+                                  <tr key={lvl} className={lvl % 2 === 0 ? '' : 'bg-secondary/20'}>
+                                    <td className="px-2 py-0.5 font-mono font-bold">{lvl + 1}</td>
+                                    {row.map((count, tier) => (
+                                      <td key={tier} className={`px-2 py-0.5 text-center font-mono ${count > 0 ? 'text-purple-400 font-bold' : 'text-muted-foreground/50'}`}>
+                                        {count}
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {c.features.slice(0, 3).map(f => (
-                  <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{f.name}</span>
-                ))}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -969,8 +1096,8 @@ function CharacterCreationRef() {
         </h3>
         <p className="text-xs text-muted-foreground mb-2">
           {locale === 'es'
-            ? 'Todos los personajes comienzan con un kit de exploracion y equipo de clase.'
-            : 'All characters start with a crawling kit and class-specific gear.'}
+            ? 'Todos los personajes comienzan con un kit de exploracion, equipo de clase y oro para comprar equipo adicional.'
+            : 'All characters start with a crawling kit, class-specific gear, and gold to buy additional equipment.'}
         </p>
         <div className="space-y-2 text-xs">
           <div className="rounded-lg bg-secondary/30 p-2.5">
@@ -989,11 +1116,25 @@ function CharacterCreationRef() {
                 : 'Each class receives additional weapons and armor based on type. Spellcasters also get starting spells.'}
             </p>
           </div>
-          <div className="rounded-lg bg-secondary/30 p-2.5">
-            <span className="font-semibold">{locale === 'es' ? 'Oro Inicial' : 'Starting Gold'}</span>
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-semibold text-amber-400">{locale === 'es' ? 'Oro Inicial' : 'Starting Gold'}</span>
+              <span className="font-mono font-bold text-amber-400">2d6 x 5 gp</span>
+            </div>
             <p className="text-muted-foreground mt-0.5">
-              {locale === 'es' ? '0 monedas de oro. Empieza sin nada mas que tu kit.' : '0 gold. You start with nothing beyond your kit.'}
+              {locale === 'es'
+                ? 'Tira 2d6 y multiplica por 5 para determinar tus monedas de oro iniciales (promedio 35 mo). Usa este oro para comprar equipo adicional de la pestana de Objetos.'
+                : 'Roll 2d6 and multiply by 5 to determine your starting gold pieces (average 35 gp). Use this gold to buy additional equipment from the Items tab.'}
             </p>
+            <div className="mt-1.5 flex items-center gap-3 text-[10px]">
+              <span className="text-muted-foreground">
+                {locale === 'es' ? 'Rango: 10-60 mo' : 'Range: 10-60 gp'}
+              </span>
+              <span className="text-muted-foreground">|</span>
+              <span className="text-muted-foreground">
+                {locale === 'es' ? 'Promedio: 35 mo' : 'Average: 35 gp'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1027,35 +1168,185 @@ function CharacterCreationRef() {
         <h3 className="mb-2 font-bold text-primary">
           {locale === 'es' ? '10. Elegir Hechizos (si es lanzador)' : '10. Choose Spells (if spellcaster)'}
         </h3>
+
+        {/* How Spellcasting Works */}
+        <div className="rounded-lg bg-secondary/30 p-3 mb-4">
+          <h4 className="text-xs font-bold text-primary mb-2">
+            {locale === 'es' ? 'Como Funciona el Lanzamiento de Hechizos' : 'How Spellcasting Works'}
+          </h4>
+          <p className="text-[11px] text-muted-foreground mb-2">
+            {locale === 'es'
+              ? 'Para lanzar un hechizo, haz un chequeo con tu estadistica de lanzamiento contra CD 10 + nivel del hechizo. Los hechizos van del Tier 1 (CD 11) al Tier 5 (CD 15).'
+              : 'To cast a spell, make a check with your casting stat vs DC 10 + spell tier. Spells range from Tier 1 (DC 11) to Tier 5 (DC 15).'}
+          </p>
+          <div className="space-y-2">
+            <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-2">
+              <span className="text-xs font-bold text-blue-400">
+                {locale === 'es' ? 'Mago (INT)' : 'Wizard (INT)'}
+              </span>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                {locale === 'es'
+                  ? 'Exito: el hechizo funciona. Fallo: el hechizo se pierde hasta descansar. Natural 1: el hechizo se pierde y tira en la tabla de Percances del Mago.'
+                  : 'Success: spell works. Failure: spell is lost until rest. Nat 1: spell is lost AND roll on the Wizard Mishap table.'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/20 p-2">
+              <span className="text-xs font-bold text-yellow-400">
+                {locale === 'es' ? 'Sacerdote (WIS)' : 'Priest (WIS)'}
+              </span>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                {locale === 'es'
+                  ? 'Exito: el hechizo funciona. Fallo: el hechizo se pierde y debes hacer penitencia (orar 1 turno). Natural 1: la deidad esta enojada, todos los hechizos se pierden hasta penitencia.'
+                  : 'Success: spell works. Failure: spell is lost and you must do penance (pray for 1 turn). Nat 1: deity is angered, ALL spells lost until penance.'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-2">
+              <span className="text-xs font-bold text-purple-400">
+                {locale === 'es' ? 'Bruja (CHA) / Vidente (WIS)' : 'Witch (CHA) / Seer (WIS)'}
+              </span>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                {locale === 'es'
+                  ? 'Funcionan de manera similar. Brujas: Natural 1 causa un Percance Diabolico. Videntes: Natural 1 requiere Penitencia del Vidente.'
+                  : 'Work similarly. Witches: Nat 1 causes a Diabolical Mishap. Seers: Nat 1 requires Seer Penance.'}
+              </p>
+            </div>
+          </div>
+          <div className="mt-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2">
+            <span className="text-xs font-bold text-amber-400">
+              {locale === 'es' ? 'Hechizos de Concentracion (Focus)' : 'Focus Spells'}
+            </span>
+            <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+              {locale === 'es'
+                ? 'Marcados con *, los hechizos de concentracion duran mientras mantengas la concentracion. Solo puedes concentrarte en un hechizo a la vez. Recibir dano o realizar otra accion puede romper la concentracion.'
+                : 'Marked with *, focus spells last as long as you concentrate. You can only focus on one spell at a time. Taking damage or performing another action can break focus.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Starting spells summary */}
         <p className="text-xs text-muted-foreground mb-3">
           {locale === 'es'
-            ? 'Los magos comienzan con 3 hechizos de Tier 1. Los sacerdotes comienzan con 2 hechizos de Tier 1 (mas Expulsar Muertos Vivientes gratis).'
-            : 'Wizards start with 3 Tier 1 spells. Priests start with 2 Tier 1 spells (plus Turn Undead for free).'}
+            ? 'Los magos comienzan con 3 hechizos de Tier 1. Los sacerdotes comienzan con 2 hechizos de Tier 1 (mas Expulsar Muertos Vivientes gratis). Las brujas comienzan con 3 hechizos de Tier 1. Los videntes comienzan con 1 hechizo de Tier 1.'
+            : 'Wizards start with 3 Tier 1 spells. Priests start with 2 Tier 1 spells (plus Turn Undead for free). Witches start with 3 Tier 1 spells. Seers start with 1 Tier 1 spell.'}
         </p>
+
+        {/* Tier 1 Spells by class with details */}
         {(['wizard', 'priest'] as const).map((cls) => {
           const tier1 = getSpellsByClassAndTier(cls, 1)
+          const isExpanded = expandedSpellClass === cls
+          const colorClass = cls === 'wizard' ? 'blue' : 'yellow'
           return (
             <div key={cls} className="mb-3">
-              <h4 className="text-xs font-bold text-primary mb-1 capitalize">
-                {cls === 'wizard' ? (locale === 'es' ? 'Hechizos de Mago Tier 1' : 'Wizard Tier 1 Spells') :
-                  (locale === 'es' ? 'Hechizos de Sacerdote Tier 1' : 'Priest Tier 1 Spells')}
-              </h4>
-              <div className="flex flex-wrap gap-1.5">
-                {tier1.map(s => (
-                  <span key={s.id} className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${
-                    cls === 'wizard' ? 'bg-blue-500/15 text-blue-400' : 'bg-yellow-500/15 text-yellow-400'
-                  }`}>
-                    {tData('spells', s.id, 'name', s.name)}
-                    {s.isFocus ? ' *' : ''}
-                  </span>
-                ))}
-              </div>
+              <button
+                onClick={() => setExpandedSpellClass(isExpanded ? null : cls)}
+                className="flex items-center gap-2 w-full text-left mb-1"
+              >
+                <h4 className={`text-xs font-bold text-${colorClass}-400`}>
+                  {cls === 'wizard' ? (locale === 'es' ? 'Hechizos de Mago Tier 1' : 'Wizard Tier 1 Spells') :
+                    (locale === 'es' ? 'Hechizos de Sacerdote Tier 1' : 'Priest Tier 1 Spells')}
+                  {' '}({tier1.length})
+                </h4>
+                <span className="text-xs text-muted-foreground">{isExpanded ? '\u25B2' : '\u25BC'}</span>
+              </button>
+
+              {!isExpanded ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {tier1.map(s => (
+                    <span key={s.id} className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${
+                      cls === 'wizard' ? 'bg-blue-500/15 text-blue-400' : 'bg-yellow-500/15 text-yellow-400'
+                    }`}>
+                      {tData('spells', s.id, 'name', s.name)}
+                      {s.isFocus ? ' *' : ''}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {tier1.map(s => (
+                    <div key={s.id} className={`rounded-lg border p-2.5 ${
+                      cls === 'wizard' ? 'bg-blue-500/5 border-blue-500/20' : 'bg-yellow-500/5 border-yellow-500/20'
+                    }`}>
+                      <div className="flex items-start justify-between mb-1">
+                        <span className={`text-xs font-bold ${cls === 'wizard' ? 'text-blue-400' : 'text-yellow-400'}`}>
+                          {tData('spells', s.id, 'name', s.name)}
+                          {s.isFocus ? ' *' : ''}
+                        </span>
+                      </div>
+                      <div className="flex gap-3 text-[9px] text-muted-foreground mb-1">
+                        <span>{locale === 'es' ? 'Alcance' : 'Range'}: {s.range}</span>
+                        <span>{locale === 'es' ? 'Duracion' : 'Duration'}: {s.duration}{s.durationValue ? ` (${s.durationValue})` : ''}</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">
+                        {tData('spells', s.id, 'description', s.description)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )
         })}
         <p className="text-[10px] text-muted-foreground italic">
-          {locale === 'es' ? '* = hechizo de concentracion' : '* = focus spell'}
+          {locale === 'es' ? '* = hechizo de concentracion (focus)' : '* = focus spell (maintained by concentrating)'}
         </p>
+      </div>
+
+      {/* Step 11: Final Details */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <h3 className="mb-2 font-bold text-primary">
+          {locale === 'es' ? '11. Detalles Finales' : '11. Final Details'}
+        </h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          {locale === 'es'
+            ? 'Completa tu personaje con los toques finales.'
+            : 'Finish your character with the final touches.'}
+        </p>
+        <div className="space-y-2 text-xs">
+          <div className="rounded-lg bg-secondary/30 p-2.5">
+            <span className="font-semibold">{locale === 'es' ? 'Nombre' : 'Name'}</span>
+            <p className="text-muted-foreground mt-0.5">
+              {locale === 'es'
+                ? 'Elige un nombre para tu personaje. Usa la pestana de Generadores para inspiracion.'
+                : 'Choose a name for your character. Use the Generators tab for inspiration.'}
+            </p>
+          </div>
+          <div className="rounded-lg bg-secondary/30 p-2.5">
+            <span className="font-semibold">{locale === 'es' ? 'Trasfondo Breve' : 'Short Backstory'}</span>
+            <p className="text-muted-foreground mt-0.5">
+              {locale === 'es'
+                ? 'Escribe 1-2 oraciones sobre el pasado de tu personaje. En ShadowDark, los personajes son aventureros desesperados que arriesgan sus vidas por riquezas.'
+                : 'Write 1-2 sentences about your character\'s past. In ShadowDark, characters are desperate adventurers who risk their lives for treasure.'}
+            </p>
+          </div>
+          <div className="rounded-lg bg-secondary/30 p-2.5">
+            <span className="font-semibold">{locale === 'es' ? 'Titulo Inicial' : 'Starting Title'}</span>
+            <p className="text-muted-foreground mt-0.5 mb-2">
+              {locale === 'es'
+                ? 'Tu titulo se determina por tu clase, alineamiento y nivel. A nivel 1, los titulos iniciales son:'
+                : 'Your title is determined by your class, alignment, and level. At level 1, starting titles are:'}
+            </p>
+            <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+              {(() => {
+                const seen = new Set<string>()
+                return TITLES.filter(t => {
+                  if (t.levelRange[0] !== 1) return false
+                  const key = `${t.class}-${t.alignment}`
+                  if (seen.has(key)) return false
+                  seen.add(key)
+                  return true
+                }).slice(0, 12).map(t => (
+                  <div key={`${t.class}-${t.alignment}`} className="rounded bg-secondary/50 px-2 py-1 text-[10px]">
+                    <span className="font-semibold capitalize">{t.class.replace(/-/g, ' ')}</span>
+                    <span className={`ml-1 ${
+                      t.alignment === 'lawful' ? 'text-blue-400' : t.alignment === 'chaotic' ? 'text-red-400' : 'text-muted-foreground'
+                    }`}>({t.alignment})</span>
+                    <span className="text-primary ml-1">{t.title}</span>
+                  </div>
+                ))
+              })()}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
