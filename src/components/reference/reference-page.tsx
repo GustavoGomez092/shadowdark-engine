@@ -1759,9 +1759,40 @@ interface LightTimer {
   active: boolean
 }
 
+interface LightPreset {
+  key: string
+  icon: string
+  labelEn: string
+  labelEs: string
+  defaultMinutes: number
+}
+
+const DEFAULT_PRESETS: LightPreset[] = [
+  { key: 'torch', icon: '🔥', labelEn: 'Torch', labelEs: 'Antorcha', defaultMinutes: 60 },
+  { key: 'lantern', icon: '🏮', labelEn: 'Lantern', labelEs: 'Linterna', defaultMinutes: 240 },
+  { key: 'campfire', icon: '🪵', labelEn: 'Campfire', labelEs: 'Fogata', defaultMinutes: 480 },
+  { key: 'light_spell', icon: '✨', labelEn: 'Light Spell', labelEs: 'Hechizo Luz', defaultMinutes: 60 },
+  { key: 'custom', icon: '⏱', labelEn: 'Custom', labelEs: 'Personalizado', defaultMinutes: 10 },
+]
+
+const STORAGE_KEY = 'shadowdark:light-presets'
+
+function loadPresetDurations(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch { return {} }
+}
+
+function savePresetDurations(durations: Record<string, number>) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(durations))
+}
+
 function ToolsTab() {
   const { locale } = useLocale()
   const [timers, setTimers] = useState<LightTimer[]>([])
+  const [customDurations, setCustomDurations] = useState<Record<string, number>>(loadPresetDurations)
+  const [showConfig, setShowConfig] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Tick all active timers every second
@@ -1775,6 +1806,21 @@ function ToolsTab() {
     }, 1000)
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [])
+
+  function getPresetMinutes(preset: LightPreset): number {
+    return customDurations[preset.key] ?? preset.defaultMinutes
+  }
+
+  function updatePresetDuration(key: string, minutes: number) {
+    const next = { ...customDurations, [key]: minutes }
+    setCustomDurations(next)
+    savePresetDurations(next)
+  }
+
+  function resetAllDurations() {
+    setCustomDurations({})
+    localStorage.removeItem(STORAGE_KEY)
+  }
 
   function addTimer(label: string, minutes: number) {
     setTimers(prev => [...prev, {
@@ -1804,37 +1850,79 @@ function ToolsTab() {
     return `${m}:${s.toString().padStart(2, '0')}`
   }
 
-  const presets = [
-    { label: locale === 'es' ? 'Antorcha' : 'Torch', minutes: 60, icon: '🔥', color: 'orange' },
-    { label: locale === 'es' ? 'Linterna' : 'Lantern', minutes: 240, icon: '🏮', color: 'yellow' },
-    { label: locale === 'es' ? 'Fogata' : 'Campfire', minutes: 480, icon: '🪵', color: 'red' },
-    { label: locale === 'es' ? 'Hechizo Luz' : 'Light Spell', minutes: 60, icon: '✨', color: 'blue' },
-    { label: locale === 'es' ? 'Personalizado (10 min)' : 'Custom (10 min)', minutes: 10, icon: '⏱', color: 'gray' },
-  ]
+  function formatDuration(minutes: number): string {
+    if (minutes >= 60) return `${minutes / 60}h`
+    return `${minutes}m`
+  }
 
   return (
     <div className="space-y-6">
       {/* Light Source Tracker */}
       <div className="rounded-xl border border-orange-500/20 bg-card p-4">
-        <h3 className="mb-1 text-lg font-bold text-orange-400">
-          {locale === 'es' ? 'Rastreador de Fuentes de Luz' : 'Light Source Tracker'}
-        </h3>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-lg font-bold text-orange-400">
+            {locale === 'es' ? 'Rastreador de Fuentes de Luz' : 'Light Source Tracker'}
+          </h3>
+          <button onClick={() => setShowConfig(!showConfig)}
+            className={`rounded-lg px-3 py-1 text-xs font-medium transition ${showConfig ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'border border-border hover:bg-accent'}`}>
+            {showConfig ? (locale === 'es' ? 'Cerrar Config.' : 'Close Config') : '⚙️'}
+          </button>
+        </div>
         <p className="mb-4 text-xs text-muted-foreground">
           {locale === 'es'
             ? 'Shadowdark usa tiempo REAL para las fuentes de luz. Haz clic en un botón para iniciar un temporizador.'
             : 'Shadowdark uses REAL TIME for light sources. Click a button to start a timer.'}
         </p>
 
+        {/* Duration configurator */}
+        {showConfig && (
+          <div className="rounded-lg border border-orange-500/20 bg-secondary/20 p-3 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-xs font-bold text-orange-300">
+                {locale === 'es' ? 'Configurar Duraciones' : 'Configure Durations'}
+              </h4>
+              <button onClick={resetAllDurations} className="text-[10px] text-muted-foreground hover:text-foreground">
+                {locale === 'es' ? 'Restaurar predeterminados' : 'Reset to defaults'}
+              </button>
+            </div>
+            <div className="space-y-2">
+              {DEFAULT_PRESETS.map(p => {
+                const current = getPresetMinutes(p)
+                const isCustomized = customDurations[p.key] !== undefined
+                return (
+                  <div key={p.key} className="flex items-center gap-3">
+                    <span className="w-5 text-center">{p.icon}</span>
+                    <span className="text-xs font-medium w-24">{locale === 'es' ? p.labelEs : p.labelEn}</span>
+                    <input type="number" min={1} max={999} value={current}
+                      onChange={e => updatePresetDuration(p.key, Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-20 rounded border border-input bg-background px-2 py-1 text-xs text-center outline-none focus:ring-1 focus:ring-ring" />
+                    <span className="text-[10px] text-muted-foreground">{locale === 'es' ? 'minutos' : 'minutes'}</span>
+                    {isCustomized && (
+                      <span className="text-[9px] text-orange-400">
+                        ({locale === 'es' ? 'por defecto' : 'default'}: {p.defaultMinutes}m)
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Preset buttons */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {presets.map(p => (
-            <button key={p.label} onClick={() => addTimer(p.label, p.minutes)}
-              className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-sm font-medium hover:bg-secondary/60 transition flex items-center gap-2">
-              <span>{p.icon}</span>
-              <span>{p.label}</span>
-              <span className="text-xs text-muted-foreground">({p.minutes >= 60 ? `${p.minutes / 60}h` : `${p.minutes}m`})</span>
-            </button>
-          ))}
+          {DEFAULT_PRESETS.map(p => {
+            const minutes = getPresetMinutes(p)
+            const label = locale === 'es' ? p.labelEs : p.labelEn
+            return (
+              <button key={p.key} onClick={() => addTimer(label, minutes)}
+                className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-sm font-medium hover:bg-secondary/60 transition flex items-center gap-2">
+                <span>{p.icon}</span>
+                <span>{label}</span>
+                <span className="text-xs text-muted-foreground">({formatDuration(minutes)})</span>
+              </button>
+            )
+          })}
         </div>
 
         {/* Active timers */}
