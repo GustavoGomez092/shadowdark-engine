@@ -15,6 +15,284 @@ import { getAbilityModifier } from "@/schemas/reference.ts"
 
 type Tab = "rules" | "spells" | "items" | "monsters" | "world" | "generators" | "classes" | "charCreation"
 
+// ========== SPANISH CLASS TRANSLATIONS ==========
+const CLASS_ES: Record<string, {
+  name: string
+  description: string
+  features: Record<string, { name: string; description: string }>
+  talents: string[]
+}> = {
+  fighter: {
+    name: 'Guerrero',
+    description: 'Maestros de armas y armaduras, los guerreros sobresalen en el combate físico.',
+    features: {
+      'Hauler': { name: 'Cargador', description: 'Añade tu modificador de CON (si es positivo) a tu capacidad de espacios de equipo.' },
+      'Grit': { name: 'Determinación', description: 'Elige STR o DEX. Tienes ventaja en chequeos de ese tipo para superar una fuerza opuesta.' },
+      'Weapon Mastery': { name: 'Maestría con Armas', description: 'Elige un tipo de arma. Ganas +1 al ataque y daño con ese tipo, más la mitad de tu nivel (redondeado hacia abajo).' },
+    },
+    talents: [
+      'Ganas Maestría con Armas con un tipo de arma adicional',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX o CON',
+      'Elige un tipo de armadura. +1 CA con esa armadura.',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  priest: {
+    name: 'Sacerdote',
+    description: 'Lanzadores de hechizos divinos devotos de su deidad, los sacerdotes curan aliados y castigan enemigos.',
+    features: {
+      'Turn Undead': { name: 'Expulsar Muertos Vivientes', description: 'Conoces el hechizo Expulsar Muertos Vivientes gratis. No cuenta para tu número de hechizos conocidos.' },
+      'Spellcasting': { name: 'Lanzamiento de Hechizos', description: 'Puedes lanzar hechizos de sacerdote usando tu modificador de WIS.' },
+    },
+    talents: [
+      'Ganas ventaja al lanzar un hechizo que conoces',
+      '+1 a ataques cuerpo a cuerpo o a distancia',
+      '+1 a chequeos de lanzamiento de hechizos de sacerdote',
+      '+2 a STR o WIS',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  thief: {
+    name: 'Ladrón',
+    description: 'Astutos y sigilosos, los ladrones sobresalen en encontrar trampas, abrir cerraduras y atacar desde las sombras.',
+    features: {
+      'Backstab': { name: 'Puñalada Trasera', description: 'Si golpeas a una criatura que no es consciente de tu ataque, infliges un dado de daño de arma extra. Añade dados de arma adicionales iguales a la mitad de tu nivel (redondeado hacia abajo).' },
+      'Thievery': { name: 'Hurto', description: 'Eres experto en habilidades de ladrón. Tienes ventaja en chequeos de escalar, sigilo, ocultarse, disfrazarse, encontrar y desactivar trampas, y tareas delicadas como robar bolsillos y abrir cerraduras.' },
+    },
+    talents: [
+      'Ganas ventaja en tiradas de iniciativa',
+      'Puñalada Trasera inflige +1 dado de daño',
+      '+2 a STR, DEX o CHA',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  wizard: {
+    name: 'Mago',
+    description: 'Lanzadores de hechizos arcanos que empuñan magia poderosa a través del estudio y el intelecto.',
+    features: {
+      'Spellcasting': { name: 'Lanzamiento de Hechizos', description: 'Puedes lanzar hechizos de mago usando tu modificador de INT.' },
+      'Learning Spells': { name: 'Aprender Hechizos', description: 'Puedes aprender permanentemente un hechizo de mago de un pergamino de hechizo estudiándolo durante un día y teniendo éxito en un chequeo de INT DC 15. El pergamino se consume tanto si tienes éxito como si fallas.' },
+    },
+    talents: [
+      'Fabrica un objeto mágico aleatorio (ver Guía del GM)',
+      '+2 a INT o +1 a chequeos de lanzamiento de hechizos de mago',
+      'Ganas ventaja al lanzar un hechizo que conoces',
+      'Aprende un hechizo de mago adicional de cualquier tier que conozcas',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  bard: {
+    name: 'Bardo',
+    description: 'Los bardos son vagabundos bienvenidos y sabios consejeros; su tarea es proteger y compartir el conocimiento transmitido a través de las eras.',
+    features: {
+      'Bardic Arts': { name: 'Artes Bárdicas', description: 'Estás entrenado en oratoria, artes escénicas, sabiduría y diplomacia. Tienes ventaja en chequeos relacionados.' },
+      'Presence': { name: 'Presencia', description: 'Haz un chequeo de CHA DC 12 para Inspirar (un objetivo en rango cercano gana un token de suerte) o Fascinar (foco: hipnotiza a todos los objetivos elegidos de nivel 4 o menos dentro de rango cercano).' },
+      'Magical Dabbler': { name: 'Aficionado Mágico', description: 'Puedes activar pergaminos de hechizo y varitas usando Carisma como tu estadística de lanzamiento. Si fallas críticamente, tira en la tabla de percances del mago.' },
+      'Prolific': { name: 'Prolífico', description: 'Añade 1d6 a tus tiradas de aprendizaje. Los grupos que celebran con 1 o más bardos añaden 1d6 a sus tiradas.' },
+    },
+    talents: [
+      'Ganas ventaja al lanzar un pergamino/varita que uses',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX, CON, INT, WIS o CHA',
+      '+1 a tiradas de Aficionado Mágico O CD de Presencia mejorada (solo puedes tomar cada una una vez)',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  ranger: {
+    name: 'Explorador',
+    description: 'Rastreadores hábiles, vagabundos sigilosos y guerreros sin igual que llaman hogar a las tierras salvajes.',
+    features: {
+      'Wayfinder': { name: 'Rastreador', description: 'Tienes ventaja en chequeos asociados con navegación, rastreo, supervivencia, sigilo y animales salvajes.' },
+      'Herbalism': { name: 'Herbalismo', description: 'Haz un chequeo de INT para preparar un remedio herbal: Ungüento (DC 11, cura 1 PG), Estimulante (DC 12, no puede ser sorprendido 10 rondas), Mataenemigos (DC 13, VTJ en ataques vs un tipo de criatura), Restaurativo (DC 14, termina veneno/enfermedad), Curativo (DC 15, como Poción de Curación). Los remedios no usados expiran en 3 rondas.' },
+    },
+    talents: [
+      'Ganas ventaja en chequeos de Herbalismo',
+      '+1 a ataques y daño cuerpo a cuerpo o a distancia',
+      '+2 a STR, DEX, INT o WIS',
+      'Aumenta un dado de daño de arma en un paso',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  warlock: {
+    name: 'Brujo',
+    description: 'Guerreros aullantes con dientes afilados, profetas de ojos salvajes que predican La Disolución, y cazadores de saber encapuchados que portan la Marca oculta de Shune.',
+    features: {
+      'Patron': { name: 'Patrón', description: 'Elige un patrón al que servir. Tu patrón es la fuente de tus dones sobrenaturales. Si tu patrón está descontento contigo, puede retener sus dones.' },
+      'Patron Boon': { name: 'Don del Patrón', description: 'A nivel 1, ganas un talento aleatorio de Don del Patrón basado en tu patrón elegido. Cada vez que ganas una nueva tirada de talento, puedes elegir tirar en tu tabla de Don del Patrón.' },
+    },
+    talents: [
+      'Tira en tu tabla de Don del Patrón',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX, CON, INT, WIS o CHA',
+      '+1 a tiradas de daño',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  witch: {
+    name: 'Bruja',
+    description: 'Brujas cacareantes encorvadas sobre calderos, chamanes cantantes untados en sangre y arcilla, y doncellas marginadas con ojos lechosos que ven portentos y secretos.',
+    features: {
+      'Spellcasting': { name: 'Lanzamiento de Hechizos', description: 'Puedes lanzar hechizos de bruja usando tu modificador de CHA. La CD es 10 + el tier del hechizo. Con un 1 natural, tira en la tabla de Percance Diabólico.' },
+      'Familiar': { name: 'Familiar', description: 'Tienes un animal pequeño (cuervo, rata, rana, etc.) que te sirve lealmente y puede hablar Común. Tu familiar puede ser la fuente de los hechizos que lanzas. Si muere, puedes restaurarlo sacrificando permanentemente 1d4 PG.' },
+    },
+    talents: [
+      'Ganas ventaja al lanzar un hechizo que conoces',
+      '+1 a chequeos de lanzamiento de hechizos de bruja',
+      'Aprende un hechizo de bruja adicional de cualquier tier que conozcas',
+      '+2 a INT o CHA',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  'knight-of-st-ydris': {
+    name: 'Caballero de San Ydris',
+    description: 'Caballeros malditos que caminan el sendero de San Ydris el Impío, el Poseído. Abrazan la oscuridad para combatirla, purificando el mal con una ráfaga de acero y hechicería prohibida.',
+    features: {
+      'Demonic Possession': { name: 'Posesión Demoníaca', description: '3/día, ganas un bonificador de +1 a tus tiradas de daño que dura 3 rondas. Además, añade la mitad de tu nivel al bonificador de daño (redondeado hacia abajo).' },
+      'Spellcasting': { name: 'Lanzamiento de Hechizos', description: 'A partir del nivel 3, puedes lanzar hechizos de bruja usando tu modificador de CHA. Con un 1 natural, tira en la tabla de Percance Diabólico.' },
+    },
+    talents: [
+      'Ganas ventaja al lanzar un hechizo que conoces',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+1 a chequeos de lanzamiento de hechizos de bruja',
+      '+2 a STR, CON o CHA',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  seer: {
+    name: 'Vidente',
+    description: 'Adivinadores funestos que huelen a humo y sangre. Desenredan los susurros de los dioses leyendo las runas, los huesos y las estrellas. Su conocimiento del destino les permite doblegarlo.',
+    features: {
+      'Spellcasting': { name: 'Lanzamiento de Hechizos', description: 'Puedes lanzar hechizos de vidente usando tu modificador de WIS. La CD es 10 + el tier del hechizo. Con un 1 natural, debes completar la Penitencia del Vidente.' },
+      'Omen': { name: 'Presagio', description: '3/día, haz un chequeo de WIS DC 9. Con éxito, ganas un token de suerte (no puedes tener más de uno a la vez).' },
+      'Destined': { name: 'Destinado', description: 'Cada vez que usas un token de suerte, añade 1d6 a la tirada.' },
+    },
+    talents: [
+      'Ganas ventaja al lanzar un hechizo que conoces',
+      '+1 a chequeos de lanzamiento de hechizos de vidente',
+      '+2 a STR, DEX, CON, INT, WIS o CHA',
+      'Aprende un hechizo de vidente adicional de cualquier tier que conozcas',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  'basilisk-warrior': {
+    name: 'Guerrero Basilisco',
+    description: 'Guerreros de ojos ardientes que cubren su piel con barro y piedra. Su antiguo estilo de combate imita la pose regia y los golpes feroces del basilisco.',
+    features: {
+      'Stone Skin': { name: 'Piel de Piedra', description: 'Añade 2 + la mitad de tu nivel (redondeado hacia abajo) a tu CA. Tienes ventaja en chequeos para ocultarte en entornos naturales.' },
+      'Basilisk Blood': { name: 'Sangre de Basilisco', description: 'Tienes ventaja en chequeos de CON para evitar enfermedades dañinas, venenos o aflicciones.' },
+      'Petrifying Gaze': { name: 'Mirada Petrificante', description: 'Una criatura de tu nivel o menos que mire a tus ojos debe pasar un chequeo de CON DC 15 o quedar petrificada durante 1d4 rondas. Usos por día iguales a tu modificador de CON (mínimo 1).' },
+    },
+    talents: [
+      'Ganas +1 CA (mejora de armadura natural)',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX, CON o WIS',
+      '+1 a tiradas de daño',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  'desert-rider': {
+    name: 'Jinete del Desierto',
+    description: 'Bárbaros aullantes que tronan por la arena en caballos salvajes, espías élficos que blanden espadas curvas sobre camellos plateados, o bandidos envueltos en sedas coloridas que cabalgan esbeltos corceles del desierto.',
+    features: {
+      'Charge': { name: 'Carga', description: '3/día, puedes cargar al combate moviendo al menos cerca antes de atacar. Cada vez que lo haces, tus ataques cuerpo a cuerpo infligen daño doble esa ronda.' },
+      'Mount': { name: 'Montura', description: 'Tienes un camello o caballo común que viene cuando lo llamas y nunca se asusta. Mientras cabalgas, ambos obtienen un bonificador a la CA igual a la mitad de tu nivel (redondeado hacia abajo). Tu montura tiene niveles adicionales iguales a la mitad de tu nivel (redondeado hacia abajo).' },
+    },
+    talents: [
+      'Tu montura gana +2 al ataque y daño',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX, CON o CHA',
+      '+1 a tiradas de daño',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  'pit-fighter': {
+    name: 'Luchador de Foso',
+    description: 'Guerreros empapados en sangre que se rodean en una arena rugiente, bandidos del desierto marcados con cicatrices que duelen por el derecho a liderar su banda, o pendencieros de taberna que nunca rechazan un desafío.',
+    features: {
+      'Flourish': { name: 'Floritura', description: '3/día, recupera 1d6 puntos de golpe cuando golpeas a un enemigo con un ataque cuerpo a cuerpo.' },
+      'Relentless': { name: 'Implacable', description: '3/día, cuando eres reducido a 0 PG, haz un chequeo de CON DC 18. Con éxito, quedas en 1 PG en su lugar.' },
+      'Implacable': { name: 'Inquebrantable', description: 'Tienes ventaja en chequeos de Constitución para resistir heridas, veneno o soportar ambientes extremos.' },
+      'Last Stand': { name: 'Último Aliento', description: 'Te levantas de moribundo con 1 punto de golpe con una tirada natural de d20 de 18-20.' },
+    },
+    talents: [
+      '+1 a ataques cuerpo a cuerpo',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX, CON o CHA',
+      '+1 a tiradas de daño',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  'sea-wolf': {
+    name: 'Lobo de Mar',
+    description: 'Asaltantes marinos que merodean las islas en busca de botín en botes con cabeza de dragón. Cuando suena el cuerno de guerra, se convierten en feroces berserkers y doncellas escuderas que esperan complacer a sus dioses con una muerte valiente.',
+    features: {
+      'Seafarer': { name: 'Marinero', description: 'Tienes ventaja en chequeos relacionados con navegar y tripular barcos.' },
+      'Old Gods': { name: 'Dioses Antiguos', description: 'Cada día, tu propósito se alinea con uno de los Dioses Antiguos. Elige después de descansar: Odín (recupera 1d4 PG al matar), Freya (token de suerte + bonificador de 1d6 al usarlo), o Loki (ventaja en chequeos de mentir/sigilo/ocultarse).' },
+      'Shield Wall': { name: 'Muro de Escudos', description: 'Si empuñas un escudo, puedes usar tu acción para tomar una postura defensiva. Tu CA se convierte en 20 durante ese tiempo.' },
+    },
+    talents: [
+      'Entrar en Frenesí (habilidad especial)',
+      '+1 a ataques cuerpo a cuerpo y a distancia',
+      '+2 a STR, DEX, CON o WIS',
+      '+1 a tiradas de daño',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+  'ras-godai': {
+    name: 'Ras-Godai',
+    description: 'Asesinos vestidos de negro que entrenan desde la infancia dentro de un monasterio oculto del desierto. Obtienen sus poderes hechiceros de una legendaria flor de loto negro que les fue entregada por un demonio.',
+    features: {
+      'Smoke Step': { name: 'Paso de Humo', description: '3/día, teletranspórtate a un lugar que puedas ver dentro de rango cercano. Esto no usa tu acción.' },
+      'Black Lotus': { name: 'Loto Negro', description: 'Ganaste el derecho a comer un pétalo de la legendaria flor de loto negro y sobreviviste. Tira un talento en la tabla de Talentos del Loto Negro.' },
+      'Trained Assassin': { name: 'Asesino Entrenado', description: 'Tienes ventaja en chequeos de sigilo y ocultarte. Tus ataques infligen daño doble contra objetivos que no son conscientes de tu presencia.' },
+    },
+    talents: [
+      'Tira un talento adicional de Loto Negro',
+      '+1 a ataques cuerpo a cuerpo',
+      '+2 a STR, DEX, CON o CHA',
+      'Ganas un uso adicional de Paso de Humo por día',
+      'Elige un talento o +2 puntos para distribuir en estadísticas',
+    ],
+  },
+}
+
+const PROF_ES: Record<string, string> = {
+  leather: 'Cuero',
+  chainmail: 'Cota de Malla',
+  plate: 'Placas',
+  shield: 'Escudo',
+  mithral_chainmail: 'Cota de Mithral',
+  none: 'Ninguna',
+  all: 'Todas',
+  all_melee: 'Todas cuerpo a cuerpo',
+  club: 'Garrote',
+  crossbow: 'Ballesta',
+  dagger: 'Daga',
+  mace: 'Maza',
+  longsword: 'Espada Larga',
+  staff: 'Bastón',
+  warhammer: 'Martillo de Guerra',
+  shortbow: 'Arco Corto',
+  shortsword: 'Espada Corta',
+  longbow: 'Arco Largo',
+  spear: 'Lanza',
+  stave: 'Vara',
+  boomerang: 'Bumerán',
+  'spear-thrower': 'Lanzador de Lanzas',
+  pike: 'Pica',
+  javelin: 'Jabalina',
+  scimitar: 'Cimitarra',
+  whip: 'Látigo',
+  handaxe: 'Hacha de Mano',
+  greataxe: 'Gran Hacha',
+  blowgun: 'Cerbatana',
+  bolas: 'Boleadoras',
+  'razor-chain': 'Cadena con Cuchillas',
+  shuriken: 'Shuriken',
+}
+
 export function ReferencePage() {
   useDataRegistry()
   const { t } = useLocale()
@@ -555,7 +833,7 @@ function MonstersRef({ search }: { search: string }) {
 
 // ========== WORLD ==========
 function WorldRef() {
-  const { t, tData } = useLocale()
+  const { locale, t, tData } = useLocale()
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="rounded-xl border border-border bg-card p-4">
@@ -589,9 +867,13 @@ function WorldRef() {
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed mb-1.5">{tData('classes', c.id, 'description', c.description)}</p>
               <div className="flex flex-wrap gap-1">
-                {c.features.map(f => (
-                  <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{f.name}</span>
-                ))}
+                {c.features.map(f => {
+                  const classEs = CLASS_ES[c.id]
+                  const fName = locale === 'es' && classEs?.features[f.name]?.name ? classEs.features[f.name].name : f.name
+                  return (
+                    <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{fName}</span>
+                  )
+                })}
               </div>
             </div>
           ))}
@@ -635,7 +917,12 @@ function WorldRef() {
 function ClassesRef({ search }: { search: string }) {
   const { locale, t, tData } = useLocale()
   const q = search.toLowerCase()
-  const filtered = CLASSES.filter((c) => !q || c.name.toLowerCase().includes(q))
+  const filtered = CLASSES.filter((c) => {
+    if (!q) return true
+    if (c.name.toLowerCase().includes(q)) return true
+    if (locale === 'es' && CLASS_ES[c.id]?.name.toLowerCase().includes(q)) return true
+    return false
+  })
 
   const weaponsLabel = locale === 'es' ? 'Armas' : 'Weapons'
   const armorLabel = locale === 'es' ? 'Armadura' : 'Armor'
@@ -671,12 +958,14 @@ function ClassesRef({ search }: { search: string }) {
           <div className="space-y-1 mb-3 text-xs">
             <p>
               <span className="font-semibold text-primary">{weaponsLabel}:</span>{" "}
-              <span className="text-muted-foreground">{c.weaponProficiencies.join(', ')}</span>
+              <span className="text-muted-foreground">{c.weaponProficiencies.map(p => locale === 'es' ? (PROF_ES[p] ?? p) : p).join(', ')}</span>
             </p>
             <p>
               <span className="font-semibold text-primary">{armorLabel}:</span>{" "}
               <span className="text-muted-foreground">
-                {c.armorProficiencies[0] === 'none' ? (locale === 'es' ? 'Ninguna' : 'None') : c.armorProficiencies.join(', ')}
+                {c.armorProficiencies[0] === 'none'
+                  ? (locale === 'es' ? 'Ninguna' : 'None')
+                  : c.armorProficiencies.map(p => locale === 'es' ? (PROF_ES[p] ?? p) : p).join(', ')}
               </span>
             </p>
           </div>
@@ -685,17 +974,22 @@ function ClassesRef({ search }: { search: string }) {
           <div className="mb-3">
             <h4 className="text-xs font-bold text-primary mb-1">{featuresLabel}</h4>
             <div className="space-y-1.5">
-              {c.features.map((f) => (
-                <div key={f.name} className="rounded-lg bg-secondary/30 px-2.5 py-1.5">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-semibold">{f.name}</span>
-                    {f.level > 1 && (
-                      <span className="text-[9px] text-muted-foreground">Lv {f.level}</span>
-                    )}
+              {c.features.map((f) => {
+                const classEs = CLASS_ES[c.id]
+                const fName = locale === 'es' && classEs?.features[f.name]?.name ? classEs.features[f.name].name : f.name
+                const fDesc = locale === 'es' && classEs?.features[f.name]?.description ? classEs.features[f.name].description : f.description
+                return (
+                  <div key={f.name} className="rounded-lg bg-secondary/30 px-2.5 py-1.5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xs font-semibold">{fName}</span>
+                      {f.level > 1 && (
+                        <span className="text-[9px] text-muted-foreground">Lv {f.level}</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{fDesc}</p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">{f.description}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -711,12 +1005,16 @@ function ClassesRef({ search }: { search: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {c.talentTable.map((row, i) => (
-                    <tr key={i} className={i % 2 === 0 ? '' : 'bg-secondary/20'}>
-                      <td className="px-2 py-1 font-mono font-bold">{formatRoll(row.roll)}</td>
-                      <td className="px-2 py-1 text-muted-foreground">{row.description}</td>
-                    </tr>
-                  ))}
+                  {c.talentTable.map((row, i) => {
+                    const classEs = CLASS_ES[c.id]
+                    const talentDesc = locale === 'es' && classEs?.talents[i] ? classEs.talents[i] : row.description
+                    return (
+                      <tr key={i} className={i % 2 === 0 ? '' : 'bg-secondary/20'}>
+                        <td className="px-2 py-1 font-mono font-bold">{formatRoll(row.roll)}</td>
+                        <td className="px-2 py-1 text-muted-foreground">{talentDesc}</td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -764,8 +1062,9 @@ function CharacterCreationRef() {
   const [expandedSpellClass, setExpandedSpellClass] = useState<string | null>(null)
 
   const formatProf = (p: string) => {
-    if (p === 'all' || p === 'all_melee') return locale === 'es' ? (p === 'all' ? 'Todas' : 'Todas cuerpo a cuerpo') : (p === 'all' ? 'All' : 'All melee')
-    if (p === 'none') return locale === 'es' ? 'Ninguna' : 'None'
+    if (locale === 'es' && PROF_ES[p]) return PROF_ES[p]
+    if (p === 'all' || p === 'all_melee') return p === 'all' ? 'All' : 'All melee'
+    if (p === 'none') return 'None'
     return p.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
   }
 
@@ -862,9 +1161,13 @@ function CharacterCreationRef() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {c.features.slice(0, 3).map(f => (
-                      <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{f.name}</span>
-                    ))}
+                    {c.features.slice(0, 3).map(f => {
+                      const classEs = CLASS_ES[c.id]
+                      const fName = locale === 'es' && classEs?.features[f.name]?.name ? classEs.features[f.name].name : f.name
+                      return (
+                        <span key={f.name} className="rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-medium text-primary">{fName}</span>
+                      )
+                    })}
                     {c.spellcasting && (
                       <span className="rounded-full bg-purple-500/15 px-2 py-0.5 text-[9px] font-medium text-purple-400">
                         {locale === 'es' ? 'Lanzador' : 'Spellcaster'} ({c.spellcasting.stat})
@@ -905,19 +1208,24 @@ function CharacterCreationRef() {
                         {locale === 'es' ? 'Rasgos de Clase' : 'Class Features'}
                       </h5>
                       <div className="space-y-1.5">
-                        {c.features.map(f => (
-                          <div key={f.name} className="rounded-lg bg-card/50 border border-border/30 p-2">
-                            <div className="flex items-baseline gap-2 mb-0.5">
-                              <span className="text-xs font-semibold">{f.name}</span>
-                              {f.level > 1 && (
-                                <span className="text-[9px] text-muted-foreground">
-                                  ({locale === 'es' ? `Nivel ${f.level}` : `Level ${f.level}`})
-                                </span>
-                              )}
+                        {c.features.map(f => {
+                          const classEs = CLASS_ES[c.id]
+                          const fName = locale === 'es' && classEs?.features[f.name]?.name ? classEs.features[f.name].name : f.name
+                          const fDesc = locale === 'es' && classEs?.features[f.name]?.description ? classEs.features[f.name].description : f.description
+                          return (
+                            <div key={f.name} className="rounded-lg bg-card/50 border border-border/30 p-2">
+                              <div className="flex items-baseline gap-2 mb-0.5">
+                                <span className="text-xs font-semibold">{fName}</span>
+                                {f.level > 1 && (
+                                  <span className="text-[9px] text-muted-foreground">
+                                    ({locale === 'es' ? `Nivel ${f.level}` : `Level ${f.level}`})
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-muted-foreground leading-relaxed">{fDesc}</p>
                             </div>
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">{f.description}</p>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     </div>
 
@@ -1223,6 +1531,61 @@ function CharacterCreationRef() {
                 ? 'Marcados con *, los hechizos de concentracion duran mientras mantengas la concentracion. Solo puedes concentrarte en un hechizo a la vez. Recibir dano o realizar otra accion puede romper la concentracion.'
                 : 'Marked with *, focus spells last as long as you concentrate. You can only focus on one spell at a time. Taking damage or performing another action can break focus.'}
             </p>
+          </div>
+        </div>
+
+        {/* Wizard Mishap Table (1d12) */}
+        <div className="rounded-lg bg-red-500/5 border border-red-500/20 p-3 mb-4">
+          <h4 className="text-xs font-bold text-red-400 mb-2">
+            {locale === 'es' ? 'Tabla de Percances del Mago (1d12)' : 'Wizard Mishap Table (1d12)'}
+          </h4>
+          <p className="text-[10px] text-muted-foreground mb-2">
+            {locale === 'es'
+              ? 'Cuando un mago saca un 1 natural al lanzar un hechizo, tira 1d12 en esta tabla:'
+              : 'When a wizard rolls a natural 1 on a spell check, roll 1d12 on this table:'}
+          </p>
+          <div className="space-y-0.5">
+            {[
+              { roll: 1, en: 'Devastation! Roll twice and combine both effects (reroll further 1s).', es: '¡Devastación! Tira dos veces y combina ambos efectos (vuelve a tirar si sale 1).' },
+              { roll: 2, en: 'Explosion! Take 1d8 damage.', es: '¡Explosión! Sufres 1d8 de daño.' },
+              { roll: 3, en: 'Refraction! Target yourself with the spell.', es: '¡Refracción! El hechizo te afecta a ti mismo.' },
+              { roll: 4, en: 'Your hand slipped! Target a random ally with the spell.', es: '¡Se te escapó! El hechizo afecta a un aliado aleatorio.' },
+              { roll: 5, en: "Mind wound! Can't cast this spell again for a week.", es: '¡Herida mental! No puedes lanzar este hechizo durante una semana.' },
+              { roll: 6, en: 'Discorporation! One random piece of gear disappears forever.', es: '¡Descorporeización! Una pieza de equipo aleatoria desaparece para siempre.' },
+              { roll: 7, en: 'Spell worm! Lose a random spell each turn until DC 12 CON check; regain after rest.', es: '¡Gusano de hechizo! Pierdes un hechizo aleatorio cada turno hasta superar CON DC 12; recuperas al descansar.' },
+              { roll: 8, en: 'Harmonic failure! Lose ability to cast a random spell until rest.', es: '¡Fallo armónico! Pierdes un hechizo aleatorio hasta descansar.' },
+              { roll: 9, en: 'Poof! All light within near range is suppressed for 10 rounds.', es: '¡Puf! Toda la luz en rango cercano se suprime durante 10 rondas.' },
+              { roll: 10, en: 'The horror! Scream uncontrollably for 3 rounds, drawing attention.', es: '¡El horror! Gritas incontrolablemente durante 3 rondas, atrayendo atención.' },
+              { roll: 11, en: 'Energy surge! Glow purple for 10 rounds. Enemies have advantage on attacks against you.', es: '¡Oleada de energía! Brillas púrpura durante 10 rondas. Enemigos tienen ventaja en ataques contra ti.' },
+              { roll: 12, en: 'Unstable conduit! Disadvantage on spells of the same tier for 10 rounds.', es: '¡Conducto inestable! Desventaja en hechizos del mismo tier durante 10 rondas.' },
+            ].map(m => (
+              <div key={m.roll} className={`flex gap-2 rounded px-2 py-1 text-[10px] ${m.roll % 2 === 0 ? 'bg-secondary/20' : ''}`}>
+                <span className="font-mono font-bold text-red-400 w-5 shrink-0 text-right">{m.roll}</span>
+                <span className="text-muted-foreground">{locale === 'es' ? m.es : m.en}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Priest Penance Costs */}
+        <div className="rounded-lg bg-yellow-500/5 border border-yellow-500/20 p-3 mb-4">
+          <h4 className="text-xs font-bold text-yellow-400 mb-2">
+            {locale === 'es' ? 'Costes de Penitencia del Sacerdote' : 'Priest Penance Costs'}
+          </h4>
+          <p className="text-[10px] text-muted-foreground mb-2">
+            {locale === 'es'
+              ? 'Cuando un sacerdote pierde un hechizo, debe hacer penitencia sacrificando oro en un templo para recuperarlo:'
+              : 'When a priest loses a spell, they must do penance by sacrificing gold at a temple to recover it:'}
+          </p>
+          <div className="flex gap-3 text-[10px]">
+            {[
+              { tier: 1, gp: 5 }, { tier: 2, gp: 20 }, { tier: 3, gp: 40 }, { tier: 4, gp: 90 }, { tier: 5, gp: 150 },
+            ].map(p => (
+              <div key={p.tier} className="rounded-lg bg-secondary/30 px-3 py-1.5 text-center">
+                <div className="font-bold text-yellow-400">Tier {p.tier}</div>
+                <div className="text-muted-foreground">{p.gp} gp</div>
+              </div>
+            ))}
           </div>
         </div>
 
