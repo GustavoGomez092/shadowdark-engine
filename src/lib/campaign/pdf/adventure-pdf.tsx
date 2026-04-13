@@ -258,7 +258,7 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
               <Text style={styles.subsectionHeader}>{L.keyNPCs}</Text>
               {npcs.map(npc => (
                 <View key={npc.id} style={styles.bulletRow}>
-                  <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
+                  <Text style={styles.bulletMarker}>{'\u2022'}</Text>
                   <Text style={styles.bulletText}>
                     <Text style={styles.bodyTextBold}>{npc.name}</Text>
                     {npc.role ? ` — ${npc.role}` : ''}
@@ -376,7 +376,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
       {/* Creatures */}
       {monsters.length > 0 ? (
         <View style={styles.bulletRow}>
-          <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
+          <Text style={styles.bulletMarker}>{'\u2022'}</Text>
           <Text style={styles.bulletText}>
             <Text style={styles.bodyTextBold}>Criaturas:</Text>
             {monsters.map(m => m.name).join(', ')}
@@ -387,7 +387,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
       {/* Treasure */}
       {room.treasure ? (
         <View style={styles.bulletRow}>
-          <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
+          <Text style={styles.bulletMarker}>{'\u2022'}</Text>
           <Text style={styles.bulletText}>
             <Text style={styles.bodyTextBold}>Tesoro:</Text>
             {room.treasure}
@@ -401,14 +401,14 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
           {room.traps.map(trap => (
             <View key={trap.id} style={{ marginBottom: 2 }}>
               <View style={styles.bulletRow}>
-                <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
+                <Text style={styles.bulletMarker}>{'\u2022'}</Text>
                 <Text style={styles.bulletText}>
                   <Text style={styles.bodyTextBold}>Trampa — {trap.name}: </Text>
                   {trap.description}
                 </Text>
               </View>
               <View style={{ ...styles.bulletRow, paddingLeft: 16 }}>
-                <Text style={styles.bulletMarker}>{'\u25B7'} </Text>
+                <Text style={styles.bulletMarker}>{'\u2013'}</Text>
                 <Text style={styles.bulletText}>
                   {L.trigger}: {trap.trigger}. {L.detection} CD {trap.detectionDC}, {L.disarm} CD {trap.disarmDC}
                   {trap.damage ? `. ${L.damage}: ${trap.damage}` : ''}
@@ -416,7 +416,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
               </View>
               {trap.effect ? (
                 <View style={{ ...styles.bulletRow, paddingLeft: 16 }}>
-                  <Text style={styles.bulletMarker}>{'\u25B7'} </Text>
+                  <Text style={styles.bulletMarker}>{'\u2013'}</Text>
                   <Text style={styles.bulletText}>{L.effect}: {trap.effect}</Text>
                 </View>
               ) : null}
@@ -428,7 +428,7 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
       {/* Connections */}
       {room.connections.length > 0 ? (
         <View style={styles.bulletRow}>
-          <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
+          <Text style={styles.bulletMarker}>{'\u2022'}</Text>
           <Text style={styles.bulletText}>
             <Text style={styles.bodyTextBold}>Salidas:</Text>
             {room.connections.join(', ')}
@@ -476,7 +476,7 @@ function NPCBlock({ npc }: { npc: AdventureNPC }) {
 
       {npc.personality ? (
         <View style={styles.bulletRow}>
-          <Text style={styles.bulletMarker}>{'\u25C6'} </Text>
+          <Text style={styles.bulletMarker}>{'\u2022'}</Text>
           <Text style={styles.bulletText}>
             <Text style={styles.bodyTextBold}>Personalidad:</Text>
             {npc.personality}
