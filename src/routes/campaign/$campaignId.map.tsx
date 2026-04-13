@@ -847,18 +847,55 @@ function MapEditorPage() {
                   Position: ({selectedRoom.x}, {selectedRoom.y}) · Size: {selectedRoom.w}×{selectedRoom.h}
                 </div>
                 <div>
-                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Description</label>
-                  <textarea value={selectedRoom.desc || selectedRoom.note?.text || ''} onFocus={() => appRef.current?.pushUndo()}
+                  <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Link to Room</label>
+                  <select
+                    value={(() => {
+                      const noteText = selectedRoom.desc || selectedRoom.note?.text || ''
+                      const match = campaign?.adventure.rooms.find(r => r.name === noteText)
+                      return match ? match.id : '__custom__'
+                    })()}
                     onChange={e => {
-                      const val = e.target.value
-                      selectedRoom.desc = val
-                      if (selectedRoom.note) selectedRoom.note.text = val
+                      appRef.current?.pushUndo()
+                      const roomId = e.target.value
+                      if (roomId === '__none__') {
+                        selectedRoom.desc = ''
+                        if (selectedRoom.note) { selectedRoom.note.text = ''; selectedRoom.note.symb = '' }
+                      } else if (roomId === '__custom__') {
+                        // Keep current value, no change
+                      } else {
+                        const advRoom = campaign?.adventure.rooms.find(r => r.id === roomId)
+                        if (advRoom) {
+                          selectedRoom.desc = advRoom.name
+                          if (selectedRoom.note) { selectedRoom.note.text = advRoom.name; selectedRoom.note.symb = String(advRoom.number) }
+                        }
+                      }
                       appRef.current?.draw()
                       refresh()
-                      // Auto-save to campaign store
                       if (currentMapId) handleSave()
                     }}
-                    rows={3} placeholder="Room description..." className={inputCls + " resize-y"} />
+                    className={inputCls}
+                  >
+                    <option value="__none__">— None —</option>
+                    {campaign?.adventure.rooms.map(r => (
+                      <option key={r.id} value={r.id}>#{r.number} {r.name}</option>
+                    ))}
+                    <option value="__custom__">Custom text...</option>
+                  </select>
+                  {(() => {
+                    const noteText = selectedRoom.desc || selectedRoom.note?.text || ''
+                    const isLinked = campaign?.adventure.rooms.some(r => r.name === noteText)
+                    if (!isLinked && noteText) return (
+                      <input type="text" value={noteText} className={inputCls + " mt-1"} placeholder="Custom label..."
+                        onFocus={() => appRef.current?.pushUndo()}
+                        onChange={e => {
+                          selectedRoom.desc = e.target.value
+                          if (selectedRoom.note) selectedRoom.note.text = e.target.value
+                          appRef.current?.draw(); refresh()
+                          if (currentMapId) handleSave()
+                        }} />
+                    )
+                    return null
+                  })()}
                 </div>
                 <div>
                   <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Shape</label>
