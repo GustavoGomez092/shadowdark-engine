@@ -295,7 +295,7 @@ const PROF_ES: Record<string, string> = {
 
 export function ReferencePage() {
   useDataRegistry()
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [tab, setTab] = useState<Tab>("rules")
   const [search, setSearch] = useState("")
 
