@@ -27,7 +27,7 @@ async function renderMapToImage(map: CampaignMap): Promise<string | null> {
 
   // Create offscreen canvas at high resolution
   const targetCellSize = 48 // pixels per grid cell for crisp output
-  const padding = 2
+  const padding = 6 // extra cells around dungeon for notes/connectors
 
   // Create a temporary canvas and DungeonApp
   const offscreen = document.createElement('canvas')
@@ -85,6 +85,10 @@ async function renderMapToImage(map: CampaignMap): Promise<string | null> {
   app.renderer.canvas = offscreen
   app.renderer.ctx = offscreen.getContext('2d')!
   app.renderer.cellSize = targetCellSize
+
+  // Clear note drag overrides — they're in editor pixel coords and don't
+  // scale correctly at the PDF cellSize
+  app.renderer.noteOverrides.clear()
 
   // Render
   app.renderer.render(app.dungeon, app.planner, app.flood)
