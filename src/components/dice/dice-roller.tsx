@@ -106,7 +106,9 @@ export function DiceRoller({ characterName, onRoll, compact = false, lockedDie, 
         })
 
         const values = result.dice.map(d => d.value)
-        setDisplayNumbers(values.length >= count ? values.slice(0, count) : [...values, ...Array(count - values.length).fill(0)])
+        // Show the final total (with modifier) as the display number for single die
+        const displayVals = count === 1 ? [result.total] : values
+        setDisplayNumbers(displayVals.length >= count ? displayVals.slice(0, count) : [...displayVals, ...Array(count - displayVals.length).fill(0)])
         setFinalValues(values)
         setLastRoll(result)
         setPhase('result')
