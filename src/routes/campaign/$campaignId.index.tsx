@@ -109,38 +109,46 @@ function CampaignOverviewPage() {
       {/* Export */}
       <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
         <h3 className="mb-4 font-semibold">{t('campaign.export')}</h3>
-        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-          <button
-            onClick={() => downloadJson(exportAsDataPack(campaign), `${campaign.id}-datapack.json`)}
-            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
-          >
-            {t('campaign.exportDataPack')}
-          </button>
-          <button
-            onClick={() => downloadJson(exportAdventureDocument(campaign), `${campaign.id}-adventure.json`)}
-            className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition"
-          >
-            {t('campaign.exportAdventure')}
-          </button>
-          <button
-            disabled={pdfExporting}
-            onClick={async () => {
-              setPdfExporting(true)
-              setPdfStatus('')
-              try {
-                await generateAdventurePDF(campaign, (step) => setPdfStatus(step))
-              } catch {
-                setPdfStatus(t('campaign.exportPDFError'))
-              } finally {
-                setPdfExporting(false)
-              }
-            }}
-            className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {pdfExporting ? pdfStatus || t('campaign.exportPDFGenerating') : t('campaign.exportPDF')}
-          </button>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => downloadJson(exportAsDataPack(campaign), `${campaign.id}-datapack.json`)}
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+            >
+              {t('campaign.exportDataPack')}
+            </button>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t('campaign.exportDataPackDesc')}</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => downloadJson(exportAdventureDocument(campaign), `${campaign.id}-adventure.json`)}
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition"
+            >
+              {t('campaign.exportAdventure')}
+            </button>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t('campaign.exportAdventureDesc')}</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <button
+              disabled={pdfExporting}
+              onClick={async () => {
+                setPdfExporting(true)
+                setPdfStatus('')
+                try {
+                  await generateAdventurePDF(campaign, (step) => setPdfStatus(step))
+                } catch {
+                  setPdfStatus(t('campaign.exportPDFError'))
+                } finally {
+                  setPdfExporting(false)
+                }
+              }}
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {pdfExporting ? pdfStatus || t('campaign.exportPDFGenerating') : t('campaign.exportPDF')}
+            </button>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t('campaign.exportPDFDesc')}</p>
+          </div>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">{t('campaign.exportHint')}</p>
       </div>
     </main>
   )
