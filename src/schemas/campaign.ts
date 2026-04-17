@@ -14,6 +14,7 @@ export interface Campaign {
   createdAt: number
   updatedAt: number
   content: DataPackContent
+  tables: RandomTable[]
   adventure: AdventureModule
   lore: LoreDocument
   maps: CampaignMap[]
@@ -26,7 +27,6 @@ export interface AdventureModule {
   overview: string
   targetLevel: [number, number]
   rooms: AdventureRoom[]
-  randomEncounters: RandomEncounterTable[]
   npcs: AdventureNPC[]
   stores: AdventureStore[]
 }
@@ -66,14 +66,26 @@ export interface AdventureNPC {
   portraitPrompt?: string
 }
 
-export interface RandomEncounterTable {
+// ── Random Tables ──
+
+export type TableKind = 'encounter' | 'loot' | 'event' | 'custom'
+
+export interface TableAttachment {
+  type: 'room' | 'map'
   id: string
-  name: string
-  diceExpression: string
-  entries: RandomEncounterEntry[]
 }
 
-export interface RandomEncounterEntry {
+export interface RandomTable {
+  id: string
+  name: string
+  kind: TableKind
+  customKind?: string
+  diceExpression: string
+  entries: RandomTableEntry[]
+  attachments: TableAttachment[]
+}
+
+export interface RandomTableEntry {
   roll: number | [number, number]
   description: string
   monsterIds?: string[]
