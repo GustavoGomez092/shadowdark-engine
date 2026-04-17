@@ -1,5 +1,5 @@
 import { Document, Page, View, Text, Image, Font } from '@react-pdf/renderer'
-import type { Campaign, AdventureRoom, AdventureNPC, AdventureStore, RandomEncounterTable, LoreChapter } from '@/schemas/campaign.ts'
+import type { Campaign, AdventureRoom, AdventureNPC, AdventureStore, RandomTable, LoreChapter } from '@/schemas/campaign.ts'
 import type { MonsterDefinition } from '@/schemas/monsters.ts'
 import { styles, COLORS } from './pdf-styles.ts'
 
@@ -34,6 +34,13 @@ const L = {
   qty: 'Cant.',
   keeper: 'Encargado',
   storeType: 'Tipo',
+  tablesSection: 'Tablas Aleatorias',
+  attachedTo: 'Asociada a',
+  kindEncounter: 'Encuentro',
+  kindLoot: 'Botín',
+  kindEvent: 'Evento',
+  kindCustom: 'Personalizado',
+  result: 'Resultado',
   designedFor: 'Diseñado para uso con Shadowdark RPG',
   levelAdventure: 'Una aventura de nivel',
   by: 'por',
@@ -92,8 +99,8 @@ function collectAllMonsterIds(campaign: Campaign): string[] {
   for (const room of campaign.adventure.rooms) {
     for (const mid of room.monsterIds) ids.add(mid)
   }
-  for (const enc of campaign.adventure.randomEncounters) {
-    for (const entry of enc.entries) {
+  for (const table of (campaign.tables ?? [])) {
+    for (const entry of table.entries) {
       if (entry.monsterIds) {
         for (const mid of entry.monsterIds) ids.add(mid)
       }
@@ -189,6 +196,11 @@ function ContentsPage({ campaign }: { campaign: Campaign }) {
     entries.push({ title: L.shops, pageHint: '' })
   }
 
+  const nonEncounterTables = (campaign.tables ?? []).filter(t => t.kind !== 'encounter')
+  if (nonEncounterTables.length > 0) {
+    entries.push({ title: L.tablesSection, pageHint: '' })
+  }
+
   const monsterIds = collectAllMonsterIds(campaign)
   if (monsterIds.length > 0) {
     entries.push({ title: L.creatureStats, pageHint: '' })
@@ -268,11 +280,11 @@ function OverviewPage({ campaign }: { campaign: Campaign }) {
             </View>
           ) : null}
 
-          {campaign.adventure.randomEncounters.length > 0 ? (
+          {(campaign.tables ?? []).filter(t => t.kind === 'encounter').length > 0 ? (
             <View>
               <Text style={styles.subsectionHeader}>{L.randomEncounters}</Text>
-              {campaign.adventure.randomEncounters.map(table => (
-                <EncounterTable key={table.id} table={table} />
+              {(campaign.tables ?? []).filter(t => t.kind === 'encounter').map(table => (
+                <RandomTablePDF key={table.id} table={table} campaign={campaign} />
               ))}
             </View>
           ) : null}
@@ -301,22 +313,56 @@ function MapPage({ image, campaign, mapIndex }: { image: { mapId: string; dataUr
   )
 }
 
-function EncounterTable({ table }: { table: RandomEncounterTable }) {
+function getKindLabel(kind: string, customKind?: string): string {
+  if (kind === 'custom' && customKind) return customKind
+  const map: Record<string, string> = { encounter: L.kindEncounter, loot: L.kindLoot, event: L.kindEvent, custom: L.kindCustom }
+  return map[kind] ?? kind
+}
+
+function getAttachmentNames(table: RandomTable, campaign: Campaign): string {
+  return table.attachments.map(a => {
+    if (a.type === 'room') {
+      const room = campaign.adventure.rooms.find(r => r.id === a.id)
+      return room ? `${room.number}. ${room.name} (Room)` : null
+    }
+    if (a.type === 'map') {
+      const map = campaign.maps.find(m => m.id === a.id)
+      return map ? `${map.name} (Map)` : null
+    }
+    return null
+  }).filter(Boolean).join(' \u00B7 ')
+}
+
+function RandomTablePDF({ table, campaign }: { table: RandomTable; campaign: Campaign }) {
+  const isEncounter = table.kind === 'encounter'
+  const attachmentNames = getAttachmentNames(table, campaign)
+
   return (
     <View style={{ marginTop: 8 }} wrap={false}>
-      <Text style={styles.subsectionHeader}>{table.name} ({table.diceExpression})</Text>
+      <Text style={styles.subsectionHeader}>
+        {table.name} ({table.diceExpression}, {getKindLabel(table.kind, table.customKind)})
+      </Text>
+
+      {attachmentNames ? (
+        <View style={{ backgroundColor: '#EEEEEE', paddingVertical: 3, paddingHorizontal: 8, marginBottom: 4, borderRadius: 2 }}>
+          <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 8, color: COLORS.darkGray }}>
+            {L.attachedTo}: {attachmentNames}
+          </Text>
+        </View>
+      ) : null}
+
       <View style={styles.rule} />
 
       <View style={styles.tableHeader}>
         <Text style={styles.tableCellHeaderSmall}>{L.roll}</Text>
-        <Text style={styles.tableCellHeaderFlex}>{L.encounter}</Text>
+        <Text style={styles.tableCellHeaderFlex}>{isEncounter ? L.encounter : L.result}</Text>
       </View>
 
       {table.entries.map((entry, i) => (
         <View key={i} style={i % 2 === 1 ? styles.tableRowAlt : styles.tableRow}>
           <Text style={styles.tableCellSmall}>{formatRollRange(entry.roll)}</Text>
           <Text style={styles.tableCellFlex}>
-            {entry.quantity ? `${entry.quantity} ` : ''}{entry.description}
+            {isEncounter && entry.quantity ? `${entry.quantity} ` : ''}{entry.description}
           </Text>
         </View>
       ))}
@@ -428,6 +474,21 @@ function RoomBlock({ room, campaign }: { room: AdventureRoom; campaign: Campaign
           </Text>
         </View>
       ) : null}
+
+      {/* Tables attached to this room */}
+      {(() => {
+        const roomTables = (campaign.tables ?? []).filter(t => t.attachments.some(a => a.type === 'room' && a.id === room.id))
+        if (roomTables.length === 0) return null
+        return (
+          <View style={styles.bulletRow}>
+            <Text style={styles.bulletMarker}>{'\u2022'}</Text>
+            <Text style={styles.bulletText}>
+              <Text style={styles.bodyTextBold}>Tablas: </Text>
+              {roomTables.map(t => t.name).join(', ')}
+            </Text>
+          </View>
+        )
+      })()}
     </View>
   )
 }
@@ -676,6 +737,36 @@ function LoreChapterBlock({ chapter }: { chapter: LoreChapter }) {
   )
 }
 
+// ── Tables Pages ──
+
+function TablesPages({ campaign }: { campaign: Campaign }) {
+  const tables = (campaign.tables ?? []).filter(t => t.kind !== 'encounter')
+  if (tables.length === 0) return null
+
+  const grouped: Record<string, RandomTable[]> = {}
+  for (const table of tables) {
+    const key = table.kind === 'custom' ? (table.customKind ?? 'Custom') : table.kind
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(table)
+  }
+
+  return (
+    <Page size="LETTER" style={styles.page} wrap>
+      <Text style={styles.sectionHeader}>{L.tablesSection}</Text>
+      <View style={styles.ruleThick} />
+
+      {Object.entries(grouped).map(([kind, kindTables]) => (
+        <View key={kind}>
+          {kindTables.map(table => (
+            <RandomTablePDF key={table.id} table={table} campaign={campaign} />
+          ))}
+        </View>
+      ))}
+      <PageNumber />
+    </Page>
+  )
+}
+
 // ── Main Document ──
 
 export function AdventurePDF({ campaign, mapImages }: AdventurePDFProps) {
@@ -705,6 +796,8 @@ export function AdventurePDF({ campaign, mapImages }: AdventurePDFProps) {
       {campaign.adventure.stores.length > 0 ? (
         <ShopPages campaign={campaign} />
       ) : null}
+
+      <TablesPages campaign={campaign} />
 
       <CreatureStatsPages campaign={campaign} />
 
