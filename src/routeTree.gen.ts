@@ -26,6 +26,7 @@ import { Route as GmCharactersRouteImport } from './routes/gm/characters'
 import { Route as CampaignCampaignIdRouteImport } from './routes/campaign/$campaignId'
 import { Route as CampaignCampaignIdIndexRouteImport } from './routes/campaign/$campaignId.index'
 import { Route as GmSessionSessionIdRouteImport } from './routes/gm/session.$sessionId'
+import { Route as CampaignCampaignIdTablesRouteImport } from './routes/campaign/$campaignId.tables'
 import { Route as CampaignCampaignIdMapRouteImport } from './routes/campaign/$campaignId.map'
 import { Route as CampaignCampaignIdLoreRouteImport } from './routes/campaign/$campaignId.lore'
 import { Route as CampaignCampaignIdContentRouteImport } from './routes/campaign/$campaignId.content'
@@ -117,6 +118,12 @@ const GmSessionSessionIdRoute = GmSessionSessionIdRouteImport.update({
   path: '/session/$sessionId',
   getParentRoute: () => GmRouteRoute,
 } as any)
+const CampaignCampaignIdTablesRoute =
+  CampaignCampaignIdTablesRouteImport.update({
+    id: '/tables',
+    path: '/tables',
+    getParentRoute: () => CampaignCampaignIdRoute,
+  } as any)
 const CampaignCampaignIdMapRoute = CampaignCampaignIdMapRouteImport.update({
   id: '/map',
   path: '/map',
@@ -166,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/campaign/$campaignId/content': typeof CampaignCampaignIdContentRoute
   '/campaign/$campaignId/lore': typeof CampaignCampaignIdLoreRoute
   '/campaign/$campaignId/map': typeof CampaignCampaignIdMapRoute
+  '/campaign/$campaignId/tables': typeof CampaignCampaignIdTablesRoute
   '/gm/session/$sessionId': typeof GmSessionSessionIdRoute
   '/campaign/$campaignId/': typeof CampaignCampaignIdIndexRoute
 }
@@ -188,6 +196,7 @@ export interface FileRoutesByTo {
   '/campaign/$campaignId/content': typeof CampaignCampaignIdContentRoute
   '/campaign/$campaignId/lore': typeof CampaignCampaignIdLoreRoute
   '/campaign/$campaignId/map': typeof CampaignCampaignIdMapRoute
+  '/campaign/$campaignId/tables': typeof CampaignCampaignIdTablesRoute
   '/gm/session/$sessionId': typeof GmSessionSessionIdRoute
   '/campaign/$campaignId': typeof CampaignCampaignIdIndexRoute
 }
@@ -213,6 +222,7 @@ export interface FileRoutesById {
   '/campaign/$campaignId/content': typeof CampaignCampaignIdContentRoute
   '/campaign/$campaignId/lore': typeof CampaignCampaignIdLoreRoute
   '/campaign/$campaignId/map': typeof CampaignCampaignIdMapRoute
+  '/campaign/$campaignId/tables': typeof CampaignCampaignIdTablesRoute
   '/gm/session/$sessionId': typeof GmSessionSessionIdRoute
   '/campaign/$campaignId/': typeof CampaignCampaignIdIndexRoute
 }
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/campaign/$campaignId/content'
     | '/campaign/$campaignId/lore'
     | '/campaign/$campaignId/map'
+    | '/campaign/$campaignId/tables'
     | '/gm/session/$sessionId'
     | '/campaign/$campaignId/'
   fileRoutesByTo: FileRoutesByTo
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/campaign/$campaignId/content'
     | '/campaign/$campaignId/lore'
     | '/campaign/$campaignId/map'
+    | '/campaign/$campaignId/tables'
     | '/gm/session/$sessionId'
     | '/campaign/$campaignId'
   id:
@@ -285,6 +297,7 @@ export interface FileRouteTypes {
     | '/campaign/$campaignId/content'
     | '/campaign/$campaignId/lore'
     | '/campaign/$campaignId/map'
+    | '/campaign/$campaignId/tables'
     | '/gm/session/$sessionId'
     | '/campaign/$campaignId/'
   fileRoutesById: FileRoutesById
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GmSessionSessionIdRouteImport
       parentRoute: typeof GmRouteRoute
     }
+    '/campaign/$campaignId/tables': {
+      id: '/campaign/$campaignId/tables'
+      path: '/tables'
+      fullPath: '/campaign/$campaignId/tables'
+      preLoaderRoute: typeof CampaignCampaignIdTablesRouteImport
+      parentRoute: typeof CampaignCampaignIdRoute
+    }
     '/campaign/$campaignId/map': {
       id: '/campaign/$campaignId/map'
       path: '/map'
@@ -462,6 +482,7 @@ interface CampaignCampaignIdRouteChildren {
   CampaignCampaignIdContentRoute: typeof CampaignCampaignIdContentRoute
   CampaignCampaignIdLoreRoute: typeof CampaignCampaignIdLoreRoute
   CampaignCampaignIdMapRoute: typeof CampaignCampaignIdMapRoute
+  CampaignCampaignIdTablesRoute: typeof CampaignCampaignIdTablesRoute
   CampaignCampaignIdIndexRoute: typeof CampaignCampaignIdIndexRoute
 }
 
@@ -471,6 +492,7 @@ const CampaignCampaignIdRouteChildren: CampaignCampaignIdRouteChildren = {
   CampaignCampaignIdContentRoute: CampaignCampaignIdContentRoute,
   CampaignCampaignIdLoreRoute: CampaignCampaignIdLoreRoute,
   CampaignCampaignIdMapRoute: CampaignCampaignIdMapRoute,
+  CampaignCampaignIdTablesRoute: CampaignCampaignIdTablesRoute,
   CampaignCampaignIdIndexRoute: CampaignCampaignIdIndexRoute,
 }
 
