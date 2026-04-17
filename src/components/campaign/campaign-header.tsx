@@ -6,6 +6,7 @@ import { LOCALE_LABELS } from '@/i18n/index.ts'
 const NAV_ITEMS = [
   { key: 'campaign.nav.overview', href: '/campaign/$campaignId', matchEnd: true },
   { key: 'campaign.nav.content', href: '/campaign/$campaignId/content', matchEnd: false },
+  { key: 'campaign.nav.tables', href: '/campaign/$campaignId/tables', matchEnd: false },
   { key: 'campaign.nav.adventure', href: '/campaign/$campaignId/adventure', matchEnd: false },
   { key: 'campaign.nav.lore', href: '/campaign/$campaignId/lore', matchEnd: false },
   { key: 'campaign.nav.map', href: '/campaign/$campaignId/map', matchEnd: false },
