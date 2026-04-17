@@ -28,6 +28,7 @@ function CampaignOverviewPage() {
   const npcCount = campaign.adventure.npcs.length
   const chapterCount = campaign.lore.chapters.length
   const mapCount = campaign.maps.length
+  const tableCount = (campaign.tables ?? []).length
 
   return (
     <main className="mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-8">
@@ -80,6 +81,7 @@ function CampaignOverviewPage() {
         <StatCard label={t('campaign.stats.rooms')} value={roomCount} />
         <StatCard label={t('campaign.stats.npcs')} value={npcCount} />
         <StatCard label={t('campaign.stats.maps')} value={mapCount} />
+        <StatCard label={t('campaign.tables.title')} value={tableCount} />
       </div>
 
       {/* Content Breakdown */}
