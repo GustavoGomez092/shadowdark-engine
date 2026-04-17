@@ -1,5 +1,5 @@
 import { generateId } from '@/lib/utils/id.ts'
-import type { Campaign, AdventureRoom, AdventureNPC, TrapDefinition, RandomEncounterTable, AdventureStore, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
+import type { Campaign, AdventureRoom, AdventureNPC, TrapDefinition, RandomTable, TableKind, AdventureStore, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
 import type { StoreItem } from '@/schemas/stores.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 
@@ -13,12 +13,12 @@ export function createEmptyCampaign(name: string, author: string = ''): Campaign
     createdAt: Date.now(),
     updatedAt: Date.now(),
     content: {},
+    tables: [],
     adventure: {
       hook: '',
       overview: '',
       targetLevel: [1, 3],
       rooms: [],
-      randomEncounters: [],
       npcs: [],
       stores: [],
     },
@@ -64,12 +64,14 @@ export function createEmptyTrap(): TrapDefinition {
   }
 }
 
-export function createEmptyEncounterTable(): RandomEncounterTable {
+export function createEmptyTable(kind: TableKind = 'encounter'): RandomTable {
   return {
     id: generateId(),
-    name: 'Random Encounters',
+    name: '',
+    kind,
     diceExpression: '1d6',
     entries: [],
+    attachments: [],
   }
 }
 
