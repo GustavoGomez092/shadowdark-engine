@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import type { Campaign, CampaignIndexEntry, AdventureRoom, AdventureNPC, RandomEncounterTable, AdventureStore, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
+import type { Campaign, CampaignIndexEntry, AdventureRoom, AdventureNPC, RandomTable, TableAttachment, AdventureStore, LoreChapter, LoreSection } from '@/schemas/campaign.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 import type { DataPackContent } from '@/lib/data/types.ts'
 import { createEmptyCampaign } from '@/lib/campaign/defaults.ts'
@@ -32,9 +32,12 @@ interface CampaignStore {
   addNPC: (npc: AdventureNPC) => void
   updateNPC: (id: string, updater: (n: AdventureNPC) => void) => void
   removeNPC: (id: string) => void
-  addEncounterTable: (table: RandomEncounterTable) => void
-  updateEncounterTable: (id: string, updater: (t: RandomEncounterTable) => void) => void
-  removeEncounterTable: (id: string) => void
+  // Tables
+  addTable: (table: RandomTable) => void
+  updateTable: (id: string, updater: (t: RandomTable) => void) => void
+  removeTable: (id: string) => void
+  attachTable: (tableId: string, attachment: TableAttachment) => void
+  detachTable: (tableId: string, attachment: TableAttachment) => void
   addStore: (store: AdventureStore) => void
   updateStore: (id: string, updater: (s: AdventureStore) => void) => void
   removeStore: (id: string) => void
@@ -119,6 +122,21 @@ export const useCampaignStore = create<CampaignStore>()(
       if (!campaign) return false
       // Backfill fields added after initial campaign creation
       if (!campaign.adventure.stores) campaign.adventure.stores = []
+      // Migrate old randomEncounters to tables
+      if (!campaign.tables) {
+        const oldEncounters = (campaign.adventure as Record<string, unknown>).randomEncounters as RandomTable[] | undefined
+        if (oldEncounters && oldEncounters.length > 0) {
+          campaign.tables = oldEncounters.map(enc => ({
+            ...enc,
+            kind: 'encounter' as const,
+            attachments: [],
+          }))
+        } else {
+          campaign.tables = []
+        }
+        delete (campaign.adventure as Record<string, unknown>).randomEncounters
+        saveToStorage(campaign)
+      }
       set(state => { state.campaign = campaign })
       return true
     },
@@ -200,21 +218,42 @@ export const useCampaignStore = create<CampaignStore>()(
       const c = get().campaign; if (c) debouncedSave(c)
     },
 
-    addEncounterTable: (table) => {
-      set(state => { state.campaign?.adventure.randomEncounters.push(table) })
+    addTable: (table) => {
+      set(state => {
+        if (!state.campaign) return
+        if (!state.campaign.tables) state.campaign.tables = []
+        state.campaign.tables.push(table)
+      })
       const c = get().campaign; if (c) debouncedSave(c)
     },
-    updateEncounterTable: (id, updater) => {
+    updateTable: (id, updater) => {
       set(state => {
-        const t = state.campaign?.adventure.randomEncounters.find(t => t.id === id)
+        const t = state.campaign?.tables?.find(t => t.id === id)
         if (t) updater(t)
       })
       const c = get().campaign; if (c) debouncedSave(c)
     },
-    removeEncounterTable: (id) => {
+    removeTable: (id) => {
       set(state => {
         if (!state.campaign) return
-        state.campaign.adventure.randomEncounters = state.campaign.adventure.randomEncounters.filter(t => t.id !== id)
+        state.campaign.tables = (state.campaign.tables ?? []).filter(t => t.id !== id)
+      })
+      const c = get().campaign; if (c) debouncedSave(c)
+    },
+    attachTable: (tableId, attachment) => {
+      set(state => {
+        const t = state.campaign?.tables?.find(t => t.id === tableId)
+        if (!t) return
+        const exists = t.attachments.some(a => a.type === attachment.type && a.id === attachment.id)
+        if (!exists) t.attachments.push(attachment)
+      })
+      const c = get().campaign; if (c) debouncedSave(c)
+    },
+    detachTable: (tableId, attachment) => {
+      set(state => {
+        const t = state.campaign?.tables?.find(t => t.id === tableId)
+        if (!t) return
+        t.attachments = t.attachments.filter(a => !(a.type === attachment.type && a.id === attachment.id))
       })
       const c = get().campaign; if (c) debouncedSave(c)
     },
