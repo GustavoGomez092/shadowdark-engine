@@ -160,12 +160,12 @@ describe('Campaign E2E', () => {
       createdAt: Date.now() - 100_000,
       updatedAt: Date.now(),
       content: {},
+      tables: [],
       adventure: {
         hook: 'A mysterious portal opens...',
         overview: 'The party must investigate a strange portal.',
         targetLevel: [1, 3],
         rooms: [],
-        randomEncounters: [],
         npcs: [],
       },
       lore: { chapters: [] },

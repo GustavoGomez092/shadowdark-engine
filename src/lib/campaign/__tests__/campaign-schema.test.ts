@@ -5,7 +5,7 @@ import {
   AdventureRoomSchema,
   TrapDefinitionSchema,
   AdventureNPCSchema,
-  RandomEncounterTableSchema,
+  RandomTableSchema,
   AdventureStoreSchema,
   StoreItemSchema,
   LoreDocumentSchema,
@@ -27,12 +27,12 @@ describe('validateCampaign', () => {
         createdAt: 1000,
         updatedAt: 2000,
         content: {},
+        tables: [],
         adventure: {
           hook: 'A hook',
           overview: 'An overview',
           targetLevel: [1, 3],
           rooms: [],
-          randomEncounters: [],
           npcs: [],
         },
         lore: { chapters: [] },
@@ -55,10 +55,10 @@ describe('validateCampaign', () => {
         overview: '',
         targetLevel: [1, 3],
         rooms: [],
-        randomEncounters: [],
         npcs: [],
         stores: [],
       })
+      expect(result.data?.tables).toEqual([])
       expect(result.data?.lore).toEqual({ chapters: [] })
       expect(result.data?.maps).toEqual([])
       expect(typeof result.data?.createdAt).toBe('number')
@@ -232,16 +232,18 @@ describe('AdventureNPCSchema', () => {
   })
 })
 
-describe('RandomEncounterTableSchema', () => {
+describe('RandomTableSchema (migrated from RandomEncounterTableSchema)', () => {
   it('accepts table with single-roll entries', () => {
-    const result = RandomEncounterTableSchema.safeParse({
+    const result = RandomTableSchema.safeParse({
       id: 'table-1',
       name: 'Forest Encounters',
+      kind: 'encounter',
       diceExpression: '1d6',
       entries: [
         { roll: 1, description: 'Wolves', monsterIds: ['wolf'], quantity: '2d4' },
         { roll: 2, description: 'Nothing happens' },
       ],
+      attachments: [],
     })
     expect(result.success).toBe(true)
     expect(result.data!.entries).toHaveLength(2)
@@ -249,7 +251,7 @@ describe('RandomEncounterTableSchema', () => {
   })
 
   it('accepts table with range-roll entries', () => {
-    const result = RandomEncounterTableSchema.safeParse({
+    const result = RandomTableSchema.safeParse({
       id: 'table-2',
       entries: [
         { roll: [1, 3], description: 'Goblins', monsterIds: ['goblin'] },
@@ -261,15 +263,15 @@ describe('RandomEncounterTableSchema', () => {
   })
 
   it('fills defaults for name and diceExpression', () => {
-    const result = RandomEncounterTableSchema.safeParse({ id: 'table-3' })
+    const result = RandomTableSchema.safeParse({ id: 'table-3' })
     expect(result.success).toBe(true)
-    expect(result.data!.name).toBe('Random Encounters')
+    expect(result.data!.name).toBe('')
     expect(result.data!.diceExpression).toBe('1d6')
     expect(result.data!.entries).toEqual([])
   })
 
   it('rejects entry with missing description', () => {
-    const result = RandomEncounterTableSchema.safeParse({
+    const result = RandomTableSchema.safeParse({
       id: 'table-4',
       entries: [{ roll: 1 }], // missing description
     })
@@ -277,7 +279,7 @@ describe('RandomEncounterTableSchema', () => {
   })
 
   it('rejects entry with missing roll', () => {
-    const result = RandomEncounterTableSchema.safeParse({
+    const result = RandomTableSchema.safeParse({
       id: 'table-5',
       entries: [{ description: 'Something' }], // missing roll
     })
@@ -666,7 +668,6 @@ describe('AdventureStoreSchema', () => {
         overview: '',
         targetLevel: [1, 3],
         rooms: [],
-        randomEncounters: [],
         npcs: [],
       },
     })
@@ -720,12 +721,12 @@ describe('validateAdventureDocument', () => {
     createdAt: 1000,
     updatedAt: 2000,
     content: {},
+    tables: [],
     adventure: {
       hook: 'A hook',
       overview: 'An overview',
       targetLevel: [1, 3],
       rooms: [],
-      randomEncounters: [],
       npcs: [],
     },
     lore: { chapters: [] },

@@ -13,6 +13,7 @@ export interface AdventureDocument {
   createdAt: number
   updatedAt: number
   content: Campaign['content']
+  tables: Campaign['tables']
   adventure: Campaign['adventure']
   lore: Campaign['lore']
   maps: Campaign['maps']
@@ -43,6 +44,7 @@ export function exportAdventureDocument(campaign: Campaign): AdventureDocument {
     createdAt: campaign.createdAt,
     updatedAt: campaign.updatedAt,
     content: campaign.content,
+    tables: campaign.tables,
     adventure: campaign.adventure,
     lore: campaign.lore,
     maps: campaign.maps,

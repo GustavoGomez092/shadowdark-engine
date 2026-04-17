@@ -75,22 +75,32 @@ export const AdventureNPCSchema = z.object({
   portraitPrompt: z.string().optional(),
 }).passthrough()
 
-// ── Random Encounter Entry ──
+// ── Table Attachment ──
 
-export const RandomEncounterEntrySchema = z.object({
+export const TableAttachmentSchema = z.object({
+  type: z.enum(['room', 'map']),
+  id: z.string(),
+})
+
+// ── Random Table Entry ──
+
+export const RandomTableEntrySchema = z.object({
   roll: z.union([z.number(), z.tuple([z.number(), z.number()])]),
   description: z.string(),
   monsterIds: z.array(z.string()).optional(),
   quantity: z.string().optional(),
 }).passthrough()
 
-// ── Random Encounter Table ──
+// ── Random Table ──
 
-export const RandomEncounterTableSchema = z.object({
+export const RandomTableSchema = z.object({
   id: z.string(),
-  name: z.string().default('Random Encounters'),
+  name: z.string().default(''),
+  kind: z.enum(['encounter', 'loot', 'event', 'custom']).default('encounter'),
+  customKind: z.string().optional(),
   diceExpression: z.string().default('1d6'),
-  entries: z.array(RandomEncounterEntrySchema).default([]),
+  entries: z.array(RandomTableEntrySchema).default([]),
+  attachments: z.array(TableAttachmentSchema).default([]),
 }).passthrough()
 
 // ── Store Item ──
@@ -128,7 +138,6 @@ export const AdventureModuleSchema = z.object({
   overview: z.string().default(''),
   targetLevel: z.tuple([z.number(), z.number()]).default([1, 3]),
   rooms: z.array(AdventureRoomSchema).default([]),
-  randomEncounters: z.array(RandomEncounterTableSchema).default([]),
   npcs: z.array(AdventureNPCSchema).default([]),
   stores: z.array(AdventureStoreSchema).default([]),
 }).passthrough()
@@ -248,12 +257,12 @@ export const CampaignSchema = z.object({
   createdAt: z.number().default(() => Date.now()),
   updatedAt: z.number().default(() => Date.now()),
   content: DataPackContentSchema.default({}),
+  tables: z.array(RandomTableSchema).default([]),
   adventure: AdventureModuleSchema.default({
     hook: '',
     overview: '',
     targetLevel: [1, 3] as [number, number],
     rooms: [],
-    randomEncounters: [],
     npcs: [],
     stores: [],
   }),
@@ -267,6 +276,33 @@ export const AdventureDocumentSchema = CampaignSchema.extend({
   format: z.literal('shadowdark-adventure-v1'),
   exportedAt: z.number(),
 })
+
+// ── Migration: adventure.randomEncounters → campaign.tables ──
+
+export function migrateRandomEncounters(data: Record<string, unknown>): Record<string, unknown> {
+  const adventure = data.adventure as Record<string, unknown> | undefined
+  if (!adventure) return data
+
+  const oldEncounters = adventure.randomEncounters as unknown[] | undefined
+  const existingTables = data.tables as unknown[] | undefined
+
+  // Only migrate if old field exists and new field doesn't
+  if (oldEncounters && oldEncounters.length > 0 && (!existingTables || existingTables.length === 0)) {
+    data.tables = oldEncounters.map((enc: unknown) => {
+      const e = enc as Record<string, unknown>
+      return {
+        ...e,
+        kind: 'encounter',
+        attachments: [],
+      }
+    })
+  }
+
+  // Remove old field
+  delete adventure.randomEncounters
+
+  return data
+}
 
 // ── Validation Functions ──
 

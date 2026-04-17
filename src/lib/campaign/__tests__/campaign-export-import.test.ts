@@ -66,6 +66,21 @@ function makeFullCampaign(): Campaign {
         },
       ],
     },
+    tables: [
+      {
+        id: 'enc-mines',
+        name: 'Mine Encounters',
+        kind: 'encounter' as const,
+        diceExpression: '1d6',
+        entries: [
+          { roll: [1, 2] as [number, number], description: 'Skeleton patrol', monsterIds: ['skeleton-warrior'], quantity: '1d4' },
+          { roll: 3, description: 'Dripping water — false alarm' },
+          { roll: [4, 5] as [number, number], description: 'Cave-in! DC 12 DEX save.' },
+          { roll: 6, description: 'A lost miner\'s ghost (non-hostile)' },
+        ],
+        attachments: [],
+      },
+    ],
     adventure: {
       hook: 'The miners have gone missing and strange sounds echo from the depths.',
       overview: 'A two-level dungeon crawl through haunted dwarven mines.',
@@ -105,19 +120,6 @@ function makeFullCampaign(): Campaign {
           ],
           connections: ['room-entrance'],
           mapId: 'map-mines',
-        },
-      ],
-      randomEncounters: [
-        {
-          id: 'enc-mines',
-          name: 'Mine Encounters',
-          diceExpression: '1d6',
-          entries: [
-            { roll: [1, 2] as [number, number], description: 'Skeleton patrol', monsterIds: ['skeleton-warrior'], quantity: '1d4' },
-            { roll: 3, description: 'Dripping water — false alarm' },
-            { roll: [4, 5] as [number, number], description: 'Cave-in! DC 12 DEX save.' },
-            { roll: 6, description: 'A lost miner\'s ghost (non-hostile)' },
-          ],
         },
       ],
       npcs: [
@@ -307,8 +309,8 @@ describe('exportAdventureDocument', () => {
 
     const expectedKeys = [
       'format', 'exportedAt', 'id', 'name', 'author', 'version',
-      'description', 'createdAt', 'updatedAt', 'content', 'adventure',
-      'lore', 'maps',
+      'description', 'createdAt', 'updatedAt', 'content', 'tables',
+      'adventure', 'lore', 'maps',
     ]
     expect(Object.keys(doc).sort()).toEqual(expectedKeys.sort())
   })
@@ -403,12 +405,12 @@ describe('parseCampaignFile', () => {
         createdAt: 1700000000000,
         updatedAt: 1700000000000,
         content: {},
+        tables: [],
         adventure: {
           hook: '',
           overview: '',
           targetLevel: [1, 3],
           rooms: [],
-          randomEncounters: [],
           npcs: [],
           stores: [],
         },
@@ -468,8 +470,8 @@ describe('parseCampaignFile', () => {
       expect(imported.adventure.rooms[0].name).toBe('Mine Entrance')
       expect(imported.adventure.rooms[1].traps).toHaveLength(1)
       expect(imported.adventure.rooms[1].traps[0].name).toBe('Ceiling Collapse')
-      expect(imported.adventure.randomEncounters).toHaveLength(1)
-      expect(imported.adventure.randomEncounters[0].entries).toHaveLength(4)
+      expect(imported.tables).toHaveLength(1)
+      expect(imported.tables[0].entries).toHaveLength(4)
       expect(imported.adventure.npcs).toHaveLength(2)
       expect(imported.adventure.npcs[0].name).toBe('Greta Ironhand')
       expect(imported.adventure.npcs[1].portraitPrompt).toBe('A ghostly miner with hollow eyes')
@@ -504,12 +506,12 @@ describe('parseCampaignFile', () => {
       expect(typeof result.campaign!.createdAt).toBe('number')
       expect(typeof result.campaign!.updatedAt).toBe('number')
       expect(result.campaign!.content).toEqual({})
+      expect(result.campaign!.tables).toEqual([])
       expect(result.campaign!.adventure).toEqual({
         hook: '',
         overview: '',
         targetLevel: [1, 3],
         rooms: [],
-        randomEncounters: [],
         npcs: [],
         stores: [],
       })
@@ -545,7 +547,6 @@ describe('parseCampaignFile', () => {
           overview: '',
           targetLevel: [1, 3],
           rooms: [],
-          randomEncounters: [],
           npcs: [],
         },
       })
