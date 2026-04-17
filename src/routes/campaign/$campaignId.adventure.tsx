@@ -1,19 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useCampaignStore } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
-import { createEmptyNPC, createEmptyEncounterTable, createEmptyStore, createEmptyRoom } from '@/lib/campaign/defaults.ts'
+import { createEmptyNPC, createEmptyStore, createEmptyRoom } from '@/lib/campaign/defaults.ts'
 import { NPCEditor } from '@/components/campaign/adventure/npc-editor.tsx'
-import { EncounterTableEditor } from '@/components/campaign/adventure/encounter-table-editor.tsx'
 import { StoreEditor } from '@/components/campaign/adventure/store-editor.tsx'
 import { RoomEditor } from '@/components/campaign/adventure/room-editor.tsx'
-import type { AdventureNPC, AdventureRoom, RandomEncounterTable, AdventureStore } from '@/schemas/campaign.ts'
+import type { AdventureNPC, AdventureRoom, AdventureStore } from '@/schemas/campaign.ts'
 
 export const Route = createFileRoute('/campaign/$campaignId/adventure')({
   component: AdventureStructurePage,
 })
 
-type AdventureTab = 'rooms' | 'overview' | 'npcs' | 'encounters' | 'shops'
+type AdventureTab = 'rooms' | 'overview' | 'npcs' | 'shops'
 
 function AdventureStructurePage() {
   const { t } = useLocale()
@@ -25,9 +24,6 @@ function AdventureStructurePage() {
   const addNPC = useCampaignStore(s => s.addNPC)
   const updateNPCStore = useCampaignStore(s => s.updateNPC)
   const removeNPC = useCampaignStore(s => s.removeNPC)
-  const addEncounterTable = useCampaignStore(s => s.addEncounterTable)
-  const updateEncounterTable = useCampaignStore(s => s.updateEncounterTable)
-  const removeEncounterTable = useCampaignStore(s => s.removeEncounterTable)
   const addStore = useCampaignStore(s => s.addStore)
   const updateStoreStore = useCampaignStore(s => s.updateStore)
   const removeStore = useCampaignStore(s => s.removeStore)
@@ -35,7 +31,6 @@ function AdventureStructurePage() {
   const [tab, setTab] = useState<AdventureTab>('rooms')
   const [editingRoom, setEditingRoom] = useState<AdventureRoom | null>(null)
   const [editingNPC, setEditingNPC] = useState<AdventureNPC | null>(null)
-  const [editingTable, setEditingTable] = useState<RandomEncounterTable | null>(null)
   const [editingStore, setEditingStore] = useState<AdventureStore | null>(null)
 
   if (!campaign) return null
@@ -59,13 +54,6 @@ function AdventureStructurePage() {
     setEditingNPC(null)
   }
 
-  function saveEncounterTable(table: RandomEncounterTable) {
-    const exists = adv.randomEncounters.find(t => t.id === table.id)
-    if (exists) updateEncounterTable(table.id, t => Object.assign(t, table))
-    else addEncounterTable(table)
-    setEditingTable(null)
-  }
-
   function saveStore(store: AdventureStore) {
     const exists = adv.stores.find(s => s.id === store.id)
     if (exists) updateStoreStore(store.id, s => Object.assign(s, store))
@@ -79,7 +67,6 @@ function AdventureStructurePage() {
     { key: 'rooms', label: `${t('campaign.adventure.rooms')} (${adv.rooms.length})` },
     { key: 'overview', label: t('campaign.adventure.overview') },
     { key: 'npcs', label: `${t('campaign.adventure.npcs')} (${adv.npcs.length})` },
-    { key: 'encounters', label: `${t('campaign.adventure.encounters')} (${adv.randomEncounters.length})` },
     { key: 'shops', label: `${t('campaign.adventure.shops')} (${adv.stores.length})` },
   ]
 
@@ -101,6 +88,13 @@ function AdventureStructurePage() {
           </button>
         ))}
       </div>
+
+      {(campaign.tables ?? []).filter(t => t.kind === 'encounter').length > 0 && (
+        <div className="mb-4 rounded-lg border border-border/50 bg-accent/30 px-3 py-2 text-xs text-muted-foreground flex items-center justify-between">
+          <span>{(campaign.tables ?? []).filter(t => t.kind === 'encounter').length} encounter tables</span>
+          <Link to={`/campaign/${campaign.id}/tables`} className="text-primary hover:underline">{t('campaign.adventure.tablesRef')}</Link>
+        </div>
+      )}
 
       {/* Rooms */}
       {tab === 'rooms' && (
@@ -194,34 +188,6 @@ function AdventureStructurePage() {
             </div>
           )}
           {editingNPC && <NPCEditor npc={editingNPC} onSave={saveNPC} onCancel={() => setEditingNPC(null)} />}
-        </div>
-      )}
-
-      {/* Encounter Tables */}
-      {tab === 'encounters' && (
-        <div>
-          <div className="mb-4 flex justify-end">
-            <button onClick={() => setEditingTable(createEmptyEncounterTable())} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">+ New Table</button>
-          </div>
-          {adv.randomEncounters.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border py-12 text-center">
-              <p className="text-muted-foreground">No encounter tables yet</p>
-              <button onClick={() => setEditingTable(createEmptyEncounterTable())} className="mt-3 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">Create First Table</button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {adv.randomEncounters.map(table => (
-                <div key={table.id} onClick={() => setEditingTable(table)} className="flex items-center justify-between rounded-xl border border-border bg-card p-3 cursor-pointer hover:border-border/80 transition">
-                  <div>
-                    <span className="font-medium">{table.name}</span>
-                    <p className="text-xs text-muted-foreground">{table.diceExpression} · {table.entries.length} entries</p>
-                  </div>
-                  <button onClick={e => { e.stopPropagation(); removeEncounterTable(table.id) }} className="shrink-0 text-xs text-red-400 hover:text-red-300 ml-3">Delete</button>
-                </div>
-              ))}
-            </div>
-          )}
-          {editingTable && <EncounterTableEditor table={editingTable} onSave={saveEncounterTable} onCancel={() => setEditingTable(null)} />}
         </div>
       )}
 
