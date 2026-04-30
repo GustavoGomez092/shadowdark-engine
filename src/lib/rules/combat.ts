@@ -39,13 +39,15 @@ export function rollInitiative(
   }
 
   // ONE shared monster row using the highest DEX mod across the group.
-  const groupDexMod = monsters
-    .map(m => getAbilityModifier(m.definition.stats.DEX))
-    .reduce((a, b) => Math.max(a, b), -Infinity)
+  const groupDexMod = Math.max(
+    ...monsters.map(m => getAbilityModifier(m.definition.stats.DEX))
+  )
   const groupRoll = rollDice('1d20', { purpose: 'initiative' })
   combatants.push({
     id: generateId(),
     type: 'monster',
+    // Group row: referenceId is one of the monster instances, but the row
+    // represents the whole group — do not look up monsters by this id.
     referenceId: monsters[0].instance.id,
     name: 'Monsters',
     initiativeRoll: groupRoll.total + groupDexMod,
