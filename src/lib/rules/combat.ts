@@ -117,6 +117,38 @@ export function autoRollMissing(state: CombatState, characters: Character[]): Co
   return working
 }
 
+export function lockInitiativeOrder(state: CombatState): CombatState {
+  // Pair each combatant with its index for stable tie-breaking among PCs.
+  const indexed = state.combatants.map((c, idx) => ({ c, idx }))
+  indexed.sort((a, b) => {
+    const rollA = a.c.initiativeRoll ?? -Infinity
+    const rollB = b.c.initiativeRoll ?? -Infinity
+    if (rollA !== rollB) return rollB - rollA
+    // PC beats monster on ties
+    if (a.c.type === 'pc' && b.c.type !== 'pc') return -1
+    if (b.c.type === 'pc' && a.c.type !== 'pc') return 1
+    // Same-type tie: array order
+    return a.idx - b.idx
+  })
+  const initiativeOrder = indexed.map(x => x.c.id)
+
+  return {
+    ...state,
+    phase: 'active',
+    initiativeOrder,
+    currentTurnIndex: 0,
+    initiativeDeadline: undefined,
+    log: [...state.log, {
+      id: generateId(),
+      timestamp: Date.now(),
+      round: state.roundNumber,
+      actorId: 'system',
+      type: 'round_start',
+      message: `Round ${state.roundNumber} begins.`,
+    }],
+  }
+}
+
 // ========== Attack Resolution ==========
 
 export interface AttackParams {

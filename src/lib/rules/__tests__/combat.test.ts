@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
-import { rollInitiative, applyInitiativeRoll, autoRollMissing } from '../combat.ts'
+import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -196,6 +196,52 @@ describe('combat rules', () => {
       const updated = autoRollMissing(state, [lucky])
       const row = updated.combatants.find((c: any) => c.type === 'pc')!
       expect(row.initiativeRoll).toBe(19) // higher of (3, 19)
+    })
+  })
+
+  describe('lockInitiativeOrder', () => {
+    it('sorts highest first and transitions to active phase', () => {
+      const pc1 = makeCharacter({ id: 'pc-1', name: 'Ralina' })
+      const pc2 = makeCharacter({ id: 'pc-2', name: 'Jorbin' })
+      queueD20(10) // monsters: 10
+      let state = rollInitiative([pc1, pc2], [makeMonsterPair('rat', 'Rat')])
+      const pc1Row = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      const pc2Row = state.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      state = applyInitiativeRoll(state, pc1Row.id, 18, false)
+      state = applyInitiativeRoll(state, pc2Row.id, 5, false)
+
+      const locked = lockInitiativeOrder(state)
+
+      expect(locked.phase).toBe('active')
+      expect(locked.currentTurnIndex).toBe(0)
+      expect(locked.initiativeDeadline).toBeUndefined()
+      // Order: Ralina 18 > Monsters 10 > Jorbin 5
+      const monsterRow = locked.combatants.find((c: any) => c.type === 'monster')!
+      expect(locked.initiativeOrder).toEqual([pc1Row.id, monsterRow.id, pc2Row.id])
+    })
+
+    it('breaks PC-vs-monster ties in favor of PC', () => {
+      queueD20(10)
+      let state = rollInitiative([makeCharacter()], [makeMonsterPair('rat', 'Rat')])
+      const pcRow = state.combatants.find((c: any) => c.type === 'pc')!
+      state = applyInitiativeRoll(state, pcRow.id, 10, false) // tie with monsters
+
+      const locked = lockInitiativeOrder(state)
+      expect(locked.initiativeOrder[0]).toBe(pcRow.id)
+    })
+
+    it('breaks PC-vs-PC ties by combatant array order', () => {
+      const pc1 = makeCharacter({ id: 'pc-1', name: 'A' })
+      const pc2 = makeCharacter({ id: 'pc-2', name: 'B' })
+      queueD20(5) // monsters low
+      let state = rollInitiative([pc1, pc2], [makeMonsterPair('rat', 'Rat')])
+      const pc1Row = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      const pc2Row = state.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      state = applyInitiativeRoll(state, pc1Row.id, 12, false)
+      state = applyInitiativeRoll(state, pc2Row.id, 12, false)
+
+      const locked = lockInitiativeOrder(state)
+      expect(locked.initiativeOrder.indexOf(pc1Row.id)).toBeLessThan(locked.initiativeOrder.indexOf(pc2Row.id))
     })
   })
 })
