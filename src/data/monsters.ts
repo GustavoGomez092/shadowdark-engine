@@ -652,9 +652,12 @@ export const MONSTERS: MonsterDefinition[] = [
     movement: { normal: 'near' },
     stats: { STR: 10, DEX: 12, CON: 12, INT: 8, WIS: 8, CHA: 6 },
     alignment: 'chaotic',
-    abilities: [],
+    abilities: [
+      { name: 'Keen Senses', description: "Can't be surprised." },
+    ],
     checksMorale: true,
     tags: [],
+    cannotBeSurprised: true,
   },
 
   // ---------- 32. Guard ----------
