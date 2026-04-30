@@ -88,6 +88,11 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                 {combatant.initiativeRolledByAuto && (
                   <span className="text-[10px] text-muted-foreground italic">{t('combat.autoRolled')}</span>
                 )}
+                {combat.roundNumber === 1 && combat.surpriseActors?.includes(combatant.id) && (
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                    💤 {t('combat.surprisedBadge')}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-3">
                 {unrolled ? (
