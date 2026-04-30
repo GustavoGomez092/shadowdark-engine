@@ -117,20 +117,27 @@ export function autoRollMissing(state: CombatState, characters: Character[]): Co
   return working
 }
 
+// Canonical sort comparator. Imported by the store so both paths agree.
+// Rule: highest roll first; PC beats non-PC on ties; same-type ties broken by array order.
+export function initiativeComparator(
+  a: { roll: number; type: string; idx: number },
+  b: { roll: number; type: string; idx: number }
+): number {
+  if (a.roll !== b.roll) return b.roll - a.roll
+  if (a.type === 'pc' && b.type !== 'pc') return -1
+  if (b.type === 'pc' && a.type !== 'pc') return 1
+  return a.idx - b.idx
+}
+
 export function lockInitiativeOrder(state: CombatState): CombatState {
-  // Pair each combatant with its index for stable tie-breaking among PCs.
-  const indexed = state.combatants.map((c, idx) => ({ c, idx }))
-  indexed.sort((a, b) => {
-    const rollA = a.c.initiativeRoll ?? -Infinity
-    const rollB = b.c.initiativeRoll ?? -Infinity
-    if (rollA !== rollB) return rollB - rollA
-    // PC beats monster on ties
-    if (a.c.type === 'pc' && b.c.type !== 'pc') return -1
-    if (b.c.type === 'pc' && a.c.type !== 'pc') return 1
-    // Same-type tie: array order
-    return a.idx - b.idx
-  })
-  const initiativeOrder = indexed.map(x => x.c.id)
+  const indexed = state.combatants.map((c, idx) => ({
+    id: c.id,
+    type: c.type,
+    roll: c.initiativeRoll ?? -Infinity,
+    idx,
+  }))
+  indexed.sort(initiativeComparator)
+  const initiativeOrder = indexed.map(x => x.id)
 
   return {
     ...state,

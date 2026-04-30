@@ -11,6 +11,7 @@ import type { LightState } from '@/schemas/light.ts'
 import type { CombatState } from '@/schemas/combat.ts'
 import { generateId, generateRoomCode } from '@/lib/utils/id.ts'
 import { computeCharacterValues } from '@/lib/rules/character.ts'
+import { initiativeComparator } from '@/lib/rules/combat.ts'
 
 const STORAGE_PREFIX = 'shadowdark'
 const ACTIVE_SESSION_KEY = `${STORAGE_PREFIX}:active-session`
@@ -330,14 +331,10 @@ export const useSessionStore = create<SessionStore>()(
       set(state => {
         if (!state.session?.combat) return
         const combat = state.session.combat
-        // Inline the same sort as lib/rules/combat.ts:lockInitiativeOrder so we mutate in place under immer.
+        // Idempotency: only lock once. Guards against race between the deadline timer and the last roll.
+        if (combat.phase !== 'initiative') return
         const indexed = combat.combatants.map((c, idx) => ({ id: c.id, type: c.type, roll: c.initiativeRoll ?? -Infinity, idx }))
-        indexed.sort((a, b) => {
-          if (a.roll !== b.roll) return b.roll - a.roll
-          if (a.type === 'pc' && b.type !== 'pc') return -1
-          if (b.type === 'pc' && a.type !== 'pc') return 1
-          return a.idx - b.idx
-        })
+        indexed.sort(initiativeComparator)
         combat.phase = 'active'
         combat.initiativeOrder = indexed.map(x => x.id)
         combat.currentTurnIndex = 0
@@ -367,6 +364,7 @@ export const useSessionStore = create<SessionStore>()(
         if (order.length === 0) return
 
         let next = combat.currentTurnIndex
+        let foundLive = false
         for (let i = 0; i < order.length; i++) {
           next = (next + 1) % order.length
           if (next === 0) {
@@ -382,7 +380,13 @@ export const useSessionStore = create<SessionStore>()(
             })
           }
           const candidate = combat.combatants.find(c => c.id === order[next])
-          if (candidate && !candidate.isDefeated) break
+          if (candidate && !candidate.isDefeated) { foundLive = true; break }
+        }
+        // If everyone is defeated, leave the turn pointer where it was and clear the active turn —
+        // do not advance to a defeated combatant.
+        if (!foundLive) {
+          state.session.activeTurnId = null
+          return
         }
         combat.currentTurnIndex = next
         const current = combat.combatants.find(c => c.id === order[next])
