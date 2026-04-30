@@ -272,6 +272,48 @@ describe('combat rules', () => {
       expect(result.monsterInstanceIds).toEqual([])
     })
   })
+
+  describe('rollInitiative with surprise options', () => {
+    it('puts surprised PC combatant ids in surpriseActors', () => {
+      const ralina = makeCharacter({ id: 'pc-1', name: 'Ralina', ancestry: 'human' })
+      const jorbin = makeCharacter({ id: 'pc-2', name: 'Jorbin', ancestry: 'human' })
+      queueD20(10)
+      const state = rollInitiative([ralina, jorbin], [makeMonsterPair('rat', 'Rat')], {
+        surprisedCharacterIds: ['pc-1'],
+      })
+      const ralinaRow = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      const jorbinRow = state.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      expect(state.surpriseActors).toContain(ralinaRow.id)
+      expect(state.surpriseActors).not.toContain(jorbinRow.id)
+    })
+
+    it('marks the monster group surprised when any monster instance is surprised', () => {
+      const goblin = makeMonsterPair('goblin', 'Goblin')
+      const rat = makeMonsterPair('rat', 'Rat')
+      queueD20(10)
+      const state = rollInitiative([makeCharacter()], [goblin, rat], {
+        surprisedMonsterInstanceIds: [goblin.instance.id],
+      })
+      const groupRow = state.combatants.find((c: any) => c.type === 'monster')!
+      expect(state.surpriseActors).toContain(groupRow.id)
+    })
+
+    it('filters out immune characters from surprise', () => {
+      const goblinChar = makeCharacter({ id: 'pc-1', ancestry: 'goblin' as any })
+      queueD20(10)
+      const state = rollInitiative([goblinChar], [makeMonsterPair('rat', 'Rat')], {
+        surprisedCharacterIds: ['pc-1'],
+      })
+      const row = state.combatants.find((c: any) => c.type === 'pc')!
+      expect(state.surpriseActors ?? []).not.toContain(row.id)
+    })
+
+    it('leaves surpriseActors undefined when no surprise options given', () => {
+      queueD20(10)
+      const state = rollInitiative([makeCharacter()], [makeMonsterPair('rat', 'Rat')])
+      expect(state.surpriseActors).toBeUndefined()
+    })
+  })
 })
 
 export { makeCharacter, makeMonsterPair, queueD20, queueD4 }

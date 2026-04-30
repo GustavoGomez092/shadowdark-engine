@@ -12,20 +12,37 @@ import { getAncestry } from '@/data/index.ts'
 
 const INITIATIVE_DEADLINE_MS = 30_000
 
+export interface RollInitiativeOptions {
+  surprisedCharacterIds?: string[]
+  surprisedMonsterInstanceIds?: string[]
+}
+
 export function rollInitiative(
   characters: Character[],
-  monsters: { instance: MonsterInstance; definition: MonsterDefinition }[]
+  monsters: { instance: MonsterInstance; definition: MonsterDefinition }[],
+  options?: RollInitiativeOptions
 ): CombatState {
   if (characters.length === 0) throw new Error('Cannot roll initiative: no characters')
   if (monsters.length === 0) throw new Error('Cannot roll initiative: no monsters')
 
+  // Determine immunity to filter out any user-supplied surprise that would violate game rules.
+  const immunity = getCombatantsImmuneToSurprise(characters, monsters)
+  const surprisedCharIds = new Set(
+    (options?.surprisedCharacterIds ?? []).filter(id => !immunity.characterIds.includes(id))
+  )
+  const surprisedMonsterIds = new Set(
+    (options?.surprisedMonsterInstanceIds ?? []).filter(id => !immunity.monsterInstanceIds.includes(id))
+  )
+
   const combatants: Combatant[] = []
+  const surpriseActorIds: string[] = []
 
   for (const char of characters) {
     const stats = computeEffectiveStats(char)
     const dexMod = getAbilityModifier(stats.DEX)
+    const id = generateId()
     combatants.push({
-      id: generateId(),
+      id,
       type: 'pc',
       referenceId: char.id,
       name: char.name,
@@ -37,6 +54,7 @@ export function rollInitiative(
       hasUsedMove: false,
       isDoubleMoveActive: false,
     })
+    if (surprisedCharIds.has(char.id)) surpriseActorIds.push(id)
   }
 
   // ONE shared monster row using the highest DEX mod across the group.
@@ -44,8 +62,9 @@ export function rollInitiative(
     ...monsters.map(m => getAbilityModifier(m.definition.stats.DEX))
   )
   const groupRoll = rollDice('1d20', { purpose: 'initiative' })
+  const groupId = generateId()
   combatants.push({
-    id: generateId(),
+    id: groupId,
     type: 'monster',
     // Group row: referenceId is one of the monster instances, but the row
     // represents the whole group — do not look up monsters by this id.
@@ -59,6 +78,10 @@ export function rollInitiative(
     hasUsedMove: false,
     isDoubleMoveActive: false,
   })
+  // Group row counts as surprised if any of its instances are in the surprised set.
+  if (monsters.some(m => surprisedMonsterIds.has(m.instance.id))) {
+    surpriseActorIds.push(groupId)
+  }
 
   return {
     id: generateId(),
@@ -68,6 +91,7 @@ export function rollInitiative(
     currentTurnIndex: 0,
     roundNumber: 1,
     initiativeDeadline: Date.now() + INITIATIVE_DEADLINE_MS,
+    surpriseActors: surpriseActorIds.length > 0 ? surpriseActorIds : undefined,
     log: [{
       id: generateId(),
       timestamp: Date.now(),
