@@ -189,7 +189,8 @@ export type GMToPlayerMessage =
   | PongMessage
   | ErrorMessage
   | MapSyncMessage
-  | TokenMoveMessage;
+  | TokenMoveMessage
+  | InitiativeRequestMessage;
 
 export interface JoinRoomResponse {
   type: 'join_room_response';
@@ -281,6 +282,11 @@ export interface ErrorMessage {
   code: string;
   message: string;
   inResponseTo?: string;
+}
+
+export interface InitiativeRequestMessage {
+  type: 'initiative_request';
+  combat: CombatState;
 }
 
 // ── Map Viewer Messages ──

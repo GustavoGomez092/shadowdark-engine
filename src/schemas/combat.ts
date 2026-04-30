@@ -8,22 +8,24 @@ export interface CombatState {
   initiativeOrder: string[]; // combatant IDs in turn order
   currentTurnIndex: number;
   roundNumber: number;
-  surpriseActors?: string[]; // combatant IDs that can act in surprise round
+  surpriseActors?: string[];
   log: CombatLogEntry[];
+  initiativeDeadline?: number; // epoch ms; only set during 'initiative' phase
 }
 
 export interface Combatant {
   id: string;
   type: 'pc' | 'monster' | 'npc';
-  referenceId: string; // Character.id or MonsterInstance.id
+  referenceId: string;
   name: string;
   initiativeRoll?: number;
-  initiativeBonus: number; // DEX modifier
-  hasActed: boolean; // this round
+  initiativeBonus: number;
+  hasActed: boolean;
   isDefeated: boolean;
   hasUsedAction: boolean;
   hasUsedMove: boolean;
   isDoubleMoveActive: boolean;
+  initiativeRolledByAuto?: boolean; // true when GM client auto-rolled on timeout
 }
 
 export type CombatLogType =
