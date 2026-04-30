@@ -51,6 +51,7 @@ export interface MonsterDefinition {
   abilities: MonsterAbility[];
   checksMorale: boolean;
   tags: string[]; // 'undead', 'beast', 'humanoid', etc.
+  cannotBeSurprised?: boolean;
 }
 
 // Live instance of a monster in play
