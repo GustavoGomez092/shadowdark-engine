@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
-import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder } from '../combat.ts'
+import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder, getCombatantsImmuneToSurprise } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -242,6 +242,34 @@ describe('combat rules', () => {
 
       const locked = lockInitiativeOrder(state)
       expect(locked.initiativeOrder.indexOf(pc1Row.id)).toBeLessThan(locked.initiativeOrder.indexOf(pc2Row.id))
+    })
+  })
+
+  describe('getCombatantsImmuneToSurprise', () => {
+    it('flags Goblin PCs as immune', () => {
+      const goblinChar = makeCharacter({ id: 'pc-1', ancestry: 'goblin' as any })
+      const humanChar = makeCharacter({ id: 'pc-2', name: 'Ralina', ancestry: 'human' })
+      const result = getCombatantsImmuneToSurprise([goblinChar, humanChar], [])
+      expect(result.characterIds).toContain('pc-1')
+      expect(result.characterIds).not.toContain('pc-2')
+    })
+
+    it('flags monsters with cannotBeSurprised', () => {
+      const immune = makeMonsterPair('goblin-mob', 'Goblin')
+      immune.definition.cannotBeSurprised = true
+      const normal = makeMonsterPair('rat', 'Rat')
+      const result = getCombatantsImmuneToSurprise([], [immune, normal])
+      expect(result.monsterInstanceIds).toContain(immune.instance.id)
+      expect(result.monsterInstanceIds).not.toContain(normal.instance.id)
+    })
+
+    it('returns empty arrays when no one is immune', () => {
+      const result = getCombatantsImmuneToSurprise(
+        [makeCharacter({ ancestry: 'human' })],
+        [makeMonsterPair('rat', 'Rat')]
+      )
+      expect(result.characterIds).toEqual([])
+      expect(result.monsterInstanceIds).toEqual([])
     })
   })
 })

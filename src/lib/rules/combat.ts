@@ -6,6 +6,7 @@ import { rollDice } from '@/lib/dice/roller.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { getAbilityModifier, DC } from '@/schemas/reference.ts'
 import { computeEffectiveStats } from './character.ts'
+import { getAncestry } from '@/data/index.ts'
 
 // ========== Initiative ==========
 
@@ -159,6 +160,30 @@ export function lockInitiativeOrder(state: CombatState): CombatState {
     initiativeDeadline: undefined,
     log,
   }
+}
+
+// ========== Surprise Immunity ==========
+
+export interface ImmunityResult {
+  characterIds: string[]
+  monsterInstanceIds: string[]
+}
+
+export function getCombatantsImmuneToSurprise(
+  characters: Character[],
+  monsters: { instance: MonsterInstance; definition: MonsterDefinition }[]
+): ImmunityResult {
+  const characterIds: string[] = []
+  for (const c of characters) {
+    const ancestry = getAncestry(c.ancestry)
+    const immune = ancestry?.mechanics.some(m => m.type === 'cannot_be_surprised') ?? false
+    if (immune) characterIds.push(c.id)
+  }
+  const monsterInstanceIds: string[] = []
+  for (const m of monsters) {
+    if (m.definition.cannotBeSurprised) monsterInstanceIds.push(m.instance.id)
+  }
+  return { characterIds, monsterInstanceIds }
 }
 
 // ========== Attack Resolution ==========
