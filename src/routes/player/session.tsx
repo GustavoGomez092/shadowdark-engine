@@ -17,7 +17,6 @@ import { Spinner, LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
 import { ChatMessageRow } from '@/components/shared/chat-message.tsx'
 import { pushRollToast } from '@/components/shared/roll-toast.tsx'
-import { rollDice } from '@/lib/dice/roller.ts'
 import { getAbilityModifier } from '@/schemas/reference.ts'
 import type { Character } from '@/schemas/character.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
@@ -681,33 +680,31 @@ function StabilizeResultDialog({ result, onClose }: {
 }
 
 function DeathTimerRoll({ character, onRoll, onClose }: { character: Character; onRoll: (roll: number, totalRounds: number) => void; onClose: () => void }) {
-  const [result, setResult] = useState<{ roll: number; conMod: number; conScore: number; total: number } | null>(null)
-
-  function handleRoll() {
-    const conScore = character.computed.effectiveStats.CON
-    const conMod = getAbilityModifier(conScore)
-    const roll = rollDice('1d4')
-    const total = Math.max(1, roll.total + conMod)
-    setResult({ roll: roll.total, conMod, conScore, total })
-    onRoll(roll.total, total)
-  }
+  const conScore = character.computed.effectiveStats.CON
+  const conMod = getAbilityModifier(conScore)
+  const [result, setResult] = useState<{ roll: number; total: number } | null>(null)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="mx-4 w-full max-w-sm rounded-2xl border border-red-500/40 bg-card p-6 text-center shadow-2xl">
-        <div className="mb-2 text-4xl">&#x1F480;</div>
-        <h2 className="text-xl font-bold text-red-400 mb-2">You are dying!</h2>
+        <div className="mb-2 animate-pulse text-5xl">&#x1F480;</div>
+        <h2 className="text-2xl font-bold text-red-400 mb-2">You are dying!</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Your HP has dropped to 0. Roll to determine how many rounds you have before death.
+          Roll for your life — 1d4 {conMod >= 0 ? `+ ${conMod}` : `− ${Math.abs(conMod)}`} (CON) determines how many rounds you have before death.
         </p>
 
         {!result ? (
-          <button
-            onClick={handleRoll}
-            className="w-full rounded-lg bg-red-600 py-3 text-lg font-bold text-white transition hover:bg-red-500 active:scale-95"
-          >
-            Roll Death Timer (1d4 + CON)
-          </button>
+          <DiceRoller
+            characterName={character.name}
+            compact
+            lockedDie="d4"
+            onRoll={(rollResult) => {
+              const rollVal = rollResult.dice[0]?.value ?? rollResult.total
+              const total = Math.max(1, rollVal + conMod)
+              setResult({ roll: rollVal, total })
+              onRoll(rollVal, total)
+            }}
+          />
         ) : (
           <div className="space-y-4">
             <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 space-y-2">
@@ -718,8 +715,8 @@ function DeathTimerRoll({ character, onRoll, onClose }: { character: Character; 
                 </div>
                 <span className="text-muted-foreground text-lg">+</span>
                 <div className="rounded-lg bg-background border border-border px-3 py-1.5">
-                  <span className="text-xs text-muted-foreground block">CON ({result.conScore})</span>
-                  <span className="text-lg font-bold">{result.conMod >= 0 ? '+' : ''}{result.conMod}</span>
+                  <span className="text-xs text-muted-foreground block">CON ({conScore})</span>
+                  <span className="text-lg font-bold">{conMod >= 0 ? '+' : ''}{conMod}</span>
                 </div>
                 <span className="text-muted-foreground text-lg">=</span>
                 <div className="rounded-lg bg-red-500/20 border border-red-500/30 px-3 py-1.5">

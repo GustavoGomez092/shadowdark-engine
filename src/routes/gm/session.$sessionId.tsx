@@ -1203,7 +1203,42 @@ function GMSessionPage() {
               setTimeout(() => gmPeer.broadcastStateSync(), 50)
             }}
             onAdvanceTurn={() => {
+              const before = useSessionStore.getState().session?.combat?.roundNumber ?? 0
               useSessionStore.getState().advanceCombatTurn()
+              const after = useSessionStore.getState().session?.combat?.roundNumber ?? 0
+              // On a round wrap, tick down each dying character's death timer.
+              // Nat 20 on the death save revives at 1 HP; timer at 0 = death.
+              if (after > before) {
+                const sessionNow = useSessionStore.getState().session
+                if (sessionNow) {
+                  for (const char of Object.values(sessionNow.characters)) {
+                    if (!char.isDying || !char.deathTimer || char.deathTimer.roundsRemaining <= 0) continue
+                    const save = rollDeathSave()
+                    if (save.isNat20) {
+                      updateCharacter(char.id, (c) => {
+                        c.currentHp = 1
+                        c.isDying = false
+                        c.deathTimer = undefined
+                      })
+                      addChatMessage(createActionLog(`${char.name} rolled a NAT 20 on their death save and rises with 1 HP!`))
+                      continue
+                    }
+                    const remaining = char.deathTimer.roundsRemaining - 1
+                    if (remaining <= 0) {
+                      updateCharacter(char.id, (c) => {
+                        c.isDying = false
+                        c.deathTimer = undefined
+                      })
+                      addChatMessage(createActionLog(`${char.name} death save: ${save.roll} — ${char.name} has died.`))
+                    } else {
+                      updateCharacter(char.id, (c) => {
+                        if (c.deathTimer) c.deathTimer.roundsRemaining = remaining
+                      })
+                      addChatMessage(createActionLog(`${char.name} death save: ${save.roll} (${remaining} round${remaining !== 1 ? 's' : ''} remaining)`))
+                    }
+                  }
+                }
+              }
               setTimeout(() => gmPeer.broadcastStateSync(), 50)
             }}
             onForceInitiativeRoll={(combatantId) => {
