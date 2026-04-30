@@ -316,6 +316,12 @@
   "combat.yourParty": "Your Party",
   "combat.you": "(You)",
   "combat.youExcited": "(You!)",
+  "combat.rollInitiative": "Roll Initiative",
+  "combat.endCombat": "End Combat",
+  "combat.rollForInitiative": "Roll for initiative!",
+  "combat.initiativeCountdown": "{{seconds}}s",
+  "combat.rolling": "rolling…",
+  "combat.autoRolled": "(auto)",
 
   "dice.rolling": "Rolling...",
   "dice.lastRoll": "Last Roll",

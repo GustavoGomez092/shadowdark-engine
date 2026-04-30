@@ -316,6 +316,12 @@
   "combat.yourParty": "Tu grupo",
   "combat.you": "(T\u00fa)",
   "combat.youExcited": "(\u00a1T\u00fa!)",
+  "combat.rollInitiative": "Tirar Iniciativa",
+  "combat.endCombat": "Terminar Combate",
+  "combat.rollForInitiative": "\u00a1Tira por iniciativa!",
+  "combat.initiativeCountdown": "{{seconds}}s",
+  "combat.rolling": "tirando\u2026",
+  "combat.autoRolled": "(auto)",
 
   "dice.rolling": "Tirando...",
   "dice.lastRoll": "\u00daltima tirada",
