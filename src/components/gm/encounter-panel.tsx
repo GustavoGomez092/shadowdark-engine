@@ -164,6 +164,7 @@ export function EncounterPanel({
               const isSelected = selection?.type === 'monster' && selection.id === m.id
               const isActiveTurn = activeTurnId === m.id
               const packColor = getPackColor(getItemPackId(m.definitionId) ?? '')
+              const monsterDef = getMonster(m.definitionId)
               return (
                 <div
                   key={m.id}
@@ -180,7 +181,7 @@ export function EncounterPanel({
                     className="absolute right-1 top-1 rounded p-0.5 text-[10px] text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
                     title="Remove"
                   >✕</button>
-                  <div className="flex items-baseline justify-between pr-6">
+                  <div className="flex items-baseline justify-between gap-2 pr-6">
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={(e) => {
@@ -193,6 +194,9 @@ export function EncounterPanel({
                       >{isActiveTurn ? '■' : '▷'}</button>
                       <span className="text-sm font-semibold">{translateMonsterName(m)}</span>
                     </div>
+                    {monsterDef && (
+                      <span className="shrink-0 text-[10px] text-muted-foreground">AC {monsterDef.ac}</span>
+                    )}
                   </div>
                   <div className="mt-1">
                     <div className="flex items-baseline justify-between text-xs">
