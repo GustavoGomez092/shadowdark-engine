@@ -6,7 +6,7 @@ import { LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
 import { ChatMessageRow } from '@/components/shared/chat-message.tsx'
 import { createActionLog } from '@/lib/utils/action-log.ts'
-import { getGear, getClass } from '@/data/index.ts'
+import { getGear, getClass, getMonster } from '@/data/index.ts'
 import { pushRollToast } from '@/components/shared/roll-toast.tsx'
 import { EncounterPanel } from '@/components/gm/encounter-panel.tsx'
 import { RewardsDialog } from '@/components/gm/rewards-dialog.tsx'
@@ -21,7 +21,7 @@ import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues, levelUpCharacter, canLevelUp } from '@/lib/rules/character.ts'
-import { rollDeathSave } from '@/lib/rules/combat.ts'
+import { rollDeathSave, rollInitiative, autoRollMissing } from '@/lib/rules/combat.ts'
 import { GMMapViewer } from '@/components/map-viewer/gm-map-viewer.tsx'
 import { useMapViewerStore } from '@/stores/map-viewer-store.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
@@ -143,6 +143,39 @@ function GMSessionPage() {
     }
 
     if (message.type === 'player_roll') {
+      // Initiative rolls take a dedicated path — short-circuit before the generic toast/chat code below.
+      if (message.purpose === 'initiative') {
+        const combat = useSessionStore.getState().session?.combat
+        if (!combat || combat.phase !== 'initiative') return
+        const player = useSessionStore.getState().session?.players[peerId]
+        const characterId = player?.characterId
+        const row = combat.combatants.find(
+          c => c.type === 'pc' && c.referenceId === characterId && c.initiativeRoll === undefined
+        )
+        if (!row) return
+        useSessionStore.getState().applyInitiativeRoll(row.id, message.total, false)
+        const character = characterId ? useSessionStore.getState().session?.characters[characterId] : null
+        const rollName = character?.name ?? row.name
+        const natLabel = message.isNat20 ? ' — NATURAL 20!' : message.isNat1 ? ' — Natural 1' : ''
+        pushRollToast({
+          id: generateId(), playerName: rollName, diceType: message.expression,
+          total: message.total, isNat20: message.isNat20, isNat1: message.isNat1, timestamp: Date.now(),
+        })
+        addChatMessage({
+          id: generateId(), senderId: peerId, senderName: rollName, type: 'roll',
+          content: `rolled ${message.expression} → ${message.total}${natLabel} (initiative)`,
+          timestamp: Date.now(), isPublic: true,
+        })
+        gmPeer.broadcast({
+          type: 'roll_result',
+          roll: { id: generateId(), expression: message.expression, dice: [], modifier: 0, total: message.total, timestamp: Date.now(), rolledBy: rollName },
+          characterName: rollName, isPublic: true, context: 'initiative',
+        })
+        checkAndLockInitiativeOrder()
+        setTimeout(() => broadcastStateSyncRef.current(), 50)
+        return
+      }
+
       const player = useSessionStore.getState().session?.players[peerId]
       const playerName = player?.displayName ?? 'Unknown'
       const charId = player?.characterId
@@ -562,6 +595,15 @@ function GMSessionPage() {
     return state
   }, [])
 
+  const checkAndLockInitiativeOrder = () => {
+    const combat = useSessionStore.getState().session?.combat
+    if (!combat || combat.phase !== 'initiative') return
+    const allRolled = combat.combatants.every(c => c.initiativeRoll !== undefined)
+    if (allRolled) {
+      useSessionStore.getState().lockInitiativeOrder()
+    }
+  }
+
   const { isReady, start, broadcastStateSync, kick } = useGMPeer({
     onPlayerJoin: handlePlayerJoin,
     onPlayerMessage: handlePlayerMessage,
@@ -673,6 +715,37 @@ function GMSessionPage() {
       }
     })
   }, [mapViewerState])
+
+  // 30-second initiative deadline timer — auto-rolls for combatants who haven't rolled
+  useEffect(() => {
+    const combat = session?.combat
+    if (!combat || combat.phase !== 'initiative' || combat.initiativeDeadline == null) return
+    const remaining = combat.initiativeDeadline - Date.now()
+    const fireAutoRoll = () => {
+      const s = useSessionStore.getState().session
+      const c2 = s?.combat
+      if (!c2 || c2.phase !== 'initiative') return
+      // Derive assigned characters from live store state (avoids depending on post-return `characters`)
+      const assignedCharIds = new Set(Object.values(s?.players ?? {}).filter(p => p.characterId).map(p => p.characterId!))
+      const liveCharacters = Object.values(s?.characters ?? {}).filter(c => assignedCharIds.has(c.id))
+      const updated = autoRollMissing(c2, liveCharacters)
+      for (const c of updated.combatants) {
+        const original = c2.combatants.find(x => x.id === c.id)
+        if (c.initiativeRoll !== undefined && c.initiativeRolledByAuto && original?.initiativeRoll === undefined) {
+          useSessionStore.getState().applyInitiativeRoll(c.id, c.initiativeRoll, true)
+          addChatMessage(createActionLog(`${c.name} rolled initiative → ${c.initiativeRoll} (auto)`))
+        }
+      }
+      useSessionStore.getState().lockInitiativeOrder()
+      setTimeout(() => gmPeer.broadcastStateSync(), 50)
+    }
+    if (remaining <= 0) {
+      fireAutoRoll()
+      return
+    }
+    const id = setTimeout(fireAutoRoll, remaining)
+    return () => clearTimeout(id)
+  }, [session?.combat?.id, session?.combat?.phase, session?.combat?.initiativeDeadline])
 
   // Handle map viewer state changes and broadcast
   const handleMapViewerChange = useCallback((newState: MapViewerState) => {
@@ -1103,6 +1176,46 @@ function GMSessionPage() {
             onResolveEncounter={(encounterType) => {
               const hasTreasure = encounterType === 'story' ? true : rollForTreasure()
               setRewardsState({ show: true, hasTreasure, encounterType })
+            }}
+            combat={session.combat}
+            onRollInitiative={() => {
+              const assignedCharacters = characters.filter(c => Object.values(session.players).some(p => p.characterId === c.id))
+              const liveMonsters = activeMonsters
+                .map(m => {
+                  const def = getMonster(m.definitionId)
+                  return def ? { instance: m, definition: def } : null
+                })
+                .filter((x): x is { instance: typeof activeMonsters[number]; definition: NonNullable<ReturnType<typeof getMonster>> } => !!x)
+              if (assignedCharacters.length === 0 || liveMonsters.length === 0) return
+              const combat = rollInitiative(assignedCharacters, liveMonsters)
+              useSessionStore.getState().setCombat(combat)
+              setTimeout(() => {
+                gmPeer.broadcastStateSync()
+                gmPeer.broadcast({ type: 'initiative_request', combat })
+              }, 50)
+            }}
+            onEndCombat={() => {
+              useSessionStore.getState().endCombat()
+              setTimeout(() => gmPeer.broadcastStateSync(), 50)
+            }}
+            onAdvanceTurn={() => {
+              useSessionStore.getState().advanceCombatTurn()
+              setTimeout(() => gmPeer.broadcastStateSync(), 50)
+            }}
+            onForceInitiativeRoll={(combatantId) => {
+              const combat = useSessionStore.getState().session?.combat
+              const row = combat?.combatants.find(c => c.id === combatantId)
+              if (!combat || !row || row.type !== 'pc') return
+              const character = characters.find(c => c.id === row.referenceId)
+              if (!character) return
+              const updated = autoRollMissing(combat, [character])
+              const single = updated.combatants.find(c => c.id === combatantId)
+              if (single?.initiativeRoll != null) {
+                useSessionStore.getState().applyInitiativeRoll(combatantId, single.initiativeRoll, true)
+                addChatMessage(createActionLog(`${row.name} rolled initiative → ${single.initiativeRoll} (auto)`))
+                checkAndLockInitiativeOrder()
+                setTimeout(() => gmPeer.broadcastStateSync(), 50)
+              }
             }}
           />
         </div>
