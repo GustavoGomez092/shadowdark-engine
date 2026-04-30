@@ -337,7 +337,6 @@ export const useSessionStore = create<SessionStore>()(
         indexed.sort(initiativeComparator)
         combat.phase = 'active'
         combat.initiativeOrder = indexed.map(x => x.id)
-        combat.currentTurnIndex = 0
         combat.initiativeDeadline = undefined
         // Round 1 already has the "Roll for initiative!" entry — don't duplicate.
         if (combat.roundNumber > 1) {
@@ -350,8 +349,23 @@ export const useSessionStore = create<SessionStore>()(
             message: `Round ${combat.roundNumber} begins.`,
           })
         }
-        // Drive activeTurnId from the new current combatant.
-        const current = combat.combatants.find(c => c.id === combat.initiativeOrder[0])
+        // Pick the first non-defeated, non-surprised combatant as the active turn.
+        // Most often this is index 0, but if the highest-init combatant is surprised
+        // on round 1, skip them so the active turn doesn't land on a frozen row.
+        let startIdx = 0
+        for (let i = 0; i < combat.initiativeOrder.length; i++) {
+          const candidate = combat.combatants.find(c => c.id === combat.initiativeOrder[i])
+          const isSurprisedRound1 =
+            combat.roundNumber === 1 &&
+            !!candidate &&
+            (combat.surpriseActors?.includes(candidate.id) ?? false)
+          if (candidate && !candidate.isDefeated && !isSurprisedRound1) {
+            startIdx = i
+            break
+          }
+        }
+        combat.currentTurnIndex = startIdx
+        const current = combat.combatants.find(c => c.id === combat.initiativeOrder[startIdx])
         state.session.activeTurnId = current?.referenceId ?? null
       })
       const s = get().session

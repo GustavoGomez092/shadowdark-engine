@@ -335,6 +335,22 @@ describe('combat rules', () => {
       expect(currentId).not.toBe(ralinaRow.id)
     })
 
+    it('lockInitiativeOrder picks the first non-surprised combatant for round 1', () => {
+      const ralina = makeCharacter({ id: 'pc-1', name: 'Ralina' })
+      queueD20(10)
+      let state = rollInitiative([ralina], [makeMonsterPair('rat', 'Rat')], {
+        surprisedCharacterIds: ['pc-1'],
+      })
+      const ralinaRow = state.combatants.find((c: any) => c.type === 'pc')!
+      state = applyInitiativeRoll(state, ralinaRow.id, 18, false)
+      state = lockInitiativeOrder(state)
+
+      // Order would be Ralina (18) > Monsters (10), but Ralina is surprised on round 1
+      // so the initial active turn must skip her and land on Monsters.
+      const currentId = state.initiativeOrder[state.currentTurnIndex]
+      expect(currentId).not.toBe(ralinaRow.id)
+    })
+
     it('clears surpriseActors on round 1 to round 2 wrap', () => {
       const ralina = makeCharacter({ id: 'pc-1', name: 'Ralina' })
       queueD20(10)
@@ -345,14 +361,12 @@ describe('combat rules', () => {
       state = applyInitiativeRoll(state, ralinaRow.id, 18, false)
       state = lockInitiativeOrder(state)
 
-      // Order: Ralina (18, surprised) -> Monsters (10). Advance from idx 0 (Ralina).
-      // Round 1: skip Ralina, advance to Monsters (the only non-surprised live row).
-      let after = advanceTurn(state)
-      expect(after.roundNumber).toBe(1)
-      expect(after.surpriseActors).toContain(ralinaRow.id)
-      // Now advance past Monsters: wraps to round 2, clears surpriseActors,
+      // After lock: starts at Monsters (Ralina skipped), still round 1.
+      expect(state.roundNumber).toBe(1)
+      expect(state.surpriseActors).toContain(ralinaRow.id)
+      // Advance once: wraps to round 2, clears surpriseActors,
       // and Ralina becomes the active turn (no longer surprised).
-      after = advanceTurn(after)
+      const after = advanceTurn(state)
       expect(after.roundNumber).toBe(2)
       expect(after.surpriseActors).toBeUndefined()
       expect(after.initiativeOrder[after.currentTurnIndex]).toBe(ralinaRow.id)
@@ -371,11 +385,12 @@ describe('combat rules', () => {
       state = applyInitiativeRoll(state, jorbinRow.id, 5, false)
       state = lockInitiativeOrder(state)
 
-      // Round 1 plays out: starting at Ralina (skip), then Monsters, then Jorbin, wrap to round 2.
+      // After lock: currentTurnIndex starts at Monsters (Ralina skipped, idx=1).
+      // Advance once: Monsters → Jorbin (idx=2).
+      // Advance again: Jorbin → wraps to round 2 → Ralina (surprise cleared).
       let after = state
-      after = advanceTurn(after) // Ralina skipped → Monsters
-      after = advanceTurn(after) // Monsters → Jorbin
-      after = advanceTurn(after) // Jorbin → wraps to Ralina (round 2, surprise cleared)
+      after = advanceTurn(after)
+      after = advanceTurn(after)
       expect(after.roundNumber).toBe(2)
       expect(after.initiativeOrder[after.currentTurnIndex]).toBe(ralinaRow.id)
     })

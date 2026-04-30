@@ -176,11 +176,27 @@ export function lockInitiativeOrder(state: CombatState): CombatState {
         message: `Round ${state.roundNumber} begins.`,
       }]
 
+  // Pick the first non-defeated, non-surprised combatant as the active turn.
+  // Most often index 0, but skip surprised rows on round 1 so the active turn
+  // doesn't land on a frozen combatant.
+  let startIdx = 0
+  for (let i = 0; i < initiativeOrder.length; i++) {
+    const candidate = state.combatants.find(c => c.id === initiativeOrder[i])
+    const isSurprisedRound1 =
+      state.roundNumber === 1 &&
+      !!candidate &&
+      (state.surpriseActors?.includes(candidate.id) ?? false)
+    if (candidate && !candidate.isDefeated && !isSurprisedRound1) {
+      startIdx = i
+      break
+    }
+  }
+
   return {
     ...state,
     phase: 'active',
     initiativeOrder,
-    currentTurnIndex: 0,
+    currentTurnIndex: startIdx,
     initiativeDeadline: undefined,
     log,
   }
