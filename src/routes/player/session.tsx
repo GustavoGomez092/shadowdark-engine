@@ -683,6 +683,7 @@ function DeathTimerRoll({ character, onRoll, onClose }: { character: Character; 
   const conScore = character.computed.effectiveStats.CON
   const conMod = getAbilityModifier(conScore)
   const [result, setResult] = useState<{ roll: number; total: number } | null>(null)
+  const [showBreakdown, setShowBreakdown] = useState(false)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
@@ -705,6 +706,20 @@ function DeathTimerRoll({ character, onRoll, onClose }: { character: Character; 
               onRoll(rollVal, total)
             }}
           />
+        ) : !showBreakdown ? (
+          <div className="space-y-4">
+            <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-6">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">You rolled</p>
+              <p className="text-7xl font-bold text-red-400 leading-none">{result.roll}</p>
+              <p className="text-xs text-muted-foreground mt-2">on the d4</p>
+            </div>
+            <button
+              onClick={() => setShowBreakdown(true)}
+              className="w-full rounded-lg bg-red-600 py-2.5 text-sm font-semibold text-white hover:bg-red-500 transition"
+            >
+              Continue
+            </button>
+          </div>
         ) : (
           <div className="space-y-4">
             <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 space-y-2">
