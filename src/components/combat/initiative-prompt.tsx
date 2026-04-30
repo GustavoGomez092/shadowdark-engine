@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import type { Character } from '@/schemas/character.ts'
 import type { CombatState, Combatant } from '@/schemas/combat.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   combat: CombatState
@@ -18,6 +19,7 @@ function hasInitiativeAdvantage(character: Character): boolean {
 }
 
 export function InitiativePrompt({ combat, myCharacter, onRoll }: Props) {
+  const { t } = useLocale()
   const me = findMyCombatant(combat, myCharacter.id)
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
@@ -37,10 +39,10 @@ export function InitiativePrompt({ combat, myCharacter, onRoll }: Props) {
     <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-lg font-bold text-amber-400">Roll for initiative!</p>
+          <p className="text-lg font-bold text-amber-400">{t('combat.rollForInitiative')}</p>
           <p className="text-xs text-amber-300">
-            d20 {dexMod >= 0 ? `+ ${dexMod}` : `− ${Math.abs(dexMod)}`} (DEX)
-            {advantageLocked && ' · advantage'}
+            d20 {dexMod >= 0 ? `+ ${dexMod}` : `− ${Math.abs(dexMod)}`} ({t('combat.dexLabel')})
+            {advantageLocked && ` · ${t('combat.advantage')}`}
           </p>
         </div>
         <p className="text-2xl font-mono font-bold text-amber-400">{secondsLeft}s</p>

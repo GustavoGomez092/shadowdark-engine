@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { CombatState, Combatant } from '@/schemas/combat.ts'
+import { useLocale } from '@/hooks/use-locale.ts'
 
 interface Props {
   combat: CombatState
@@ -21,6 +22,7 @@ function useCountdown(deadline: number | undefined): number {
 }
 
 export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceRoll, isGM }: Props) {
+  const { t, ti } = useLocale()
   const isInitiativePhase = combat.phase === 'initiative'
   const secondsLeft = useCountdown(isInitiativePhase ? combat.initiativeDeadline : undefined)
   const currentId = combat.initiativeOrder[combat.currentTurnIndex]
@@ -36,8 +38,8 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-semibold">
           {isInitiativePhase
-            ? `Roll for initiative — ${secondsLeft}s`
-            : `Combat — Round ${combat.roundNumber}`}
+            ? ti('combat.rollForInitiativeWithCountdown', { seconds: secondsLeft })
+            : ti('combat.combatRound', { round: combat.roundNumber })}
         </h2>
         {isGM && !isInitiativePhase && (
           <div className="flex gap-2">
@@ -46,7 +48,7 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                 onClick={onAdvanceTurn}
                 className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition"
               >
-                Next Turn
+                {t('combat.nextTurn')}
               </button>
             )}
             {onEndCombat && (
@@ -54,7 +56,7 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                 onClick={onEndCombat}
                 className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-accent transition"
               >
-                End Combat
+                {t('combat.endCombat')}
               </button>
             )}
           </div>
@@ -82,12 +84,12 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                 <span className={`h-2 w-2 rounded-full ${isPC ? 'bg-green-500' : 'bg-red-500'}`} />
                 <span className={`font-medium ${isCurrent ? 'text-primary' : ''}`}>{combatant.name}</span>
                 {combatant.initiativeRolledByAuto && (
-                  <span className="text-[10px] text-muted-foreground italic">(auto)</span>
+                  <span className="text-[10px] text-muted-foreground italic">{t('combat.autoRolled')}</span>
                 )}
               </div>
               <div className="flex items-center gap-3">
                 {unrolled ? (
-                  <span className="text-xs text-muted-foreground italic">rolling…</span>
+                  <span className="text-xs text-muted-foreground italic">{t('combat.rolling')}</span>
                 ) : (
                   <span className="text-xs text-muted-foreground">Init: {combatant.initiativeRoll}</span>
                 )}
@@ -95,13 +97,13 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                   <button
                     onClick={() => onForceRoll(combatant.id)}
                     className="rounded-md border border-border px-2 py-0.5 text-[10px] hover:bg-accent"
-                    title="Roll for them now"
+                    title={t('combat.rollForThem')}
                   >
-                    Roll
+                    {t('combat.rollInitiative')}
                   </button>
                 )}
                 {isCurrent && !combatant.isDefeated && (
-                  <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary uppercase">Active</span>
+                  <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary uppercase">{t('combat.active')}</span>
                 )}
               </div>
             </div>
@@ -110,7 +112,7 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
       </div>
 
       <div className="mt-3 border-t border-border pt-3">
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Combat Log</p>
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.combatLog')}</p>
         <div className="max-h-32 space-y-0.5 overflow-y-auto">
           {combat.log.slice(-8).map(entry => (
             <p key={entry.id} className="text-xs text-muted-foreground">
