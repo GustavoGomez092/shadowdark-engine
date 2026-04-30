@@ -8,7 +8,7 @@ export interface CombatState {
   initiativeOrder: string[]; // combatant IDs in turn order
   currentTurnIndex: number;
   roundNumber: number;
-  surpriseActors?: string[];
+  surpriseActors?: string[]; // combatant IDs that can act in surprise round
   log: CombatLogEntry[];
   initiativeDeadline?: number; // epoch ms; only set during 'initiative' phase
 }
