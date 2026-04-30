@@ -231,44 +231,48 @@ export function EncounterPanel({
           </div>
         </div>
 
-        {/* Center: tracker (during combat) stacked above the detail panel.
-            The detail panel keeps the GM's HP +/- buttons, AC, attacks, equipped weapons, and
-            on-turn dice roller available — they're needed during combat as much as before. */}
+        {/* Center: tracker + (when active monster is selected) dice roller share the top row,
+            with the detail panel below. Both stay visible during combat so the GM keeps
+            HP +/- buttons, AC, attacks, equipped weapons, and the on-turn roller in reach. */}
         <div className="space-y-4">
           {combat && (
-            <InitiativeTracker
-              combat={combat}
-              isGM={true}
-              onAdvanceTurn={onAdvanceTurn}
-              onEndCombat={onEndCombat}
-              onForceRoll={onForceInitiativeRoll}
-            />
-          )}
-          {selectedMonster && selectedMonsterDef ? (
-            <div className="space-y-4">
-              <MonsterDetail
-                instance={selectedMonster}
-                definition={selectedMonsterDef}
-                onHpChange={(delta) => onUpdateMonsterHp(selectedMonster.id, delta)}
-                onDefeat={() => onDefeatMonster(selectedMonster.id)}
-              />
-              {activeTurnId === selectedMonster.id && (
-                <DiceRoller characterName={selectedMonster.name} compact onRoll={(result) => {
-                  const n20 = result.dice[0]?.isNat20 ?? false
-                  const n1 = result.dice[0]?.isNat1 ?? false
-                  pushRollToast({
-                    id: generateId(),
-                    playerName: selectedMonster.name,
-                    diceType: result.expression,
-                    total: result.total,
-                    isNat20: n20,
-                    isNat1: n1,
-                    timestamp: Date.now(),
-                  })
-                  onBroadcastRoll(selectedMonster.name, result.expression, result.total, n20, n1)
-                }} />
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+              <div className="lg:flex-1 lg:min-w-0">
+                <InitiativeTracker
+                  combat={combat}
+                  isGM={true}
+                  onAdvanceTurn={onAdvanceTurn}
+                  onEndCombat={onEndCombat}
+                  onForceRoll={onForceInitiativeRoll}
+                />
+              </div>
+              {selectedMonster && activeTurnId === selectedMonster.id && (
+                <div className="lg:flex-1 lg:min-w-0">
+                  <DiceRoller characterName={selectedMonster.name} compact onRoll={(result) => {
+                    const n20 = result.dice[0]?.isNat20 ?? false
+                    const n1 = result.dice[0]?.isNat1 ?? false
+                    pushRollToast({
+                      id: generateId(),
+                      playerName: selectedMonster.name,
+                      diceType: result.expression,
+                      total: result.total,
+                      isNat20: n20,
+                      isNat1: n1,
+                      timestamp: Date.now(),
+                    })
+                    onBroadcastRoll(selectedMonster.name, result.expression, result.total, n20, n1)
+                  }} />
+                </div>
               )}
             </div>
+          )}
+          {selectedMonster && selectedMonsterDef ? (
+            <MonsterDetail
+              instance={selectedMonster}
+              definition={selectedMonsterDef}
+              onHpChange={(delta) => onUpdateMonsterHp(selectedMonster.id, delta)}
+              onDefeat={() => onDefeatMonster(selectedMonster.id)}
+            />
           ) : selectedCharacter ? (
             <CharacterDetail
               character={selectedCharacter}
