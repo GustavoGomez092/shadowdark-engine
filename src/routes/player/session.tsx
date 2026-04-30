@@ -8,6 +8,8 @@ import { CharacterSheet } from '@/components/character/character-sheet.tsx'
 import { CharacterCreator } from '@/components/character/character-creator.tsx'
 import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import { EncounterView } from '@/components/combat/encounter-view.tsx'
+import { InitiativePrompt } from '@/components/combat/initiative-prompt.tsx'
+import { InitiativeTracker } from '@/components/combat/initiative-tracker.tsx'
 import { LightControls } from '@/components/player/light-controls.tsx'
 import { ShopWidget } from '@/components/player/shop-widget.tsx'
 import { StabilizeWidget } from '@/components/player/stabilize-widget.tsx'
@@ -288,6 +290,29 @@ function PlayerSessionPage() {
               otherCharacters={state.otherCharacters}
               activeTurnId={state.activeTurnId}
             />
+          </div>
+        )}
+
+        {state.combat?.phase === 'initiative' && state.myCharacter && (
+          <InitiativePrompt
+            combat={state.combat}
+            myCharacter={state.myCharacter}
+            onRoll={(total, isNat20, isNat1) => {
+              send({
+                type: 'player_roll',
+                expression: '1d20',
+                total,
+                isNat20,
+                isNat1,
+                purpose: 'initiative',
+                isPublic: true,
+              })
+            }}
+          />
+        )}
+        {state.combat?.phase === 'active' && (
+          <div className="mb-4">
+            <InitiativeTracker combat={state.combat} isGM={false} />
           </div>
         )}
 
