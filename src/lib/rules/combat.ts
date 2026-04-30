@@ -335,7 +335,7 @@ export function advanceTurn(combat: CombatState): CombatState {
     c.id === currentId ? { ...c, hasActed: true, hasUsedAction: false, hasUsedMove: false, isDoubleMoveActive: false } : c
   )
 
-  // Find next non-defeated combatant
+  // Find next non-defeated, non-surprised combatant
   let nextIndex = updated.currentTurnIndex
   do {
     nextIndex = (nextIndex + 1) % updated.initiativeOrder.length
@@ -344,6 +344,10 @@ export function advanceTurn(combat: CombatState): CombatState {
     if (nextIndex === 0) {
       updated.roundNumber += 1
       updated.combatants = updated.combatants.map(c => ({ ...c, hasActed: false }))
+      // Surprise expires after round 1.
+      if (updated.roundNumber > 1) {
+        updated.surpriseActors = undefined
+      }
       updated.log = [...updated.log, {
         id: generateId(),
         timestamp: Date.now(),
@@ -355,7 +359,11 @@ export function advanceTurn(combat: CombatState): CombatState {
     }
 
     const nextCombatant = updated.combatants.find(c => c.id === updated.initiativeOrder[nextIndex])
-    if (nextCombatant && !nextCombatant.isDefeated) break
+    const isSurprisedRound1 =
+      updated.roundNumber === 1 &&
+      !!nextCombatant &&
+      (updated.surpriseActors?.includes(nextCombatant.id) ?? false)
+    if (nextCombatant && !nextCombatant.isDefeated && !isSurprisedRound1) break
   } while (nextIndex !== updated.currentTurnIndex)
 
   updated.currentTurnIndex = nextIndex

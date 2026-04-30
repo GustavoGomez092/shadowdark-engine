@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
-import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder, getCombatantsImmuneToSurprise } from '../combat.ts'
+import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder, getCombatantsImmuneToSurprise, advanceTurn } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -312,6 +312,72 @@ describe('combat rules', () => {
       queueD20(10)
       const state = rollInitiative([makeCharacter()], [makeMonsterPair('rat', 'Rat')])
       expect(state.surpriseActors).toBeUndefined()
+    })
+  })
+
+  describe('advanceTurn with surprise', () => {
+    it('skips surprised combatants on round 1', () => {
+      const ralina = makeCharacter({ id: 'pc-1', name: 'Ralina' })
+      const jorbin = makeCharacter({ id: 'pc-2', name: 'Jorbin' })
+      queueD20(10) // monster group
+      let state = rollInitiative([ralina, jorbin], [makeMonsterPair('rat', 'Rat')], {
+        surprisedCharacterIds: ['pc-1'],
+      })
+      const ralinaRow = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      const jorbinRow = state.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      state = applyInitiativeRoll(state, ralinaRow.id, 18, false) // would be first
+      state = applyInitiativeRoll(state, jorbinRow.id, 5, false)
+      state = lockInitiativeOrder(state)
+
+      // currentTurnIndex starts at 0 = Ralina (init 18). Advance once.
+      const after = advanceTurn(state)
+      const currentId = after.initiativeOrder[after.currentTurnIndex]
+      expect(currentId).not.toBe(ralinaRow.id)
+    })
+
+    it('clears surpriseActors on round 1 to round 2 wrap', () => {
+      const ralina = makeCharacter({ id: 'pc-1', name: 'Ralina' })
+      queueD20(10)
+      let state = rollInitiative([ralina], [makeMonsterPair('rat', 'Rat')], {
+        surprisedCharacterIds: ['pc-1'],
+      })
+      const ralinaRow = state.combatants.find((c: any) => c.type === 'pc')!
+      state = applyInitiativeRoll(state, ralinaRow.id, 18, false)
+      state = lockInitiativeOrder(state)
+
+      // Order: Ralina (18, surprised) -> Monsters (10). Advance from idx 0 (Ralina).
+      // Round 1: skip Ralina, advance to Monsters (the only non-surprised live row).
+      let after = advanceTurn(state)
+      expect(after.roundNumber).toBe(1)
+      expect(after.surpriseActors).toContain(ralinaRow.id)
+      // Now advance past Monsters: wraps to round 2, clears surpriseActors,
+      // and Ralina becomes the active turn (no longer surprised).
+      after = advanceTurn(after)
+      expect(after.roundNumber).toBe(2)
+      expect(after.surpriseActors).toBeUndefined()
+      expect(after.initiativeOrder[after.currentTurnIndex]).toBe(ralinaRow.id)
+    })
+
+    it('round 2+ does not skip combatants who were surprised in round 1', () => {
+      const ralina = makeCharacter({ id: 'pc-1', name: 'Ralina' })
+      const jorbin = makeCharacter({ id: 'pc-2', name: 'Jorbin' })
+      queueD20(10)
+      let state = rollInitiative([ralina, jorbin], [makeMonsterPair('rat', 'Rat')], {
+        surprisedCharacterIds: ['pc-1'],
+      })
+      const ralinaRow = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      const jorbinRow = state.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      state = applyInitiativeRoll(state, ralinaRow.id, 18, false)
+      state = applyInitiativeRoll(state, jorbinRow.id, 5, false)
+      state = lockInitiativeOrder(state)
+
+      // Round 1 plays out: starting at Ralina (skip), then Monsters, then Jorbin, wrap to round 2.
+      let after = state
+      after = advanceTurn(after) // Ralina skipped → Monsters
+      after = advanceTurn(after) // Monsters → Jorbin
+      after = advanceTurn(after) // Jorbin → wraps to Ralina (round 2, surprise cleared)
+      expect(after.roundNumber).toBe(2)
+      expect(after.initiativeOrder[after.currentTurnIndex]).toBe(ralinaRow.id)
     })
   })
 })
