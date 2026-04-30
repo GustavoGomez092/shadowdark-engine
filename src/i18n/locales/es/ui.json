@@ -322,7 +322,7 @@
   "combat.initiativeCountdown": "{{seconds}}s",
   "combat.rolling": "tirando\u2026",
   "combat.autoRolled": "(auto)",
-  "combat.combatRound": "Combate \u2014 Ronda {{round}}",
+  "combat.combatRound": "Ronda {{round}}",
   "combat.rollForInitiativeWithCountdown": "Tira por iniciativa \u2014 {{seconds}}s",
   "combat.nextTurn": "Siguiente Turno",
   "combat.combatLog": "Registro de Combate",
