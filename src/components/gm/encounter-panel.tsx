@@ -7,12 +7,14 @@ import type { Character } from "@/schemas/character.ts"
 import type { MonsterDefinition, MonsterInstance } from "@/schemas/monsters.ts"
 import { getAbilityModifier } from "@/schemas/reference.ts"
 import { useLocale } from '@/hooks/use-locale.ts'
+import { InitiativeTracker } from '@/components/combat/initiative-tracker.tsx'
 
 type Selection = { type: 'monster'; id: string } | { type: 'character'; id: string } | null
 
 interface Props {
   monsters: MonsterInstance[]
   characters: Character[]
+  combat: import('@/schemas/combat.ts').CombatState | null
   activeTurnId: string | null
   onSetActiveTurn: (id: string | null) => void
   onBroadcastRoll: (name: string, expression: string, total: number, isNat20: boolean, isNat1: boolean) => void
@@ -21,11 +23,16 @@ interface Props {
   onRemoveMonster: (id: string) => void
   onUpdateCharacterHp: (id: string, delta: number) => void
   onResolveEncounter: (encounterType: 'random' | 'story') => void
+  onRollInitiative: () => void
+  onEndCombat: () => void
+  onAdvanceTurn: () => void
+  onForceInitiativeRoll: (combatantId: string) => void
 }
 
 export function EncounterPanel({
   monsters,
   characters,
+  combat,
   activeTurnId,
   onSetActiveTurn,
   onBroadcastRoll,
@@ -34,6 +41,10 @@ export function EncounterPanel({
   onRemoveMonster,
   onUpdateCharacterHp,
   onResolveEncounter,
+  onRollInitiative,
+  onEndCombat,
+  onAdvanceTurn,
+  onForceInitiativeRoll,
 }: Props) {
   const { t, ti, tData, tDataNested } = useLocale()
 
@@ -111,12 +122,31 @@ export function EncounterPanel({
           <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400">
             {ti('combat.activeCount', { count: activeMonsters.length })}
           </span>
-          <button
-            onClick={() => onResolveEncounter(encounterType)}
-            className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition"
-          >
-            {t('combat.resolveEncounter')}
-          </button>
+          {combat ? (
+            <button
+              onClick={onEndCombat}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:bg-accent transition"
+            >
+              {t('combat.endCombat')}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={onRollInitiative}
+                disabled={characters.length === 0 || activeMonsters.length === 0}
+                className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-black hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                title={characters.length === 0 ? 'Assign characters first' : ''}
+              >
+                {t('combat.rollInitiative')}
+              </button>
+              <button
+                onClick={() => onResolveEncounter(encounterType)}
+                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition"
+              >
+                {t('combat.resolveEncounter')}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -199,9 +229,17 @@ export function EncounterPanel({
           </div>
         </div>
 
-        {/* Center: Detail Panel (monster or character) */}
+        {/* Center: Detail Panel (monster or character) — replaced by tracker during combat */}
         <div>
-          {selectedMonster && selectedMonsterDef ? (
+          {combat ? (
+            <InitiativeTracker
+              combat={combat}
+              isGM={true}
+              onAdvanceTurn={onAdvanceTurn}
+              onEndCombat={onEndCombat}
+              onForceRoll={onForceInitiativeRoll}
+            />
+          ) : selectedMonster && selectedMonsterDef ? (
             <div className="space-y-4">
               <MonsterDetail
                 instance={selectedMonster}
