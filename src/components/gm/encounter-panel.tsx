@@ -8,6 +8,7 @@ import type { MonsterDefinition, MonsterInstance } from "@/schemas/monsters.ts"
 import { getAbilityModifier } from "@/schemas/reference.ts"
 import { useLocale } from '@/hooks/use-locale.ts'
 import { InitiativeTracker } from '@/components/combat/initiative-tracker.tsx'
+import { SurpriseDialog } from '@/components/gm/surprise-dialog.tsx'
 
 type Selection = { type: 'monster'; id: string } | { type: 'character'; id: string } | null
 
@@ -23,7 +24,7 @@ interface Props {
   onRemoveMonster: (id: string) => void
   onUpdateCharacterHp: (id: string, delta: number) => void
   onResolveEncounter: (encounterType: 'random' | 'story') => void
-  onRollInitiative: () => void
+  onConfirmRollInitiative: (selection: { surprisedCharacterIds: string[]; surprisedMonsterInstanceIds: string[] }) => void
   onEndCombat: () => void
   onAdvanceTurn: () => void
   onForceInitiativeRoll: (combatantId: string) => void
@@ -41,7 +42,7 @@ export function EncounterPanel({
   onRemoveMonster,
   onUpdateCharacterHp,
   onResolveEncounter,
-  onRollInitiative,
+  onConfirmRollInitiative,
   onEndCombat,
   onAdvanceTurn,
   onForceInitiativeRoll,
@@ -66,6 +67,7 @@ export function EncounterPanel({
   const [selection, setSelection] = useState<Selection>(
     monsters[0] ? { type: 'monster', id: monsters[0].id } : null
   )
+  const [surpriseDialogOpen, setSurpriseDialogOpen] = useState(false)
   const activeMonsters = monsters.filter((m) => !m.isDefeated)
   const defeatedMonsters = monsters.filter((m) => m.isDefeated)
 
@@ -132,7 +134,7 @@ export function EncounterPanel({
           ) : (
             <>
               <button
-                onClick={onRollInitiative}
+                onClick={() => setSurpriseDialogOpen(true)}
                 disabled={characters.length === 0 || activeMonsters.length === 0}
                 className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-black hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
                 title={characters.length === 0 ? 'Assign characters first' : ''}
@@ -333,6 +335,22 @@ export function EncounterPanel({
           </div>
         </div>
       </div>
+      {surpriseDialogOpen && (
+        <SurpriseDialog
+          characters={characters}
+          monsters={activeMonsters
+            .map(m => {
+              const def = getMonster(m.definitionId)
+              return def ? { instance: m, definition: def } : null
+            })
+            .filter((x): x is { instance: typeof activeMonsters[number]; definition: NonNullable<ReturnType<typeof getMonster>> } => !!x)}
+          onCancel={() => setSurpriseDialogOpen(false)}
+          onConfirm={(selection) => {
+            setSurpriseDialogOpen(false)
+            onConfirmRollInitiative(selection)
+          }}
+        />
+      )}
     </div>
   )
 }
