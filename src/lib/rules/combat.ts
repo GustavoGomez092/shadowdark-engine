@@ -94,6 +94,29 @@ export function applyInitiativeRoll(
   }
 }
 
+export function hasInitiativeAdvantage(character: Character): boolean {
+  return character.talents.some(t => t.mechanic.type === 'initiative_advantage')
+}
+
+export function autoRollMissing(state: CombatState, characters: Character[]): CombatState {
+  let working = state
+  for (const c of state.combatants) {
+    if (c.type !== 'pc') continue
+    if (c.initiativeRoll !== undefined) continue
+    const character = characters.find(ch => ch.id === c.referenceId)
+    if (!character) continue
+    const advantage = hasInitiativeAdvantage(character)
+    const roll = rollDice('1d20', {
+      purpose: 'initiative',
+      rolledBy: character.id,
+      advantage,
+    })
+    const total = roll.total + c.initiativeBonus
+    working = applyInitiativeRoll(working, c.id, total, true)
+  }
+  return working
+}
+
 // ========== Attack Resolution ==========
 
 export interface AttackParams {

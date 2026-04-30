@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
-import { rollInitiative, applyInitiativeRoll } from '../combat.ts'
+import { rollInitiative, applyInitiativeRoll, autoRollMissing } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -154,6 +154,48 @@ describe('combat rules', () => {
       const updated = applyInitiativeRoll(state, pcRow.id, 9, true)
       const r = updated.combatants.find((c: any) => c.id === pcRow.id)!
       expect(r.initiativeRolledByAuto).toBe(true)
+    })
+  })
+
+  describe('autoRollMissing', () => {
+    it('rolls only for combatants with undefined initiative and marks them auto', () => {
+      const pc1 = makeCharacter({ id: 'pc-1' })
+      const pc2 = makeCharacter({ id: 'pc-2', name: 'Jorbin' })
+      queueD20(10) // monster group
+      let state = rollInitiative([pc1, pc2], [makeMonsterPair('rat', 'Rat')])
+      const pc1Row = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      state = applyInitiativeRoll(state, pc1Row.id, 18, false)
+
+      // pc-2 still missing — auto roll should fire for them only
+      queueD20(7)
+      const updated = autoRollMissing(state, [pc1, pc2])
+
+      const pc2Row = updated.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      expect(pc2Row.initiativeRoll).toBe(7) // d20=7, DEX mod 0
+      expect(pc2Row.initiativeRolledByAuto).toBe(true)
+      const pc1RowAfter = updated.combatants.find((c: any) => c.referenceId === 'pc-1')!
+      expect(pc1RowAfter.initiativeRoll).toBe(18)
+      expect(pc1RowAfter.initiativeRolledByAuto).toBe(false)
+    })
+
+    it('uses advantage for characters with initiative_advantage talent', () => {
+      const lucky = makeCharacter({
+        id: 'pc-1',
+        talents: [{
+          id: 't1',
+          source: 'level-up',
+          level: 1,
+          description: 'Initiative advantage',
+          mechanic: { type: 'initiative_advantage' } as any,
+        }] as any,
+      })
+      queueD20(10) // monster group
+      const state = rollInitiative([lucky], [makeMonsterPair('rat', 'Rat')])
+      // advantage rolls 2 d20s and keeps the higher
+      queueD20(3, 19)
+      const updated = autoRollMissing(state, [lucky])
+      const row = updated.combatants.find((c: any) => c.type === 'pc')!
+      expect(row.initiativeRoll).toBe(19) // higher of (3, 19)
     })
   })
 })
