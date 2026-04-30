@@ -78,6 +78,22 @@ export function rollInitiative(
   }
 }
 
+export function applyInitiativeRoll(
+  state: CombatState,
+  combatantId: string,
+  total: number,
+  byAuto: boolean
+): CombatState {
+  return {
+    ...state,
+    combatants: state.combatants.map(c =>
+      c.id === combatantId
+        ? { ...c, initiativeRoll: total, initiativeRolledByAuto: byAuto }
+        : c
+    ),
+  }
+}
+
 // ========== Attack Resolution ==========
 
 export interface AttackParams {

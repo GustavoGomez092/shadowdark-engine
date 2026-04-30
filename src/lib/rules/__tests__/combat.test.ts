@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
-import { rollInitiative } from '../combat.ts'
+import { rollInitiative, applyInitiativeRoll } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -128,6 +128,32 @@ describe('combat rules', () => {
 
     it('refuses to build state when there are no characters', () => {
       expect(() => rollInitiative([], [makeMonsterPair('rat', 'Rat')])).toThrow(/no characters/i)
+    })
+  })
+
+  describe('applyInitiativeRoll', () => {
+    it('sets the roll on the targeted combatant only', () => {
+      const pcs = [makeCharacter({ id: 'pc-1' }), makeCharacter({ id: 'pc-2', name: 'Jorbin' })]
+      queueD20(10) // monster group roll
+      const state = rollInitiative(pcs, [makeMonsterPair('rat', 'Rat')])
+      const pc1Row = state.combatants.find((c: any) => c.referenceId === 'pc-1')!
+
+      const updated = applyInitiativeRoll(state, pc1Row.id, 17, false)
+
+      const updatedRow = updated.combatants.find((c: any) => c.id === pc1Row.id)!
+      expect(updatedRow.initiativeRoll).toBe(17)
+      expect(updatedRow.initiativeRolledByAuto).toBe(false)
+      const otherPcRow = updated.combatants.find((c: any) => c.referenceId === 'pc-2')!
+      expect(otherPcRow.initiativeRoll).toBeUndefined()
+    })
+
+    it('marks auto-rolled when byAuto is true', () => {
+      queueD20(10)
+      const state = rollInitiative([makeCharacter()], [makeMonsterPair('rat', 'Rat')])
+      const pcRow = state.combatants.find((c: any) => c.type === 'pc')!
+      const updated = applyInitiativeRoll(state, pcRow.id, 9, true)
+      const r = updated.combatants.find((c: any) => c.id === pcRow.id)!
+      expect(r.initiativeRolledByAuto).toBe(true)
     })
   })
 })
