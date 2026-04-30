@@ -373,6 +373,10 @@ export const useSessionStore = create<SessionStore>()(
           if (next === 0) {
             combat.roundNumber += 1
             for (const c of combat.combatants) c.hasActed = false
+            // Surprise expires after round 1.
+            if (combat.roundNumber > 1) {
+              combat.surpriseActors = undefined
+            }
             combat.log.push({
               id: generateId(),
               timestamp: Date.now(),
@@ -383,7 +387,14 @@ export const useSessionStore = create<SessionStore>()(
             })
           }
           const candidate = combat.combatants.find(c => c.id === order[next])
-          if (candidate && !candidate.isDefeated) { foundLive = true; break }
+          const isSurprisedRound1 =
+            combat.roundNumber === 1 &&
+            !!candidate &&
+            (combat.surpriseActors?.includes(candidate.id) ?? false)
+          if (candidate && !candidate.isDefeated && !isSurprisedRound1) {
+            foundLive = true
+            break
+          }
         }
         // If everyone is defeated, leave the turn pointer where it was and clear the active turn —
         // do not advance to a defeated combatant.
