@@ -339,14 +339,17 @@ export const useSessionStore = create<SessionStore>()(
         combat.initiativeOrder = indexed.map(x => x.id)
         combat.currentTurnIndex = 0
         combat.initiativeDeadline = undefined
-        combat.log.push({
-          id: generateId(),
-          timestamp: Date.now(),
-          round: combat.roundNumber,
-          actorId: 'system',
-          type: 'round_start',
-          message: `Round ${combat.roundNumber} begins.`,
-        })
+        // Round 1 already has the "Roll for initiative!" entry — don't duplicate.
+        if (combat.roundNumber > 1) {
+          combat.log.push({
+            id: generateId(),
+            timestamp: Date.now(),
+            round: combat.roundNumber,
+            actorId: 'system',
+            type: 'round_start',
+            message: `Round ${combat.roundNumber} begins.`,
+          })
+        }
         // Drive activeTurnId from the new current combatant.
         const current = combat.combatants.find(c => c.id === combat.initiativeOrder[0])
         state.session.activeTurnId = current?.referenceId ?? null

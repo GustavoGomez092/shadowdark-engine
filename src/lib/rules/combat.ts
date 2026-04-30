@@ -139,20 +139,25 @@ export function lockInitiativeOrder(state: CombatState): CombatState {
   indexed.sort(initiativeComparator)
   const initiativeOrder = indexed.map(x => x.id)
 
+  // Round 1 already has the "Roll for initiative!" entry from rollInitiative — don't duplicate it.
+  const log = state.roundNumber === 1
+    ? state.log
+    : [...state.log, {
+        id: generateId(),
+        timestamp: Date.now(),
+        round: state.roundNumber,
+        actorId: 'system',
+        type: 'round_start' as const,
+        message: `Round ${state.roundNumber} begins.`,
+      }]
+
   return {
     ...state,
     phase: 'active',
     initiativeOrder,
     currentTurnIndex: 0,
     initiativeDeadline: undefined,
-    log: [...state.log, {
-      id: generateId(),
-      timestamp: Date.now(),
-      round: state.roundNumber,
-      actorId: 'system',
-      type: 'round_start',
-      message: `Round ${state.roundNumber} begins.`,
-    }],
+    log,
   }
 }
 

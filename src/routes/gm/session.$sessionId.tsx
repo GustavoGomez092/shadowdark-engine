@@ -1181,6 +1181,7 @@ function GMSessionPage() {
             onRollInitiative={() => {
               const assignedCharacters = characters.filter(c => Object.values(session.players).some(p => p.characterId === c.id))
               const liveMonsters = activeMonsters
+                .filter(m => !m.isDefeated)
                 .map(m => {
                   const def = getMonster(m.definitionId)
                   return def ? { instance: m, definition: def } : null

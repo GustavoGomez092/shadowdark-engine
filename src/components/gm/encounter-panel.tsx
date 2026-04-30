@@ -46,7 +46,7 @@ export function EncounterPanel({
   onAdvanceTurn,
   onForceInitiativeRoll,
 }: Props) {
-  const { t, ti, tData, tDataNested } = useLocale()
+  const { t, ti, tData } = useLocale()
 
   // Translate a monster instance name using the definition overlay
   function translateMonsterName(m: MonsterInstance) {
