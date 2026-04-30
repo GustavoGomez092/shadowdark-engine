@@ -28,7 +28,9 @@ export function InitiativePrompt({ combat, myCharacter, onRoll }: Props) {
     return () => clearInterval(id)
   }, [combat.initiativeDeadline])
 
-  if (!me || me.initiativeRoll !== undefined) return null
+  // Check `!= null` (not `!== undefined`) because P2P JSON serialization
+  // converts `undefined` → `null` between GM and player.
+  if (!me || me.initiativeRoll != null) return null
   if (combat.initiativeDeadline == null) return null
 
   const secondsLeft = Math.max(0, Math.ceil((combat.initiativeDeadline - now) / 1000))

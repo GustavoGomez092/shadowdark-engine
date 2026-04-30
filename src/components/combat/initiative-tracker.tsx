@@ -67,7 +67,9 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
         {orderedRows.map((combatant, index) => {
           const isCurrent = !isInitiativePhase && combatant.id === currentId
           const isPC = combatant.type === 'pc'
-          const unrolled = combatant.initiativeRoll === undefined
+          // `== null` (not `=== undefined`) because P2P JSON serialization
+          // converts `undefined` → `null` between GM and player.
+          const unrolled = combatant.initiativeRoll == null
           return (
             <div
               key={combatant.id}
