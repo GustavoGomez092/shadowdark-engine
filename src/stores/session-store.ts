@@ -9,7 +9,7 @@ import type { DiceRollResult } from '@/schemas/dice.ts'
 import type { DangerLevel } from '@/schemas/reference.ts'
 import type { LightState } from '@/schemas/light.ts'
 import type { CombatState } from '@/schemas/combat.ts'
-import { generateRoomCode } from '@/lib/utils/id.ts'
+import { generateId, generateRoomCode } from '@/lib/utils/id.ts'
 import { computeCharacterValues } from '@/lib/rules/character.ts'
 
 const STORAGE_PREFIX = 'shadowdark'
@@ -43,6 +43,10 @@ interface SessionStore {
 
   // Combat
   setCombat: (combat: CombatState | null) => void
+  applyInitiativeRoll: (combatantId: string, total: number, byAuto: boolean) => void
+  lockInitiativeOrder: () => void
+  advanceCombatTurn: () => void
+  endCombat: () => void
 
   // Light
   setLight: (light: LightState) => void
@@ -305,6 +309,94 @@ export const useSessionStore = create<SessionStore>()(
       set(state => {
         if (!state.session) return
         state.session.combat = combat
+      })
+      const s = get().session
+      if (s) debouncedSave(s)
+    },
+
+    applyInitiativeRoll: (combatantId, total, byAuto) => {
+      set(state => {
+        if (!state.session?.combat) return
+        const c = state.session.combat.combatants.find(c => c.id === combatantId)
+        if (!c) return
+        c.initiativeRoll = total
+        c.initiativeRolledByAuto = byAuto
+      })
+      const s = get().session
+      if (s) debouncedSave(s)
+    },
+
+    lockInitiativeOrder: () => {
+      set(state => {
+        if (!state.session?.combat) return
+        const combat = state.session.combat
+        // Inline the same sort as lib/rules/combat.ts:lockInitiativeOrder so we mutate in place under immer.
+        const indexed = combat.combatants.map((c, idx) => ({ id: c.id, type: c.type, roll: c.initiativeRoll ?? -Infinity, idx }))
+        indexed.sort((a, b) => {
+          if (a.roll !== b.roll) return b.roll - a.roll
+          if (a.type === 'pc' && b.type !== 'pc') return -1
+          if (b.type === 'pc' && a.type !== 'pc') return 1
+          return a.idx - b.idx
+        })
+        combat.phase = 'active'
+        combat.initiativeOrder = indexed.map(x => x.id)
+        combat.currentTurnIndex = 0
+        combat.initiativeDeadline = undefined
+        combat.log.push({
+          id: generateId(),
+          timestamp: Date.now(),
+          round: combat.roundNumber,
+          actorId: 'system',
+          type: 'round_start',
+          message: `Round ${combat.roundNumber} begins.`,
+        })
+        // Drive activeTurnId from the new current combatant.
+        const current = combat.combatants.find(c => c.id === combat.initiativeOrder[0])
+        state.session.activeTurnId = current?.referenceId ?? null
+      })
+      const s = get().session
+      if (s) debouncedSave(s)
+    },
+
+    advanceCombatTurn: () => {
+      set(state => {
+        if (!state.session?.combat) return
+        const combat = state.session.combat
+        if (combat.phase !== 'active') return
+        const order = combat.initiativeOrder
+        if (order.length === 0) return
+
+        let next = combat.currentTurnIndex
+        for (let i = 0; i < order.length; i++) {
+          next = (next + 1) % order.length
+          if (next === 0) {
+            combat.roundNumber += 1
+            for (const c of combat.combatants) c.hasActed = false
+            combat.log.push({
+              id: generateId(),
+              timestamp: Date.now(),
+              round: combat.roundNumber,
+              actorId: 'system',
+              type: 'round_start',
+              message: `Round ${combat.roundNumber} begins.`,
+            })
+          }
+          const candidate = combat.combatants.find(c => c.id === order[next])
+          if (candidate && !candidate.isDefeated) break
+        }
+        combat.currentTurnIndex = next
+        const current = combat.combatants.find(c => c.id === order[next])
+        state.session.activeTurnId = current?.referenceId ?? null
+      })
+      const s = get().session
+      if (s) debouncedSave(s)
+    },
+
+    endCombat: () => {
+      set(state => {
+        if (!state.session) return
+        state.session.combat = null
+        state.session.activeTurnId = null
       })
       const s = get().session
       if (s) debouncedSave(s)
