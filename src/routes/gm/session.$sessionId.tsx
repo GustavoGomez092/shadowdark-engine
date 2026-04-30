@@ -1178,7 +1178,7 @@ function GMSessionPage() {
               setRewardsState({ show: true, hasTreasure, encounterType })
             }}
             combat={session.combat}
-            onRollInitiative={() => {
+            onConfirmRollInitiative={(selection) => {
               const assignedCharacters = characters.filter(c => Object.values(session.players).some(p => p.characterId === c.id))
               const liveMonsters = activeMonsters
                 .filter(m => !m.isDefeated)
@@ -1188,7 +1188,10 @@ function GMSessionPage() {
                 })
                 .filter((x): x is { instance: typeof activeMonsters[number]; definition: NonNullable<ReturnType<typeof getMonster>> } => !!x)
               if (assignedCharacters.length === 0 || liveMonsters.length === 0) return
-              const combat = rollInitiative(assignedCharacters, liveMonsters)
+              const combat = rollInitiative(assignedCharacters, liveMonsters, {
+                surprisedCharacterIds: selection.surprisedCharacterIds,
+                surprisedMonsterInstanceIds: selection.surprisedMonsterInstanceIds,
+              })
               useSessionStore.getState().setCombat(combat)
               setTimeout(() => {
                 gmPeer.broadcastStateSync()
