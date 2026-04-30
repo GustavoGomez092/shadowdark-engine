@@ -231,9 +231,11 @@ export function EncounterPanel({
           </div>
         </div>
 
-        {/* Center: Detail Panel (monster or character) — replaced by tracker during combat */}
-        <div>
-          {combat ? (
+        {/* Center: tracker (during combat) stacked above the detail panel.
+            The detail panel keeps the GM's HP +/- buttons, AC, attacks, equipped weapons, and
+            on-turn dice roller available — they're needed during combat as much as before. */}
+        <div className="space-y-4">
+          {combat && (
             <InitiativeTracker
               combat={combat}
               isGM={true}
@@ -241,7 +243,8 @@ export function EncounterPanel({
               onEndCombat={onEndCombat}
               onForceRoll={onForceInitiativeRoll}
             />
-          ) : selectedMonster && selectedMonsterDef ? (
+          )}
+          {selectedMonster && selectedMonsterDef ? (
             <div className="space-y-4">
               <MonsterDetail
                 instance={selectedMonster}
@@ -271,11 +274,11 @@ export function EncounterPanel({
               character={selectedCharacter}
               onHpChange={(delta) => onUpdateCharacterHp(selectedCharacter.id, delta)}
             />
-          ) : (
+          ) : !combat ? (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
               {t('combat.selectThreatOrPartyMember')}
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Right: The Party */}
