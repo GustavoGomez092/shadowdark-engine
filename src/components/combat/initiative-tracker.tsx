@@ -1,47 +1,74 @@
-import type { CombatState } from '@/schemas/combat.ts'
+import { useEffect, useState } from 'react'
+import type { CombatState, Combatant } from '@/schemas/combat.ts'
 
 interface Props {
   combat: CombatState
-  onAdvanceTurn: () => void
-  onEndCombat: () => void
+  onAdvanceTurn?: () => void
+  onEndCombat?: () => void
+  onForceRoll?: (combatantId: string) => void
   isGM: boolean
 }
 
-export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, isGM }: Props) {
+function useCountdown(deadline: number | undefined): number {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (deadline == null) return
+    const id = setInterval(() => setNow(Date.now()), 250)
+    return () => clearInterval(id)
+  }, [deadline])
+  if (deadline == null) return 0
+  return Math.max(0, Math.ceil((deadline - now) / 1000))
+}
+
+export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceRoll, isGM }: Props) {
+  const isInitiativePhase = combat.phase === 'initiative'
+  const secondsLeft = useCountdown(isInitiativePhase ? combat.initiativeDeadline : undefined)
   const currentId = combat.initiativeOrder[combat.currentTurnIndex]
+
+  const orderedRows: Combatant[] = isInitiativePhase
+    ? combat.combatants
+    : combat.initiativeOrder
+        .map(id => combat.combatants.find(c => c.id === id))
+        .filter((c): c is Combatant => !!c)
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-semibold">Combat — Round {combat.roundNumber}</h2>
-        {isGM && (
+        <h2 className="font-semibold">
+          {isInitiativePhase
+            ? `Roll for initiative — ${secondsLeft}s`
+            : `Combat — Round ${combat.roundNumber}`}
+        </h2>
+        {isGM && !isInitiativePhase && (
           <div className="flex gap-2">
-            <button
-              onClick={onAdvanceTurn}
-              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition"
-            >
-              Next Turn
-            </button>
-            <button
-              onClick={onEndCombat}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-accent transition"
-            >
-              End Combat
-            </button>
+            {onAdvanceTurn && (
+              <button
+                onClick={onAdvanceTurn}
+                className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 transition"
+              >
+                Next Turn
+              </button>
+            )}
+            {onEndCombat && (
+              <button
+                onClick={onEndCombat}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-accent transition"
+              >
+                End Combat
+              </button>
+            )}
           </div>
         )}
       </div>
 
       <div className="space-y-1">
-        {combat.initiativeOrder.map((id, index) => {
-          const combatant = combat.combatants.find(c => c.id === id)
-          if (!combatant) return null
-          const isCurrent = id === currentId
+        {orderedRows.map((combatant, index) => {
+          const isCurrent = !isInitiativePhase && combatant.id === currentId
           const isPC = combatant.type === 'pc'
-
+          const unrolled = combatant.initiativeRoll === undefined
           return (
             <div
-              key={id}
+              key={combatant.id}
               className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm transition ${
                 combatant.isDefeated ? 'opacity-30 line-through' :
                 isCurrent ? 'bg-primary/15 border border-primary/30' :
@@ -49,12 +76,30 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, isGM }: 
               }`}
             >
               <div className="flex items-center gap-3">
-                <span className="w-6 text-center text-xs font-mono text-muted-foreground">{index + 1}</span>
+                {!isInitiativePhase && (
+                  <span className="w-6 text-center text-xs font-mono text-muted-foreground">{index + 1}</span>
+                )}
                 <span className={`h-2 w-2 rounded-full ${isPC ? 'bg-green-500' : 'bg-red-500'}`} />
                 <span className={`font-medium ${isCurrent ? 'text-primary' : ''}`}>{combatant.name}</span>
+                {combatant.initiativeRolledByAuto && (
+                  <span className="text-[10px] text-muted-foreground italic">(auto)</span>
+                )}
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">Init: {combatant.initiativeRoll}</span>
+                {unrolled ? (
+                  <span className="text-xs text-muted-foreground italic">rolling…</span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Init: {combatant.initiativeRoll}</span>
+                )}
+                {isInitiativePhase && isGM && unrolled && isPC && onForceRoll && (
+                  <button
+                    onClick={() => onForceRoll(combatant.id)}
+                    className="rounded-md border border-border px-2 py-0.5 text-[10px] hover:bg-accent"
+                    title="Roll for them now"
+                  >
+                    Roll
+                  </button>
+                )}
                 {isCurrent && !combatant.isDefeated && (
                   <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary uppercase">Active</span>
                 )}
@@ -64,7 +109,6 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, isGM }: 
         })}
       </div>
 
-      {/* Combat Log (last 5 entries) */}
       <div className="mt-3 border-t border-border pt-3">
         <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Combat Log</p>
         <div className="max-h-32 space-y-0.5 overflow-y-auto">
