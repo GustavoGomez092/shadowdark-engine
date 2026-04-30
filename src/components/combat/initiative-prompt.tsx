@@ -22,20 +22,54 @@ export function InitiativePrompt({ combat, myCharacter, onRoll }: Props) {
   const { t } = useLocale()
   const me = findMyCombatant(combat, myCharacter.id)
   const [now, setNow] = useState(() => Date.now())
+  const [dismissed, setDismissed] = useState(false)
+
   useEffect(() => {
     if (combat.initiativeDeadline == null) return
     const id = setInterval(() => setNow(Date.now()), 250)
     return () => clearInterval(id)
   }, [combat.initiativeDeadline])
 
+  if (!me) return null
+  if (dismissed) return null
+
   // Check `!= null` (not `!== undefined`) because P2P JSON serialization
   // converts `undefined` → `null` between GM and player.
-  if (!me || me.initiativeRoll != null) return null
+  const hasRolled = me.initiativeRoll != null
+  const advantageLocked = hasInitiativeAdvantage(myCharacter)
+  const dexMod = me.initiativeBonus
+
+  // Result view — shown after the player rolls (or auto-rolls). Stays visible
+  // until the player clicks Continue, so they can actually see what they got.
+  if (hasRolled) {
+    return (
+      <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <p className="text-lg font-bold text-amber-400">
+              {t('combat.initiativeResult')}
+            </p>
+            <p className="text-xs text-amber-300">
+              d20 {dexMod >= 0 ? `+ ${dexMod}` : `− ${Math.abs(dexMod)}`} ({t('combat.dexLabel')})
+              {me.initiativeRolledByAuto && ` · ${t('combat.autoRolled')}`}
+            </p>
+          </div>
+          <p className="text-5xl font-mono font-bold text-amber-400">{me.initiativeRoll}</p>
+        </div>
+        <button
+          onClick={() => setDismissed(true)}
+          className="w-full rounded-lg bg-amber-500 px-3 py-2 text-sm font-semibold text-black hover:opacity-90 transition"
+        >
+          {t('combat.continue')}
+        </button>
+      </div>
+    )
+  }
+
+  // Roll view — only shown while the deadline is live and the player hasn't rolled.
   if (combat.initiativeDeadline == null) return null
 
   const secondsLeft = Math.max(0, Math.ceil((combat.initiativeDeadline - now) / 1000))
-  const advantageLocked = hasInitiativeAdvantage(myCharacter)
-  const dexMod = me.initiativeBonus
 
   return (
     <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">

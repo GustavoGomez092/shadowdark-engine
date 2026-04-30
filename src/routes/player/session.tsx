@@ -293,7 +293,7 @@ function PlayerSessionPage() {
           </div>
         )}
 
-        {state.combat?.phase === 'initiative' && state.myCharacter && (
+        {state.combat && state.myCharacter && (
           <InitiativePrompt
             combat={state.combat}
             myCharacter={state.myCharacter}

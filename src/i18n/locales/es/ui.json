@@ -338,6 +338,8 @@
   "combat.combatants": "Combatientes",
   "combat.cantBeSurprised": "No puede ser sorprendido",
   "combat.surprisedBadge": "Sorprendido",
+  "combat.initiativeResult": "Tu iniciativa",
+  "combat.continue": "Continuar",
 
   "dice.rolling": "Tirando...",
   "dice.lastRoll": "\u00daltima tirada",

@@ -338,6 +338,8 @@
   "combat.combatants": "Combatants",
   "combat.cantBeSurprised": "Can't be surprised",
   "combat.surprisedBadge": "Surprised",
+  "combat.initiativeResult": "Your initiative",
+  "combat.continue": "Continue",
 
   "dice.rolling": "Rolling...",
   "dice.lastRoll": "Last Roll",
