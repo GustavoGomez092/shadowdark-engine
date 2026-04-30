@@ -9,20 +9,26 @@ import { computeEffectiveStats } from './character.ts'
 
 // ========== Initiative ==========
 
-export function rollInitiative(characters: Character[], monsters: { instance: MonsterInstance; definition: MonsterDefinition }[]): CombatState {
+const INITIATIVE_DEADLINE_MS = 30_000
+
+export function rollInitiative(
+  characters: Character[],
+  monsters: { instance: MonsterInstance; definition: MonsterDefinition }[]
+): CombatState {
+  if (characters.length === 0) throw new Error('Cannot roll initiative: no characters')
+  if (monsters.length === 0) throw new Error('Cannot roll initiative: no monsters')
+
   const combatants: Combatant[] = []
 
-  // Roll for each PC
   for (const char of characters) {
     const stats = computeEffectiveStats(char)
     const dexMod = getAbilityModifier(stats.DEX)
-    const roll = rollDice('1d20', { rolledBy: char.id, purpose: 'initiative' })
     combatants.push({
       id: generateId(),
       type: 'pc',
       referenceId: char.id,
       name: char.name,
-      initiativeRoll: roll.total + dexMod,
+      initiativeRoll: undefined,
       initiativeBonus: dexMod,
       hasActed: false,
       isDefeated: false,
@@ -32,43 +38,40 @@ export function rollInitiative(characters: Character[], monsters: { instance: Mo
     })
   }
 
-  // Roll once for all monsters using highest DEX mod
-  for (const { instance, definition } of monsters) {
-    const dexMod = getAbilityModifier(definition.stats.DEX)
-    const roll = rollDice('1d20', { rolledBy: instance.id, purpose: 'initiative' })
-    combatants.push({
-      id: generateId(),
-      type: 'monster',
-      referenceId: instance.id,
-      name: instance.name,
-      initiativeRoll: roll.total + dexMod,
-      initiativeBonus: dexMod,
-      hasActed: false,
-      isDefeated: false,
-      hasUsedAction: false,
-      hasUsedMove: false,
-      isDoubleMoveActive: false,
-    })
-  }
-
-  // Sort by initiative (highest first)
-  const sorted = [...combatants].sort((a, b) => (b.initiativeRoll ?? 0) - (a.initiativeRoll ?? 0))
-  const initiativeOrder = sorted.map(c => c.id)
+  // ONE shared monster row using the highest DEX mod across the group.
+  const groupDexMod = monsters
+    .map(m => getAbilityModifier(m.definition.stats.DEX))
+    .reduce((a, b) => Math.max(a, b), -Infinity)
+  const groupRoll = rollDice('1d20', { purpose: 'initiative' })
+  combatants.push({
+    id: generateId(),
+    type: 'monster',
+    referenceId: monsters[0].instance.id,
+    name: 'Monsters',
+    initiativeRoll: groupRoll.total + groupDexMod,
+    initiativeBonus: groupDexMod,
+    hasActed: false,
+    isDefeated: false,
+    hasUsedAction: false,
+    hasUsedMove: false,
+    isDoubleMoveActive: false,
+  })
 
   return {
     id: generateId(),
-    phase: 'active',
+    phase: 'initiative',
     combatants,
-    initiativeOrder,
+    initiativeOrder: [],
     currentTurnIndex: 0,
     roundNumber: 1,
+    initiativeDeadline: Date.now() + INITIATIVE_DEADLINE_MS,
     log: [{
       id: generateId(),
       timestamp: Date.now(),
       round: 1,
       actorId: 'system',
       type: 'round_start',
-      message: 'Combat begins! Round 1.',
+      message: 'Roll for initiative!',
     }],
   }
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
+import { rollInitiative } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -84,6 +85,50 @@ describe('combat rules', () => {
   it('test scaffolding works', () => {
     queueD20(15)
     expect(Math.floor(Math.random() * 20) + 1).toBe(15)
+  })
+
+  describe('rollInitiative', () => {
+    it('builds a state in initiative phase with unrolled PC rows and one rolled monster row', () => {
+      const pcs = [
+        makeCharacter({ id: 'pc-1', name: 'Ralina', baseStats: { STR: 10, DEX: 14, CON: 10, INT: 10, WIS: 10, CHA: 10 } as any }),
+        makeCharacter({ id: 'pc-2', name: 'Jorbin' }),
+      ]
+      const monsters = [
+        makeMonsterPair('goblin', 'Goblin', 13),
+        makeMonsterPair('rat', 'Rat', 11),
+      ]
+      queueD20(15) // monster group roll uses highest DEX (13 -> +1)
+      const before = Date.now()
+      const state = rollInitiative(pcs, monsters)
+      const after = Date.now()
+
+      expect(state.phase).toBe('initiative')
+      expect(state.combatants).toHaveLength(3) // 2 PCs + 1 monster group
+      expect(state.initiativeOrder).toEqual([])
+      expect(state.roundNumber).toBe(1)
+
+      const pcRows = state.combatants.filter((c: any) => c.type === 'pc')
+      expect(pcRows).toHaveLength(2)
+      for (const r of pcRows) {
+        expect(r.initiativeRoll).toBeUndefined()
+      }
+
+      const groupRow = state.combatants.find((c: any) => c.type === 'monster')!
+      expect(groupRow.name).toBe('Monsters')
+      expect(groupRow.initiativeRoll).toBe(15 + 1) // d20=15, +DEX mod 1
+      expect(groupRow.initiativeBonus).toBe(1)
+
+      expect(state.initiativeDeadline).toBeGreaterThanOrEqual(before + 29_000)
+      expect(state.initiativeDeadline).toBeLessThanOrEqual(after + 31_000)
+    })
+
+    it('refuses to build state when there are no monsters', () => {
+      expect(() => rollInitiative([makeCharacter()], [])).toThrow(/no monsters/i)
+    })
+
+    it('refuses to build state when there are no characters', () => {
+      expect(() => rollInitiative([], [makeMonsterPair('rat', 'Rat')])).toThrow(/no characters/i)
+    })
   })
 })
 
