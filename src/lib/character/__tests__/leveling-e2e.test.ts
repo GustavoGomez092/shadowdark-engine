@@ -11,7 +11,7 @@
  *   pnpm test     # terminal 2  (or: npx vitest run leveling-e2e)
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import puppeteer, { type Browser, type Page } from 'puppeteer'
+import puppeteer, { type Browser, type Page, type ElementHandle } from 'puppeteer'
 
 const BASE_URL = 'http://localhost:3000'
 const TIMEOUT = 60_000
@@ -40,7 +40,7 @@ async function clickByText(page: Page, text: string, tag = 'button'): Promise<vo
   )
   const el = handle.asElement()
   if (!el) throw new Error(`No <${tag}> with text "${text}"`)
-  await el.click()
+  await (el as ElementHandle<Element>).click()
 }
 
 /** Click a selection card by its exact title text (e.g. "Human", "Thief"); the
@@ -53,7 +53,7 @@ async function clickCardTitle(page: Page, title: string): Promise<void> {
   }, title)
   const el = handle.asElement()
   if (!el) throw new Error(`No card titled "${title}"`)
-  await el.click()
+  await (el as ElementHandle<Element>).click()
 }
 
 const pause = (ms: number) => new Promise(r => setTimeout(r, ms))

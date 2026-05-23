@@ -12,7 +12,7 @@
  *   pnpm test     # terminal 2  (or: npx vitest run character-import-export-e2e)
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import puppeteer, { type Browser, type Page } from 'puppeteer'
+import puppeteer, { type Browser, type Page, type ElementHandle } from 'puppeteer'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as os from 'node:os'
@@ -39,7 +39,7 @@ async function clickByText(page: Page, text: string, tag = 'button'): Promise<vo
   }, text, tag)
   const el = handle.asElement()
   if (!el) throw new Error(`No <${tag}> with text "${text}"`)
-  await el.click()
+  await (el as ElementHandle<Element>).click()
 }
 
 async function clickCardTitle(page: Page, title: string): Promise<void> {
@@ -50,7 +50,7 @@ async function clickCardTitle(page: Page, title: string): Promise<void> {
   }, title)
   const el = handle.asElement()
   if (!el) throw new Error(`No card titled "${title}"`)
-  await el.click()
+  await (el as ElementHandle<Element>).click()
 }
 
 const pause = (ms: number) => new Promise(r => setTimeout(r, ms))
