@@ -1,6 +1,6 @@
 import type {
   Character, AbilityScores, AbilityModifiers, AbilityScore,
-  Ancestry, CharacterClass, ComputedCharacterValues, AppliedTalent
+  Ancestry, CharacterClass, ComputedCharacterValues, AppliedTalent, StatModification
 } from '@/schemas/character.ts';
 import type { Alignment } from '@/schemas/reference.ts';
 import type { InventoryState } from '@/schemas/inventory.ts';
@@ -304,10 +304,33 @@ export function getXpToNextLevel(character: Character): number {
   return Math.max(0, threshold - character.xp);
 }
 
-export function levelUpCharacter(character: Character, hpRoll: number, newTalent?: AppliedTalent): Character {
+export interface StatIncrease {
+  stat: AbilityScore;
+  amount: number;
+}
+
+export function levelUpCharacter(
+  character: Character,
+  hpRoll: number,
+  newTalent?: AppliedTalent,
+  statIncreases?: StatIncrease[],
+): Character {
   const newLevel = character.level + 1;
   const conMod = getAbilityModifier(computeEffectiveStats(character).CON);
   const hpGain = Math.max(1, hpRoll + conMod);
+
+  // Talent-granted ability score increases are recorded as permanent stat
+  // modifications so they flow through computeEffectiveStats and survive rests.
+  const source = newTalent ? `talent:${newTalent.id}` : 'level-up';
+  const newStatMods: StatModification[] = (statIncreases ?? [])
+    .filter(inc => inc.amount !== 0)
+    .map(inc => ({
+      id: generateId(),
+      stat: inc.stat,
+      amount: inc.amount,
+      source,
+      permanent: true,
+    }));
 
   const updated: Character = {
     ...character,
@@ -317,6 +340,7 @@ export function levelUpCharacter(character: Character, hpRoll: number, newTalent
     maxHp: character.maxHp + hpGain,
     currentHp: character.currentHp + hpGain, // heal the gained amount
     talents: newTalent ? [...character.talents, newTalent] : character.talents,
+    statModifications: [...character.statModifications, ...newStatMods],
   };
 
   updated.computed = computeCharacterValues(updated);

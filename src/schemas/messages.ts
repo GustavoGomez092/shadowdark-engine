@@ -142,6 +142,7 @@ export interface PlayerLevelUp {
   hpRoll: number;
   talent?: import('@/schemas/character.ts').AppliedTalent;
   newSpellIds?: string[];
+  statIncreases?: { stat: import('@/schemas/character.ts').AbilityScore; amount: number }[];
 }
 
 export interface PlayerCreateCharacter {

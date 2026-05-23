@@ -661,7 +661,7 @@ function GMSessionPage() {
       const char = useSessionStore.getState().session?.characters[msg.characterId]
       if (!char) return
 
-      const updated = levelUpCharacter(char, msg.hpRoll, msg.talent)
+      const updated = levelUpCharacter(char, msg.hpRoll, msg.talent, msg.statIncreases)
       if (msg.newSpellIds) {
         for (const spellId of msg.newSpellIds) {
           updated.spells.knownSpells.push({ spellId, isAvailable: true, source: 'class', hasAdvantage: false })

@@ -378,7 +378,7 @@ function PlayerSessionPage() {
                   send({ type: 'player_character_update', characterId: state.myCharacter!.id, updates: { notes } })
                 }}
                 onLevelUp={(updates) => {
-                  send({ type: 'player_level_up', characterId: state.myCharacter!.id, hpRoll: updates.hpRoll, talent: updates.talent, newSpellIds: updates.newSpellIds })
+                  send({ type: 'player_level_up', characterId: state.myCharacter!.id, hpRoll: updates.hpRoll, talent: updates.talent, newSpellIds: updates.newSpellIds, statIncreases: updates.statIncreases })
                 }}
               />
               {/* Rest Button */}

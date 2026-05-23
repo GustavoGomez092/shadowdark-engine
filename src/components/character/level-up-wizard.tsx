@@ -13,15 +13,23 @@ import { getAbilityModifier } from '@/schemas/reference.ts'
 import { rollDice } from '@/lib/dice/roller.ts'
 import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import { gainsTalentAtLevel, computeEffectiveStats } from '@/lib/rules/character.ts'
+import { deriveStatIncreases } from '@/lib/rules/talent-stats.ts'
 import { getClass, getTitle, getSpellsByClassAndTier, getSpell } from '@/data/index.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
 
 // ========== Types ==========
 
+export interface LevelUpResult {
+  hpRoll: number
+  talent?: AppliedTalent
+  newSpellIds?: string[]
+  statIncreases?: { stat: AbilityScore; amount: number }[]
+}
+
 interface LevelUpWizardProps {
   character: Character
-  onComplete: (updates: { hpRoll: number; talent?: AppliedTalent; newSpellIds?: string[] }) => void
+  onComplete: (updates: LevelUpResult) => void
   onCancel: () => void
 }
 
@@ -228,7 +236,13 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
 
     if (isChooseTalentOrStats(matchedEntry.mechanic)) {
       if (!chooseTalentMode) return false
-      if (chooseTalentMode === 'talent') return chosenTalentIndex !== null
+      if (chooseTalentMode === 'talent') {
+        if (chosenTalentIndex === null || !classDef) return false
+        const picked = classDef.talentTable[chosenTalentIndex].mechanic
+        // A picked stat_bonus talent with multiple options still needs a stat choice.
+        if (picked.type === 'stat_bonus' && picked.stats.length > 1) return selectedStat !== null
+        return true
+      }
       if (chooseTalentMode === 'stats') {
         const total = Object.values(statDistribution).reduce((sum, v) => sum + v, 0)
         return total === 2
@@ -264,10 +278,27 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
       ? Object.values(selectedSpells).filter(id => id !== '')
       : undefined
 
+    let statIncreases: { stat: AbilityScore; amount: number }[] | undefined
+    if (hasTalentStep && talentRollState) {
+      const chosenTalentMechanic =
+        chooseTalentMode === 'talent' && chosenTalentIndex !== null
+          ? classDef?.talentTable[chosenTalentIndex].mechanic
+          : undefined
+      const increases = deriveStatIncreases({
+        mechanic: talentRollState.matchedEntry.mechanic,
+        chooseTalentMode,
+        chosenTalentMechanic,
+        selectedStat,
+        statDistribution,
+      })
+      if (increases.length > 0) statIncreases = increases
+    }
+
     onComplete({
       hpRoll: hpRollState.chosenRoll,
       talent,
       newSpellIds: newSpellIds && newSpellIds.length > 0 ? newSpellIds : undefined,
+      statIncreases,
     })
   }
 
@@ -549,6 +580,35 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
                       })}
                   </div>
                 )}
+
+                {/* If the picked talent grants a stat increase with options, choose which stat */}
+                {chooseTalentMode === 'talent' && chosenTalentIndex !== null && (() => {
+                  const picked = classDef.talentTable[chosenTalentIndex].mechanic
+                  if (picked.type !== 'stat_bonus' || picked.stats.length <= 1) return null
+                  return (
+                    <div className="space-y-2">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        {ti('character.levelUp.chooseStatToIncrease', { amount: picked.amount })}
+                      </label>
+                      <div className="flex gap-2">
+                        {picked.stats.map(stat => (
+                          <button
+                            key={stat}
+                            onClick={() => setSelectedStat(stat)}
+                            className={`flex-1 rounded-lg border py-2 text-center text-sm font-semibold transition ${
+                              selectedStat === stat
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                            }`}
+                          >
+                            {stat}
+                            <div className="text-[10px] opacity-70">{effectiveStats[stat]}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {chooseTalentMode === 'stats' && (
                   <div className="space-y-2">

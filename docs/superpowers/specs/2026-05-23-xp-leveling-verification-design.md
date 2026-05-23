@@ -85,6 +85,25 @@ Documented step-by-step with explicit acceptance criteria:
 
 Each step gets a ✅/❌ with notes. Failures are filed as fixes.
 
+## Fixes Applied During Verification
+
+**Bug: ability score increases from talents were never applied.** Effective stats are
+computed from `baseStats + statModifications` only; `computeEffectiveStats` never read
+`talents`, and `levelUpCharacter` never converted a `stat_bonus` / "+2 to distribute"
+choice into a `statModification`. So the chosen +2 was stored on the talent but never
+reached the sheet. Affected every class (all have `stat_bonus` talents) and both the
+"pick a stat" and "+2 distribute" paths.
+
+Fix (TDD, in the rules layer so it is authoritative and tested):
+- `deriveStatIncreases` (`src/lib/rules/talent-stats.ts`) — pure resolver from a talent
+  choice to `{ stat, amount }[]`, covering single-option auto-apply, multi-option choice,
+  distribution, and a stat_bonus talent picked via the choose-talent path.
+- `levelUpCharacter(char, hpRoll, talent?, statIncreases?)` appends permanent
+  `statModifications` for each increase, then recomputes.
+- `LevelUpResult` / `PlayerLevelUp` / player send / GM handler all carry `statIncreases`.
+- Wizard now also prompts which stat to raise when a stat_bonus talent is picked via the
+  "choose a talent" option (previously no prompt → silently no effect).
+
 ## File Changes
 
 ### New Files

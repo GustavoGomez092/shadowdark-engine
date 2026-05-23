@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import type { Character, AbilityScore, AppliedTalent } from '@/schemas/character.ts'
+import type { Character, AbilityScore } from '@/schemas/character.ts'
 import type { InventoryItem } from '@/schemas/inventory.ts'
 import { getSpell, getClass } from '@/data/index.ts'
 import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
-import { LevelUpWizard } from './level-up-wizard.tsx'
+import { LevelUpWizard, type LevelUpResult } from './level-up-wizard.tsx'
 import { useLocale } from '@/hooks/use-locale.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
@@ -21,7 +21,7 @@ interface Props {
   onAdjustQuantity?: (itemId: string, delta: number) => void
   onNotesChange?: (notes: string) => void
   onRest?: () => void
-  onLevelUp?: (updates: { hpRoll: number; talent?: AppliedTalent; newSpellIds?: string[] }) => void
+  onLevelUp?: (updates: LevelUpResult) => void
 }
 
 export function CharacterSheet({
