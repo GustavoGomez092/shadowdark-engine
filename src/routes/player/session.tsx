@@ -45,6 +45,10 @@ function PlayerSessionPage() {
     targetName: string; roll: number; intScore: number; intMod: number; total: number; success: boolean
   } | null>(null)
   const [potionToUse, setPotionToUse] = useState<string | null>(null)
+  // Debounced notes sync: avoid flooding the peer channel on every keystroke.
+  const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingNotesRef = useRef<{ characterId: string; notes: string } | null>(null)
+  const sendRef = useRef<((msg: { type: 'player_character_update'; characterId: string; updates: { notes: string } }) => void) | null>(null)
 
   // Open death dialog when character enters dying state with no timer
   const myCharIsDying = state?.myCharacter?.isDying ?? false
@@ -98,6 +102,28 @@ function PlayerSessionPage() {
       }
     },
   })
+  sendRef.current = send
+
+  // Flush any pending notes update if the player leaves before the debounce fires.
+  useEffect(() => () => {
+    if (notesTimerRef.current) {
+      clearTimeout(notesTimerRef.current)
+      const pending = pendingNotesRef.current
+      if (pending && sendRef.current) {
+        sendRef.current({ type: 'player_character_update', characterId: pending.characterId, updates: { notes: pending.notes } })
+      }
+    }
+  }, [])
+
+  const queueNotesSync = (characterId: string, notes: string) => {
+    if (notesTimerRef.current) clearTimeout(notesTimerRef.current)
+    pendingNotesRef.current = { characterId, notes }
+    notesTimerRef.current = setTimeout(() => {
+      send({ type: 'player_character_update', characterId, updates: { notes } })
+      pendingNotesRef.current = null
+      notesTimerRef.current = null
+    }, 500)
+  }
 
   // Auto-reconnect on page load if we have saved connection info
   useEffect(() => {
@@ -375,7 +401,7 @@ function PlayerSessionPage() {
                   send({ type: 'player_inventory', characterId: state.myCharacter!.id, action: { type: 'use', itemId } })
                 }}
                 onNotesChange={(notes) => {
-                  send({ type: 'player_character_update', characterId: state.myCharacter!.id, updates: { notes } })
+                  queueNotesSync(state.myCharacter!.id, notes)
                 }}
                 onLevelUp={(updates) => {
                   send({ type: 'player_level_up', characterId: state.myCharacter!.id, hpRoll: updates.hpRoll, talent: updates.talent, newSpellIds: updates.newSpellIds, statIncreases: updates.statIncreases })

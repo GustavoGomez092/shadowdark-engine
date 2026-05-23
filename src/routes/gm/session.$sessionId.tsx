@@ -22,6 +22,7 @@ import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues, levelUpCharacter, canLevelUp } from '@/lib/rules/character.ts'
+import { applyCharacterUpdate } from '@/lib/peer/apply-character-update.ts'
 import { rollDeathSave, rollInitiative, autoRollMissing } from '@/lib/rules/combat.ts'
 import { GMMapViewer } from '@/components/map-viewer/gm-map-viewer.tsx'
 import { useMapViewerStore } from '@/stores/map-viewer-store.ts'
@@ -654,6 +655,15 @@ function GMSessionPage() {
 
       addChatMessage(createActionLog(`${player.displayName} created ${character.name} (${character.ancestry} ${character.class})`))
       setTimeout(() => broadcastStateSyncRef.current(), 50)
+    }
+
+    if (message.type === 'player_character_update') {
+      const msg = message as import('@/schemas/messages.ts').PlayerCharacterUpdate
+      const char = useSessionStore.getState().session?.characters[msg.characterId]
+      if (!char) return
+      updateCharacter(msg.characterId, (c) => { applyCharacterUpdate(c, msg.updates) })
+      setTimeout(() => broadcastStateSyncRef.current(), 50)
+      return
     }
 
     if (message.type === 'player_level_up') {

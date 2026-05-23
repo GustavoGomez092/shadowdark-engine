@@ -4,6 +4,7 @@ import type { InventoryItem } from '@/schemas/inventory.ts'
 import { getSpell, getClass } from '@/data/index.ts'
 import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
 import { LevelUpWizard, type LevelUpResult } from './level-up-wizard.tsx'
+import { NotesField } from './notes-field.tsx'
 import { useLocale } from '@/hooks/use-locale.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
@@ -300,9 +301,9 @@ export function CharacterSheet({
       {/* Notes */}
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="mb-2 font-semibold">{t('character.notes')}</h3>
-        <textarea
+        <NotesField
           value={c.notes}
-          onChange={e => onNotesChange?.(e.target.value)}
+          onChange={value => onNotesChange?.(value)}
           disabled={!isEditable}
           placeholder={t('character.notesPlaceholder')}
           className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring min-h-[80px] resize-y disabled:opacity-50"
