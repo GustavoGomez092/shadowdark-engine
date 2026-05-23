@@ -94,15 +94,25 @@ class DataRegistry {
   getAncestry(id: string) { return this.ancestryIndex.get(id) }
   getClass(id: string) { return this.classIndex.get(id) }
 
-  // Filtered lookups
+  // Filtered lookups.
+  // A casting class's spell-list name maps to the spell `class` pools it can draw from.
+  // Witches and seers are arcane casters but have no dedicated spells authored yet, so
+  // they draw from the wizard (arcane) pool — otherwise their spell lists are empty and
+  // they cannot learn spells on level-up. Narrow these to 'witch'/'seer' once dedicated
+  // spell data exists.
+  private spellPoolsFor(spellClass: 'wizard' | 'priest' | 'witch' | 'seer'): Array<'wizard' | 'priest'> {
+    return spellClass === 'priest' ? ['priest'] : ['wizard']
+  }
   getSpellsByClass(spellClass: 'wizard' | 'priest' | 'witch' | 'seer') {
-    return this.spells.filter(s => s.class === spellClass)
+    const pools = this.spellPoolsFor(spellClass)
+    return this.spells.filter(s => pools.includes(s.class))
   }
   getSpellsByTier(tier: number) {
     return this.spells.filter(s => s.tier === tier)
   }
   getSpellsByClassAndTier(spellClass: 'wizard' | 'priest' | 'witch' | 'seer', tier: number) {
-    return this.spells.filter(s => s.class === spellClass && s.tier === tier)
+    const pools = this.spellPoolsFor(spellClass)
+    return this.spells.filter(s => pools.includes(s.class) && s.tier === tier)
   }
   getMonstersByTag(tag: string) {
     return this.monsters.filter(m => m.tags.includes(tag))

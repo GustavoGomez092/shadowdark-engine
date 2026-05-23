@@ -258,20 +258,23 @@ describe('Leveling E2E (GM + player)', () => {
     await player.close()
   }, TEST_TIMEOUT)
 
-  it('levels a Wizard to level 2 and presents new spell slots to choose', async () => {
-    if (!serverAvailable) return
-    const code = await createGmSession('E2E Wizard')
-    expect(code).toMatch(/^SD-/)
-    const player = await joinAndCreate(code, 'EWiz', 'wizard')
-    expect(await readLevel(player)).toBe(1)
+  // Each caster (incl. witch & seer, which draw from the arcane pool) must level up
+  // AND be presented a real list of new spells to choose how to attack.
+  for (const caster of ['wizard', 'witch', 'seer'] as const) {
+    it(`levels a ${caster} to level 2 and presents new spell slots to choose`, async () => {
+      if (!serverAvailable) return
+      const code = await createGmSession(`E2E ${caster}`)
+      expect(code).toMatch(/^SD-/)
+      const player = await joinAndCreate(code, `E${caster}`, caster)
+      expect(await readLevel(player)).toBe(1)
 
-    await awardXp(2)
-    const outcome = await levelUpOnce(player)
+      await awardXp(2)
+      const outcome = await levelUpOnce(player)
 
-    expect(await readLevel(player)).toBe(2)
-    // The caster must be presented a real list of new spells to choose how to attack.
-    expect(outcome.sawSpellStep).toBe(true)
-    expect(outcome.spellOptionCount).toBeGreaterThan(1)
-    await player.close()
-  }, TEST_TIMEOUT)
+      expect(await readLevel(player)).toBe(2)
+      expect(outcome.sawSpellStep).toBe(true)
+      expect(outcome.spellOptionCount).toBeGreaterThan(1)
+      await player.close()
+    }, TEST_TIMEOUT)
+  }
 })

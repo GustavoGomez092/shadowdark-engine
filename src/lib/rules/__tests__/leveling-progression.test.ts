@@ -9,7 +9,7 @@ import { getClass, getSpellsByClass } from '@/data/index.ts'
 // expanding spell slots and a real list of spells to learn.
 
 const SIMPLE: CharacterClass[] = ['thief', 'fighter', 'ranger']
-const CASTERS: CharacterClass[] = ['wizard', 'priest', 'witch']
+const CASTERS: CharacterClass[] = ['wizard', 'priest', 'witch', 'seer']
 const ALL = [...SIMPLE, ...CASTERS]
 
 function flatStats(): AbilityScores {
@@ -100,14 +100,13 @@ describe.each(CASTERS)('caster %s spell progression', (characterClass) => {
   })
 
   it('has a list of spells the player can actually choose from', () => {
+    // Every caster — including witch and seer (which draw from the arcane pool until
+    // dedicated spell data exists) — must offer a non-empty spell list so the player
+    // can pick spells on level-up.
     const spellList = classDef.spellcasting!.spellList
     const available = getSpellsByClass(spellList)
-    if (characterClass === 'witch') {
-      // KNOWN GAP: witch/seer classes have spell slots but no spells authored in the
-      // core data, so a leveling witch sees empty spell-selection lists.
-      expect(available.length).toBe(0)
-    } else {
-      expect(available.length).toBeGreaterThan(0)
-    }
+    expect(available.length).toBeGreaterThan(0)
+    // tier-1 spells specifically must exist (first slots opened are tier 1)
+    expect(available.filter(s => s.tier === 1).length).toBeGreaterThan(0)
   })
 })
