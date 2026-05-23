@@ -147,4 +147,30 @@ describe('parseCharacterImport', () => {
     const result = parseCharacterImport({ format: 'something-else', exportedAt: 1, character: makeFullCharacter() })
     expect(result.valid).toBe(false)
   })
+
+  it('preserves equipment, coins, notes and weapon masteries across export→import', () => {
+    const c = parseCharacterImport(exportCharacter(makeFullCharacter())).character!
+    expect(c.inventory.items.map(i => i.name)).toEqual(['Longsword', 'Mystery Relic'])
+    expect(c.inventory.coins.gp).toBe(50)
+    expect(c.notes).toBe('Kept the Grit ability at creation.')
+    expect(c.weaponMasteries).toEqual(['longsword'])
+    expect(c.background).toBe('soldier')
+  })
+
+  it('gives each import a fresh, unique identity so two imports are distinct characters', () => {
+    const env = exportCharacter(makeFullCharacter())
+    const a = parseCharacterImport(env).character!
+    const b = parseCharacterImport(env).character!
+    expect(a.id).not.toBe(b.id)
+    expect(a.playerId).toBe('')
+    expect(b.playerId).toBe('')
+  })
+
+  it('round-trips through a JSON string (as a file would)', () => {
+    const json = JSON.stringify(exportCharacter(makeFullCharacter()))
+    const result = parseCharacterImport(JSON.parse(json))
+    expect(result.valid).toBe(true)
+    expect(result.character?.level).toBe(3)
+    expect(result.character?.class).toBe('fighter')
+  })
 })
