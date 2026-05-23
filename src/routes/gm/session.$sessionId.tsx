@@ -21,8 +21,9 @@ import type { PlayerToGMMessage } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
-import { computeCharacterValues, levelUpCharacter, canLevelUp } from '@/lib/rules/character.ts'
+import { computeCharacterValues, canLevelUp } from '@/lib/rules/character.ts'
 import { applyCharacterUpdate } from '@/lib/peer/apply-character-update.ts'
+import { applyPlayerLevelUp } from '@/lib/peer/apply-level-up.ts'
 import { rollDeathSave, rollInitiative, autoRollMissing } from '@/lib/rules/combat.ts'
 import { GMMapViewer } from '@/components/map-viewer/gm-map-viewer.tsx'
 import { useMapViewerStore } from '@/stores/map-viewer-store.ts'
@@ -671,12 +672,7 @@ function GMSessionPage() {
       const char = useSessionStore.getState().session?.characters[msg.characterId]
       if (!char) return
 
-      const updated = levelUpCharacter(char, msg.hpRoll, msg.talent, msg.statIncreases)
-      if (msg.newSpellIds) {
-        for (const spellId of msg.newSpellIds) {
-          updated.spells.knownSpells.push({ spellId, isAvailable: true, source: 'class', hasAdvantage: false })
-        }
-      }
+      const updated = applyPlayerLevelUp(char, { hpRoll: msg.hpRoll, talent: msg.talent, newSpellIds: msg.newSpellIds, statIncreases: msg.statIncreases })
       updateCharacter(msg.characterId, (c) => { Object.assign(c, updated) })
       addChatMessage({
         id: generateId(), senderId: 'system', senderName: 'System',

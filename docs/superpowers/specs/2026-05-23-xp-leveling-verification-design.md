@@ -104,6 +104,33 @@ Fix (TDD, in the rules layer so it is authoritative and tested):
 - Wizard now also prompts which stat to raise when a stat_bonus talent is picked via the
   "choose a talent" option (previously no prompt → silently no effect).
 
+**Bug: casters could not level up (found via E2E).** The GM's `player_level_up`
+handler pushed new spells onto `character.spells.knownSpells` directly. That array is
+part of the Immer-frozen session state, so the push threw — silently rejected by the GM
+peer ("Bad message") for every class that sends `newSpellIds` (i.e. all casters). Martials
+were unaffected. Fixed by extracting `applyPlayerLevelUp` (`src/lib/peer/apply-level-up.ts`),
+which builds the leveled character **immutably** (new `knownSpells` array), and wiring the
+route to it. Covered by `src/lib/peer/__tests__/apply-level-up.test.ts` (uses a deep-frozen
+character to reproduce the crash).
+
+**Gap: witch/seer have spell slots but no spells.** Spell data contains only `wizard`
+and `priest` class spells; `witch`/`seer` classes open spell slots on level-up but
+`getSpellsByClass('witch')` returns an empty list — a leveling witch sees an empty
+spell-selection dropdown. Documented (not fixed — authoring a witch spell list is content
+work) in `leveling-progression.test.ts` and flagged for follow-up.
+
+## Test Coverage Added
+
+- `src/lib/rules/__tests__/leveling-progression.test.ts` — deterministic: every class
+  (thief/fighter/ranger/wizard/priest/witch) driven 1→10, asserting HP growth, +2-per-talent
+  attribute increases, talent accumulation, and caster spell-slot growth.
+- `src/lib/character/__tests__/leveling-e2e.test.ts` — Puppeteer (recommended over Cypress:
+  already a dependency, matches existing E2E, runs `// @vitest-environment node`, gated on the
+  dev server). Drives the real GM+player PeerJS flow: create session → join → create character
+  → GM awards XP → player level-up wizard, for a Thief and a Wizard (asserting the caster is
+  shown a real new-spell list). Browser launched with background-throttling disabled so WebRTC
+  stays alive on the backgrounded GM tab.
+
 ## File Changes
 
 ### New Files
