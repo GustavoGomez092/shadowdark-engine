@@ -75,11 +75,15 @@ export function EncounterPanel({
   const selectedMonsterDef = selectedMonster ? getMonster(selectedMonster.definitionId) : null
   const selectedCharacter = selection?.type === 'character' ? characters.find(c => c.id === selection.id) : null
 
-  // Resolve active turn name
-  const activeTurnMonster = activeTurnId ? monsters.find(m => m.id === activeTurnId) : null
+  // Resolve active turn name. A defeated monster can't hold an active turn —
+  // skip the stale reference rather than showing a banner for a corpse.
+  const rawActiveTurnMonster = activeTurnId ? monsters.find(m => m.id === activeTurnId) : null
+  const activeTurnMonster = rawActiveTurnMonster && !rawActiveTurnMonster.isDefeated ? rawActiveTurnMonster : null
   const activeTurnCharacter = activeTurnId ? characters.find(c => c.id === activeTurnId) : null
   const activeTurnName = activeTurnMonster?.name ?? activeTurnCharacter?.name ?? null
   const activeTurnIsMonster = !!activeTurnMonster
+  const effectiveActiveTurnId = activeTurnMonster?.id ?? activeTurnCharacter?.id ?? null
+  const someoneElseActive = (id: string) => effectiveActiveTurnId !== null && effectiveActiveTurnId !== id
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
@@ -169,7 +173,7 @@ export function EncounterPanel({
                 <div
                   key={m.id}
                   onClick={() => setSelection({ type: 'monster', id: m.id })}
-                  onDoubleClick={() => onSetActiveTurn(isActiveTurn ? null : m.id)}
+                  onDoubleClick={() => { if (!someoneElseActive(m.id)) onSetActiveTurn(isActiveTurn ? null : m.id) }}
                   style={packColor ? { borderLeftColor: packColor, borderLeftWidth: '3px', borderLeftStyle: 'solid' } : undefined}
                   className={`relative w-full cursor-pointer rounded-lg border p-2 text-left transition ${
                     isActiveTurn ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500/30" :
@@ -184,13 +188,15 @@ export function EncounterPanel({
                   <div className="flex items-baseline justify-between gap-2 pr-6">
                     <div className="flex items-center gap-1.5">
                       <button
+                        disabled={someoneElseActive(m.id)}
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (someoneElseActive(m.id)) return
                           onSetActiveTurn(isActiveTurn ? null : m.id)
                           setSelection({ type: 'monster', id: m.id })
                         }}
-                        className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'}`}
-                        title={t('combat.setActiveTurn')}
+                        className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'} disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-muted-foreground`}
+                        title={someoneElseActive(m.id) ? t('combat.anotherTurnActive') : t('combat.setActiveTurn')}
                       >{isActiveTurn ? '■' : '▷'}</button>
                       <span className="text-sm font-semibold">{translateMonsterName(m)}</span>
                     </div>
@@ -250,21 +256,21 @@ export function EncounterPanel({
                   onForceRoll={onForceInitiativeRoll}
                 />
               </div>
-              {selectedMonster && activeTurnId === selectedMonster.id && (
-                <div className="lg:flex-1 lg:min-w-0">
-                  <DiceRoller characterName={selectedMonster.name} compact onRoll={(result) => {
+              {activeTurnMonster && (
+                <div key={activeTurnMonster.id} className="lg:flex-1 lg:min-w-0">
+                  <DiceRoller characterName={activeTurnMonster.name} compact onRoll={(result) => {
                     const n20 = result.dice[0]?.isNat20 ?? false
                     const n1 = result.dice[0]?.isNat1 ?? false
                     pushRollToast({
                       id: generateId(),
-                      playerName: selectedMonster.name,
+                      playerName: activeTurnMonster.name,
                       diceType: result.expression,
                       total: result.total,
                       isNat20: n20,
                       isNat1: n1,
                       timestamp: Date.now(),
                     })
-                    onBroadcastRoll(selectedMonster.name, result.expression, result.total, n20, n1)
+                    onBroadcastRoll(activeTurnMonster.name, result.expression, result.total, n20, n1)
                   }} />
                 </div>
               )}
@@ -303,7 +309,7 @@ export function EncounterPanel({
                 <div
                   key={c.id}
                   onClick={() => setSelection({ type: 'character', id: c.id })}
-                  onDoubleClick={() => onSetActiveTurn(isActiveTurn ? null : c.id)}
+                  onDoubleClick={() => { if (!someoneElseActive(c.id)) onSetActiveTurn(isActiveTurn ? null : c.id) }}
                   className={`cursor-pointer rounded-lg border p-2 transition ${
                     isActiveTurn ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500/30" :
                     isSelected ? "border-primary bg-primary/5" : "border-border/50 hover:border-border"
@@ -312,13 +318,15 @@ export function EncounterPanel({
                   <div className="flex items-baseline justify-between">
                     <div className="flex items-center gap-1.5">
                       <button
+                        disabled={someoneElseActive(c.id)}
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (someoneElseActive(c.id)) return
                           onSetActiveTurn(isActiveTurn ? null : c.id)
                           setSelection({ type: 'character', id: c.id })
                         }}
-                        className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'}`}
-                        title={t('combat.setActiveTurn')}
+                        className={`text-[9px] font-bold ${isActiveTurn ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-400'} disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-muted-foreground`}
+                        title={someoneElseActive(c.id) ? t('combat.anotherTurnActive') : t('combat.setActiveTurn')}
                       >{isActiveTurn ? '■' : '▷'}</button>
                       <span className="text-sm font-semibold">{c.name}</span>
                       <span className="text-[10px] text-muted-foreground capitalize">

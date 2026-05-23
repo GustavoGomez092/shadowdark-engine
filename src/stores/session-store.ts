@@ -100,7 +100,15 @@ function getActiveSessionId(): string | null {
 function loadSessionFromStorage(id: string): SessionState | null {
   try {
     const raw = localStorage.getItem(`${STORAGE_PREFIX}:session:${id}`)
-    return raw ? JSON.parse(raw) as SessionState : null
+    if (!raw) return null
+    const session = JSON.parse(raw) as SessionState
+    for (const c of Object.values(session.characters ?? {})) {
+      if (c.currentHp > 0 && (c.isDying || c.deathTimer)) {
+        c.isDying = false
+        c.deathTimer = undefined
+      }
+    }
+    return session
   } catch { return null }
 }
 
@@ -199,6 +207,13 @@ export const useSessionStore = create<SessionStore>()(
         const raw = localStorage.getItem(key)
         if (!raw) return false
         const session = JSON.parse(raw) as SessionState
+        // Sanitize: any character whose HP > 0 should not be flagged dying (clears stale state from older bug).
+        for (const c of Object.values(session.characters ?? {})) {
+          if (c.currentHp > 0 && (c.isDying || c.deathTimer)) {
+            c.isDying = false
+            c.deathTimer = undefined
+          }
+        }
         set(state => {
           state.session = session
           state.isActive = true
@@ -233,8 +248,14 @@ export const useSessionStore = create<SessionStore>()(
       set(state => {
         if (!state.session?.characters[id]) return
         updater(state.session.characters[id])
-        // Recompute derived values after any character mutation
         const char = state.session.characters[id]
+        // Invariant: a character with HP > 0 cannot be dying. Catches any handler
+        // that bumps HP without explicitly clearing the dying flag.
+        if (char.currentHp > 0 && (char.isDying || char.deathTimer)) {
+          char.isDying = false
+          char.deathTimer = undefined
+        }
+        // Recompute derived values after any character mutation
         try {
           char.computed = computeCharacterValues(char as any)
         } catch { /* ignore if computation fails during partial update */ }

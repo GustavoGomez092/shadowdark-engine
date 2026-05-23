@@ -34,6 +34,7 @@ interface Props {
   mapViewerState: MapViewerState
   onStateChange: (state: MapViewerState) => void
   onTokenMove?: (tokenId: string, gridX: number, gridY: number) => void
+  activeCombatantId?: string | null
 }
 
 // Pending token to be placed on next map click
@@ -47,7 +48,7 @@ interface PendingToken {
 
 export function GMMapViewer({
   campaignMaps, characters, monsters, lightState,
-  mapViewerState, onStateChange, onTokenMove,
+  mapViewerState, onStateChange, onTokenMove, activeCombatantId,
 }: Props) {
   const [viewport, setViewport] = useState<MapViewport>({ offsetX: 0, offsetY: 0, zoom: DEFAULT_ZOOM })
   const [showPlayerView, setShowPlayerView] = useState(false)
@@ -284,6 +285,7 @@ export function GMMapViewer({
                   placingToken={!!pendingToken}
                   panMode={panMode}
                   onDungeonReady={onDungeonReady}
+                  activeCombatantId={activeCombatantId}
                 />
               </div>
 

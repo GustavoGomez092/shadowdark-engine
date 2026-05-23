@@ -13,11 +13,12 @@ import { InitiativeTracker } from '@/components/combat/initiative-tracker.tsx'
 import { LightControls } from '@/components/player/light-controls.tsx'
 import { ShopWidget } from '@/components/player/shop-widget.tsx'
 import { StabilizeWidget } from '@/components/player/stabilize-widget.tsx'
+import { UsePotionDialog } from '@/components/player/use-potion-dialog.tsx'
 import { Spinner, LoadingScreen } from '@/components/shared/spinner.tsx'
 import { AutoScrollContainer } from '@/components/shared/auto-scroll.tsx'
 import { ChatMessageRow } from '@/components/shared/chat-message.tsx'
 import { pushRollToast } from '@/components/shared/roll-toast.tsx'
-import { getAbilityModifier } from '@/schemas/reference.ts'
+import { getAbilityModifier, getPotionHealing } from '@/schemas/reference.ts'
 import type { Character } from '@/schemas/character.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import type { GMToPlayerMessage } from '@/schemas/messages.ts'
@@ -43,6 +44,7 @@ function PlayerSessionPage() {
   const [stabilizeResult, setStabilizeResult] = useState<{
     targetName: string; roll: number; intScore: number; intMod: number; total: number; success: boolean
   } | null>(null)
+  const [potionToUse, setPotionToUse] = useState<string | null>(null)
 
   // Open death dialog when character enters dying state with no timer
   const myCharIsDying = state?.myCharacter?.isDying ?? false
@@ -248,6 +250,30 @@ function PlayerSessionPage() {
         <StabilizeResultDialog result={stabilizeResult} onClose={() => setStabilizeResult(null)} />
       )}
 
+      {/* Potion roll dialog — player rolls their own healing dice */}
+      {potionToUse && state?.myCharacter && (() => {
+        const item = state.myCharacter.inventory.items.find(i => i.id === potionToUse)
+        if (!item) { setPotionToUse(null); return null }
+        return (
+          <UsePotionDialog
+            item={item}
+            characterName={state.myCharacter.name}
+            currentHp={state.myCharacter.currentHp}
+            maxHp={state.myCharacter.maxHp}
+            expression={getPotionHealing(state.myCharacter.level)}
+            onConfirm={(rollTotal, rollExpression) => {
+              send({
+                type: 'player_inventory',
+                characterId: state.myCharacter!.id,
+                action: { type: 'use', itemId: potionToUse, rollTotal, rollExpression },
+              })
+              setPotionToUse(null)
+            }}
+            onCancel={() => setPotionToUse(null)}
+          />
+        )
+      })()}
+
       {/* Death Timer Roll Dialog — pops up when dying, stays until dismissed */}
       {deathDialogOpen && state?.myCharacter && (
         <DeathTimerRoll
@@ -276,6 +302,7 @@ function PlayerSessionPage() {
               mapView={state.mapView}
               lightState={state.light}
               myCharacterId={state.myCharacter?.id}
+              activeCombatantId={state.activeTurnId}
             />
           </div>
         )}
@@ -340,6 +367,11 @@ function PlayerSessionPage() {
                   send({ type: 'player_inventory', characterId: state.myCharacter!.id, action: { type: 'drop', itemId } })
                 }}
                 onUseItem={(itemId) => {
+                  const item = state.myCharacter!.inventory.items.find(i => i.id === itemId)
+                  if (item?.definitionId === 'potion-healing') {
+                    setPotionToUse(itemId)
+                    return
+                  }
                   send({ type: 'player_inventory', characterId: state.myCharacter!.id, action: { type: 'use', itemId } })
                 }}
                 onNotesChange={(notes) => {

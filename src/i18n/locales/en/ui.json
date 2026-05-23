@@ -300,6 +300,7 @@
   "combat.theParty": "The Party",
   "combat.selectThreatOrPartyMember": "Select a threat or party member",
   "combat.setActiveTurn": "Set active turn",
+  "combat.anotherTurnActive": "Clear the current turn first",
   "combat.defeated": "Defeated",
   "combat.markAsDefeated": "Mark as Defeated",
   "combat.attack": "Attack",
@@ -665,7 +666,7 @@
   "reference.generators.name": "{{ancestry}} Name",
 
   "landing.createCampaign": "Create Campaign",
-  "landing.reference": "Reference / Referencia",
+  "landing.reference": "Reference",
 
   "campaign.title": "Campaign Creator",
   "campaign.subtitle": "Adventure Builder",

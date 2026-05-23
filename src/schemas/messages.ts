@@ -98,7 +98,7 @@ export type InventoryActionType =
   | { type: 'equip'; itemId: string }
   | { type: 'unequip'; itemId: string }
   | { type: 'drop'; itemId: string; quantity?: number }
-  | { type: 'use'; itemId: string }
+  | { type: 'use'; itemId: string; rollTotal?: number; rollExpression?: string }
   | { type: 'light'; itemId: string }
   | { type: 'light_lantern'; lanternId: string; oilId: string }
   | { type: 'light_campfire'; torchIds: string[] }

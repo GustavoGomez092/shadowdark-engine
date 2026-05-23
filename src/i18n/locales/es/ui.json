@@ -300,6 +300,7 @@
   "combat.theParty": "El grupo",
   "combat.selectThreatOrPartyMember": "Selecciona una amenaza o miembro del grupo",
   "combat.setActiveTurn": "Establecer turno activo",
+  "combat.anotherTurnActive": "Primero termina el turno actual",
   "combat.defeated": "Derrotado",
   "combat.markAsDefeated": "Marcar como derrotado",
   "combat.attack": "Ataque",
@@ -665,7 +666,7 @@
   "reference.generators.name": "Nombre {{ancestry}}",
 
   "landing.createCampaign": "Crear Campaña",
-  "landing.reference": "Referencia / Reference",
+  "landing.reference": "Referencia",
 
   "campaign.title": "Creador de Campañas",
   "campaign.subtitle": "Constructor de Aventuras",

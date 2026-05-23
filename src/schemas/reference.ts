@@ -2,9 +2,10 @@ export type DangerLevel = 'safe' | 'unsafe' | 'risky' | 'deadly';
 export type RangeCategory = 'close' | 'near' | 'far';
 export type Alignment = 'lawful' | 'neutral' | 'chaotic';
 
-// ShadowDark ability modifier table (CORRECT values from PDF)
-// 1-3: -4, 4-5: -3, 6-7: -2, 8-9: -1, 10-11: 0,
-// 12-13: +1, 14-15: +2, 16-17: +3, 18+: +4
+// ShadowDark ability modifier table (player-character side caps at 18+ = +4).
+// For monsters, ShadowDark stat blocks list modifiers directly that can exceed
+// +4, so we extend with the standard D&D progression beyond 18 to allow
+// representing monster mods of +5/+6/+7 via scores 20/22/24.
 export function getAbilityModifier(score: number): number {
   if (score <= 3) return -4;
   if (score <= 5) return -3;
@@ -14,7 +15,10 @@ export function getAbilityModifier(score: number): number {
   if (score <= 13) return 1;
   if (score <= 15) return 2;
   if (score <= 17) return 3;
-  return 4; // 18+
+  if (score <= 19) return 4;
+  if (score <= 21) return 5;
+  if (score <= 23) return 6;
+  return 7; // 24+
 }
 
 // Difficulty Classes

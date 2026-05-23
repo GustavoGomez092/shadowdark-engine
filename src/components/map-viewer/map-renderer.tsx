@@ -50,6 +50,8 @@ interface Props {
   panMode?: boolean
   /** Token referenceId to center the view on after init */
   centerOnTokenRef?: string
+  /** Reference ID (character or monster instance) whose turn it is — pulses on the map */
+  activeCombatantId?: string | null
   /** Hide titles, notes, room numbers (player view) */
   playerView?: boolean
   className?: string
@@ -59,7 +61,7 @@ export function MapRenderer({
   mapData, tokens, wallSegments, lightSources, exploredCells,
   fogMode, viewport, onViewportChange: _onViewportChange,
   onTokenDragEnd, onTokenClick, onMapClick, onDungeonReady,
-  selectedTokenId, placingToken, panMode, centerOnTokenRef, playerView, className,
+  selectedTokenId, placingToken, panMode, centerOnTokenRef, activeCombatantId, playerView, className,
 }: Props) {
   // Outer sizer div (fixed size, measures available space)
   const sizerRef = useRef<HTMLDivElement>(null)
@@ -284,9 +286,17 @@ export function MapRenderer({
   useEffect(() => {
     if (fogMode === 'none' || lightSources.length === 0) {
       visibilityRef.current = null
+      visibilityKeyRef.current = ''
       return
     }
-    const key = JSON.stringify(lightSources.map(s => `${s.x},${s.y},${s.radius}`))
+    // Cache key must include wall count: walls populate AFTER the dungeon renderer
+    // initializes (via onDungeonReady), so the first run typically has 0 walls and would
+    // otherwise cache an unobstructed visibility polygon that never gets recomputed
+    // until the player moves and the light source position changes.
+    const key = JSON.stringify({
+      lights: lightSources.map(s => `${s.x},${s.y},${s.radius}`),
+      walls: wallSegments.length,
+    })
     if (key === visibilityKeyRef.current) return
     // cellSize=1 because walls, lights, and results are all in grid units
     visibilityRef.current = computeCombinedVisibility(
@@ -353,11 +363,27 @@ export function MapRenderer({
       const { sx: cx, sy: cy } = gridToScreen(gx, gy)
       const tokenR = Math.max(4, scaledCS * 0.4 * token.size)
       const isSelected = token.id === selectedTokenId
+      const isActiveTurn = !!activeCombatantId && token.referenceId === activeCombatantId
+
+      // Pulsing ring for the active combatant
+      if (isActiveTurn) {
+        const t = (performance.now() % 1600) / 1600 // 0..1, 1.6s loop
+        const pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2) // 0..1
+        const ringR = tokenR + Math.max(3, scaledCS * 0.12) + pulse * Math.max(2, scaledCS * 0.08)
+        ctx.save()
+        ctx.strokeStyle = '#f59e0b' // amber-500
+        ctx.globalAlpha = 0.35 + 0.5 * (1 - pulse)
+        ctx.lineWidth = Math.max(2, scaledCS * 0.08)
+        ctx.shadowColor = '#f59e0b'
+        ctx.shadowBlur = 12
+        ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI * 2); ctx.stroke()
+        ctx.restore()
+      }
 
       if (isSelected) { ctx.shadowColor = token.color; ctx.shadowBlur = 8 }
 
-      ctx.strokeStyle = token.color
-      ctx.lineWidth = Math.max(2, scaledCS * 0.06)
+      ctx.strokeStyle = isActiveTurn ? '#f59e0b' : token.color
+      ctx.lineWidth = Math.max(2, scaledCS * (isActiveTurn ? 0.09 : 0.06))
       ctx.beginPath(); ctx.arc(cx, cy, tokenR, 0, Math.PI * 2); ctx.stroke()
 
       ctx.fillStyle = isDragging ? 'rgba(30,30,30,0.7)' : 'rgba(20,20,20,0.85)'
@@ -388,7 +414,7 @@ export function MapRenderer({
     if (fogMode === 'player') {
       drawFog(ctx, w, h, gridPointToScreen, getLayout, visibilityRef.current, exploredCells)
     }
-  }, [tokens, fogMode, exploredCells, selectedTokenId, lightSources, mapData.cellSize, ready, viewport.zoom])
+  }, [tokens, fogMode, exploredCells, selectedTokenId, lightSources, mapData.cellSize, ready, viewport.zoom, activeCombatantId])
 
   useEffect(() => {
     if (ready) {
@@ -396,6 +422,18 @@ export function MapRenderer({
       return () => cancelAnimationFrame(id)
     }
   }, [renderOverlay, ready])
+
+  // Continuous redraw loop while an active combatant exists, to drive the pulse animation
+  useEffect(() => {
+    if (!ready || !activeCombatantId) return
+    let raf = 0
+    const tick = () => {
+      renderOverlay()
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [ready, activeCombatantId, renderOverlay])
 
   // ── Transform-based pan ──
   const isPanning = useRef(false)

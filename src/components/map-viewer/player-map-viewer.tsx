@@ -20,9 +20,10 @@ interface Props {
   mapView: PlayerMapViewState
   lightState: LightState
   myCharacterId?: string
+  activeCombatantId?: string | null
 }
 
-export function PlayerMapViewer({ mapView, lightState, myCharacterId }: Props) {
+export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeCombatantId }: Props) {
   const [viewport, setViewport] = useState<MapViewport>({ offsetX: 0, offsetY: 0, zoom: DEFAULT_ZOOM })
   const [collapsed, setCollapsed] = useState(false)
 
@@ -96,6 +97,7 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId }: Props) {
               onViewportChange={setViewport}
               onDungeonReady={onDungeonReady}
               centerOnTokenRef={myCharacterId}
+              activeCombatantId={activeCombatantId}
               playerView
             />
           </div>

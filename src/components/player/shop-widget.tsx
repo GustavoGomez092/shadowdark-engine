@@ -60,8 +60,8 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
   const sellableItems = character.inventory.items.filter(i => !i.equipped)
 
   return (
-    <div className="rounded-xl border border-primary/30 bg-card p-4">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="flex flex-col rounded-xl border border-primary/30 bg-card p-4 max-h-[60vh]">
+      <div className="mb-3 flex items-center justify-between shrink-0">
         <div>
           <h3 className="font-semibold">🏪 {store.name}</h3>
           <span className="text-xs text-muted-foreground">{store.items.length} items for sale</span>
@@ -69,7 +69,7 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
         <span className="text-sm font-bold text-amber-400">{character.inventory.coins.gp} gp</span>
       </div>
 
-      <div className="flex gap-1 rounded-lg border border-border p-0.5 mb-3">
+      <div className="flex gap-1 rounded-lg border border-border p-0.5 mb-3 shrink-0">
         <button
           onClick={() => setTab('buy')}
           className={`flex-1 rounded-md py-1 text-xs font-semibold transition ${
@@ -91,9 +91,9 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t('store.searchItems')}
-            className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs mb-2 outline-none focus:ring-1 focus:ring-ring"
+            className="w-full rounded-md border border-input bg-background px-2 py-1 text-xs mb-2 outline-none focus:ring-1 focus:ring-ring shrink-0"
           />
-          <div className="max-h-64 space-y-0.5 overflow-y-auto">
+          <div className="flex-1 min-h-0 space-y-0.5 overflow-y-auto">
             {filteredItems.map(item => {
               const canAfford = gold >= item.price
               const details = getItemDetails(item)
@@ -133,7 +133,7 @@ export function ShopWidget({ store, character, onBuy, onSell }: Props) {
       )}
 
       {tab === 'sell' && (
-        <div className="max-h-64 space-y-0.5 overflow-y-auto">
+        <div className="flex-1 min-h-0 space-y-0.5 overflow-y-auto">
           {sellableItems.length === 0 ? (
             <p className="text-xs text-muted-foreground py-4 text-center">{t('player.noItemsToSell')}</p>
           ) : (

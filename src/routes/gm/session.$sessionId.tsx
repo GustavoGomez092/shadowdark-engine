@@ -13,7 +13,8 @@ import { RewardsDialog } from '@/components/gm/rewards-dialog.tsx'
 import { PlayerMenu } from '@/components/gm/player-menu.tsx'
 import { LightTracker } from '@/components/light/light-tracker.tsx'
 import { rollForTreasure, distributeEncounterRewards } from '@/lib/rules/xp.ts'
-import { TREASURE_XP } from '@/schemas/reference.ts'
+import { TREASURE_XP, getPotionHealing } from '@/schemas/reference.ts'
+import { rollDice } from '@/lib/dice/roller.ts'
 import { createLightTimer, pauseAllTimers, resumeAllTimers, tickLightState } from '@/lib/rules/light.ts'
 import { useGMPeer } from '@/hooks/use-peer-connection.ts'
 import type { PlayerToGMMessage } from '@/schemas/messages.ts'
@@ -242,11 +243,14 @@ function GMSessionPage() {
       })
 
       // Timer reset logic: if active timer exists, reset it. Otherwise create new.
+      // Rewrite type/carrierId/range when resetting so the timer attaches to the new lighter.
       const torchMs = (s.settings?.torchDurationMinutes ?? 60) * 60000
       const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
       if (activeTimer) {
         const resetTimers = s.light.timers.map(t =>
-          t.id === activeTimer.id ? { ...t, startedAt: Date.now(), durationMs: torchMs, accumulatedPauseMs: 0, pausedAt: undefined } : t
+          t.id === activeTimer.id
+            ? { ...t, type: 'torch' as const, carrierId: player.characterId!, range: 'near' as const, startedAt: Date.now(), durationMs: torchMs, accumulatedPauseMs: 0, pausedAt: undefined }
+            : t
         )
         useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
       } else {
@@ -272,12 +276,14 @@ function GMSessionPage() {
         c.inventory.items = c.inventory.items.filter(i => i.id !== oilId)
       })
 
-      // Timer reset logic
+      // Timer reset logic — rewrite carrierId so the lantern attaches to the new lighter.
       const lanternMs = (s.settings?.lanternDurationMinutes ?? 60) * 60000
       const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
       if (activeTimer) {
         const resetTimers = s.light.timers.map(t =>
-          t.id === activeTimer.id ? { ...t, type: 'lantern' as const, startedAt: Date.now(), durationMs: lanternMs, accumulatedPauseMs: 0, pausedAt: undefined, range: 'double_near' as const } : t
+          t.id === activeTimer.id
+            ? { ...t, type: 'lantern' as const, carrierId: player.characterId!, range: 'double_near' as const, startedAt: Date.now(), durationMs: lanternMs, accumulatedPauseMs: 0, pausedAt: undefined }
+            : t
         )
         useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
       } else {
@@ -338,6 +344,120 @@ function GMSessionPage() {
 
       addChatMessage(createActionLog(`${charName} ${isEquip ? 'equipped' : 'unequipped'} ${itemName}`))
       setTimeout(() => broadcastStateSyncRef.current(), 50)
+    }
+
+    // === USE ITEM (consumables + light sources) ===
+    if (message.type === 'player_inventory' && message.action.type === 'use') {
+      const player = useSessionStore.getState().session?.players[peerId]
+      if (!player?.characterId) return
+      const s = useSessionStore.getState().session
+      if (!s) return
+      const char = s.characters[player.characterId]
+      if (!char) return
+      const itemId = (message.action as { type: 'use'; itemId: string }).itemId
+      const item = char.inventory.items.find(i => i.id === itemId)
+      if (!item) return
+      const charName = char.name
+
+      // Light source: route bag-use through the same logic as the dedicated Light Controls widget.
+      // Reset path forcibly rewrites type/carrierId/range so the timer reflects the current user
+      // (the timer is keyed by id; the active fields must match the new light source for the map's
+      // light derivation to attach to this character's token).
+      if (item.category === 'light_source') {
+        const name = item.name.toLowerCase()
+        const characterId = player.characterId
+        const findOilFlask = () => char.inventory.items.find(i => i.definitionId === 'oil-flask' || /oil/i.test(i.name))
+
+        if (name.includes('torch')) {
+          updateCharacter(characterId, (c) => {
+            c.inventory.items = c.inventory.items.filter(i => i.id !== itemId)
+          })
+          const torchMs = (s.settings?.torchDurationMinutes ?? 60) * 60000
+          const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
+          if (activeTimer) {
+            const resetTimers = s.light.timers.map(t =>
+              t.id === activeTimer.id
+                ? { ...t, type: 'torch' as const, carrierId: characterId, range: 'near' as const, startedAt: Date.now(), durationMs: torchMs, accumulatedPauseMs: 0, pausedAt: undefined }
+                : t
+            )
+            useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
+          } else {
+            const timer = createLightTimer('torch', characterId, torchMs)
+            useSessionStore.getState().setLight({ ...s.light, timers: [...s.light.timers, timer], isInDarkness: false })
+          }
+          addChatMessage(createActionLog(`${charName} lit a torch 🔥${activeTimer ? ' (timer reset)' : ''}`))
+        } else if (name.includes('lantern')) {
+          const oil = findOilFlask()
+          if (!oil) {
+            addChatMessage(createActionLog(`${charName} needs an oil flask to light ${item.name}`))
+          } else {
+            updateCharacter(characterId, (c) => {
+              c.inventory.items = c.inventory.items.filter(i => i.id !== oil.id)
+            })
+            const lanternMs = (s.settings?.lanternDurationMinutes ?? 60) * 60000
+            const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
+            if (activeTimer) {
+              const resetTimers = s.light.timers.map(t =>
+                t.id === activeTimer.id
+                  ? { ...t, type: 'lantern' as const, carrierId: characterId, range: 'double_near' as const, startedAt: Date.now(), durationMs: lanternMs, accumulatedPauseMs: 0, pausedAt: undefined }
+                  : t
+              )
+              useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
+            } else {
+              const timer = createLightTimer('lantern', characterId, lanternMs)
+              useSessionStore.getState().setLight({ ...s.light, timers: [...s.light.timers, timer], isInDarkness: false })
+            }
+            addChatMessage(createActionLog(`${charName} lit a lantern 🏮${activeTimer ? ' (timer reset)' : ''}`))
+          }
+        } else {
+          addChatMessage(createActionLog(`${charName} fumbled with ${item.name} — use the Light controls to ignite it.`))
+        }
+        setTimeout(() => broadcastStateSyncRef.current(), 50)
+        return
+      }
+
+      if (item.category === 'consumable') {
+        // Potion of Healing: prefer the player's rolled total when provided; otherwise GM rolls server-side.
+        if (item.definitionId === 'potion-healing') {
+          const playerRollTotal = (message.action as { rollTotal?: number }).rollTotal
+          const playerRollExpr = (message.action as { rollExpression?: string }).rollExpression
+          const expr = playerRollExpr ?? getPotionHealing(char.level)
+          const total = playerRollTotal ?? rollDice(expr, { rolledBy: charName, purpose: 'manual' }).total
+          const newHp = Math.min(char.maxHp, char.currentHp + total)
+          const healed = newHp - char.currentHp
+          const cameBackFromDying = char.isDying && newHp > 0
+          updateCharacter(player.characterId, (c) => {
+            c.currentHp = newHp
+            if (newHp > 0 && c.isDying) {
+              c.isDying = false
+              c.deathTimer = undefined
+            }
+            const it = c.inventory.items.find(i => i.id === itemId)
+            if (it) {
+              if (it.quantity > 1) it.quantity -= 1
+              else c.inventory.items = c.inventory.items.filter(i => i.id !== itemId)
+            }
+          })
+          addChatMessage(createActionLog(
+            `${charName} drank ${item.name} 🧪 (${expr} → ${total}, healed ${healed} HP)`
+            + (cameBackFromDying ? ` — back on their feet!` : ''),
+          ))
+          setTimeout(() => broadcastStateSyncRef.current(), 50)
+          return
+        }
+
+        // Generic consumable: consume one, log it. No automatic mechanical effect — GM applies as needed.
+        updateCharacter(player.characterId, (c) => {
+          const it = c.inventory.items.find(i => i.id === itemId)
+          if (it) {
+            if (it.quantity > 1) it.quantity -= 1
+            else c.inventory.items = c.inventory.items.filter(i => i.id !== itemId)
+          }
+        })
+        addChatMessage(createActionLog(`${charName} used ${item.name}`))
+        setTimeout(() => broadcastStateSyncRef.current(), 50)
+        return
+      }
     }
 
     if (message.type === 'player_inventory' && message.action.type === 'drop') {
@@ -1094,6 +1214,7 @@ function GMSessionPage() {
             mapViewerState={mapViewerState}
             onStateChange={handleMapViewerChange}
             onTokenMove={handleTokenMove}
+            activeCombatantId={session.activeTurnId}
           />
         </div>
       )}
@@ -1137,10 +1258,30 @@ function GMSessionPage() {
             }}
             onDefeatMonster={(id) => {
               updateMonster(id, (m) => { m.isDefeated = true })
+              if (useSessionStore.getState().session?.activeTurnId === id) {
+                useSessionStore.getState().setActiveTurnId(null)
+              }
+              const mv = mapViewerStateRef.current
+              if (mv.tokens.some(t => t.type === 'monster' && t.referenceId === id)) {
+                setMapViewerState({
+                  ...mv,
+                  tokens: mv.tokens.filter(t => !(t.type === 'monster' && t.referenceId === id)),
+                })
+              }
               setTimeout(() => gmPeer.broadcastStateSync(), 50)
             }}
             onRemoveMonster={(id) => {
+              if (useSessionStore.getState().session?.activeTurnId === id) {
+                useSessionStore.getState().setActiveTurnId(null)
+              }
               removeMonster(id)
+              const mv = mapViewerStateRef.current
+              if (mv.tokens.some(t => t.type === 'monster' && t.referenceId === id)) {
+                setMapViewerState({
+                  ...mv,
+                  tokens: mv.tokens.filter(t => !(t.type === 'monster' && t.referenceId === id)),
+                })
+              }
               setTimeout(() => gmPeer.broadcastStateSync(), 50)
             }}
             onUpdateCharacterHp={(id, delta) => {
