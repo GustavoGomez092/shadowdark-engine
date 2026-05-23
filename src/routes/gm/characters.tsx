@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CharacterCreator } from '@/components/character/character-creator.tsx'
 import { CharacterSheet } from '@/components/character/character-sheet.tsx'
+import { CharacterImportButton } from '@/components/character/character-import-button.tsx'
 import type { Character } from '@/schemas/character.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { computeCharacterValues, restCharacter } from '@/lib/rules/character.ts'
@@ -30,6 +31,12 @@ function GMCharactersPage() {
     setShowCreator(false)
   }
 
+  function handleCharacterImported(character: Character) {
+    addCharacter(character)
+    setSelectedId(character.id)
+    setTimeout(() => gmPeer.broadcastStateSync(), 50)
+  }
+
   function updateChar(id: string, updater: (c: Character) => Character) {
     updateCharacter(id, (draft) => {
       const updated = updater({ ...draft } as Character)
@@ -53,12 +60,15 @@ function GMCharactersPage() {
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">{t('gm.characters')}</h1>
-        <button
-          onClick={() => setShowCreator(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
-        >
-          {t('gm.newCharacter')}
-        </button>
+        <div className="flex items-start gap-2">
+          <CharacterImportButton onImported={handleCharacterImported} />
+          <button
+            onClick={() => setShowCreator(true)}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+          >
+            {t('gm.newCharacter')}
+          </button>
+        </div>
       </div>
 
       {characters.length === 0 ? (

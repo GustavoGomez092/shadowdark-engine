@@ -6,6 +6,7 @@ import { usePlayerStore } from '@/stores/player-store.ts'
 import { usePlayerPeer } from '@/hooks/use-peer-connection.ts'
 import { CharacterSheet } from '@/components/character/character-sheet.tsx'
 import { CharacterCreator } from '@/components/character/character-creator.tsx'
+import { CharacterImportButton } from '@/components/character/character-import-button.tsx'
 import { DiceRoller } from '@/components/dice/dice-roller.tsx'
 import { EncounterView } from '@/components/combat/encounter-view.tsx'
 import { InitiativePrompt } from '@/components/combat/initiative-prompt.tsx'
@@ -837,13 +838,18 @@ function NoCharacterView({ playerName, onCreateCharacter }: { playerName: string
   return (
     <div className="rounded-xl border border-dashed border-border py-12 text-center">
       <p className="text-lg text-muted-foreground mb-2">No character assigned</p>
-      <p className="text-sm text-muted-foreground mb-4">Wait for the GM to assign you a character, or create your own.</p>
-      <button
-        onClick={() => setShowCreator(true)}
-        className="rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition"
-      >
-        Create My Character
-      </button>
+      <p className="text-sm text-muted-foreground mb-4">Wait for the GM to assign you a character, create your own, or import an existing one.</p>
+      <div className="flex flex-col items-center gap-3">
+        <button
+          onClick={() => setShowCreator(true)}
+          className="rounded-lg bg-primary px-6 py-2.5 font-semibold text-primary-foreground hover:opacity-90 transition"
+        >
+          Create My Character
+        </button>
+        <CharacterImportButton
+          onImported={(character) => onCreateCharacter({ ...character, playerId: playerName })}
+        />
+      </div>
     </div>
   )
 }

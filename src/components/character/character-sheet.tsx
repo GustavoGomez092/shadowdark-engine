@@ -5,6 +5,8 @@ import { getSpell, getClass } from '@/data/index.ts'
 import { getXpToNextLevel, canLevelUp } from '@/lib/rules/character.ts'
 import { LevelUpWizard, type LevelUpResult } from './level-up-wizard.tsx'
 import { NotesField } from './notes-field.tsx'
+import { downloadCharacter } from '@/lib/character/export.ts'
+import { Download } from 'lucide-react'
 import { useLocale } from '@/hooks/use-locale.ts'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
@@ -66,7 +68,7 @@ export function CharacterSheet({
               {tData('ancestries', c.ancestry, 'name', c.ancestry)} {tData('classes', c.class, 'name', c.class)} · {t('character.level')} {c.level} · {t(`character.alignment.${c.alignment}`)}
             </p>
           </div>
-          <div className="text-right">
+          <div className="flex flex-col items-end gap-2">
             {c.hasLuckToken ? (
               <button
                 onClick={onToggleLuckToken}
@@ -79,6 +81,14 @@ export function CharacterSheet({
             ) : (
               <span className="rounded-full bg-secondary px-3 py-1 text-sm text-muted-foreground">{t('character.noLuck')}</span>
             )}
+            <button
+              onClick={() => downloadCharacter(c)}
+              className="flex items-center gap-1 rounded-lg border border-border px-3 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground hover:border-foreground/30 transition"
+              title={t('character.exportTitle')}
+            >
+              <Download className="h-3.5 w-3.5" />
+              {t('character.export')}
+            </button>
           </div>
         </div>
 
