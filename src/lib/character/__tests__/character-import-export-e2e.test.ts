@@ -87,7 +87,9 @@ describe('Character import/export E2E (GM + player)', () => {
       return
     }
     browser = await puppeteer.launch({
-      headless: true,
+      // Watch the run with a visible browser: E2E_HEADLESS=false npx vitest run character-import-export-e2e
+      headless: process.env.E2E_HEADLESS !== 'false',
+      slowMo: process.env.E2E_HEADLESS === 'false' ? 60 : 0,
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-background-timer-throttling', '--disable-backgrounding-occluded-windows', '--disable-renderer-backgrounding'],
     })
     gm = await browser.newPage()
