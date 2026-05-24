@@ -285,6 +285,7 @@
   "character.levelUp.learnNewSpells": "Aprender nuevos hechizos",
   "character.levelUp.newSpellSlotsOpened": "Se abrieron nuevos espacios de hechizo en el Nivel {{level}}",
   "character.levelUp.newTierSpell": "Nuevo hechizo de Nivel {{tier}}",
+  "character.levelUp.newSpellNumber": "Nuevo hechizo n.º {{number}}",
   "character.levelUp.selectSpell": "Selecciona un hechizo...",
   "character.levelUp.complete": "\u00a1Subida de nivel completa!",
   "character.levelUp.completeLevelUp": "Completar subida de nivel",

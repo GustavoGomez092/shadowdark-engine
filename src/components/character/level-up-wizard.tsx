@@ -72,27 +72,23 @@ function isChooseTalentOrStats(mechanic: TalentMechanic): boolean {
   return mechanic.type === 'choose_talent_or_stats'
 }
 
-/** Determine the new spell slots opened at a given level. Returns an array of { tier, count } for each tier with new slots.
+/** How many new spells the character learns at this level, and the highest spell tier
+ * they now have access to.
  *
- * Only offers a slot for a tier that actually has spells the class can learn. Some
- * classes' progression opens higher-tier slots than there is spell data for (e.g. the
- * priest list only has tier 1–2 spells but opens tier-3+ slots) — offering an empty
- * dropdown would block the player from completing their level-up. */
-function getNewSpellSlots(classDef: ClassDefinition, currentLevel: number, newLevel: number): { tier: number; count: number }[] {
-  if (!classDef.spellsKnownByLevel || !classDef.spellcasting) return []
-  const spellList = classDef.spellcasting.spellList
-
-  const currentSlots = classDef.spellsKnownByLevel[currentLevel - 1] ?? []
-  const newSlots = classDef.spellsKnownByLevel[newLevel - 1] ?? []
-
-  const result: { tier: number; count: number }[] = []
-  for (let tier = 0; tier < newSlots.length; tier++) {
-    const diff = (newSlots[tier] ?? 0) - (currentSlots[tier] ?? 0)
-    if (diff > 0 && getSpellsByClassAndTier(spellList, tier + 1).length > 0) {
-      result.push({ tier: tier + 1, count: diff })
-    }
-  }
-  return result
+ * Spell learning is additive, not per-tier: each level you learn (total known at the new
+ * level − total at the current level) new spells, and you may pick each from ANY tier you
+ * have unlocked (≤ maxTier) that you don't already know. So unlocking a new tier simply
+ * widens the pool — it never forces you to take a spell of that exact tier. This also
+ * means a class whose progression opens a tier with no spell data (e.g. the priest list
+ * only has tier 1–2 spells) still learns new spells, drawn from the tiers that exist. */
+function getNewSpellInfo(classDef: ClassDefinition, currentLevel: number, newLevel: number): { count: number; maxTier: number } {
+  if (!classDef.spellsKnownByLevel) return { count: 0, maxTier: 0 }
+  const cur = classDef.spellsKnownByLevel[currentLevel - 1] ?? []
+  const next = classDef.spellsKnownByLevel[newLevel - 1] ?? []
+  const count = next.reduce((a, b) => a + b, 0) - cur.reduce((a, b) => a + b, 0)
+  let maxTier = 0
+  for (let t = 0; t < next.length; t++) if ((next[t] ?? 0) > 0) maxTier = t + 1
+  return { count: Math.max(0, count), maxTier }
 }
 
 // ========== Component ==========
@@ -110,11 +106,23 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
   const newTitle = getTitle(character.class, character.alignment, newLevel)
 
   const hasTalentStep = gainsTalentAtLevel(newLevel)
-  const newSpellSlots = useMemo(() => {
-    if (!classDef?.spellcasting) return []
-    return getNewSpellSlots(classDef, character.level, newLevel)
+  const spellInfo = useMemo(() => {
+    if (!classDef?.spellcasting) return { count: 0, maxTier: 0 }
+    return getNewSpellInfo(classDef, character.level, newLevel)
   }, [classDef, character.level, newLevel])
-  const hasSpellStep = classDef?.spellcasting != null && newSpellSlots.length > 0
+  // The spells the character can choose from this level: every spell of a tier they've
+  // unlocked (≤ maxTier) that exists in the data and they don't already know.
+  const learnableSpells = useMemo<SpellDefinition[]>(() => {
+    if (!classDef?.spellcasting || spellInfo.count === 0) return []
+    const spellList = classDef.spellcasting.spellList
+    const known = new Set(character.spells.knownSpells.map(s => s.spellId))
+    const pool: SpellDefinition[] = []
+    for (let tier = 1; tier <= spellInfo.maxTier; tier++) pool.push(...getSpellsByClassAndTier(spellList, tier))
+    return pool.filter(s => !known.has(s.id)).sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name))
+  }, [classDef, spellInfo, character.spells.knownSpells])
+  // Can't learn more new spells than exist to learn.
+  const requiredSpellCount = Math.min(spellInfo.count, learnableSpells.length)
+  const hasSpellStep = classDef?.spellcasting != null && requiredSpellCount > 0
 
   // Build ordered step list
   const steps = useMemo<Step[]>(() => {
@@ -266,12 +274,8 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
   // ========== Spells ==========
 
   function areAllSpellsFilled(): boolean {
-    let totalRequired = 0
-    for (const slot of newSpellSlots) {
-      totalRequired += slot.count
-    }
     const filled = Object.values(selectedSpells).filter(id => id !== '').length
-    return filled >= totalRequired
+    return filled >= requiredSpellCount
   }
 
   // ========== Complete ==========
@@ -670,7 +674,6 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
 
   function renderSpellsStep() {
     if (!classDef?.spellcasting) return null
-    const spellList = classDef.spellcasting.spellList
 
     return (
       <div className="space-y-4">
@@ -681,41 +684,36 @@ export function LevelUpWizard({ character, onComplete, onCancel }: LevelUpWizard
           </p>
         </div>
 
-        {newSpellSlots.map(({ tier, count }) => {
-          return Array.from({ length: count }, (_, slotIdx) => {
-            const key = `${tier}-${slotIdx}`
-            const currentSelection = selectedSpells[key] ?? ''
+        {Array.from({ length: requiredSpellCount }, (_, slotIdx) => {
+          const key = `slot-${slotIdx}`
+          const currentSelection = selectedSpells[key] ?? ''
+          // Exclude spells chosen in the OTHER slots this level-up (the pool already
+          // excludes already-known spells). The player picks from any unlocked tier.
+          const otherSelected = Object.entries(selectedSpells)
+            .filter(([k]) => k !== key)
+            .map(([, v]) => v)
+            .filter(v => v !== '')
+          const options = learnableSpells.filter(s => !otherSelected.includes(s.id) || s.id === currentSelection)
 
-            // For filtering, exclude spells already selected in OTHER slots
-            const otherSelected = Object.entries(selectedSpells)
-              .filter(([k]) => k !== key)
-              .map(([, v]) => v)
-              .filter(v => v !== '')
-            const knownIds = [...character.spells.knownSpells.map(s => s.spellId), ...otherSelected]
-            const filteredSpells = getSpellsByClassAndTier(spellList, tier).filter(
-              (s: SpellDefinition) => !knownIds.includes(s.id) || s.id === currentSelection
-            )
-
-            return (
-              <div key={key} className="rounded-lg border border-border/50 p-3">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  {ti('character.levelUp.newTierSpell', { tier })}
-                </label>
-                <select
-                  value={currentSelection}
-                  onChange={e => setSelectedSpells(prev => ({ ...prev, [key]: e.target.value }))}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="">{t('character.levelUp.selectSpell')}</option>
-                  {filteredSpells.map((spell: SpellDefinition) => (
-                    <option key={spell.id} value={spell.id}>
-                      {spell.name} {spell.isFocus ? '(Focus)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )
-          })
+          return (
+            <div key={key} className="rounded-lg border border-border/50 p-3">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                {ti('character.levelUp.newSpellNumber', { number: slotIdx + 1 })}
+              </label>
+              <select
+                value={currentSelection}
+                onChange={e => setSelectedSpells(prev => ({ ...prev, [key]: e.target.value }))}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">{t('character.levelUp.selectSpell')}</option>
+                {options.map((spell: SpellDefinition) => (
+                  <option key={spell.id} value={spell.id}>
+                    {spell.name} {ti('character.tier', { tier: spell.tier })}{spell.isFocus ? ' (Focus)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )
         })}
 
         <button

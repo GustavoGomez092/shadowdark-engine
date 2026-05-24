@@ -27,7 +27,8 @@ async function isServerRunning(): Promise<boolean> {
 
 const pause = (ms: number) => new Promise(r => setTimeout(r, ms))
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
-const normalizeSpell = (s: string) => s.replace(/\s*\(Focus\)\s*$/i, '').trim()
+// Dropdown labels read "<name> Tier <n> (Focus)"; reduce to the bare name for sheet matching.
+const normalizeSpell = (s: string) => s.replace(/\s*tier\s*\d+/i, '').replace(/\s*\(focus\)\s*/i, '').trim()
 
 async function click(page: Page, text: string, tag = 'button'): Promise<void> {
   const h = await page.evaluateHandle((t: string, sel: string) => {
@@ -167,12 +168,15 @@ describe('Deep leveling journey E2E (creation → level 10)', () => {
     const chosen = await p.evaluate(() => {
       const sels = Array.from(document.querySelectorAll('select')).filter(s => Array.from(s.options).some(o => /select a spell/i.test(o.textContent ?? '')))
       const picked: string[] = []
+      const used: string[] = []
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')!.set!
       for (const sel of sels) {
-        const opt = Array.from(sel.options).find(o => o.value)
+        // distinct spell per slot (all slots share the same unlocked-tier pool)
+        const opt = Array.from(sel.options).find(o => o.value && !used.includes(o.value))
         if (opt) {
-          const setter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value')!.set!
           setter.call(sel, opt.value)
           sel.dispatchEvent(new Event('change', { bubbles: true }))
+          used.push(opt.value)
           picked.push((opt.textContent ?? '').trim())
         }
       }

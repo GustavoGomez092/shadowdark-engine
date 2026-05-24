@@ -285,6 +285,7 @@
   "character.levelUp.learnNewSpells": "Learn New Spells",
   "character.levelUp.newSpellSlotsOpened": "New spell slots have opened at Level {{level}}",
   "character.levelUp.newTierSpell": "New Tier {{tier}} Spell",
+  "character.levelUp.newSpellNumber": "New Spell #{{number}}",
   "character.levelUp.selectSpell": "Select a spell...",
   "character.levelUp.complete": "Level Up Complete!",
   "character.levelUp.completeLevelUp": "Complete Level Up",
