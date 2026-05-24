@@ -72,9 +72,15 @@ function isChooseTalentOrStats(mechanic: TalentMechanic): boolean {
   return mechanic.type === 'choose_talent_or_stats'
 }
 
-/** Determine the new spell slots opened at a given level. Returns an array of { tier, count } for each tier with new slots. */
+/** Determine the new spell slots opened at a given level. Returns an array of { tier, count } for each tier with new slots.
+ *
+ * Only offers a slot for a tier that actually has spells the class can learn. Some
+ * classes' progression opens higher-tier slots than there is spell data for (e.g. the
+ * priest list only has tier 1–2 spells but opens tier-3+ slots) — offering an empty
+ * dropdown would block the player from completing their level-up. */
 function getNewSpellSlots(classDef: ClassDefinition, currentLevel: number, newLevel: number): { tier: number; count: number }[] {
-  if (!classDef.spellsKnownByLevel) return []
+  if (!classDef.spellsKnownByLevel || !classDef.spellcasting) return []
+  const spellList = classDef.spellcasting.spellList
 
   const currentSlots = classDef.spellsKnownByLevel[currentLevel - 1] ?? []
   const newSlots = classDef.spellsKnownByLevel[newLevel - 1] ?? []
@@ -82,7 +88,7 @@ function getNewSpellSlots(classDef: ClassDefinition, currentLevel: number, newLe
   const result: { tier: number; count: number }[] = []
   for (let tier = 0; tier < newSlots.length; tier++) {
     const diff = (newSlots[tier] ?? 0) - (currentSlots[tier] ?? 0)
-    if (diff > 0) {
+    if (diff > 0 && getSpellsByClassAndTier(spellList, tier + 1).length > 0) {
       result.push({ tier: tier + 1, count: diff })
     }
   }
