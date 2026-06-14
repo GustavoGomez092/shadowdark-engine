@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { CharacterCreator } from '@/components/character/character-creator.tsx'
 import { CharacterSheet } from '@/components/character/character-sheet.tsx'
 import { CharacterImportButton } from '@/components/character/character-import-button.tsx'
+import { AddNpcDialog } from '@/components/gm/add-npc-dialog.tsx'
 import type { Character } from '@/schemas/character.ts'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { computeCharacterValues, restCharacter } from '@/lib/rules/character.ts'
@@ -20,6 +21,7 @@ function GMCharactersPage() {
   const addCharacter = useSessionStore(s => s.addCharacter)
   const updateCharacter = useSessionStore(s => s.updateCharacter)
   const [showCreator, setShowCreator] = useState(false)
+  const [showAddNpc, setShowAddNpc] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const characters = session ? Object.values(session.characters) : []
@@ -34,6 +36,12 @@ function GMCharactersPage() {
   function handleCharacterImported(character: Character) {
     addCharacter(character)
     setSelectedId(character.id)
+    setTimeout(() => gmPeer.broadcastStateSync(), 50)
+  }
+
+  function handleNpcsAdded(npcChars: Character[]) {
+    for (const c of npcChars) addCharacter(c)
+    if (npcChars[0]) setSelectedId(npcChars[0].id)
     setTimeout(() => gmPeer.broadcastStateSync(), 50)
   }
 
@@ -63,6 +71,12 @@ function GMCharactersPage() {
         <div className="flex items-start gap-2">
           <CharacterImportButton onImported={handleCharacterImported} />
           <button
+            onClick={() => setShowAddNpc(true)}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:border-primary/50 transition"
+          >
+            Add NPC
+          </button>
+          <button
             onClick={() => setShowCreator(true)}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
           >
@@ -70,6 +84,10 @@ function GMCharactersPage() {
           </button>
         </div>
       </div>
+
+      {showAddNpc && (
+        <AddNpcDialog onClose={() => setShowAddNpc(false)} onAdd={handleNpcsAdded} />
+      )}
 
       {characters.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
@@ -99,7 +117,7 @@ function GMCharactersPage() {
                 >
                   <div className="font-semibold">{c.name}</div>
                   <div className="text-sm text-muted-foreground capitalize">
-                    {c.ancestry} {c.class} · Lv {c.level}
+                    {c.ancestry} {c.isNpc ? 'NPC' : c.class} · Lv {c.level}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     HP: {c.currentHp}/{c.maxHp}

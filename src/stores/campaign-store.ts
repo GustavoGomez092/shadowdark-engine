@@ -70,6 +70,19 @@ function loadFromStorage(id: string): Campaign | null {
   } catch { return null }
 }
 
+/** Read a full saved campaign by id WITHOUT making it the active campaign. */
+export function readCampaign(id: string): Campaign | null {
+  return loadFromStorage(id)
+}
+
+/** List saved campaigns (index entries) without touching store state. */
+export function listSavedCampaigns(): CampaignIndexEntry[] {
+  try {
+    const raw = localStorage.getItem(INDEX_KEY)
+    return raw ? JSON.parse(raw) as CampaignIndexEntry[] : []
+  } catch { return [] }
+}
+
 function saveToStorage(campaign: Campaign) {
   try {
     localStorage.setItem(`${STORAGE_PREFIX}:campaign:${campaign.id}`, JSON.stringify(campaign))

@@ -2,6 +2,23 @@ import type { DieType } from './dice.ts';
 import type { Alignment } from './reference.ts';
 import type { InventoryState } from './inventory.ts';
 import type { CharacterSpellState } from './spells.ts';
+import type { MonsterAttack, MonsterAbility, MonsterMovement } from './monsters.ts';
+
+/**
+ * Authored statblock for an NPC controlled as a Character variant.
+ * Holds the parts of an adventure NPC that aren't naturally derived from the
+ * Character fields (AC comes from the statblock, not armor; attacks/abilities
+ * are authored, not computed from gear/class).
+ */
+export interface NpcStatblock {
+  ac: number;
+  attacks: MonsterAttack[];
+  abilities: MonsterAbility[];
+  movement?: MonsterMovement;
+  role?: string;
+  personality?: string;
+  portraitPrompt?: string;
+}
 
 export type AbilityScore = 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
 export type AbilityScores = Record<AbilityScore, number>;
@@ -233,6 +250,11 @@ export interface Character {
   hasLuckToken: boolean;
   weaponMasteries: string[];
   notes: string;
+
+  /** When true, this Character is an adventure NPC controlled by the GM/a player. */
+  isNpc?: boolean;
+  /** Authored statblock — present (and authoritative for AC/attacks) when isNpc. */
+  npc?: NpcStatblock;
 
   computed: ComputedCharacterValues;
 }

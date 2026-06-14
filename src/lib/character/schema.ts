@@ -115,6 +115,16 @@ export const CharacterSchema = z.object({
   hasLuckToken: z.boolean().default(false),
   weaponMasteries: z.array(z.string()).default([]),
   notes: z.string().default(''),
+  isNpc: z.boolean().optional(),
+  npc: z.object({
+    ac: z.number(),
+    attacks: z.array(z.any()).default([]),
+    abilities: z.array(z.any()).default([]),
+    movement: z.any().optional(),
+    role: z.string().optional(),
+    personality: z.string().optional(),
+    portraitPrompt: z.string().optional(),
+  }).optional(),
   computed: z.any().optional(), // recomputed on import; not trusted
 })
 

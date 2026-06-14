@@ -34,6 +34,9 @@ export function computeEffectiveStats(character: Character): AbilityScores {
 // ========== AC Calculation ==========
 
 export function computeAC(character: Character): number {
+  // NPCs carry an authored AC in their statblock — it is not derived from gear.
+  if (character.isNpc && character.npc) return character.npc.ac;
+
   const effective = computeEffectiveStats(character);
   const dexMod = getAbilityModifier(effective.DEX);
 

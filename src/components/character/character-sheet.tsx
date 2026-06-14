@@ -8,6 +8,7 @@ import { NotesField } from './notes-field.tsx'
 import { downloadCharacter } from '@/lib/character/export.ts'
 import { Download } from 'lucide-react'
 import { useLocale } from '@/hooks/use-locale.ts'
+import { NpcSheet } from './npc-sheet.tsx'
 
 const ABILITY_KEYS: AbilityScore[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
 
@@ -27,7 +28,26 @@ interface Props {
   onLevelUp?: (updates: LevelUpResult) => void
 }
 
-export function CharacterSheet({
+/**
+ * Renders a Character. NPCs (character.isNpc) get a statblock-style sheet;
+ * everyone else gets the full player-character sheet. Branching here means every
+ * call site (GM panel, player view, encounter panel) handles NPCs for free.
+ */
+export function CharacterSheet(props: Props) {
+  if (props.character.isNpc && props.character.npc) {
+    return (
+      <NpcSheet
+        character={props.character}
+        isEditable={props.isEditable}
+        onHpChange={props.onHpChange}
+        onNotesChange={props.onNotesChange}
+      />
+    )
+  }
+  return <PlayerCharacterSheet {...props} />
+}
+
+function PlayerCharacterSheet({
   character: c,
   isEditable = false,
   hideInventory = false,
