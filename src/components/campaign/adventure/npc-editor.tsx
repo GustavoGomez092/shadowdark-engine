@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { AdventureNPC } from '@/schemas/campaign.ts'
+import { StatblockFields } from './statblock-fields.tsx'
+import { ensureNpcStats } from '@/lib/campaign/npc-statblock.ts'
 
 interface Props {
   npc: AdventureNPC
@@ -48,6 +50,10 @@ export function NPCEditor({ npc: initial, onSave, onCancel }: Props) {
             <label className="mb-1 block text-xs font-semibold text-muted-foreground">Portrait Prompt (for AI)</label>
             <input type="text" value={n.portraitPrompt ?? ''} onChange={e => update('portraitPrompt', e.target.value || undefined)} placeholder="Brief visual description for AI generation" className={inputCls} />
           </div>
+
+          {/* Statblock — used when controlling this NPC in play. Edits here export
+              with the adventure; re-add the NPC to a session to pick them up. */}
+          <StatblockFields stats={ensureNpcStats(n.stats)} onChange={s => update('stats', s)} />
         </div>
 
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
