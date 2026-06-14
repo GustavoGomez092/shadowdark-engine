@@ -479,7 +479,10 @@ function MapEditorPage() {
     a.download = `${(editingTitle || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.png`; a.click()
   }
   function exportJSON() {
-    const data = appRef.current?.getData(); if (!data) return
+    // Export the full editable state (serialize includes _snapshot/editorState/seed),
+    // not the flattened getData() outline — so room edits (pillars, props, links)
+    // are preserved and the map round-trips.
+    const data = appRef.current?.serialize(); if (!data) return
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
     a.download = `${(editingTitle || 'dungeon').toLowerCase().replace(/\s+/g, '_')}.json`; a.click()
@@ -606,7 +609,7 @@ function MapEditorPage() {
                   {currentMapId ? 'Save' : 'Save As New'}
                 </button>
                 <button onClick={exportPNG} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">PNG</button>
-                <button onClick={exportJSON} className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">JSON</button>
+                <button onClick={exportJSON} title="Download this map's full editable data (includes room edits — pillars, props, links). Re-importable." className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">JSON</button>
                 <button onClick={() => { setPrintSettings(p => ({ ...p, title: editingTitle || 'Dungeon Map' })); setShowPrintDialog(true) }}
                   className="rounded-lg border border-border px-2 py-1 text-xs hover:bg-accent transition">Print</button>
                 <button onClick={() => setShowGMPrintDialog(true)}
