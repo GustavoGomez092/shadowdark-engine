@@ -11,8 +11,11 @@ export interface MonsterAttack {
   specialEffect?: string; // "poison: DC 12 CON or 1d4 extra damage"
 }
 
+// A movement range band, or 'none' for immobile/rooted monsters.
+export type MovementSpeed = RangeCategory | 'none';
+
 export interface MonsterMovement {
-  normal: RangeCategory; // typically 'near'
+  normal: MovementSpeed; // typically 'near'; 'none' = cannot move
   double?: boolean; // double near
   fly?: RangeCategory;
   swim?: RangeCategory;

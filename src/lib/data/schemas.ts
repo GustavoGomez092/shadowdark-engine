@@ -6,6 +6,8 @@
 import { z } from 'zod'
 
 const rangeCategorySchema = z.enum(['close', 'near', 'far'])
+// Movement speed: a range band, or 'none' for immobile/rooted monsters.
+const movementSpeedSchema = z.enum(['none', 'close', 'near', 'far'])
 const alignmentSchema = z.enum(['lawful', 'neutral', 'chaotic'])
 const abilityScoresSchema = z.object({
   STR: z.number(),
@@ -26,7 +28,7 @@ const monsterAttackSchema = z.object({
 }).passthrough()
 
 const monsterMovementSchema = z.object({
-  normal: rangeCategorySchema,
+  normal: movementSpeedSchema,
 }).passthrough()
 
 const monsterAbilitySchema = z.object({

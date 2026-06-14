@@ -135,6 +135,25 @@ describe('validateDataPack', () => {
     expect(result.errors.length).toBeGreaterThan(0)
   })
 
+  it('accepts an immobile monster (movement.normal "none")', () => {
+    const result = validateDataPack(makeValidPack({
+      data: {
+        monsters: [{ ...makeMonster(), movement: { normal: 'none' as const } }],
+      },
+    }))
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects an unknown movement.normal value', () => {
+    const result = validateDataPack(makeValidPack({
+      data: {
+        monsters: [{ ...makeMonster(), movement: { normal: 'teleport' } as never }],
+      },
+    }))
+    expect(result.valid).toBe(false)
+  })
+
   it('validates spell required fields via Zod', () => {
     const result = validateDataPack({
       id: 'x', name: 'x', author: 'x', version: '1',

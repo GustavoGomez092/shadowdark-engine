@@ -543,6 +543,27 @@ describe('DataPackContentSchema', () => {
     expect(result.data!.monsters).toHaveLength(1)
   })
 
+  it('accepts an immobile monster (movement.normal "none")', () => {
+    const result = DataPackContentSchema.safeParse({
+      monsters: [{
+        id: 'rooted-boss',
+        name: 'Rooted Boss',
+        level: 4,
+        ac: 12,
+        hp: 40,
+        attacks: [{ name: 'Tendril', bonus: 4, damage: '1d8', range: 'near' }],
+        movement: { normal: 'none' },
+        stats: { STR: 16, DEX: 6, CON: 18, INT: 14, WIS: 13, CHA: 16 },
+        alignment: 'chaotic',
+        abilities: [],
+        checksMorale: false,
+        tags: ['plant'],
+      }],
+    })
+    expect(result.success).toBe(true)
+    expect(result.data!.monsters![0].movement.normal).toBe('none')
+  })
+
   it('accepts content with spells', () => {
     const result = DataPackContentSchema.safeParse({
       spells: [{

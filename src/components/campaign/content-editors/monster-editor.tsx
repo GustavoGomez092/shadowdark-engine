@@ -194,8 +194,9 @@ export function MonsterEditor({ monster: initial, onSave, onCancel }: Props) {
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-muted-foreground">Movement</label>
-              <select value={m.movement.normal} onChange={e => update('movement', { ...m.movement, normal: e.target.value as 'close' | 'near' | 'far' })}
+              <select value={m.movement.normal} onChange={e => update('movement', { ...m.movement, normal: e.target.value as 'none' | 'close' | 'near' | 'far' })}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring">
+                <option value="none">None (immobile)</option>
                 <option value="close">Close</option>
                 <option value="near">Near</option>
                 <option value="far">Far</option>
