@@ -914,6 +914,44 @@ function MapEditorPage() {
                     </button>
                   </div>
                 </div>
+                {/* Colonnade controls — only when Columns shape is on */}
+                {selectedRoom.columns && (() => {
+                  const r = selectedRoom as any
+                  const defCount = r.round
+                    ? 4 * Math.floor((Math.PI * (r.w / 2 - (r.colInset ?? 2))) / 2)
+                    : ((r.axis?.x ?? 0) !== 0 ? r.w - 3 : r.h - 3)
+                  const maxInset = Math.max(1, Math.floor(Math.min(r.w, r.h) / 2) - 1)
+                  const setCol = (field: string, value: number) => {
+                    appRef.current?.pushUndo()
+                    r[field] = value
+                    appRef.current?.draw(); refresh()
+                    if (currentMapId) handleSave()
+                  }
+                  const rows = [
+                    { label: 'Columns', field: 'colCount', val: r.colCount ?? defCount, min: 1, max: 60, step: 1, fmt: (v: number) => String(v) },
+                    { label: 'Radius', field: 'colRadius', val: r.colRadius ?? 0.15, min: 0.05, max: 0.4, step: 0.05, fmt: (v: number) => v.toFixed(2) },
+                    { label: 'Wall dist', field: 'colInset', val: r.colInset ?? 2, min: 1, max: maxInset, step: 1, fmt: (v: number) => String(v) },
+                  ]
+                  return (
+                    <div>
+                      <label className="block text-[10px] font-semibold text-muted-foreground mb-1">Colonnade</label>
+                      <div className="space-y-1.5">
+                        {rows.map(({ label, field, val, min, max, step, fmt }) => (
+                          <div key={field} className="flex items-center justify-between gap-2">
+                            <span className="text-[10px] text-muted-foreground w-14">{label}</span>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => setCol(field, Math.max(min, +(val - step).toFixed(2)))}
+                                className="rounded w-5 h-5 flex items-center justify-center text-[10px] border border-border hover:bg-accent transition">−</button>
+                              <span className="text-[10px] font-mono w-8 text-center">{fmt(val)}</span>
+                              <button onClick={() => setCol(field, Math.min(max, +(val + step).toFixed(2)))}
+                                className="rounded w-5 h-5 flex items-center justify-center text-[10px] border border-border hover:bg-accent transition">+</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
                 {/* Props management */}
                 <div>
                   <div className="flex items-center justify-between mb-1">

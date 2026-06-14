@@ -798,6 +798,7 @@ class App {
       width: r.width, depth: r.depth, mirror: r.mirror,
       seed: r.seed, round: r.round, columns: r.columns, hidden: r.hidden,
       symm: r.symm, desc: r.desc,
+      colCount: r.colCount, colRadius: r.colRadius, colInset: r.colInset,
       enemy: r.enemy, loot: r.loot, key: r.key, gate: r.gate, event: r.event, enviro: r.enviro,
       props: r.props.map(p => ({
         type: p.type,
@@ -838,6 +839,9 @@ class App {
       room.hidden = r.hidden;
       room.symm = r.symm;
       room.desc = r.desc;
+      room.colCount = r.colCount;
+      room.colRadius = r.colRadius;
+      room.colInset = r.colInset;
       room.enemy = r.enemy; room.loot = r.loot; room.key = r.key;
       room.gate = r.gate; room.event = r.event; room.enviro = r.enviro;
       room.dungeon = this.dungeon;

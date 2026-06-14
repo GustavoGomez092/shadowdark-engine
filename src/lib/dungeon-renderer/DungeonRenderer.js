@@ -21,6 +21,7 @@ import style, { GRID_MODES, NOTE_MODES } from './Style.js';
 import Parameters from './Parameters.js';
 import { rng } from './Random.js';
 import { chaikinSmooth } from './Geometry.js';
+import { colonnadePoints } from './colonnade.js';
 
 // Hatching configuration (matches original jb.* values)
 const HATCHING = {
@@ -2086,35 +2087,11 @@ class DungeonRenderer {
       // Skip small rooms as a safety guard even if columns was set.
       if (room.w <= 3 || room.h <= 3) continue;
 
-      const shrunk = { x: room.x + 1, y: room.y + 1, w: room.w - 2, h: room.h - 2 };
-      const radius = cs * Parameters.columnRadius;
-
-      if (room.round) {
-        // Circular room: columns around the perimeter
-        const innerR = (shrunk.w / 2 - 1);
-        const nCols = 4 * Math.floor(Math.PI * innerR / 2);
-        const center = { x: (shrunk.x + shrunk.w / 2), y: (shrunk.y + shrunk.h / 2) };
-        for (let i = 0; i < nCols; i++) {
-          const angle = ((i + 0.5) / nCols) * 2 * Math.PI;
-          const px = center.x + innerR * Math.cos(angle);
-          const py = center.y + innerR * Math.sin(angle);
-          this._drawColumn(ctx, px * cs, py * cs, radius);
-        }
-      } else {
-        // Rectangular room: columns along parallel edges
-        if (room.axis && room.axis.x !== 0) {
-          // Horizontal axis: columns along top and bottom rows
-          for (let x = shrunk.x + 1; x < shrunk.x + shrunk.w; x++) {
-            this._drawColumn(ctx, x * cs, (shrunk.y + 1) * cs, radius);
-            this._drawColumn(ctx, x * cs, (shrunk.y + shrunk.h - 1) * cs, radius);
-          }
-        } else {
-          // Vertical axis: columns along left and right columns
-          for (let y = shrunk.y + 1; y < shrunk.y + shrunk.h; y++) {
-            this._drawColumn(ctx, (shrunk.x + 1) * cs, y * cs, radius);
-            this._drawColumn(ctx, (shrunk.x + shrunk.w - 1) * cs, y * cs, radius);
-          }
-        }
+      // Per-room overrides (colCount / colRadius / colInset) fall back to legacy
+      // behavior when unset — see colonnade.js. Radius is a fraction of cell size.
+      const radius = cs * (room.colRadius ?? Parameters.columnRadius);
+      for (const pt of colonnadePoints(room)) {
+        this._drawColumn(ctx, pt.x * cs, pt.y * cs, radius);
       }
     }
   }
