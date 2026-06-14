@@ -46,6 +46,8 @@ interface Props {
   viewport: MapViewport
   onViewportChange: (v: MapViewport) => void
   onTokenDragEnd?: (tokenId: string, gridX: number, gridY: number) => void
+  /** If set, only the token whose referenceId matches can be dragged (player self-move). */
+  draggableTokenRefId?: string
   onTokenClick?: (tokenId: string) => void
   onMapClick?: (gridX: number, gridY: number) => void
   onDungeonReady?: (app: any) => void
@@ -63,8 +65,8 @@ interface Props {
 
 export function MapRenderer({
   mapData, tokens, wallSegments, lightSources, exploredCells,
-  fogMode, darknessOpacity = 1, flicker = true, viewport, onViewportChange: _onViewportChange,
-  onTokenDragEnd, onTokenClick, onMapClick, onDungeonReady,
+  fogMode, darknessOpacity = 1, flicker = true, viewport, onViewportChange,
+  onTokenDragEnd, draggableTokenRefId, onTokenClick, onMapClick, onDungeonReady,
   selectedTokenId, placingToken, panMode, centerOnTokenRef, activeCombatantId, playerView, className,
 }: Props) {
   // Outer sizer div (fixed size, measures available space)
@@ -530,7 +532,7 @@ export function MapRenderer({
 
     // Check if clicking on a token to start dragging
     const token = findTokenAtScreen(e.clientX, e.clientY)
-    if (token && onTokenDragEnd) {
+    if (token && onTokenDragEnd && (!draggableTokenRefId || token.referenceId === draggableTokenRefId)) {
       draggingTokenId.current = token.id
       dragPos.current = { gx: token.gridX, gy: token.gridY }
       onTokenClick?.(token.id)
@@ -586,6 +588,115 @@ export function MapRenderer({
     mouseDownPos.current = null
   }
 
+  // ── Touch gestures (mobile): one-finger pan / token-drag, two-finger pinch-zoom ──
+  const pinch = useRef<{ dist: number; cx: number; cy: number } | null>(null)
+  const touchPanLast = useRef<{ x: number; y: number } | null>(null)
+  const touchDragging = useRef(false)
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null)
+
+  function touchDist(t: React.TouchList) {
+    return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+  }
+  function touchMid(t: React.TouchList) {
+    return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    if (e.touches.length === 2) {
+      const m = touchMid(e.touches)
+      pinch.current = { dist: touchDist(e.touches), cx: m.x, cy: m.y }
+      touchPanLast.current = null
+      touchDragging.current = false
+      return
+    }
+    if (e.touches.length === 1) {
+      const t = e.touches[0]
+      touchStartPos.current = { x: t.clientX, y: t.clientY }
+      // One finger on a draggable token = drag it; otherwise = pan the map.
+      const token = onTokenDragEnd ? findTokenAtScreen(t.clientX, t.clientY) : undefined
+      if (token && onTokenDragEnd && (!draggableTokenRefId || token.referenceId === draggableTokenRefId)) {
+        touchDragging.current = true
+        draggingTokenId.current = token.id
+        dragPos.current = { gx: token.gridX, gy: token.gridY }
+        onTokenClick?.(token.id)
+      } else {
+        touchDragging.current = false
+        touchPanLast.current = { x: t.clientX, y: t.clientY }
+      }
+    }
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (e.touches.length === 2 && pinch.current) {
+      const dist = touchDist(e.touches)
+      const mid = touchMid(e.touches)
+      // Two-finger drag pans by the midpoint delta
+      const dx = mid.x - pinch.current.cx
+      const dy = mid.y - pinch.current.cy
+      if (dx || dy) {
+        panRef.current = { x: panRef.current.x + dx, y: panRef.current.y + dy }
+        setPan({ ...panRef.current })
+      }
+      // Pinch changes zoom (clamped to match the +/- buttons)
+      const ratio = dist / pinch.current.dist
+      if (Math.abs(ratio - 1) > 0.02) {
+        const newZoom = Math.min(8, Math.max(0.25, viewport.zoom * ratio))
+        onViewportChange({ ...viewport, zoom: newZoom })
+        pinch.current.dist = dist
+      }
+      pinch.current.cx = mid.x
+      pinch.current.cy = mid.y
+      return
+    }
+    if (e.touches.length === 1) {
+      const t = e.touches[0]
+      if (touchDragging.current && draggingTokenId.current) {
+        const { gx, gy } = screenToGrid(t.clientX, t.clientY)
+        dragPos.current = { gx, gy }
+        requestAnimationFrame(renderOverlay)
+      } else if (touchPanLast.current) {
+        const dx = t.clientX - touchPanLast.current.x
+        const dy = t.clientY - touchPanLast.current.y
+        panRef.current = { x: panRef.current.x + dx, y: panRef.current.y + dy }
+        setPan({ ...panRef.current })
+        touchPanLast.current = { x: t.clientX, y: t.clientY }
+      }
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const last = e.changedTouches[0]
+    const moved = !!(touchStartPos.current && last &&
+      (Math.abs(last.clientX - touchStartPos.current.x) > DRAG_THRESHOLD ||
+       Math.abs(last.clientY - touchStartPos.current.y) > DRAG_THRESHOLD))
+
+    if (touchDragging.current && draggingTokenId.current && dragPos.current) {
+      if (moved) onTokenDragEnd?.(draggingTokenId.current, dragPos.current.gx, dragPos.current.gy)
+      else onTokenClick?.(draggingTokenId.current)
+    } else if (!moved && touchPanLast.current && last) {
+      // A tap (no pan) selects a token, places a pending token, or clears selection
+      const token = findTokenAtScreen(last.clientX, last.clientY)
+      if (token) onTokenClick?.(token.id)
+      else if (placingToken && onMapClick) {
+        const { gx, gy } = screenToGrid(last.clientX, last.clientY)
+        onMapClick(gx, gy)
+      } else onTokenClick?.('')
+    }
+
+    if (e.touches.length === 0) {
+      pinch.current = null
+      touchPanLast.current = null
+      touchDragging.current = false
+      draggingTokenId.current = null
+      dragPos.current = null
+      touchStartPos.current = null
+    } else if (e.touches.length === 1) {
+      // Lifted one finger of a pinch — resume single-finger panning cleanly
+      pinch.current = null
+      touchPanLast.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+  }
+
   return (
     <div className={`relative w-full h-full ${className || ''}`}>
       {/* Invisible sizer: measures available space without being affected by canvas */}
@@ -595,10 +706,15 @@ export function MapRenderer({
       <div
         ref={scrollRef}
         className={`w-full h-full overflow-hidden ${panMode ? 'cursor-grab active:cursor-grabbing' : placingToken ? 'cursor-crosshair' : 'cursor-default'}`}
+        style={{ touchAction: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         onContextMenu={e => e.preventDefault()}
       >
         <div

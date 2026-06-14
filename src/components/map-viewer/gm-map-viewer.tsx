@@ -16,7 +16,7 @@ import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance } from '@/schemas/monsters.ts'
 import type { LightState } from '@/schemas/light.ts'
 import { MapRenderer, type MapViewport } from './map-renderer.tsx'
-import { extractDungeonWallSegments } from '@/lib/map-viewer/dungeon-walls.ts'
+import { extractDungeonWallSegments, extractColumnOccluders } from '@/lib/map-viewer/dungeon-walls.ts'
 import { ensureMapHasCells } from '@/lib/map-viewer/dungeon-converter.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { getHpStatus } from '@/schemas/session.ts'
@@ -67,6 +67,12 @@ export function GMMapViewer({
   const onDungeonReady = useCallback((app: any) => {
     setWallSegments(extractDungeonWallSegments(app))
   }, [])
+
+  // Pillars (colonnade columns) occlude torchlight just like walls do
+  const wallSegmentsWithPillars = useMemo(
+    () => [...wallSegments, ...extractColumnOccluders(activeMap?.dungeonData?.columns)],
+    [wallSegments, activeMap],
+  )
 
   // Lighting settings (GM-controlled, synced to players); fall back to defaults
   const lighting: MapLightingSettings = mapViewerState.lighting ?? DEFAULT_LIGHTING
@@ -286,7 +292,7 @@ export function GMMapViewer({
                 <MapRenderer
                   mapData={activeMap}
                   tokens={mapViewerState.tokens}
-                  wallSegments={wallSegments}
+                  wallSegments={wallSegmentsWithPillars}
                   lightSources={lightSources}
                   exploredCells={exploredCells}
                   fogMode={showPlayerView ? 'player' : 'none'}

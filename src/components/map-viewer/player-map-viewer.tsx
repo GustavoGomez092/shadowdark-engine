@@ -11,9 +11,11 @@ import type { PlayerMapViewState, MapLightSource } from '@/schemas/map-viewer.ts
 import type { WallSegment } from '@/schemas/map-viewer.ts'
 import { DEFAULT_LIGHTING, LIGHT_INTENSITY_MIN } from '@/schemas/map-viewer.ts'
 import type { LightState } from '@/schemas/light.ts'
+import type { PlayerTokenMoveSettings } from '@/schemas/session.ts'
+import { DEFAULT_PLAYER_TOKEN_MOVE } from '@/schemas/session.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 import { MapRenderer, type MapViewport } from './map-renderer.tsx'
-import { extractDungeonWallSegments } from '@/lib/map-viewer/dungeon-walls.ts'
+import { extractDungeonWallSegments, extractColumnOccluders } from '@/lib/map-viewer/dungeon-walls.ts'
 
 const DEFAULT_ZOOM = 4
 
@@ -22,11 +24,35 @@ interface Props {
   lightState: LightState
   myCharacterId?: string
   activeCombatantId?: string | null
+  /** Movement rules synced from the GM */
+  moveSettings?: PlayerTokenMoveSettings
+  /** Action pips already spent this turn (moves + rolls), tracked by the player route */
+  actionsUsed?: number
+  /** Send a move of the player's own token to the GM (one move action) */
+  onMoveToken?: (gridX: number, gridY: number) => void
+  /** End the player's turn */
+  onEndTurn?: () => void
 }
 
-export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeCombatantId }: Props) {
+export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeCombatantId, moveSettings, actionsUsed = 0, onMoveToken, onEndTurn }: Props) {
   const [viewport, setViewport] = useState<MapViewport>({ offsetX: 0, offsetY: 0, zoom: DEFAULT_ZOOM })
   const [collapsed, setCollapsed] = useState(false)
+
+  // ── Self-move action economy ──
+  // The budget (moves + rolls) is tracked by the player route; we just enforce it here.
+  const s = moveSettings ?? DEFAULT_PLAYER_TOKEN_MOVE
+  const isMyTurn = !!activeCombatantId && activeCombatantId === myCharacterId
+  const selfMoveAllowed = !!myCharacterId && s.enabled && (!s.activeTurnOnly || isMyTurn)
+  const budgetActive = isMyTurn // action economy applies on the player's turn
+  const canMove = selfMoveAllowed && (!budgetActive || actionsUsed < s.actionsPerTurn)
+
+  const handleSelfMove = useCallback((tokenId: string, gx: number, gy: number) => {
+    const token = mapView.tokens.find(t => t.id === tokenId)
+    if (!token || token.referenceId !== myCharacterId) return
+    const dist = Math.max(Math.abs(gx - token.gridX), Math.abs(gy - token.gridY))
+    if (dist < 1 || dist > s.moveDistance) return // out of range — token snaps back on next sync
+    onMoveToken?.(gx, gy) // the route's send wrapper spends the action pip
+  }, [mapView.tokens, myCharacterId, s.moveDistance, onMoveToken])
 
   // Build a CampaignMap-shaped object for MapRenderer
   const mapData: CampaignMap = useMemo(() => ({
@@ -48,6 +74,12 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
   const onDungeonReady = useCallback((app: any) => {
     setWallSegments(extractDungeonWallSegments(app))
   }, [])
+
+  // Pillars (colonnade columns) occlude torchlight just like walls do
+  const wallSegmentsWithPillars = useMemo(
+    () => [...wallSegments, ...extractColumnOccluders(mapView.dungeonData?.columns)],
+    [wallSegments, mapView.dungeonData],
+  )
 
   // Lighting settings synced from the GM (defaults applied if absent)
   const lighting = mapView.lighting ?? DEFAULT_LIGHTING
@@ -98,7 +130,7 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
             <MapRenderer
               mapData={mapData}
               tokens={mapView.tokens}
-              wallSegments={wallSegments}
+              wallSegments={wallSegmentsWithPillars}
               lightSources={lightSources}
               exploredCells={exploredCells}
               fogMode="player"
@@ -109,9 +141,33 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
               onDungeonReady={onDungeonReady}
               centerOnTokenRef={myCharacterId}
               activeCombatantId={activeCombatantId}
+              onTokenDragEnd={canMove ? handleSelfMove : undefined}
+              draggableTokenRefId={myCharacterId}
               playerView
             />
           </div>
+
+          {/* Self-move action tracker */}
+          {selfMoveAllowed && (
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-2 bg-zinc-900/90 border border-zinc-600 rounded px-2 py-1 text-xs select-none">
+              <span className="text-amber-300 font-medium">{isMyTurn ? 'Tu turno' : 'Mover'}</span>
+              {budgetActive ? (
+                <span className="flex gap-1 items-center">
+                  {Array.from({ length: s.actionsPerTurn }).map((_, i) => (
+                    <span key={i} className={`w-2.5 h-2.5 rounded-full ${i < actionsUsed ? 'bg-zinc-600' : 'bg-emerald-400'}`} title="Cada acción (mover o tirar dados) gasta una ficha" />
+                  ))}
+                  <span className="text-zinc-400 ml-1">arrastra · ≤{s.moveDistance}</span>
+                  <button
+                    onClick={() => onEndTurn?.()}
+                    className="ml-1 px-1.5 py-0.5 rounded border border-amber-500 text-amber-300 hover:bg-amber-500/20"
+                    title="Termina tu turno"
+                  >Terminar turno</button>
+                </span>
+              ) : (
+                <span className="text-zinc-400">arrastra tu ficha · ≤{s.moveDistance} casillas</span>
+              )}
+            </div>
+          )}
 
           {/* Zoom controls */}
           <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">

@@ -183,7 +183,7 @@ export const useSessionStore = create<SessionStore>()(
         rollHistory: [],
         gmNotes: '',
         aiConversations: [],
-        settings: { torchDurationMinutes: 60, lanternDurationMinutes: 60, campfireDurationMinutes: 480 },
+        settings: { torchDurationMinutes: 60, lanternDurationMinutes: 60, campfireDurationMinutes: 480, playerTokenMove: { enabled: true, moveDistance: 3, actionsPerTurn: 2, activeTurnOnly: true } },
         meta: {
           lastSavedAt: Date.now(),
           totalPlayTimeMs: 0,

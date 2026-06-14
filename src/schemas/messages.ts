@@ -26,6 +26,7 @@ export type PlayerToGMMessage =
   | PlayerAttackRequest
   | PlayerSpellCastRequest
   | PlayerMoveRequest
+  | PlayerMoveTokenRequest
   | PlayerInventoryAction
   | PlayerEndTurnAction
   | PlayerRestRequest
@@ -86,6 +87,14 @@ export interface PlayerMoveRequest {
   characterId: string;
   direction: 'closer' | 'further';
   isDoubleMove: boolean;
+}
+
+/** Player moving their own token to a grid cell on the map (one move action). */
+export interface PlayerMoveTokenRequest {
+  type: 'player_move_token';
+  characterId: string;
+  gridX: number;
+  gridY: number;
 }
 
 export interface PlayerInventoryAction {

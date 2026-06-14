@@ -72,6 +72,43 @@ export function extractDungeonWallSegments(app: any): WallSegment[] {
   return mergeCollinear(segments)
 }
 
+/**
+ * Half-width (in grid units) of a pillar's light-occluding footprint.
+ * Tuned to sit just outside the renderer's drawn column (Parameters.columnRadius
+ * ~0.15 of a cell): big enough that the shadow reads as a solid pillar, small
+ * enough that it still hugs the visible column rather than overshooting it.
+ */
+export const PILLAR_OCCLUDER_HALF = 0.22
+
+/**
+ * Build light-occluding wall segments for colonnade pillars (dungeonData.columns).
+ *
+ * Each pillar becomes a small square of 4 segments, so the existing raycasting
+ * visibility treats it exactly like a wall: torchlight casts a shadow behind the
+ * pillar, while light still streams through the gaps between adjacent columns
+ * (they sit ~1 grid unit apart; the box is sized to the drawn column ~0.3 wide).
+ * Returned segments are in grid-unit coordinates, ready to concat onto
+ * extractDungeonWallSegments output.
+ */
+export function extractColumnOccluders(
+  columns: { x: number; y: number }[] | null | undefined,
+  half: number = PILLAR_OCCLUDER_HALF,
+): WallSegment[] {
+  if (!columns || columns.length === 0) return []
+  const segs: WallSegment[] = []
+  for (const c of columns) {
+    const x0 = c.x - half, y0 = c.y - half
+    const x1 = c.x + half, y1 = c.y + half
+    segs.push(
+      { x1: x0, y1: y0, x2: x1, y2: y0 }, // top
+      { x1: x1, y1: y0, x2: x1, y2: y1 }, // right
+      { x1: x1, y1: y1, x2: x0, y2: y1 }, // bottom
+      { x1: x0, y1: y1, x2: x0, y2: y0 }, // left
+    )
+  }
+  return segs
+}
+
 /** Merge collinear segments sharing an endpoint */
 function mergeCollinear(segments: WallSegment[]): WallSegment[] {
   const horizontals = new Map<number, Array<[number, number]>>()

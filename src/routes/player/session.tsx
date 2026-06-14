@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocale } from '@/hooks/use-locale.ts'
 import { LOCALE_LABELS } from '@/i18n/index.ts'
 import { usePlayerStore } from '@/stores/player-store.ts'
@@ -93,7 +93,7 @@ function PlayerSessionPage() {
     }
   }
 
-  const { isConnected, isJoined, error, connect, send, disconnect } = usePlayerPeer({
+  const { isConnected, isJoined, error, connect, send: rawSend, disconnect } = usePlayerPeer({
     onStateSync: handleStateSync,
     onMessage: handleMessage,
     onRoomCodeChanged: (newRoomCode) => {
@@ -103,6 +103,19 @@ function PlayerSessionPage() {
       }
     },
   })
+
+  // ── Turn action budget ──
+  // On the player's turn, each meaningful action (a token move, a roll, an attack,
+  // a spell) spends one of their action pips. Reset whenever the active turn changes.
+  const isMyTurn = !!state?.myCharacter && state.activeTurnId === state.myCharacter.id
+  const [actionsUsed, setActionsUsed] = useState(0)
+  useEffect(() => { setActionsUsed(0) }, [state?.activeTurnId])
+  const send = useCallback((msg: import('@/schemas/messages.ts').PlayerToGMMessage) => {
+    if (isMyTurn && (msg.type === 'player_move_token' || msg.type === 'player_roll' || msg.type === 'player_attack' || msg.type === 'player_spell_cast')) {
+      setActionsUsed(a => a + 1)
+    }
+    rawSend(msg)
+  }, [rawSend, isMyTurn])
   sendRef.current = send
 
   // Flush any pending notes update if the player leaves before the debounce fires.
@@ -330,6 +343,10 @@ function PlayerSessionPage() {
               lightState={state.light}
               myCharacterId={state.myCharacter?.id}
               activeCombatantId={state.activeTurnId}
+              moveSettings={state.playerTokenMove}
+              actionsUsed={actionsUsed}
+              onMoveToken={(gx, gy) => state.myCharacter && send({ type: 'player_move_token', characterId: state.myCharacter.id, gridX: gx, gridY: gy })}
+              onEndTurn={() => state.myCharacter && send({ type: 'player_end_turn', characterId: state.myCharacter.id })}
             />
           </div>
         )}

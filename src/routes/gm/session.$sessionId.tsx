@@ -19,6 +19,7 @@ import { createLightTimer, pauseAllTimers, resumeAllTimers, tickLightState } fro
 import { useGMPeer } from '@/hooks/use-peer-connection.ts'
 import type { PlayerToGMMessage } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
+import { DEFAULT_PLAYER_TOKEN_MOVE } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues, canLevelUp } from '@/lib/rules/character.ts'
@@ -667,6 +668,34 @@ function GMSessionPage() {
       return
     }
 
+    if (message.type === 'player_move_token') {
+      const msg = message as import('@/schemas/messages.ts').PlayerMoveTokenRequest
+      const session = useSessionStore.getState().session
+      const settings = session?.settings.playerTokenMove ?? DEFAULT_PLAYER_TOKEN_MOVE
+      if (!settings.enabled) return
+      // Only on the player's active turn, if so configured
+      if (settings.activeTurnOnly && session?.activeTurnId !== msg.characterId) return
+      const mvStore = useMapViewerStore.getState()
+      const token = mvStore.state.tokens.find(t => t.referenceId === msg.characterId)
+      if (!token) return
+      // Reject moves beyond the allowed distance (Chebyshev — diagonal counts as 1)
+      const dist = Math.max(Math.abs(msg.gridX - token.gridX), Math.abs(msg.gridY - token.gridY))
+      if (dist < 1 || dist > settings.moveDistance) return
+      mvStore.moveToken(token.id, msg.gridX, msg.gridY)
+      setTimeout(() => broadcastStateSyncRef.current(), 50)
+      return
+    }
+
+    if (message.type === 'player_end_turn') {
+      const msg = message as import('@/schemas/messages.ts').PlayerEndTurnAction
+      const session = useSessionStore.getState().session
+      // Only the player whose turn it is may end it
+      if (!session?.combat || session.activeTurnId !== msg.characterId) return
+      useSessionStore.getState().advanceCombatTurn()
+      setTimeout(() => broadcastStateSyncRef.current(), 50)
+      return
+    }
+
     if (message.type === 'player_level_up') {
       const msg = message as import('@/schemas/messages.ts').PlayerLevelUp
       const char = useSessionStore.getState().session?.characters[msg.characterId]
@@ -703,6 +732,8 @@ function GMSessionPage() {
   const getPlayerStateForPeer = useCallback((peerId: string): PlayerVisibleState | null => {
     const state = getPlayerVisibleStateRef.current(peerId)
     if (!state) return null
+    // Movement rules so the player client can enforce its own action budget
+    state.playerTokenMove = useSessionStore.getState().session?.settings.playerTokenMove ?? DEFAULT_PLAYER_TOKEN_MOVE
     // Only send map view if this player's character has a token on the map
     const mvState = mapViewerStateRef.current
     const playerCharId = state.myCharacter?.id
@@ -1223,6 +1254,37 @@ function GMSessionPage() {
             onTokenMove={handleTokenMove}
             activeCombatantId={session.activeTurnId}
           />
+
+          {/* Player movement settings */}
+          {(() => {
+            const pm = session.settings.playerTokenMove ?? DEFAULT_PLAYER_TOKEN_MOVE
+            const update = (patch: Partial<typeof pm>) => {
+              useSessionStore.setState((st) => { if (st.session) st.session.settings.playerTokenMove = { ...pm, ...patch } })
+              useSessionStore.getState().saveNow()
+              setTimeout(() => broadcastStateSyncRef.current(), 50)
+            }
+            return (
+              <div className="mt-2 border border-zinc-700 rounded-lg bg-zinc-900 px-3 py-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                <span className="font-medium text-zinc-300">Player movement</span>
+                <label className="flex items-center gap-1 text-zinc-300 cursor-pointer">
+                  <input type="checkbox" checked={pm.enabled} onChange={e => update({ enabled: e.target.checked })} className="w-3 h-3 accent-emerald-400" />
+                  Enabled
+                </label>
+                <label className="flex items-center gap-1 text-zinc-400">
+                  Move distance
+                  <input type="number" min={1} max={12} value={pm.moveDistance} onChange={e => update({ moveDistance: Math.max(1, Math.min(12, Number(e.target.value) || 1)) })} className="w-12 bg-zinc-800 border border-zinc-600 rounded px-1 py-0.5 text-zinc-200" />
+                </label>
+                <label className="flex items-center gap-1 text-zinc-400">
+                  Actions/turn
+                  <input type="number" min={1} max={4} value={pm.actionsPerTurn} onChange={e => update({ actionsPerTurn: Math.max(1, Math.min(4, Number(e.target.value) || 1)) })} className="w-12 bg-zinc-800 border border-zinc-600 rounded px-1 py-0.5 text-zinc-200" />
+                </label>
+                <label className="flex items-center gap-1 text-zinc-300 cursor-pointer">
+                  <input type="checkbox" checked={pm.activeTurnOnly} onChange={e => update({ activeTurnOnly: e.target.checked })} className="w-3 h-3 accent-emerald-400" />
+                  Active turn only
+                </label>
+              </div>
+            )
+          })()}
         </div>
       )}
 

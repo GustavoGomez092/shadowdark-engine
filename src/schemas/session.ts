@@ -60,12 +60,29 @@ export interface GameSettings {
   campfireDurationMinutes: number; // default 480 (8 hours)
   showPackMonstersFirst?: boolean;
   showPackItemsFirst?: boolean;
+  playerTokenMove?: PlayerTokenMoveSettings;
+}
+
+/** Lets players move their own token on the map within an action budget. */
+export interface PlayerTokenMoveSettings {
+  enabled: boolean;        // master toggle (default true)
+  moveDistance: number;    // spaces per move action, diagonal counts as 1 (default 3)
+  actionsPerTurn: number;  // total action pips per turn; attack always capped at 1 (default 2)
+  activeTurnOnly: boolean; // only allow self-move on the player's active combat turn (default true)
+}
+
+export const DEFAULT_PLAYER_TOKEN_MOVE: PlayerTokenMoveSettings = {
+  enabled: true,
+  moveDistance: 3,
+  actionsPerTurn: 2,
+  activeTurnOnly: true,
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
   torchDurationMinutes: 60,
   lanternDurationMinutes: 60,
   campfireDurationMinutes: 480,
+  playerTokenMove: { ...DEFAULT_PLAYER_TOKEN_MOVE },
 }
 
 export interface SessionMeta {
@@ -89,6 +106,7 @@ export interface PlayerVisibleState {
   recentRolls: DiceRollResult[];
   activeStore?: PublicStoreInfo;
   mapView?: PlayerMapViewState;
+  playerTokenMove?: PlayerTokenMoveSettings; // movement rules, so the player client can enforce them
 }
 
 export type HpStatus = 'healthy' | 'wounded' | 'critical' | 'dying' | 'dead';
