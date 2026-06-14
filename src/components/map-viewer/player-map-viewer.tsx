@@ -9,6 +9,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import type { PlayerMapViewState, MapLightSource } from '@/schemas/map-viewer.ts'
 import type { WallSegment } from '@/schemas/map-viewer.ts'
+import { DEFAULT_LIGHTING, LIGHT_INTENSITY_MIN } from '@/schemas/map-viewer.ts'
 import type { LightState } from '@/schemas/light.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 import { MapRenderer, type MapViewport } from './map-renderer.tsx'
@@ -48,6 +49,13 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
     setWallSegments(extractDungeonWallSegments(app))
   }, [])
 
+  // Lighting settings synced from the GM (defaults applied if absent)
+  const lighting = mapView.lighting ?? DEFAULT_LIGHTING
+  // Radius multiplier — base radius (1x) is the floor; intensity only widens the light
+  const radiusScale = Math.max(LIGHT_INTENSITY_MIN, lighting.intensity)
+  // Flicker defaults on when the field is absent (older sessions)
+  const flicker = lighting.flicker !== false
+
   // Derive light sources from tokens + light timers (in grid coordinates)
   const lightSources: MapLightSource[] = useMemo(() => {
     const sources: MapLightSource[] = []
@@ -55,7 +63,8 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
       if (!timer.isActive || timer.isExpired) continue
       const token = mapView.tokens.find(t => t.referenceId === timer.carrierId)
       if (!token) continue
-      const radiusCells = timer.range === 'double_near' ? 6 : 3
+      // Base radius widened by the intensity multiplier; walls still occlude via raycasting.
+      const radiusCells = (timer.range === 'double_near' ? 6 : 3) * radiusScale
       sources.push({
         x: token.gridX + 0.5,
         y: token.gridY + 0.5,
@@ -64,7 +73,7 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
       })
     }
     return sources
-  }, [lightState.timers, mapView.tokens])
+  }, [lightState.timers, mapView.tokens, radiusScale])
 
   const exploredCells = useMemo(() => new Set<string>(), [])
 
@@ -93,6 +102,8 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
               lightSources={lightSources}
               exploredCells={exploredCells}
               fogMode="player"
+              darknessOpacity={lighting.darkness}
+              flicker={flicker}
               viewport={viewport}
               onViewportChange={setViewport}
               onDungeonReady={onDungeonReady}

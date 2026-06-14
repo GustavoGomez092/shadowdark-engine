@@ -7,6 +7,7 @@
 
 import { create } from 'zustand'
 import type { MapToken, MapViewerState } from '@/schemas/map-viewer.ts'
+import { DEFAULT_LIGHTING } from '@/schemas/map-viewer.ts'
 
 interface MapViewerStoreState {
   state: MapViewerState
@@ -26,6 +27,7 @@ const EMPTY_STATE: MapViewerState = {
   activeMapId: null,
   tokens: [],
   exploredCells: [],
+  lighting: { ...DEFAULT_LIGHTING },
 }
 
 export const useMapViewerStore = create<MapViewerStoreState>((set) => ({

@@ -35,6 +35,25 @@ export interface MapLightSource {
   intensity: number          // 0-1
 }
 
+// ── Lighting Settings (GM-controlled, synced to players) ──
+
+export interface MapLightingSettings {
+  intensity: number   // radius multiplier (>= 1): 1 = each light's base radius, higher = wider
+  darkness: number    // 0-1, opacity of the unlit darkness/fog fill
+  flicker: boolean    // animate a subtle torch flicker on lit areas
+}
+
+// Light radius multiplier range. The base radius (1x) is the minimum; intensity
+// only expands the lit area outward from there.
+export const LIGHT_INTENSITY_MIN = 1
+export const LIGHT_INTENSITY_MAX = 3
+
+export const DEFAULT_LIGHTING: MapLightingSettings = {
+  intensity: LIGHT_INTENSITY_MIN,
+  darkness: 1,
+  flicker: true,
+}
+
 // ── Player-visible Map State (sent via P2P) ──
 
 export interface PlayerMapViewState {
@@ -42,6 +61,7 @@ export interface PlayerMapViewState {
   dungeonData: DungeonMapData   // full dungeon for DungeonApp rendering
   seed: number
   tokens: MapToken[]            // only tokens visible to this player
+  lighting?: MapLightingSettings // GM lighting settings (defaults applied if absent)
 }
 
 // ── GM-side Map Viewer State (persisted in session) ──
@@ -50,4 +70,5 @@ export interface MapViewerState {
   activeMapId: string | null
   tokens: MapToken[]
   exploredCells: string[]       // cumulative "x,y" keys
+  lighting?: MapLightingSettings // GM lighting settings (defaults applied if absent)
 }

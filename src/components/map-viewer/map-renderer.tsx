@@ -39,6 +39,10 @@ interface Props {
   lightSources: MapLightSource[]
   exploredCells: Set<string>
   fogMode: 'none' | 'player'
+  /** Opacity (0-1) of the unlit darkness fill; defaults to 1 (fully dark) */
+  darknessOpacity?: number
+  /** Animate a subtle torch flicker on lit areas; defaults to true */
+  flicker?: boolean
   viewport: MapViewport
   onViewportChange: (v: MapViewport) => void
   onTokenDragEnd?: (tokenId: string, gridX: number, gridY: number) => void
@@ -59,7 +63,7 @@ interface Props {
 
 export function MapRenderer({
   mapData, tokens, wallSegments, lightSources, exploredCells,
-  fogMode, viewport, onViewportChange: _onViewportChange,
+  fogMode, darknessOpacity = 1, flicker = true, viewport, onViewportChange: _onViewportChange,
   onTokenDragEnd, onTokenClick, onMapClick, onDungeonReady,
   selectedTokenId, placingToken, panMode, centerOnTokenRef, activeCombatantId, playerView, className,
 }: Props) {
@@ -294,7 +298,7 @@ export function MapRenderer({
     // otherwise cache an unobstructed visibility polygon that never gets recomputed
     // until the player moves and the light source position changes.
     const key = JSON.stringify({
-      lights: lightSources.map(s => `${s.x},${s.y},${s.radius}`),
+      lights: lightSources.map(s => `${s.x},${s.y},${s.radius},${s.intensity}`),
       walls: wallSegments.length,
     })
     if (key === visibilityKeyRef.current) return
@@ -412,9 +416,9 @@ export function MapRenderer({
     }
 
     if (fogMode === 'player') {
-      drawFog(ctx, w, h, gridPointToScreen, getLayout, visibilityRef.current, exploredCells)
+      drawFog(ctx, w, h, gridPointToScreen, getLayout, visibilityRef.current, exploredCells, darknessOpacity, flicker)
     }
-  }, [tokens, fogMode, exploredCells, selectedTokenId, lightSources, mapData.cellSize, ready, viewport.zoom, activeCombatantId])
+  }, [tokens, fogMode, darknessOpacity, flicker, exploredCells, selectedTokenId, lightSources, mapData.cellSize, ready, viewport.zoom, activeCombatantId])
 
   useEffect(() => {
     if (ready) {
@@ -423,9 +427,11 @@ export function MapRenderer({
     }
   }, [renderOverlay, ready])
 
-  // Continuous redraw loop while an active combatant exists, to drive the pulse animation
+  // Continuous redraw loop to drive animations: the active-combatant pulse and the
+  // torch/lantern flicker (whenever fog is shown with at least one light source).
   useEffect(() => {
-    if (!ready || !activeCombatantId) return
+    const animate = !!activeCombatantId || (fogMode === 'player' && lightSources.length > 0 && flicker)
+    if (!ready || !animate) return
     let raf = 0
     const tick = () => {
       renderOverlay()
@@ -433,7 +439,7 @@ export function MapRenderer({
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [ready, activeCombatantId, renderOverlay])
+  }, [ready, activeCombatantId, fogMode, lightSources.length, flicker, renderOverlay])
 
   // ── Transform-based pan ──
   const isPanning = useRef(false)
@@ -617,6 +623,8 @@ function drawFog(
   getLayout: () => { scaledCS: number; mapX: number; mapY: number; fitScale: number; rotation: number; cs: number },
   visibility: VisibilityResult | null,
   exploredCells: Set<string>,
+  darknessOpacity: number,
+  flicker: boolean,
 ) {
   const fogCanvas = document.createElement('canvas')
   const dpr = window.devicePixelRatio || 1
@@ -625,8 +633,8 @@ function drawFog(
   const fogCtx = fogCanvas.getContext('2d')!
   fogCtx.scale(dpr, dpr)
 
-  // Full darkness
-  fogCtx.fillStyle = 'rgba(0, 0, 0, 1)'
+  // Full darkness (opacity controlled by GM lighting settings)
+  fogCtx.fillStyle = `rgba(0, 0, 0, ${darknessOpacity})`
   fogCtx.fillRect(0, 0, canvasWidth, canvasHeight)
 
   const { scaledCS } = getLayout()
@@ -660,13 +668,32 @@ function drawFog(
       fogCtx.closePath()
       fogCtx.clip()
 
+      // Per-source flicker — subtle, time-based torch wobble. Phase is offset by
+      // the source position so multiple lights don't pulse in unison. It modulates
+      // brightness and reach *inside* the (fixed) visibility polygon, so walls still
+      // bound the light — no per-frame raycasting needed.
+      let briFlicker = 1
+      let radFlicker = 1
+      if (flicker) {
+        const tFlick = performance.now() / 1000
+        const phase = source.x * 12.9898 + source.y * 78.233
+        const wave =
+          0.6 * Math.sin(tFlick * 6.3 + phase) +
+          0.3 * Math.sin(tFlick * 11.7 + phase * 1.7) +
+          0.1 * Math.sin(tFlick * 19.1 + phase * 0.5)
+        const n = 0.5 + 0.5 * wave           // ~0..1
+        briFlicker = 1 - 0.14 * (1 - n)      // brightness in ~[0.86, 1]
+        radFlicker = 0.94 + 0.06 * n         // reach in ~[0.94, 1]
+      }
+
       // Radial gradient from light source center
       const sc = pointToScreen(source.x, source.y)
-      const sr = source.radius * scaledCS  // radius in grid units → screen pixels
+      const sr = source.radius * scaledCS * radFlicker  // grid units → screen px, flickered
+      const i0 = source.intensity * briFlicker
       const grad = fogCtx.createRadialGradient(sc.sx, sc.sy, 0, sc.sx, sc.sy, sr)
-      grad.addColorStop(0, `rgba(255,255,255,${source.intensity})`)
-      grad.addColorStop(0.6, `rgba(255,255,255,${source.intensity * 0.85})`)
-      grad.addColorStop(0.85, `rgba(255,255,255,${source.intensity * 0.4})`)
+      grad.addColorStop(0, `rgba(255,255,255,${i0})`)
+      grad.addColorStop(0.6, `rgba(255,255,255,${i0 * 0.85})`)
+      grad.addColorStop(0.85, `rgba(255,255,255,${i0 * 0.4})`)
       grad.addColorStop(1.0, 'rgba(255,255,255,0)')
       fogCtx.fillStyle = grad
       fogCtx.fillRect(sc.sx - sr, sc.sy - sr, sr * 2, sr * 2)

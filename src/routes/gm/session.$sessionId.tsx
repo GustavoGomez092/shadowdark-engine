@@ -715,6 +715,7 @@ function GMSessionPage() {
           dungeonData: activeMap.dungeonData,
           seed: (activeMap.dungeonData as any)?.seed || activeMap.seed || 0,
           tokens: mvState.tokens.filter(t => t.visible),
+          lighting: mvState.lighting,
         }
       }
     }

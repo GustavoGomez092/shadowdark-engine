@@ -10,7 +10,8 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import type { CampaignMap } from '@/schemas/map.ts'
-import type { MapToken, MapLightSource, WallSegment, MapViewerState } from '@/schemas/map-viewer.ts'
+import type { MapToken, MapLightSource, WallSegment, MapViewerState, MapLightingSettings } from '@/schemas/map-viewer.ts'
+import { DEFAULT_LIGHTING, LIGHT_INTENSITY_MIN, LIGHT_INTENSITY_MAX } from '@/schemas/map-viewer.ts'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance } from '@/schemas/monsters.ts'
 import type { LightState } from '@/schemas/light.ts'
@@ -67,6 +68,13 @@ export function GMMapViewer({
     setWallSegments(extractDungeonWallSegments(app))
   }, [])
 
+  // Lighting settings (GM-controlled, synced to players); fall back to defaults
+  const lighting: MapLightingSettings = mapViewerState.lighting ?? DEFAULT_LIGHTING
+  // Radius multiplier — base radius (1x) is the floor; intensity only widens the light
+  const radiusScale = Math.max(LIGHT_INTENSITY_MIN, lighting.intensity)
+  // Flicker defaults on when the field is absent (older sessions)
+  const flicker = lighting.flicker !== false
+
   // Derive light sources from tokens + light timers (in grid coordinates)
   const lightSources: MapLightSource[] = useMemo(() => {
     const sources: MapLightSource[] = []
@@ -74,8 +82,9 @@ export function GMMapViewer({
       if (!timer.isActive || timer.isExpired) continue
       const token = mapViewerState.tokens.find(t => t.referenceId === timer.carrierId)
       if (!token) continue
-      // Radius in grid units (not pixels)
-      const radiusCells = timer.range === 'double_near' ? 6 : 3
+      // Base radius in grid units (not pixels), widened by the intensity multiplier.
+      // Walls still occlude the expanded light via the raycasting visibility polygon.
+      const radiusCells = (timer.range === 'double_near' ? 6 : 3) * radiusScale
       sources.push({
         x: token.gridX + 0.5,
         y: token.gridY + 0.5,
@@ -84,7 +93,11 @@ export function GMMapViewer({
       })
     }
     return sources
-  }, [lightState.timers, mapViewerState.tokens])
+  }, [lightState.timers, mapViewerState.tokens, radiusScale])
+
+  function setLighting(updates: Partial<MapLightingSettings>) {
+    onStateChange({ ...mapViewerState, lighting: { ...lighting, ...updates } })
+  }
 
   const exploredCells = useMemo(() => new Set(mapViewerState.exploredCells), [mapViewerState.exploredCells])
 
@@ -95,8 +108,8 @@ export function GMMapViewer({
       return
     }
     if (mapId === mapViewerState.activeMapId) return
-    // Start fresh — no auto-tokens, user places them via click
-    onStateChange({ activeMapId: mapId, tokens: [], exploredCells: [] })
+    // Start fresh — no auto-tokens, user places them via click (keep lighting settings)
+    onStateChange({ activeMapId: mapId, tokens: [], exploredCells: [], lighting })
     setViewport({ offsetX: 0, offsetY: 0, zoom: DEFAULT_ZOOM })
     setPendingToken(null)
   }
@@ -266,6 +279,7 @@ export function GMMapViewer({
           )}
 
           {activeMap ? (
+            <>
             <div className="relative h-[400px]">
               {/* Canvas — fills the whole area */}
               <div className="absolute inset-0">
@@ -276,6 +290,8 @@ export function GMMapViewer({
                   lightSources={lightSources}
                   exploredCells={exploredCells}
                   fogMode={showPlayerView ? 'player' : 'none'}
+                  darknessOpacity={lighting.darkness}
+                  flicker={flicker}
                   viewport={viewport}
                   onViewportChange={setViewport}
                   onTokenDragEnd={handleTokenDragEnd}
@@ -390,6 +406,54 @@ export function GMMapViewer({
                 )}
               </div>
             </div>
+
+            {/* Lighting controls — affect player view & the "Player view" preview, synced live */}
+            <div className="px-3 py-2 border-t border-zinc-700 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-medium text-zinc-400">Lighting</span>
+                  <label className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={flicker}
+                      onChange={e => setLighting({ flicker: e.target.checked })}
+                      className="w-3 h-3 accent-amber-400"
+                    />
+                    Flicker
+                  </label>
+                </div>
+                {!showPlayerView && (
+                  <span className="text-[10px] text-zinc-500 italic">Enable “Player view” to preview</span>
+                )}
+              </div>
+              <label className="flex items-center gap-2 text-xs text-zinc-300">
+                <span className="w-20 flex-shrink-0">Light radius</span>
+                <input
+                  type="range"
+                  min={LIGHT_INTENSITY_MIN}
+                  max={LIGHT_INTENSITY_MAX}
+                  step={0.1}
+                  value={radiusScale}
+                  onChange={e => setLighting({ intensity: Number(e.target.value) })}
+                  className="flex-1 accent-amber-400"
+                />
+                <span className="w-9 text-right tabular-nums text-zinc-400">{radiusScale.toFixed(1)}×</span>
+              </label>
+              <label className="flex items-center gap-2 text-xs text-zinc-300">
+                <span className="w-20 flex-shrink-0">Darkness</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={lighting.darkness}
+                  onChange={e => setLighting({ darkness: Number(e.target.value) })}
+                  className="flex-1 accent-indigo-400"
+                />
+                <span className="w-9 text-right tabular-nums text-zinc-400">{Math.round(lighting.darkness * 100)}%</span>
+              </label>
+            </div>
+            </>
           ) : (
             <div className="h-32 flex items-center justify-center text-zinc-500 text-sm">
               Select a campaign map to display
