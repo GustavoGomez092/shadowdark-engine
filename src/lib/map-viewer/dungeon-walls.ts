@@ -91,14 +91,17 @@ export const PILLAR_OCCLUDER_HALF = 0.22
  * extractDungeonWallSegments output.
  */
 export function extractColumnOccluders(
-  columns: { x: number; y: number }[] | null | undefined,
+  columns: { x: number; y: number; r?: number }[] | null | undefined,
   half: number = PILLAR_OCCLUDER_HALF,
 ): WallSegment[] {
   if (!columns || columns.length === 0) return []
   const segs: WallSegment[] = []
   for (const c of columns) {
-    const x0 = c.x - half, y0 = c.y - half
-    const x1 = c.x + half, y1 = c.y + half
+    // Each pillar's occluder matches its drawn size: a per-column radius (r)
+    // overrides the default half-extent so wide pillars cast wider shadows.
+    const h = c.r ?? half
+    const x0 = c.x - h, y0 = c.y - h
+    const x1 = c.x + h, y1 = c.y + h
     segs.push(
       { x1: x0, y1: y0, x2: x1, y2: y0 }, // top
       { x1: x1, y1: y0, x2: x1, y2: y1 }, // right

@@ -8,6 +8,7 @@ import Graph from './Graph.js';
 import Deck from './Deck.js';
 import Planner from './Planner.js';
 import Flood from './Flood.js';
+import { colonnadePoints } from './colonnade.js';
 import Story from './Story.js';
 import Tags from './Tags.js';
 
@@ -971,29 +972,14 @@ class Dungeon {
       if (room.round) g.rotunda = true;
       if (room.hidden) g.hidden = true;
 
-      // Columns
+      // Columns — single source of truth with the renderer (colonnade.js), so
+      // colCount/colInset/colRadius edits and map scaling flow through to the
+      // exported column positions (and therefore the light occluders). Each
+      // pillar carries its radius `r` so occluders match the drawn size.
       if (room.columns) {
-        if (room.round) {
-          const radius = k.w / 2 - 1;
-          const numCols = 4 * ((Math.PI * radius / 2) | 0);
-          for (let i = 0; i < numCols; i++) {
-            const angle = ((i + 0.5) / numCols) * 2 * Math.PI;
-            const cx = k.x + k.w / 2 + Math.cos(angle) * radius;
-            const cy = k.y + k.h / 2 + Math.sin(angle) * radius;
-            columns.push({ x: cx, y: cy });
-          }
-        } else if (room.axis.x !== 0) {
-          // Horizontal axis
-          for (let x = k.x + 1; x < k.x + k.w; x++) {
-            columns.push({ x, y: k.y + 1 });
-            columns.push({ x, y: k.y + k.h - 1 });
-          }
-        } else {
-          // Vertical axis
-          for (let y = k.y + 1; y < k.y + k.h; y++) {
-            columns.push({ x: k.x + 1, y });
-            columns.push({ x: k.x + k.w - 1, y });
-          }
+        const r = room.colRadius ?? Parameters.columnRadius;
+        for (const p of colonnadePoints(room)) {
+          columns.push({ x: p.x, y: p.y, r });
         }
       }
 

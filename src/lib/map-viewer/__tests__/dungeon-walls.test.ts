@@ -39,4 +39,13 @@ describe('extractColumnOccluders', () => {
     const top = segs[0]
     expect(top.x2 - top.x1).toBeCloseTo(2 * PILLAR_OCCLUDER_HALF)
   })
+
+  it("sizes each pillar's occluder by its own radius when provided", () => {
+    // A wide pillar (r=0.4) and a default one in the same call
+    const segs = extractColumnOccluders([{ x: 0, y: 0, r: 0.4 }, { x: 5, y: 0 }])
+    const wideTop = segs[0]
+    const defaultTop = segs[4]
+    expect(wideTop.x2 - wideTop.x1).toBeCloseTo(0.8) // 2 * 0.4
+    expect(defaultTop.x2 - defaultTop.x1).toBeCloseTo(2 * PILLAR_OCCLUDER_HALF)
+  })
 })
