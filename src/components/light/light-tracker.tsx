@@ -12,9 +12,11 @@ interface Props {
   onResumeAll: () => void
   onRemoveTimer: (timerId: string) => void
   isGM: boolean
+  /** Resolve a carrier (character) id to a display name, for per-bearer labels. */
+  carrierName?: (carrierId: string) => string | undefined
 }
 
-export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, onRemoveTimer, isGM }: Props) {
+export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, onRemoveTimer, isGM, carrierName }: Props) {
   const { t } = useLocale()
   const [, setTick] = useState(0)
 
@@ -69,7 +71,10 @@ export function LightTracker({ lightState, onAddLight, onPauseAll, onResumeAll, 
                 <span className="text-base">{timer.type === 'torch' ? '🔥' : timer.type === 'lantern' ? '🏮' : timer.type === 'campfire' ? '🔥' : '✨'}</span>
                 <div className="flex-1">
                   <div className="flex items-baseline justify-between text-sm">
-                    <span className="capitalize">{timer.type === 'torch' ? t('light.torch') : timer.type === 'lantern' ? t('light.lantern') : timer.type === 'campfire' ? t('light.campfire') : timer.type}</span>
+                    <span className="capitalize">
+                      {timer.type === 'torch' ? t('light.torch') : timer.type === 'lantern' ? t('light.lantern') : timer.type === 'campfire' ? t('light.campfire') : timer.type}
+                      {(() => { const n = carrierName?.(timer.carrierId); return n ? <span className="text-muted-foreground"> — {n}</span> : null })()}
+                    </span>
                     <span className={`font-mono text-xs ${isLow ? 'text-red-400 animate-pulse' : 'text-muted-foreground'}`}>
                       {formatDuration(remaining)}
                     </span>

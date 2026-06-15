@@ -15,7 +15,7 @@ import { LightTracker } from '@/components/light/light-tracker.tsx'
 import { rollForTreasure, distributeEncounterRewards } from '@/lib/rules/xp.ts'
 import { TREASURE_XP, getPotionHealing } from '@/schemas/reference.ts'
 import { rollDice } from '@/lib/dice/roller.ts'
-import { createLightTimer, pauseAllTimers, resumeAllTimers, tickLightState } from '@/lib/rules/light.ts'
+import { createLightTimer, applyLightForCarrier, pauseAllTimers, resumeAllTimers, tickLightState } from '@/lib/rules/light.ts'
 import { useGMPeer } from '@/hooks/use-peer-connection.ts'
 import type { PlayerToGMMessage } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
@@ -245,23 +245,14 @@ function GMSessionPage() {
         c.inventory.items = c.inventory.items.filter(i => i.id !== torchItemId)
       })
 
-      // Timer reset logic: if active timer exists, reset it. Otherwise create new.
-      // Rewrite type/carrierId/range when resetting so the timer attaches to the new lighter.
+      // Per-bearer light: relighting THIS character resets their timer; other
+      // bearers keep their own. See applyLightForCarrier.
       const torchMs = (s.settings?.torchDurationMinutes ?? 60) * 60000
-      const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
-      if (activeTimer) {
-        const resetTimers = s.light.timers.map(t =>
-          t.id === activeTimer.id
-            ? { ...t, type: 'torch' as const, carrierId: player.characterId!, range: 'near' as const, startedAt: Date.now(), durationMs: torchMs, accumulatedPauseMs: 0, pausedAt: undefined }
-            : t
-        )
-        useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
-      } else {
-        const timer = createLightTimer('torch', player.characterId, torchMs)
-        useSessionStore.getState().setLight({ ...s.light, timers: [...s.light.timers, timer], isInDarkness: false })
-      }
+      const hadLight = s.light.timers.some(t => t.carrierId === player.characterId && t.isActive && !t.isExpired)
+      const timers = applyLightForCarrier(s.light.timers, player.characterId, 'torch', torchMs)
+      useSessionStore.getState().setLight({ ...s.light, timers, isInDarkness: false })
 
-      addChatMessage(createActionLog(`${charName} lit a torch 🔥${activeTimer ? ' (timer reset)' : ''}`))
+      addChatMessage(createActionLog(`${charName} lit a torch 🔥${hadLight ? ' (timer reset)' : ''}`))
       setTimeout(() => broadcastStateSyncRef.current(), 50)
     }
 
@@ -279,22 +270,13 @@ function GMSessionPage() {
         c.inventory.items = c.inventory.items.filter(i => i.id !== oilId)
       })
 
-      // Timer reset logic — rewrite carrierId so the lantern attaches to the new lighter.
+      // Per-bearer light (see torch handler).
       const lanternMs = (s.settings?.lanternDurationMinutes ?? 60) * 60000
-      const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
-      if (activeTimer) {
-        const resetTimers = s.light.timers.map(t =>
-          t.id === activeTimer.id
-            ? { ...t, type: 'lantern' as const, carrierId: player.characterId!, range: 'double_near' as const, startedAt: Date.now(), durationMs: lanternMs, accumulatedPauseMs: 0, pausedAt: undefined }
-            : t
-        )
-        useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
-      } else {
-        const timer = createLightTimer('lantern', player.characterId, lanternMs)
-        useSessionStore.getState().setLight({ ...s.light, timers: [...s.light.timers, timer], isInDarkness: false })
-      }
+      const hadLight = s.light.timers.some(t => t.carrierId === player.characterId && t.isActive && !t.isExpired)
+      const timers = applyLightForCarrier(s.light.timers, player.characterId, 'lantern', lanternMs)
+      useSessionStore.getState().setLight({ ...s.light, timers, isInDarkness: false })
 
-      addChatMessage(createActionLog(`${charName} lit a lantern 🏮${activeTimer ? ' (timer reset)' : ''}`))
+      addChatMessage(createActionLog(`${charName} lit a lantern 🏮${hadLight ? ' (timer reset)' : ''}`))
       setTimeout(() => broadcastStateSyncRef.current(), 50)
     }
 
@@ -1218,6 +1200,7 @@ function GMSessionPage() {
         <LightTracker
           lightState={session.light}
           isGM
+          carrierName={(id) => session.characters[id]?.name}
           onAddLight={(type, carrierId) => {
             const timer = createLightTimer(type, carrierId)
             const newLight = { ...session.light, timers: [...session.light.timers, timer], isInDarkness: false }

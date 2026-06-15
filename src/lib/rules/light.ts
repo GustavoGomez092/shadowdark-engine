@@ -17,6 +17,30 @@ export function createLightTimer(type: LightSourceType, carrierId: string, custo
   }
 }
 
+/**
+ * Light a source for a specific carrier. Each carrier keeps its OWN timer:
+ * relighting an active carrier resets their timer in place; a different carrier
+ * gets a separate timer appended. This is what lets multiple bearers each track
+ * (and render) their own light.
+ */
+export function applyLightForCarrier(
+  timers: LightTimer[],
+  carrierId: string,
+  type: LightSourceType,
+  durationMs: number,
+  now: number = Date.now(),
+): LightTimer[] {
+  const existing = timers.find(t => t.carrierId === carrierId && t.isActive && !t.isExpired)
+  if (existing) {
+    return timers.map(t =>
+      t.id === existing.id
+        ? { ...t, type, range: LIGHT_RANGES[type], startedAt: now, durationMs, accumulatedPauseMs: 0, pausedAt: undefined, isActive: true, isExpired: false }
+        : t,
+    )
+  }
+  return [...timers, { ...createLightTimer(type, carrierId, durationMs), startedAt: now }]
+}
+
 export function getRemainingMs(timer: LightTimer): number {
   if (!timer.isActive || timer.isExpired) return 0
   const now = timer.pausedAt ?? Date.now()
