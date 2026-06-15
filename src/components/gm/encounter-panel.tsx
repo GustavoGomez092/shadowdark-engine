@@ -28,6 +28,8 @@ interface Props {
   onEndCombat: () => void
   onAdvanceTurn: () => void
   onForceInitiativeRoll: (combatantId: string) => void
+  npcs?: Character[]
+  onSetNpcCombatRole?: (id: string, role: 'ally' | 'enemy' | undefined) => void
 }
 
 export function EncounterPanel({
@@ -46,8 +48,19 @@ export function EncounterPanel({
   onEndCombat,
   onAdvanceTurn,
   onForceInitiativeRoll,
+  npcs = [],
+  onSetNpcCombatRole,
 }: Props) {
   const { t, ti, tData } = useLocale()
+
+  // NPCs the GM has opted into the fight (each gets its own initiative row), plus
+  // the combined "party" used for the surprise picker so NPCs can be surprised too.
+  const fightingNpcs = npcs.filter(n => n.combatRole === 'ally' || n.combatRole === 'enemy')
+  const surpriseCharacters = [...characters, ...fightingNpcs]
+  const allyCount = fightingNpcs.filter(n => n.combatRole === 'ally').length
+  const enemyCount = fightingNpcs.filter(n => n.combatRole === 'enemy').length
+  const liveMonsterCount = monsters.filter(m => !m.isDefeated).length
+  const canRollInitiative = (characters.length + allyCount) > 0 && (liveMonsterCount + enemyCount) > 0
 
   // Translate a monster instance name using the definition overlay
   function translateMonsterName(m: MonsterInstance) {
@@ -139,9 +152,9 @@ export function EncounterPanel({
             <>
               <button
                 onClick={() => setSurpriseDialogOpen(true)}
-                disabled={characters.length === 0 || activeMonsters.length === 0}
+                disabled={!canRollInitiative}
                 className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-black hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                title={characters.length === 0 ? 'Assign characters first' : ''}
+                title={!canRollInitiative ? 'Need at least one combatant on each side (party vs. foes)' : ''}
               >
                 {t('combat.rollInitiative')}
               </button>
@@ -155,6 +168,37 @@ export function EncounterPanel({
           )}
         </div>
       </div>
+
+      {npcs.length > 0 && onSetNpcCombatRole && (
+        <div className="mb-4 rounded-lg border border-border/60 p-3">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t('combat.npcsInFight')}</p>
+          <div className="space-y-1.5">
+            {npcs.map(n => (
+              <div key={n.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/40 px-2 py-1.5 text-sm">
+                <span className="flex-1 truncate">{n.name} <span className="text-xs text-muted-foreground">Lv{n.level}</span></span>
+                <div className="flex gap-1">
+                  {([['off', undefined], ['ally', 'ally'], ['enemy', 'enemy']] as const).map(([key, role]) => {
+                    const active = (n.combatRole ?? undefined) === (role ?? undefined)
+                    const label = key === 'off' ? t('combat.npcOff') : key === 'ally' ? t('combat.npcAlly') : t('combat.npcEnemy')
+                    const activeClass = key === 'ally' ? 'border-green-500 bg-green-500/15 text-green-400'
+                      : key === 'enemy' ? 'border-red-500 bg-red-500/15 text-red-400'
+                      : 'border-primary bg-primary/15 text-primary'
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => onSetNpcCombatRole(n.id, role as 'ally' | 'enemy' | undefined)}
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-medium transition ${active ? activeClass : 'border-border text-muted-foreground hover:bg-accent'}`}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:gap-6 md:grid-cols-[180px_1fr] lg:grid-cols-[200px_1fr_220px]">
         {/* Left: Spawned Threats */}
@@ -356,7 +400,7 @@ export function EncounterPanel({
       </div>
       {surpriseDialogOpen && (
         <SurpriseDialog
-          characters={characters}
+          characters={surpriseCharacters}
           monsters={activeMonsters
             .map(m => {
               const def = getMonster(m.definitionId)

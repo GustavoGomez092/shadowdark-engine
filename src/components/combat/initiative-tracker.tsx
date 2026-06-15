@@ -66,7 +66,9 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
       <div className="space-y-1">
         {orderedRows.map((combatant, index) => {
           const isCurrent = !isInitiativePhase && combatant.id === currentId
-          const isPC = combatant.type === 'pc'
+          // Friendly = party (PCs + ally NPCs); everything else is a foe.
+          const isFriendly = combatant.type === 'pc' || combatant.combatRole === 'ally'
+          const canForceRoll = combatant.type === 'pc' || combatant.type === 'npc'
           // `== null` (not `=== undefined`) because P2P JSON serialization
           // converts `undefined` → `null` between GM and player.
           const unrolled = combatant.initiativeRoll == null
@@ -83,7 +85,7 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                 {!isInitiativePhase && (
                   <span className="w-6 text-center text-xs font-mono text-muted-foreground">{index + 1}</span>
                 )}
-                <span className={`h-2 w-2 rounded-full ${isPC ? 'bg-green-500' : 'bg-red-500'}`} />
+                <span className={`h-2 w-2 rounded-full ${isFriendly ? 'bg-green-500' : 'bg-red-500'}`} />
                 <span className={`font-medium ${isCurrent ? 'text-primary' : ''}`}>{combatant.name}</span>
                 {combatant.initiativeRolledByAuto && (
                   <span className="text-[10px] text-muted-foreground italic">{t('combat.autoRolled')}</span>
@@ -100,7 +102,7 @@ export function InitiativeTracker({ combat, onAdvanceTurn, onEndCombat, onForceR
                 ) : (
                   <span className="text-xs text-muted-foreground">Init: {combatant.initiativeRoll}</span>
                 )}
-                {isInitiativePhase && isGM && unrolled && isPC && onForceRoll && (
+                {isInitiativePhase && isGM && unrolled && canForceRoll && onForceRoll && (
                   <button
                     onClick={() => onForceRoll(combatant.id)}
                     className="rounded-md border border-border px-2 py-0.5 text-[10px] hover:bg-accent"

@@ -26,6 +26,7 @@ export interface Combatant {
   hasUsedMove: boolean;
   isDoubleMoveActive: boolean;
   initiativeRolledByAuto?: boolean; // true when GM client auto-rolled on timeout
+  combatRole?: 'ally' | 'enemy'; // for 'npc' rows: which side they fight on
 }
 
 export type CombatLogType =

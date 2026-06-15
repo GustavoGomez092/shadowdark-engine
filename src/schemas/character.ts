@@ -255,6 +255,12 @@ export interface Character {
   isNpc?: boolean;
   /** Authored statblock — present (and authoritative for AC/attacks) when isNpc. */
   npc?: NpcStatblock;
+  /**
+   * Whether this NPC joins combat, and on which side. Undefined = sits out.
+   * Set by the GM in the encounter panel; ally NPCs fight with the party, enemy
+   * NPCs fight against it. Each gets its own initiative row.
+   */
+  combatRole?: 'ally' | 'enemy';
 
   computed: ComputedCharacterValues;
 }

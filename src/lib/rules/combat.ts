@@ -17,16 +17,38 @@ export interface RollInitiativeOptions {
   surprisedMonsterInstanceIds?: string[]
 }
 
+/**
+ * Decide what a player's "End Turn" should do. The active turn can be set two ways:
+ * by running combat (advance the initiative order) or by the GM manually highlighting
+ * a token (no running combat — just clear the highlight). The old handler only knew
+ * about combat, so ending a manually-set turn silently did nothing.
+ */
+export function resolveEndTurn(
+  combat: CombatState | null | undefined,
+  activeTurnId: string | null,
+  characterId: string
+): 'advance' | 'clear' | 'ignore' {
+  if (activeTurnId !== characterId) return 'ignore'
+  if (combat?.phase === 'active') return 'advance'
+  return 'clear'
+}
+
 export function rollInitiative(
   characters: Character[],
   monsters: { instance: MonsterInstance; definition: MonsterDefinition }[],
-  options?: RollInitiativeOptions
+  options?: RollInitiativeOptions,
+  npcs: { character: Character; role: 'ally' | 'enemy' }[] = []
 ): CombatState {
-  if (characters.length === 0) throw new Error('Cannot roll initiative: no characters')
-  if (monsters.length === 0) throw new Error('Cannot roll initiative: no monsters')
+  const allyNpcs = npcs.filter(n => n.role === 'ally')
+  const enemyNpcs = npcs.filter(n => n.role === 'enemy')
+  // A fight needs at least one combatant on each side. PCs and ally NPCs form the
+  // party; monsters and enemy NPCs form the opposition.
+  if (characters.length + allyNpcs.length === 0) throw new Error('Cannot roll initiative: no party (no PCs or ally NPCs)')
+  if (monsters.length + enemyNpcs.length === 0) throw new Error('Cannot roll initiative: no enemies (no monsters or enemy NPCs)')
 
-  // Determine immunity to filter out any user-supplied surprise that would violate game rules.
-  const immunity = getCombatantsImmuneToSurprise(characters, monsters)
+  // Determine immunity to filter out any user-supplied surprise that would violate
+  // game rules. Fighting NPCs are Characters too, so include them.
+  const immunity = getCombatantsImmuneToSurprise([...characters, ...npcs.map(n => n.character)], monsters)
   const surprisedCharIds = new Set(
     (options?.surprisedCharacterIds ?? []).filter(id => !immunity.characterIds.includes(id))
   )
@@ -57,30 +79,56 @@ export function rollInitiative(
     if (surprisedCharIds.has(char.id)) surpriseActorIds.push(id)
   }
 
-  // ONE shared monster row using the highest DEX mod across the group.
-  const groupDexMod = Math.max(
-    ...monsters.map(m => getAbilityModifier(m.definition.stats.DEX))
-  )
-  const groupRoll = rollDice('1d20', { purpose: 'initiative' })
-  const groupId = generateId()
-  combatants.push({
-    id: groupId,
-    type: 'monster',
-    // Group row: referenceId is one of the monster instances, but the row
-    // represents the whole group — do not look up monsters by this id.
-    referenceId: monsters[0].instance.id,
-    name: 'Monsters',
-    initiativeRoll: groupRoll.total + groupDexMod,
-    initiativeBonus: groupDexMod,
-    hasActed: false,
-    isDefeated: false,
-    hasUsedAction: false,
-    hasUsedMove: false,
-    isDoubleMoveActive: false,
-  })
-  // Group row counts as surprised if any of its instances are in the surprised set.
-  if (monsters.some(m => surprisedMonsterIds.has(m.instance.id))) {
-    surpriseActorIds.push(groupId)
+  // Each fighting NPC gets its own initiative row (named individual, GM-controlled),
+  // tagged with the side it fights on. Unrolled like PCs until rolled/auto-rolled.
+  for (const { character: char, role } of npcs) {
+    const stats = computeEffectiveStats(char)
+    const dexMod = getAbilityModifier(stats.DEX)
+    const id = generateId()
+    combatants.push({
+      id,
+      type: 'npc',
+      referenceId: char.id,
+      name: char.name,
+      initiativeRoll: undefined,
+      initiativeBonus: dexMod,
+      hasActed: false,
+      isDefeated: false,
+      hasUsedAction: false,
+      hasUsedMove: false,
+      isDoubleMoveActive: false,
+      combatRole: role,
+    })
+    if (surprisedCharIds.has(char.id)) surpriseActorIds.push(id)
+  }
+
+  // ONE shared monster row using the highest DEX mod across the group (only when
+  // monsters are present — a fight can be purely PCs/NPCs vs enemy NPCs).
+  if (monsters.length > 0) {
+    const groupDexMod = Math.max(
+      ...monsters.map(m => getAbilityModifier(m.definition.stats.DEX))
+    )
+    const groupRoll = rollDice('1d20', { purpose: 'initiative' })
+    const groupId = generateId()
+    combatants.push({
+      id: groupId,
+      type: 'monster',
+      // Group row: referenceId is one of the monster instances, but the row
+      // represents the whole group — do not look up monsters by this id.
+      referenceId: monsters[0].instance.id,
+      name: 'Monsters',
+      initiativeRoll: groupRoll.total + groupDexMod,
+      initiativeBonus: groupDexMod,
+      hasActed: false,
+      isDefeated: false,
+      hasUsedAction: false,
+      hasUsedMove: false,
+      isDoubleMoveActive: false,
+    })
+    // Group row counts as surprised if any of its instances are in the surprised set.
+    if (monsters.some(m => surprisedMonsterIds.has(m.instance.id))) {
+      surpriseActorIds.push(groupId)
+    }
   }
 
   return {
@@ -126,7 +174,7 @@ export function hasInitiativeAdvantage(character: Character): boolean {
 export function autoRollMissing(state: CombatState, characters: Character[]): CombatState {
   let working = state
   for (const c of state.combatants) {
-    if (c.type !== 'pc') continue
+    if (c.type !== 'pc' && c.type !== 'npc') continue
     if (c.initiativeRoll !== undefined) continue
     const character = characters.find(ch => ch.id === c.referenceId)
     if (!character) continue

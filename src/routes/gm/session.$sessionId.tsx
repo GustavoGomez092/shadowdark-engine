@@ -25,7 +25,7 @@ import { gmPeer } from '@/lib/peer/gm-peer-singleton.ts'
 import { computeCharacterValues, canLevelUp } from '@/lib/rules/character.ts'
 import { applyCharacterUpdate } from '@/lib/peer/apply-character-update.ts'
 import { applyPlayerLevelUp } from '@/lib/peer/apply-level-up.ts'
-import { rollDeathSave, rollInitiative, autoRollMissing } from '@/lib/rules/combat.ts'
+import { rollDeathSave, rollInitiative, autoRollMissing, resolveEndTurn } from '@/lib/rules/combat.ts'
 import { GMMapViewer } from '@/components/map-viewer/gm-map-viewer.tsx'
 import { useMapViewerStore } from '@/stores/map-viewer-store.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
@@ -654,9 +654,13 @@ function GMSessionPage() {
     if (message.type === 'player_end_turn') {
       const msg = message as import('@/schemas/messages.ts').PlayerEndTurnAction
       const session = useSessionStore.getState().session
-      // Only the player whose turn it is may end it
-      if (!session?.combat || session.activeTurnId !== msg.characterId) return
-      useSessionStore.getState().advanceCombatTurn()
+      // The active turn may come from running combat OR a manual GM highlight. Either
+      // way the player's End Turn must take effect (advance combat, or just clear the
+      // highlight when there's no active combat).
+      const action = resolveEndTurn(session?.combat, session?.activeTurnId ?? null, msg.characterId)
+      if (action === 'ignore') return
+      if (action === 'advance') useSessionStore.getState().advanceCombatTurn()
+      else useSessionStore.getState().setActiveTurnId(null)
       setTimeout(() => broadcastStateSyncRef.current(), 50)
       return
     }
@@ -850,7 +854,8 @@ function GMSessionPage() {
       if (!c2 || c2.phase !== 'initiative') return
       // Derive assigned characters from live store state (avoids depending on post-return `characters`)
       const assignedCharIds = new Set(Object.values(s?.players ?? {}).filter(p => p.characterId).map(p => p.characterId!))
-      const liveCharacters = Object.values(s?.characters ?? {}).filter(c => assignedCharIds.has(c.id))
+      // Include fighting NPCs so their initiative rows auto-roll alongside the party.
+      const liveCharacters = Object.values(s?.characters ?? {}).filter(c => assignedCharIds.has(c.id) || (c.isNpc && (c.combatRole === 'ally' || c.combatRole === 'enemy')))
       const updated = autoRollMissing(c2, liveCharacters)
       for (const c of updated.combatants) {
         const original = c2.combatants.find(x => x.id === c.id)
@@ -905,6 +910,10 @@ function GMSessionPage() {
   // Only characters assigned to players are "the party"
   const assignedCharIds = new Set(Object.values(session.players).filter(p => p.characterId).map(p => p.characterId!))
   const characters = allCharacters.filter(c => assignedCharIds.has(c.id))
+  // NPCs the GM can opt into a fight (not part of the player party). combatRole
+  // (undefined | 'ally' | 'enemy') decides whether/which side they fight on.
+  const npcs = allCharacters.filter(c => c.isNpc && !assignedCharIds.has(c.id))
+  const fightingNpcs = npcs.filter(c => c.combatRole === 'ally' || c.combatRole === 'enemy')
   const activeMonsters = Object.values(session.activeMonsters)
   // Map character ID → player name for assignment hints in dropdown
   const charToPlayer = new Map<string, string>()
@@ -1260,6 +1269,11 @@ function GMSessionPage() {
           <EncounterPanel
             monsters={activeMonsters}
             characters={characters}
+            npcs={npcs}
+            onSetNpcCombatRole={(id, role) => {
+              updateCharacter(id, (c) => { c.combatRole = role })
+              setTimeout(() => gmPeer.broadcastStateSync(), 50)
+            }}
             activeTurnId={session.activeTurnId}
             onSetActiveTurn={(id) => {
               useSessionStore.getState().setActiveTurnId(id)
@@ -1363,11 +1377,16 @@ function GMSessionPage() {
                   return def ? { instance: m, definition: def } : null
                 })
                 .filter((x): x is { instance: typeof activeMonsters[number]; definition: NonNullable<ReturnType<typeof getMonster>> } => !!x)
-              if (assignedCharacters.length === 0 || liveMonsters.length === 0) return
+              // Fighting NPCs join as individual combatants on their chosen side.
+              const combatNpcs = fightingNpcs.map(c => ({ character: c, role: c.combatRole as 'ally' | 'enemy' }))
+              const allies = combatNpcs.filter(n => n.role === 'ally').length
+              const enemies = combatNpcs.filter(n => n.role === 'enemy').length
+              // Need a combatant on each side: party = PCs + ally NPCs, foes = monsters + enemy NPCs.
+              if (assignedCharacters.length + allies === 0 || liveMonsters.length + enemies === 0) return
               const combat = rollInitiative(assignedCharacters, liveMonsters, {
                 surprisedCharacterIds: selection.surprisedCharacterIds,
                 surprisedMonsterInstanceIds: selection.surprisedMonsterInstanceIds,
-              })
+              }, combatNpcs)
               useSessionStore.getState().setCombat(combat)
               setTimeout(() => {
                 gmPeer.broadcastStateSync()
@@ -1420,8 +1439,8 @@ function GMSessionPage() {
             onForceInitiativeRoll={(combatantId) => {
               const combat = useSessionStore.getState().session?.combat
               const row = combat?.combatants.find(c => c.id === combatantId)
-              if (!combat || !row || row.type !== 'pc') return
-              const character = characters.find(c => c.id === row.referenceId)
+              if (!combat || !row || (row.type !== 'pc' && row.type !== 'npc')) return
+              const character = allCharacters.find(c => c.id === row.referenceId)
               if (!character) return
               const updated = autoRollMissing(combat, [character])
               const single = updated.combatants.find(c => c.id === combatantId)

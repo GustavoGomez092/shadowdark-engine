@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance, MonsterDefinition } from '@/schemas/monsters.ts'
-import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder, getCombatantsImmuneToSurprise, advanceTurn } from '../combat.ts'
+import { rollInitiative, applyInitiativeRoll, autoRollMissing, lockInitiativeOrder, getCombatantsImmuneToSurprise, advanceTurn, resolveEndTurn } from '../combat.ts'
 
 function makeCharacter(overrides: Partial<Character> = {}): Character {
   const baseStats = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 }
@@ -81,6 +81,27 @@ function queueD4(...values: number[]) {
   for (const v of values) randomQueue.push((v - 1) / 4 + 0.0001)
 }
 
+describe('resolveEndTurn', () => {
+  const active = { phase: 'active' } as import('@/schemas/combat.ts').CombatState
+  const initiative = { phase: 'initiative' } as import('@/schemas/combat.ts').CombatState
+
+  it('ignores the request when it is not that character\'s active turn', () => {
+    expect(resolveEndTurn(active, 'someone-else', 'hau')).toBe('ignore')
+    expect(resolveEndTurn(null, null, 'hau')).toBe('ignore')
+  })
+
+  it('advances the turn during active combat', () => {
+    expect(resolveEndTurn(active, 'hau', 'hau')).toBe('advance')
+  })
+
+  it('clears a manually-set active turn when there is no active combat', () => {
+    // GM highlighted the player's turn outside of combat — End Turn should still end it.
+    expect(resolveEndTurn(null, 'hau', 'hau')).toBe('clear')
+    expect(resolveEndTurn(undefined, 'hau', 'hau')).toBe('clear')
+    expect(resolveEndTurn(initiative, 'hau', 'hau')).toBe('clear')
+  })
+})
+
 describe('combat rules', () => {
   it('test scaffolding works', () => {
     queueD20(15)
@@ -122,12 +143,71 @@ describe('combat rules', () => {
       expect(state.initiativeDeadline).toBeLessThanOrEqual(after + 31_000)
     })
 
-    it('refuses to build state when there are no monsters', () => {
-      expect(() => rollInitiative([makeCharacter()], [])).toThrow(/no monsters/i)
+    it('refuses to build state when there is no hostile side (no monsters, no enemy NPCs)', () => {
+      expect(() => rollInitiative([makeCharacter()], [])).toThrow(/no enem/i)
     })
 
-    it('refuses to build state when there are no characters', () => {
-      expect(() => rollInitiative([], [makeMonsterPair('rat', 'Rat')])).toThrow(/no characters/i)
+    it('refuses to build state when there is no friendly side (no PCs, no ally NPCs)', () => {
+      expect(() => rollInitiative([], [makeMonsterPair('rat', 'Rat')])).toThrow(/no part/i)
+    })
+  })
+
+  describe('rollInitiative with NPCs', () => {
+    function makeNpc(id: string, name: string, dex = 10): Character {
+      return makeCharacter({ id, name, isNpc: true, baseStats: { STR: 10, DEX: dex, CON: 10, INT: 10, WIS: 10, CHA: 10 } as any })
+    }
+
+    it('adds an individual npc row for each fighting NPC, tagged with its side', () => {
+      const state = rollInitiative([makeCharacter()], [makeMonsterPair('rat', 'Rat')], undefined, [
+        { character: makeNpc('npc-ally', 'Hau'), role: 'ally' },
+        { character: makeNpc('npc-foe', 'Bandit'), role: 'enemy' },
+      ])
+      const npcRows = state.combatants.filter(c => c.type === 'npc')
+      expect(npcRows).toHaveLength(2)
+      expect(npcRows.find(r => r.name === 'Hau')?.combatRole).toBe('ally')
+      expect(npcRows.find(r => r.name === 'Bandit')?.combatRole).toBe('enemy')
+      // Individual rows, unrolled until rolled (like PCs)
+      expect(npcRows.every(r => r.initiativeRoll === undefined)).toBe(true)
+    })
+
+    it('allows a fight with an enemy NPC and no monsters', () => {
+      const state = rollInitiative([makeCharacter()], [], undefined, [{ character: makeNpc('npc-foe', 'Bandit'), role: 'enemy' }])
+      expect(state.combatants.some(c => c.type === 'monster')).toBe(false)
+      expect(state.combatants.filter(c => c.type === 'npc')).toHaveLength(1)
+      expect(state.combatants.filter(c => c.type === 'pc')).toHaveLength(1)
+    })
+
+    it('allows an all-NPC fight (ally NPC vs enemy NPC, no PCs or monsters)', () => {
+      const state = rollInitiative([], [], undefined, [
+        { character: makeNpc('npc-ally', 'Hau'), role: 'ally' },
+        { character: makeNpc('npc-foe', 'Bandit'), role: 'enemy' },
+      ])
+      expect(state.combatants.filter(c => c.type === 'npc')).toHaveLength(2)
+    })
+
+    it('throws when no hostile side (only ally NPCs)', () => {
+      expect(() => rollInitiative([makeCharacter()], [], undefined, [{ character: makeNpc('a', 'Ally'), role: 'ally' }])).toThrow(/no enem/i)
+    })
+
+    it('throws when no friendly side (only enemy NPCs)', () => {
+      expect(() => rollInitiative([], [], undefined, [{ character: makeNpc('e', 'Foe'), role: 'enemy' }])).toThrow(/no part/i)
+    })
+
+    it('can surprise a fighting NPC via surprisedCharacterIds', () => {
+      const state = rollInitiative([makeCharacter()], [makeMonsterPair('rat', 'Rat')], { surprisedCharacterIds: ['npc-foe'] }, [
+        { character: makeNpc('npc-foe', 'Bandit'), role: 'enemy' },
+      ])
+      const row = state.combatants.find(c => c.referenceId === 'npc-foe')!
+      expect(state.surpriseActors).toContain(row.id)
+    })
+
+    it('autoRollMissing rolls npc rows too (GM controls them)', () => {
+      let state = rollInitiative([makeCharacter()], [], undefined, [{ character: makeNpc('npc-foe', 'Bandit'), role: 'enemy' }])
+      queueD20(12, 8)
+      state = autoRollMissing(state, [makeCharacter(), makeNpc('npc-foe', 'Bandit')])
+      const row = state.combatants.find(c => c.type === 'npc')!
+      expect(row.initiativeRoll).toBeDefined()
+      expect(row.initiativeRolledByAuto).toBe(true)
     })
   })
 
