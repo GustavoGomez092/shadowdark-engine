@@ -357,20 +357,12 @@ function GMSessionPage() {
           updateCharacter(characterId, (c) => {
             c.inventory.items = c.inventory.items.filter(i => i.id !== itemId)
           })
+          // Per-bearer light: relighting THIS character resets only their timer (see applyLightForCarrier).
           const torchMs = (s.settings?.torchDurationMinutes ?? 60) * 60000
-          const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
-          if (activeTimer) {
-            const resetTimers = s.light.timers.map(t =>
-              t.id === activeTimer.id
-                ? { ...t, type: 'torch' as const, carrierId: characterId, range: 'near' as const, startedAt: Date.now(), durationMs: torchMs, accumulatedPauseMs: 0, pausedAt: undefined }
-                : t
-            )
-            useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
-          } else {
-            const timer = createLightTimer('torch', characterId, torchMs)
-            useSessionStore.getState().setLight({ ...s.light, timers: [...s.light.timers, timer], isInDarkness: false })
-          }
-          addChatMessage(createActionLog(`${charName} lit a torch 🔥${activeTimer ? ' (timer reset)' : ''}`))
+          const hadLight = s.light.timers.some(t => t.carrierId === characterId && t.isActive && !t.isExpired)
+          const timers = applyLightForCarrier(s.light.timers, characterId, 'torch', torchMs)
+          useSessionStore.getState().setLight({ ...s.light, timers, isInDarkness: false })
+          addChatMessage(createActionLog(`${charName} lit a torch 🔥${hadLight ? ' (timer reset)' : ''}`))
         } else if (name.includes('lantern')) {
           const oil = findOilFlask()
           if (!oil) {
@@ -380,19 +372,10 @@ function GMSessionPage() {
               c.inventory.items = c.inventory.items.filter(i => i.id !== oil.id)
             })
             const lanternMs = (s.settings?.lanternDurationMinutes ?? 60) * 60000
-            const activeTimer = s.light.timers.find(t => t.isActive && !t.isExpired && t.type !== 'campfire')
-            if (activeTimer) {
-              const resetTimers = s.light.timers.map(t =>
-                t.id === activeTimer.id
-                  ? { ...t, type: 'lantern' as const, carrierId: characterId, range: 'double_near' as const, startedAt: Date.now(), durationMs: lanternMs, accumulatedPauseMs: 0, pausedAt: undefined }
-                  : t
-              )
-              useSessionStore.getState().setLight({ ...s.light, timers: resetTimers, isInDarkness: false })
-            } else {
-              const timer = createLightTimer('lantern', characterId, lanternMs)
-              useSessionStore.getState().setLight({ ...s.light, timers: [...s.light.timers, timer], isInDarkness: false })
-            }
-            addChatMessage(createActionLog(`${charName} lit a lantern 🏮${activeTimer ? ' (timer reset)' : ''}`))
+            const hadLight = s.light.timers.some(t => t.carrierId === characterId && t.isActive && !t.isExpired)
+            const timers = applyLightForCarrier(s.light.timers, characterId, 'lantern', lanternMs)
+            useSessionStore.getState().setLight({ ...s.light, timers, isInDarkness: false })
+            addChatMessage(createActionLog(`${charName} lit a lantern 🏮${hadLight ? ' (timer reset)' : ''}`))
           }
         } else {
           addChatMessage(createActionLog(`${charName} fumbled with ${item.name} — use the Light controls to ignite it.`))
