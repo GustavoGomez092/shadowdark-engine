@@ -1,5 +1,6 @@
 import Peer from 'peerjs'
 import type { DataConnection } from 'peerjs'
+import { getPeerOptions } from './peer-config.ts'
 import type { PlayerToGMMessage, GMToPlayerMessage, P2PMessageEnvelope } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
@@ -43,7 +44,8 @@ export class PlayerPeerClient {
     this.existingCharacterId = existingCharacterId
 
     return new Promise((resolve, reject) => {
-      this.peer = new Peer()
+      const peerOpts = getPeerOptions()
+      this.peer = peerOpts ? new Peer(peerOpts) : new Peer()
 
       this.peer.on('open', (id) => {
         this._peerId = id
@@ -160,7 +162,8 @@ export class PlayerPeerClient {
           if (!this.peer || this.peer.destroyed || this.peer.disconnected) {
             console.log('[Player Peer] Recreating Peer for rotation reconnect')
             this.peer?.destroy()
-            this.peer = new Peer()
+            const peerOpts = getPeerOptions()
+      this.peer = peerOpts ? new Peer(peerOpts) : new Peer()
             this.peer.on('open', () => {
               console.log('[Player Peer] New Peer ready, connecting to rotated room')
               this.connectToRoom(message.newRoomCode)
