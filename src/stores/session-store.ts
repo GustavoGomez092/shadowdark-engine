@@ -23,7 +23,7 @@ interface SessionStore {
   isActive: boolean
 
   // Session lifecycle
-  createSession: (name: string, password?: string) => SessionState
+  createSession: (name: string, password?: string, campaign?: { id: string; name: string }) => SessionState
   loadSession: (id: string) => boolean
   endSession: () => void
 
@@ -59,6 +59,7 @@ interface SessionStore {
   setActiveTurnId: (id: string | null) => void
 
   // Stores
+  linkCampaign: (campaign: { id: string; name: string }) => void
   addStore: (store: GameStore) => void
   updateStore: (id: string, updater: (s: GameStore) => void) => void
   removeStore: (id: string) => void
@@ -153,7 +154,7 @@ export const useSessionStore = create<SessionStore>()(
     session: initialSession,
     isActive: initialSession !== null,
 
-    createSession: (name, password) => {
+    createSession: (name, password, campaign) => {
       const roomId = generateRoomCode()
       const session: SessionState = {
         schemaVersion: SCHEMA_VERSION,
@@ -188,6 +189,8 @@ export const useSessionStore = create<SessionStore>()(
           lastSavedAt: Date.now(),
           totalPlayTimeMs: 0,
           sessionNumber: 1,
+          campaignId: campaign?.id,
+          campaignName: campaign?.name,
         },
       }
 
@@ -477,6 +480,16 @@ export const useSessionStore = create<SessionStore>()(
       set(state => {
         if (!state.session) return
         state.session.dangerLevel = level
+      })
+      const s = get().session
+      if (s) debouncedSave(s)
+    },
+
+    linkCampaign: (campaign) => {
+      set(state => {
+        if (!state.session) return
+        state.session.meta.campaignId = campaign.id
+        state.session.meta.campaignName = campaign.name
       })
       const s = get().session
       if (s) debouncedSave(s)

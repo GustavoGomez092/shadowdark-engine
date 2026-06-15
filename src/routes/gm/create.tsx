@@ -3,6 +3,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useSessionStore } from '@/stores/session-store.ts'
 import { Spinner } from '@/components/shared/spinner.tsx'
 import { exportSession, getExportFilename, downloadJson, parseSessionImport } from '@/lib/storage/session-export.ts'
+import { listSavedCampaigns } from '@/stores/campaign-store.ts'
 import { useLocale } from '@/hooks/use-locale.ts'
 
 export const Route = createFileRoute('/gm/create')({
@@ -23,6 +24,8 @@ function CreateGamePage() {
   const [usePassword, setUsePassword] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [savedSessions, setSavedSessions] = useState(() => getSavedSessions())
+  const [campaigns] = useState(() => listSavedCampaigns())
+  const [campaignId, setCampaignId] = useState('')
 
   // Import state
   const [importError, setImportError] = useState<string | null>(null)
@@ -34,7 +37,8 @@ function CreateGamePage() {
   function handleCreate() {
     if (!name.trim()) return
     setIsCreating(true)
-    const session = createSession(name.trim(), usePassword ? password : undefined)
+    const linked = campaigns.find(c => c.id === campaignId)
+    const session = createSession(name.trim(), usePassword ? password : undefined, linked ? { id: linked.id, name: linked.name } : undefined)
     setTimeout(() => navigate({ to: '/gm/session/$sessionId', params: { sessionId: session.room.id } }), 50)
   }
 
@@ -126,6 +130,23 @@ function CreateGamePage() {
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
           />
         </div>
+
+        {campaigns.length > 0 && (
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold">Working adventure <span className="font-normal text-muted-foreground">(optional)</span></label>
+            <select
+              value={campaignId}
+              onChange={e => setCampaignId(e.target.value)}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">None — start blank</option>
+              {campaigns.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">Links this session's shops and monster filter to a campaign. Changeable later.</p>
+          </div>
+        )}
 
         <div className="flex items-center gap-2">
           <input

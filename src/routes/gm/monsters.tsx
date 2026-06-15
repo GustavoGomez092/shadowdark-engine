@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MONSTERS, getItemPackId, getPackColor } from '@/data/index.ts'
+import { WorkingCampaignBar, useWorkingCampaign } from '@/components/gm/working-campaign-bar.tsx'
+import { filterCampaignMonsters } from '@/lib/campaign/session-campaign.ts'
 import { dataRegistry } from '@/lib/data/registry.ts'
 import { useDataRegistry } from '@/hooks/use-data-registry.ts'
 import { sortPackFirst } from '@/lib/data/sort.ts'
@@ -28,14 +30,28 @@ function GMMonstersPage() {
   const settings = useSessionStore(s => s.session?.settings)
 
   const monsterPacks = dataRegistry.getPacks().filter(p => p.enabled && p.counts.monsters > 0)
+  const { campaign } = useWorkingCampaign()
 
-  const maxLevel = Math.max(...MONSTERS.map(m => m.level))
-  let filtered = MONSTERS.filter(m => {
+  // The working adventure's monsters (its content.monsters, surfaced even if not
+  // installed as a global pack) and a combined catalog so they're spawnable in 'all'.
+  const adventureMonsters = useMemo(
+    () => filterCampaignMonsters(MONSTERS, campaign?.content.monsters ?? []),
+    [campaign],
+  )
+  const catalog = useMemo(() => {
+    const have = new Set(MONSTERS.map(m => m.id))
+    const extra = (campaign?.content.monsters ?? []).filter(m => !have.has(m.id))
+    return [...MONSTERS, ...extra]
+  }, [campaign])
+
+  const maxLevel = Math.max(...catalog.map(m => m.level))
+  const base = sourceFilter === 'campaign' ? adventureMonsters : catalog
+  let filtered = base.filter(m => {
     if (search && !m.name.toLowerCase().includes(search.toLowerCase())) return false
     if (levelFilter > 0 && m.level !== levelFilter) return false
     if (sourceFilter === 'core') {
       if (getItemPackId(m.id)) return false
-    } else if (sourceFilter !== 'all') {
+    } else if (sourceFilter !== 'all' && sourceFilter !== 'campaign') {
       if (getItemPackId(m.id) !== sourceFilter) return false
     }
     return true
@@ -78,6 +94,8 @@ function GMMonstersPage() {
         </button>
       </div>
 
+      <WorkingCampaignBar />
+
       <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-3">
         <input
           type="text"
@@ -109,6 +127,9 @@ function GMMonstersPage() {
           className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="all">{t('common.allSources')}</option>
+          {campaign && adventureMonsters.length > 0 && (
+            <option value="campaign">★ {campaign.name} ({adventureMonsters.length})</option>
+          )}
           <option value="core">{t('common.coreOnly')}</option>
           {monsterPacks.map(p => (
             <option key={p.id} value={p.id}>{p.name} ({p.counts.monsters})</option>

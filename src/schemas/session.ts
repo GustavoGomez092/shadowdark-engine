@@ -90,6 +90,7 @@ export interface SessionMeta {
   totalPlayTimeMs: number;
   sessionNumber: number;
   campaignName?: string;
+  campaignId?: string; // links the session to its working campaign (stores + monsters)
 }
 
 // FILTERED STATE — sent to each player
