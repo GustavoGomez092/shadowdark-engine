@@ -75,6 +75,38 @@ afterEach(() => {
   localStorage.clear()
 })
 
+// ========== Session Packs (ephemeral campaign content) ==========
+
+describe('session packs', () => {
+  afterEach(() => dataRegistry.setSessionPacks([]))
+
+  it('resolves session-pack monsters via getMonster (so spawned campaign monsters work in combat)', () => {
+    expect(getMonster('campaign-only-fungus')).toBeUndefined()
+    dataRegistry.setSessionPacks([
+      makeValidPack({ id: 'campaign:abc', name: 'Tomb', data: { monsters: [makeMonster({ id: 'campaign-only-fungus', name: 'Violet Fungus' })] } }),
+    ])
+    expect(getMonster('campaign-only-fungus')?.name).toBe('Violet Fungus')
+  })
+
+  it('does NOT persist or appear in the pack list (ephemeral)', () => {
+    const before = dataRegistry.getPacks().length
+    dataRegistry.setSessionPacks([
+      makeValidPack({ id: 'campaign:abc', data: { monsters: [makeMonster({ id: 'campaign-only-fungus' })] } }),
+    ])
+    expect(dataRegistry.getPacks().length).toBe(before) // not in the data-pack manager list
+    expect(localStorage.getItem('shadowdark:data-packs')).toBeNull() // not saved
+  })
+
+  it('clears when set to empty (leaving the session drops campaign content)', () => {
+    dataRegistry.setSessionPacks([
+      makeValidPack({ id: 'campaign:abc', data: { monsters: [makeMonster({ id: 'campaign-only-fungus' })] } }),
+    ])
+    expect(getMonster('campaign-only-fungus')).toBeDefined()
+    dataRegistry.setSessionPacks([])
+    expect(getMonster('campaign-only-fungus')).toBeUndefined()
+  })
+})
+
 // ========== Validator Tests ==========
 
 describe('validateDataPack', () => {

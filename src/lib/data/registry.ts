@@ -73,6 +73,11 @@ class DataRegistry {
   private packs: DataPack[] = []
   private packMetas: DataPackMeta[] = []
 
+  // Ephemeral session packs (the active campaign's content). Merged into lookups so
+  // spawned campaign monsters/items resolve everywhere, but NEVER persisted and kept
+  // out of the data-pack manager list.
+  private sessionPacks: DataPack[] = []
+
   // Change listeners
   private listeners: Set<() => void> = new Set()
 
@@ -181,6 +186,18 @@ class DataRegistry {
     this.notify()
   }
 
+  /**
+   * Register the active session/campaign content so its monsters, items and spells
+   * resolve via getMonster/getWeapon/etc. everywhere (initiative, combat statblocks,
+   * stores). Ephemeral: replaces any prior session packs, is NOT persisted, and does
+   * NOT show in getPacks(). Pass [] when leaving the session to drop the content.
+   */
+  setSessionPacks(packs: DataPack[]) {
+    this.sessionPacks = packs
+    this.rebuild()
+    this.notify()
+  }
+
   getPacks(): DataPackMeta[] {
     return this.packMetas
   }
@@ -259,8 +276,9 @@ class DataRegistry {
   }
 
   private rebuild() {
-    // Collect custom data from enabled packs only
-    const enabledPacks = this.packs.filter(p => p.enabled !== false)
+    // Collect custom data from enabled packs only, plus the ephemeral session packs
+    // (active campaign content) so spawned campaign monsters/items resolve in lookups.
+    const enabledPacks = [...this.packs.filter(p => p.enabled !== false), ...this.sessionPacks]
     const customMonsters: MonsterDefinition[] = []
     const customSpells: SpellDefinition[] = []
     const customWeapons: WeaponDefinition[] = []
