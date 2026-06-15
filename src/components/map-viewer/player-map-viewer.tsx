@@ -15,7 +15,7 @@ import type { PlayerTokenMoveSettings } from '@/schemas/session.ts'
 import { DEFAULT_PLAYER_TOKEN_MOVE } from '@/schemas/session.ts'
 import type { CampaignMap } from '@/schemas/map.ts'
 import { MapRenderer, type MapViewport } from './map-renderer.tsx'
-import { extractDungeonWallSegments, extractColumnOccluders } from '@/lib/map-viewer/dungeon-walls.ts'
+import { extractDungeonWallSegments, extractColumnOccludersFromApp } from '@/lib/map-viewer/dungeon-walls.ts'
 
 const DEFAULT_ZOOM = 4
 
@@ -71,15 +71,11 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
   // Wall segments + light sources populated after DungeonApp init
   const [wallSegments, setWallSegments] = useState<WallSegment[]>([])
 
+  // Walls + colonnade pillars, both from the LIVE dungeon geometry so occluders
+  // always match the drawn map (after scaling / colCount edits, no re-save).
   const onDungeonReady = useCallback((app: any) => {
-    setWallSegments(extractDungeonWallSegments(app))
+    setWallSegments([...extractDungeonWallSegments(app), ...extractColumnOccludersFromApp(app)])
   }, [])
-
-  // Pillars (colonnade columns) occlude torchlight just like walls do
-  const wallSegmentsWithPillars = useMemo(
-    () => [...wallSegments, ...extractColumnOccluders(mapView.dungeonData?.columns)],
-    [wallSegments, mapView.dungeonData],
-  )
 
   // Lighting settings synced from the GM (defaults applied if absent)
   const lighting = mapView.lighting ?? DEFAULT_LIGHTING
@@ -130,7 +126,7 @@ export function PlayerMapViewer({ mapView, lightState, myCharacterId, activeComb
             <MapRenderer
               mapData={mapData}
               tokens={mapView.tokens}
-              wallSegments={wallSegmentsWithPillars}
+              wallSegments={wallSegments}
               lightSources={lightSources}
               exploredCells={exploredCells}
               fogMode="player"

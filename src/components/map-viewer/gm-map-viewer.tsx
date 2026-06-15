@@ -16,7 +16,7 @@ import type { Character } from '@/schemas/character.ts'
 import type { MonsterInstance } from '@/schemas/monsters.ts'
 import type { LightState } from '@/schemas/light.ts'
 import { MapRenderer, type MapViewport } from './map-renderer.tsx'
-import { extractDungeonWallSegments, extractColumnOccluders } from '@/lib/map-viewer/dungeon-walls.ts'
+import { extractDungeonWallSegments, extractColumnOccludersFromApp } from '@/lib/map-viewer/dungeon-walls.ts'
 import { ensureMapHasCells } from '@/lib/map-viewer/dungeon-converter.ts'
 import { generateId } from '@/lib/utils/id.ts'
 import { getHpStatus } from '@/schemas/session.ts'
@@ -64,15 +64,11 @@ export function GMMapViewer({
   // Wall segments extracted from the live dungeon (watabou grid coordinates)
   // These are populated after DungeonApp initializes via a ref callback
   const [wallSegments, setWallSegments] = useState<WallSegment[]>([])
+  // Walls + colonnade pillars, both from the LIVE dungeon geometry so occluders
+  // always match the drawn map (after scaling / colCount edits, no re-save).
   const onDungeonReady = useCallback((app: any) => {
-    setWallSegments(extractDungeonWallSegments(app))
+    setWallSegments([...extractDungeonWallSegments(app), ...extractColumnOccludersFromApp(app)])
   }, [])
-
-  // Pillars (colonnade columns) occlude torchlight just like walls do
-  const wallSegmentsWithPillars = useMemo(
-    () => [...wallSegments, ...extractColumnOccluders(activeMap?.dungeonData?.columns)],
-    [wallSegments, activeMap],
-  )
 
   // Lighting settings (GM-controlled, synced to players); fall back to defaults
   const lighting: MapLightingSettings = mapViewerState.lighting ?? DEFAULT_LIGHTING
@@ -292,7 +288,7 @@ export function GMMapViewer({
                 <MapRenderer
                   mapData={activeMap}
                   tokens={mapViewerState.tokens}
-                  wallSegments={wallSegmentsWithPillars}
+                  wallSegments={wallSegments}
                   lightSources={lightSources}
                   exploredCells={exploredCells}
                   fogMode={showPlayerView ? 'player' : 'none'}

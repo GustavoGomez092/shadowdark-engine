@@ -1,5 +1,27 @@
 import { describe, it, expect } from 'vitest'
-import { extractColumnOccluders, PILLAR_OCCLUDER_HALF } from '../dungeon-walls.ts'
+import { extractColumnOccluders, colonnadeColumns, PILLAR_OCCLUDER_HALF } from '../dungeon-walls.ts'
+
+describe('colonnadeColumns (live geometry → pillar centers)', () => {
+  const hall = { x: -8, y: 0, w: 17, h: 17, round: false, axis: { x: 0, y: 1 }, columns: true }
+
+  it('emits no columns for a room without the colonnade flag', () => {
+    expect(colonnadeColumns([{ ...hall, columns: false }])).toEqual([])
+  })
+
+  it('skips small rooms (corridors) even if flagged', () => {
+    expect(colonnadeColumns([{ x: 0, y: 0, w: 3, h: 9, round: false, axis: { x: 0, y: 1 }, columns: true }])).toEqual([])
+  })
+
+  it('uses the rooms current colCount and tags each pillar with its colRadius', () => {
+    const cols = colonnadeColumns([{ ...hall, colCount: 3, colRadius: 0.4 }])
+    expect(cols).toHaveLength(6) // 3 per side, 2 sides
+    expect(cols.every(c => c.r === 0.4)).toBe(true)
+  })
+
+  it('leaves r undefined when the room has no colRadius (default occluder size)', () => {
+    expect(colonnadeColumns([{ ...hall, colCount: 2 }])[0].r).toBeUndefined()
+  })
+})
 
 describe('extractColumnOccluders', () => {
   it('returns no segments for empty/missing columns', () => {

@@ -9,6 +9,36 @@
  */
 
 import type { WallSegment } from '@/schemas/map-viewer.ts'
+// @ts-expect-error - plain JS module, no types
+import { colonnadePoints } from '@/lib/dungeon-renderer/colonnade.js'
+
+/**
+ * Pillar centers (with per-pillar radius) for the colonnades of a set of rooms,
+ * computed from the LIVE geometry the renderer uses (colonnadePoints) rather
+ * than the serialized dungeonData.columns. This keeps light occluders in sync
+ * with the drawn pillars after map scaling and colCount/colInset/colRadius edits
+ * — no re-save required. Mirrors DungeonRenderer's "skip rooms <= 3" guard.
+ */
+export function colonnadeColumns(
+  rooms: Array<{ columns?: boolean; w: number; h: number; colRadius?: number; [k: string]: unknown }> | null | undefined,
+): { x: number; y: number; r?: number }[] {
+  const cols: { x: number; y: number; r?: number }[] = []
+  for (const room of rooms ?? []) {
+    if (!room.columns || room.w <= 3 || room.h <= 3) continue
+    for (const p of colonnadePoints(room) as { x: number; y: number }[]) {
+      cols.push({ x: p.x, y: p.y, r: room.colRadius })
+    }
+  }
+  return cols
+}
+
+/**
+ * Light-occluding segments for a live DungeonApp's colonnade pillars — derived
+ * from the app's current rooms, so they always match what's drawn.
+ */
+export function extractColumnOccludersFromApp(app: { dungeon?: { rooms?: unknown[] } } | null | undefined): WallSegment[] {
+  return extractColumnOccluders(colonnadeColumns(app?.dungeon?.rooms as never))
+}
 
 /**
  * Extract wall segments from a DungeonApp instance.
