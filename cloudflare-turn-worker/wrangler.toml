@@ -6,7 +6,7 @@ compatibility_date = "2026-06-01"
 # secret token), so it's safe here. If you'd rather not commit it, delete the
 # line and run `wrangler secret put TURN_KEY_ID` instead.
 [vars]
-TURN_KEY_ID = "bbbe5060c7bee5eb086cdf48f43ff735"
+TURN_KEY_ID = "9c9a77f370ba22474f5d71a135583f2d"
 ALLOW_ORIGINS = "https://gustavogomez092.github.io"
 TURN_TTL = "86400"
 
