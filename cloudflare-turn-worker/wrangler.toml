@@ -1,0 +1,12 @@
+name = "shadowdark-turn"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# Non-secret config (edit these):
+[vars]
+TURN_KEY_ID = "YOUR_CLOUDFLARE_TURN_KEY_ID"
+ALLOW_ORIGINS = "https://gustavogomez092.github.io"
+TURN_TTL = "86400"
+
+# Secret — do NOT put here. Set it once with:
+#   wrangler secret put TURN_API_TOKEN

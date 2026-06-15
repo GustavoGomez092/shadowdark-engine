@@ -1,5 +1,40 @@
-import { describe, it, expect } from 'vitest'
-import { buildIceServers } from '../peer-config.ts'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { buildIceServers, parseIceResponse, fetchIceServers, resetIceCache } from '../peer-config.ts'
+
+describe('parseIceResponse', () => {
+  it('wraps a single iceServers object into an array', () => {
+    const r = parseIceResponse({ iceServers: { urls: ['turn:t:3478'], username: 'u', credential: 'c' } })
+    expect(r).toEqual([{ urls: ['turn:t:3478'], username: 'u', credential: 'c' }])
+  })
+
+  it('passes an iceServers array through', () => {
+    const arr = [{ urls: 'stun:s:3478' }, { urls: ['turn:t:3478'], username: 'u', credential: 'c' }]
+    expect(parseIceResponse({ iceServers: arr })).toEqual(arr)
+  })
+
+  it('returns null for missing/empty/invalid shapes', () => {
+    expect(parseIceResponse({})).toBeNull()
+    expect(parseIceResponse({ iceServers: [] })).toBeNull()
+    expect(parseIceResponse(null)).toBeNull()
+    expect(parseIceResponse('nope')).toBeNull()
+  })
+})
+
+describe('fetchIceServers', () => {
+  beforeEach(() => resetIceCache())
+
+  it('fetches and parses ICE servers from an endpoint', async () => {
+    const fakeFetch = async () => ({ ok: true, json: async () => ({ iceServers: [{ urls: 'turn:t:3478' }] }) }) as unknown as Response
+    expect(await fetchIceServers('https://worker.example/', fakeFetch)).toEqual([{ urls: 'turn:t:3478' }])
+  })
+
+  it('returns null when the endpoint errors (so PeerJS defaults are used)', async () => {
+    const failFetch = async () => ({ ok: false, status: 502, json: async () => ({}) }) as unknown as Response
+    expect(await fetchIceServers('https://worker.example/', failFetch)).toBeNull()
+    const throwFetch = async () => { throw new Error('network') }
+    expect(await fetchIceServers('https://worker.example/', throwFetch)).toBeNull()
+  })
+})
 
 describe('buildIceServers', () => {
   it('returns null when nothing is configured (use PeerJS defaults)', () => {

@@ -1,6 +1,6 @@
 import Peer from 'peerjs'
 import type { DataConnection } from 'peerjs'
-import { getPeerOptions } from './peer-config.ts'
+import { resolvePeerOptions } from './peer-config.ts'
 import type { PlayerToGMMessage, GMToPlayerMessage, P2PMessageEnvelope } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId } from '@/lib/utils/id.ts'
@@ -43,8 +43,8 @@ export class PlayerPeerClient {
     this.password = password
     this.existingCharacterId = existingCharacterId
 
+    const peerOpts = await resolvePeerOptions()
     return new Promise((resolve, reject) => {
-      const peerOpts = getPeerOptions()
       this.peer = peerOpts ? new Peer(peerOpts) : new Peer()
 
       this.peer.on('open', (id) => {
@@ -154,7 +154,7 @@ export class PlayerPeerClient {
         this._isConnected = false
         // Wait for GM to finish destroying old peer + creating new peer, then reconnect
         // 3s total: 500ms GM broadcast delay + ~1-2s peer creation
-        setTimeout(() => {
+        setTimeout(async () => {
           this._isRotating = false
           this.reconnectAttempts = 0
           this.dataReconnectAttempts = 0
@@ -162,8 +162,8 @@ export class PlayerPeerClient {
           if (!this.peer || this.peer.destroyed || this.peer.disconnected) {
             console.log('[Player Peer] Recreating Peer for rotation reconnect')
             this.peer?.destroy()
-            const peerOpts = getPeerOptions()
-      this.peer = peerOpts ? new Peer(peerOpts) : new Peer()
+            const peerOpts = await resolvePeerOptions()
+            this.peer = peerOpts ? new Peer(peerOpts) : new Peer()
             this.peer.on('open', () => {
               console.log('[Player Peer] New Peer ready, connecting to rotated room')
               this.connectToRoom(message.newRoomCode)

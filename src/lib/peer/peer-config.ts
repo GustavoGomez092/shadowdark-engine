@@ -52,8 +52,9 @@ export function buildIceServers(opts: IceConfigInput): RTCIceServer[] | null {
 }
 
 /**
- * PeerJS options with a custom ICE config, or undefined to use PeerJS defaults.
- * Use for both `new Peer(id, getPeerOptions())` and `new Peer(undefined, getPeerOptions())`.
+ * Synchronous PeerJS options from static env / localStorage override, or
+ * undefined. Prefer resolvePeerOptions() which also supports a credential
+ * endpoint (e.g. a Cloudflare Worker minting short-lived TURN creds).
  */
 export function getPeerOptions(): PeerOptions | undefined {
   const env = import.meta.env as Record<string, string | undefined>
@@ -68,5 +69,59 @@ export function getPeerOptions(): PeerOptions | undefined {
     override,
   })
 
+  return servers ? { config: { iceServers: servers } } : undefined
+}
+
+/** Normalize a credential endpoint's JSON into an RTCIceServer[] (or null). */
+export function parseIceResponse(json: unknown): RTCIceServer[] | null {
+  if (!json || typeof json !== 'object') return null
+  const ice = (json as { iceServers?: unknown }).iceServers
+  if (!ice) return null
+  const arr = Array.isArray(ice) ? ice : [ice]
+  return arr.length > 0 ? (arr as RTCIceServer[]) : null
+}
+
+const CACHE_MS = 12 * 60 * 60 * 1000 // refetch creds at most twice/day
+let iceCache: { servers: RTCIceServer[]; expiresAt: number } | null = null
+
+/** Clear the in-memory ICE cache (tests). */
+export function resetIceCache(): void { iceCache = null }
+
+/**
+ * Fetch ICE servers from a credential endpoint (a Cloudflare Worker that mints
+ * short-lived TURN creds). Cached in-memory; returns null on any failure so the
+ * caller can fall back to PeerJS defaults rather than block connecting.
+ */
+export async function fetchIceServers(
+  url: string,
+  fetchFn: typeof fetch = fetch,
+  now: () => number = Date.now,
+): Promise<RTCIceServer[] | null> {
+  if (iceCache && iceCache.expiresAt > now()) return iceCache.servers
+  try {
+    const res = await fetchFn(url)
+    if (!res.ok) return null
+    const servers = parseIceResponse(await res.json())
+    if (!servers) return null
+    iceCache = { servers, expiresAt: now() + CACHE_MS }
+    return servers
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Resolve PeerJS options for both peers. Static env/localStorage config wins
+ * (no network); otherwise fetch from VITE_ICE_SERVERS_URL if set; otherwise
+ * undefined (PeerJS defaults). Always resolves — never throws.
+ */
+export async function resolvePeerOptions(): Promise<PeerOptions | undefined> {
+  const sync = getPeerOptions()
+  if (sync) return sync
+
+  const url = (import.meta.env as Record<string, string | undefined>).VITE_ICE_SERVERS_URL
+  if (!url) return undefined
+
+  const servers = await fetchIceServers(url)
   return servers ? { config: { iceServers: servers } } : undefined
 }

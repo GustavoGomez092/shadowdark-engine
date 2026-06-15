@@ -1,6 +1,6 @@
 import Peer from 'peerjs'
 import type { DataConnection } from 'peerjs'
-import { getPeerOptions } from './peer-config.ts'
+import { resolvePeerOptions } from './peer-config.ts'
 import type { PlayerToGMMessage, GMToPlayerMessage, P2PMessageEnvelope } from '@/schemas/messages.ts'
 import type { PlayerVisibleState } from '@/schemas/session.ts'
 import { generateId, generateRoomCode } from '@/lib/utils/id.ts'
@@ -38,9 +38,10 @@ export class GMPeerHost {
   get connectedPlayers(): ConnectedPeer[] { return Array.from(this.connections.values()) }
 
   async start(existingRoomCode?: string): Promise<string> {
+    const peerOpts = await resolvePeerOptions()
     const tryConnect = (roomCode: string): Promise<string> => {
       return new Promise((resolve, reject) => {
-        this.peer = new Peer(roomCode, getPeerOptions())
+        this.peer = new Peer(roomCode, peerOpts)
 
         this.peer.on('open', (id) => {
           this._roomCode = id
@@ -248,8 +249,9 @@ export class GMPeerHost {
     this.peer = null
 
     // 4. Create new peer with new code
+    const peerOpts = await resolvePeerOptions()
     return new Promise((resolve, reject) => {
-      this.peer = new Peer(newCode, getPeerOptions())
+      this.peer = new Peer(newCode, peerOpts)
       this.peer.on('open', (id) => {
         this._roomCode = id
         this._isReady = true
